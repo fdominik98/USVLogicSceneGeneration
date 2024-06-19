@@ -1,0 +1,17 @@
+{
+    "algorithm_desc": "pymoo_algorithm",
+    "config_name": "two_way_overtaking",
+    "random_seed": 1,
+    "evaluation_time": null,
+    "number_of_generations": 300,
+    "population_size": 20,
+    "num_parents_mating": 2,
+    "best_solution": null,
+    "best_fitness": null,
+    "mutate_eta": null,
+    "mutate_prob": 0.5,
+    "crossover_eta": null,
+    "crossover_prob": 0.5,
+    "error_message": "unsupported operand type(s) for +: 'NoneType' and 'float'\nTraceback (most recent call last):\n  File \"/home/fdominik98/Desktop/DREAL/genetic_algorithms/genetic_algorithm_base.py\", line 90, in evaluate\n    some_results = self.do_evaluate(some_input, eval_data)\n  File \"/home/fdominik98/Desktop/DREAL/genetic_algorithms/pymoo_algorithm.py\", line 60, in do_evaluate\n    return minimize(problem,\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/optimize.py\", line 67, in minimize\n    res = algorithm.run()\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/algorithm.py\", line 138, in run\n    self.next()\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/algorithm.py\", line 154, in next\n    infills = self.infill()\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/algorithm.py\", line 190, in infill\n    infills = self._infill()\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/algorithms/base/genetic.py\", line 85, in _infill\n    off = self.mating.do(self.problem, self.pop, self.n_offsprings, algorithm=self)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/infill.py\", line 38, in do\n    _off = self._do(problem, pop, n_remaining, **kwargs)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/mating.py\", line 31, in _do\n    off = self.crossover(problem, parents, **kwargs)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/operator.py\", line 27, in __call__\n    out = self.do(problem, elem, *args, **kwargs)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/core/crossover.py\", line 48, in do\n    Q = self._do(problem, X, **kwargs)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/operators/crossover/sbx.py\", line 114, in _do\n    Q = cross_sbx(X.astype(float), problem.xl, problem.xu, eta, prob_var, prob_bin)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/operators/crossover/sbx.py\", line 56, in cross_sbx\n    betaq = calc_betaq(beta)\n  File \"/home/fdominik98/Desktop/DREAL/env/lib/python3.10/site-packages/pymoo/operators/crossover/sbx.py\", line 42, in calc_betaq\n    alpha = 2.0 - np.power(beta, -(eta + 1.0))\nTypeError: unsupported operand type(s) for +: 'NoneType' and 'float'\n",
+    "timestamp": "2024-06-19T14:26:01.930141"
+}
