@@ -4,7 +4,6 @@ from model.usv_config import *
 from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 from aggregates import NoAggregate, AggregateAll, EulerDistance
-from colreg_plot import ColregPlot
 from model.usv_config import *
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
@@ -20,8 +19,8 @@ from model.usv_environment_config import USVEnvironmentConfig
 
 class PyMooAlgorithm(GeneticAlgorithmBase):
     
-    def __init__(self, config_name: str, verbose : bool) -> None:
-        super().__init__('pymoo_algorithm', config_name, verbose)
+    def __init__(self, measurement_name : str, config_name: str, verbose : bool) -> None:
+        super().__init__(measurement_name, 'pymoo_algorithm', config_name, verbose)
     
     def get_aggregate(self, env) -> Aggregate:
         return NoAggregate(env, minimize=True)   
@@ -66,8 +65,6 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
                   termination=("n_gen", eval_data.number_of_generations))
     
     def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float]]:
-        X = some_results.X.tolist()
-        X = sorted(X, key=self.env.evaluate)
         if self.verbose:
             # Plot the convergence
             n_evals = []  # corresponding number of function evaluations
@@ -83,10 +80,9 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
             plt.xlabel("Number of Evaluations")
             plt.ylabel("Optimum Value")
             plt.show()
-            
-            ColregPlot(self.env.update(X[0]))
 
-
+        X = some_results.X.tolist()
+        X = sorted(X, key=self.env.evaluate)
         # Extract the decision variables (X) and objective values (F)
         return X[0], self.aggregate.evaluate(X[0])
 

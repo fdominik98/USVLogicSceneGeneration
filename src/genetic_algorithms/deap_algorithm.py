@@ -4,14 +4,13 @@ from model.usv_config import *
 from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 from aggregates import NoAggregate, AggregateAll, EulerDistance
-from colreg_plot import ColregPlot
 from model.usv_config import *
 from deap import base, creator, tools, algorithms
 
 class DeapAlgorithm(GeneticAlgorithmBase):
     
-    def __init__(self, config_name: str, verbose : bool) -> None:
-        super().__init__('deap_algorithm', config_name, verbose)
+    def __init__(self, measurement_name : str, config_name: str, verbose : bool) -> None:
+        super().__init__(measurement_name, 'deap_algorithm', config_name, verbose)
     
     def get_aggregate(self, env) -> Aggregate:
         return NoAggregate(env)   
@@ -69,12 +68,6 @@ class DeapAlgorithm(GeneticAlgorithmBase):
     def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float]]:
         halloffame = some_results
         best_ind = tools.selBest(halloffame, 1)[0]
-        if self.verbose:
-            print("Best individual is:", best_ind)
-            print("Best individual fitness is:", best_ind.fitness.values)
-            
-            ColregPlot(self.env.update(best_ind))
-            
         return list(best_ind), list(best_ind.fitness.values)
 
 

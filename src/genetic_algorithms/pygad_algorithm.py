@@ -5,13 +5,13 @@ from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 import pygad
 from aggregates import NoAggregate, AggregateAll, EulerDistance
-from colreg_plot import ColregPlot
+from src.visualization.colreg_plot import ColregPlot
 from model.usv_config import *
 
 class PyGadAlgorithm(GeneticAlgorithmBase):
     
-    def __init__(self, config_name: str, verbose : bool) -> None:
-        super().__init__('pygad_algorithm', config_name, verbose)
+    def __init__(self, measurement_name : str, config_name: str, verbose : bool) -> None:
+        super().__init__(measurement_name, 'pygad_algorithm', config_name, verbose)
     
     def get_aggregate(self, env) -> Aggregate:
         return AggregateAll(env)   
@@ -53,19 +53,14 @@ class PyGadAlgorithm(GeneticAlgorithmBase):
         ga_instance = some_results
         # After the GA run, print the best solution found
         solution, solution_fitness, solution_idx = ga_instance.best_solution()
-        if self.verbose:
-            print("Best solution:", solution)
-            print("Best solution fitness:", solution_fitness)
-            print('\n')
-
-            # Get the best solutions
-            num_best_solutions = 1
-            population_fitness = ga_instance.last_generation_fitness
-            sorted_indices = np.argsort(population_fitness)[::-1]  # Sort in descending order of fitness
-            best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
-            for sol in best_solutions:
-                ColregPlot(self.env.update(sol))
-        
+        # if self.verbose:
+        #     # Get the best solutions
+        #     num_best_solutions = 1
+        #     population_fitness = ga_instance.last_generation_fitness
+        #     sorted_indices = np.argsort(population_fitness)[::-1]  # Sort in descending order of fitness
+        #     best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
+        #     for sol in best_solutions:
+        #         ColregPlot(self.env.update(sol))
         return list(solution.flatten()), [solution_fitness]
 
     # Attribute generator with different boundaries

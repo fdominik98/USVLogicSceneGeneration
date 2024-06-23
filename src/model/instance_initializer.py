@@ -4,6 +4,7 @@ from model.usv_config import *
 from model.vessel import Vessel
 from model.colreg_situation import ColregSituation, NoColision, NoConstraint
 from networkx.algorithms import isomorphism
+import math
 
 class InstanceInitializer():
     def __init__(self, radii : list[float], colreg_situation_configs : list[ColregSituationConfig]) -> None:
@@ -106,7 +107,7 @@ class InstanceInitializer():
                 if count >= limit:
                     break
         if count < limit:
-            raise Exception('Not enough possible solutions')
+            matches = (matches * math.ceil(limit/count))[:limit]
         return matches
     
     def has_unique_positions(self, G: nx.Graph, d : dict):

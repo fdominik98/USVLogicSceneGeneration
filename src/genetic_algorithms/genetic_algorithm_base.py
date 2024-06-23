@@ -14,6 +14,7 @@ import gc
 import traceback
 import os
 from model.usv_config import *
+from src.visualization.colreg_plot import ColregPlot
 
 class GeneticAlgorithmBase(ABC):
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -52,13 +53,16 @@ class GeneticAlgorithmBase(ABC):
                                                                                    ColregSituationConfig(3, NoColision, 2, [1800, max_distance])]),
     }
     
-    def __init__(self, algorithm_desc, config_name : str, verbose : bool) -> None:
+    def __init__(self, measurement_name: str, algorithm_desc : str, config_name : str, verbose : bool) -> None:
+        self.measurement_name = f'{measurement_name} - {datetime.now().isoformat()}'
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.env_config = self.usv_environment_configs[config_name]
         self.env = USVEnvironment(self.env_config)
         self.aggregate = self.get_aggregate(self.env)
         self.verbose = verbose
+        self.initial_population_array = self.env.get_population(200)
+            
         
     @abstractmethod
     def get_aggregate(self, env) -> Aggregate:
@@ -83,8 +87,7 @@ class GeneticAlgorithmBase(ABC):
             random.seed(random_seed)
             np.random.seed(random_seed)
             
-            initial_population_array = self.env.get_population(population_size)
-            some_input = self.init_problem(initial_population_array, eval_data)
+            some_input = self.init_problem(self.initial_population_array[:population_size], eval_data)
             gc.collect()
             start_time = datetime.now()
             some_results = self.do_evaluate(some_input, eval_data)
@@ -93,6 +96,10 @@ class GeneticAlgorithmBase(ABC):
             best_solution, best_fitness = self.convert_results(some_results, eval_data)
             eval_data.best_solution = best_solution
             eval_data.best_fitness = best_fitness
+            if self.verbose:
+                print("Best individual is:", best_solution)
+                print("Best individual fitness is:", best_fitness)
+                ColregPlot(self.env.update(best_solution))
         except Exception as e:
             eval_data.error_message = f'{str(e)}\n{traceback.format_exc()}'
             print(eval_data.error_message)
@@ -113,7 +120,7 @@ class GeneticAlgorithmBase(ABC):
         pass
     
     def save_eval_data(self, eval_data : EvaluationData):
-        asset_folder = f'{self.current_file_directory}/../../assets/{self.algorithm_desc}/{self.config_name}'
+        asset_folder = f'{self.current_file_directory}/../../assets/{self.algorithm_desc}/{self.config_name}/{self.measurement_name}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         
