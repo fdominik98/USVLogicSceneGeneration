@@ -54,7 +54,7 @@ class GeneticAlgorithmBase(ABC):
     }
     
     def __init__(self, measurement_name: str, algorithm_desc : str, config_name : str, verbose : bool) -> None:
-        self.measurement_name = f'{measurement_name} - {datetime.now().isoformat()}'
+        self.measurement_name = f'{measurement_name} - {datetime.now().isoformat().replace(':','-')}'
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.env_config = self.usv_environment_configs[config_name]
@@ -124,5 +124,5 @@ class GeneticAlgorithmBase(ABC):
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         
-        eval_data.save_to_json(file_path=f'{asset_folder}/{eval_data.timestamp}.json')
+        eval_data.save_to_json(file_path=f'{asset_folder}/{eval_data.timestamp.replace(':','-')}.json')
     

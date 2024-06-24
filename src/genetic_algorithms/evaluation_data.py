@@ -83,6 +83,11 @@ class EvaluationData:
         with open(file_path, 'r') as json_file:
             data = json.load(json_file)
             return cls.from_dict(data)
+        
+    @classmethod
+    def load_dict_from_json(cls, file_path: str) -> dict:
+        with open(file_path, 'r') as json_file:
+            return json.load(json_file)
 
     def __str__(self) -> str:
         return str(self.to_dict())
