@@ -6,12 +6,15 @@ from pandas.plotting import parallel_coordinates
 from mpl_toolkits.mplot3d import Axes3D
 
 
-dp = DataParser('/home/fdominik98/Desktop/USVLogicSceneGeneration/assets/pygad_algorithm/two_way_overtaking/parameter_optimization - 2024-06-20T13:01:41.944756')
-df_sorted = dp.df.sort_values(by='result', ascending=False)
+dp = DataParser()
+df = dp.dfs[0]
+df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
+df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name'])
+#df_sorted = df_sorted.drop(columns=['actual_number_of_generations'])
 
 df_simple_sorted = df_sorted.drop(columns=['evaluation_time'])
 df_best = df_sorted.head(50)
-df_simple_best = df_simple_sorted.head(100)
+df_simple_best = df_simple_sorted.head(1000)
 
 # Display the DataFrame as a table
 fig, ax = plt.subplots(figsize=(15, 10))
@@ -21,7 +24,23 @@ table = ax.table(cellText=df_best.values, colLabels=df_best.columns, cellLoc='ce
 table.auto_set_font_size(False)
 table.set_fontsize(10)
 table.auto_set_column_width(col=list(range(len(df_best.columns))))
+ax.set_title(f'All samples: {len(df_sorted)}', fontsize=15, pad=40)
+
+# Columns you want to color
+columns_to_white = ['result', 'evaluation_time', 'actual_number_of_generations']
+# Get the index of the columns to color
+columns_to_white_indices = [df_best.columns.get_loc(col) for col in columns_to_white]
+
+# Iterate over the table to set the background color
+for key, cell in table.get_celld().items():
+    row, col = key
+    if col in columns_to_white_indices:
+        cell.set_facecolor('white')
+    else:
+        cell.set_facecolor('lightgreen')
+
 plt.show()
+
 
 # Correlation Heatmap
 correlation_matrix = df_sorted.corr()

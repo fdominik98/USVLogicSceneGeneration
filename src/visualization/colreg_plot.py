@@ -5,10 +5,11 @@ from model.usv_environment_config import USVEnvironmentConfig
 from model.usv_config import *
 import pickle
 import os
-from model.colreg_situation import NoConstraint
 
-colors = ['blue', 'red', 'green', 'orange', 'purple', 'grey']
-light_colors = ['lightblue', 'salmon', 'lightgreen', 'moccasin', 'thistle', 'lightgrey']
+from model.colreg_situation import NoColreg
+
+colors = ['blue', 'red', 'green', 'orange', 'purple', 'grey', 'olive']
+light_colors = ['lightblue', 'salmon', 'lightgreen', 'moccasin', 'thistle', 'lightgrey', 'y']
 
 class ColregPlotFromFile():
     def __init__(self, env_config: USVEnvironmentConfig):
@@ -30,21 +31,27 @@ class ColregPlot():
         title = ''
         r_label = 'R Radius'
         cone_label = 'Velocity Obstacle Cone'
-        for i, colreg_s in enumerate(env.colreg_situations):
-            line_break = '\n' if (i + 1) % 3 == 0 else ' '
-            title = colreg_s.name if not title else f'{title},{line_break}{colreg_s.name}'
+        i = 0
+        for colreg_s in env.colreg_situations:
+            if not isinstance(colreg_s, NoColreg): 
+                line_break = '\n' if (i + 1) % 3 == 0 else ' '
+                title = colreg_s.name if not title else f'{title},{line_break}{colreg_s.name}'
+                i += 1
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2      
             
             #'\nv1 angle to p1p2: {np.degrees(angle_p12_v1):.2f} degs'
             plt.text(o1.p[0] + colreg_s.p12[0] / 2, o1.p[1] + colreg_s.p12[1] / 2, f'Distance: {colreg_s.norm_p12:.2f} m', fontsize=11, color='black')
                 
+            line, = plt.plot([o1.p[0], o2.p[0]], [o1.p[1], o2.p[1]], color=light_colors[5], linewidth=0.8)
+                
             plt.quiver(o1.p[0], o1.p[1], o2.v[0], o2.v[1], angles='xy', scale_units='xy', scale=1, color='red')
             circle = plt.Circle(o2.p, colreg_s.r, color='black', fill=False, linestyle='--', label=r_label)
             r_label = None
             
             plt.gca().add_artist(circle)
-            if not isinstance(colreg_s, NoConstraint):
+            
+            if not isinstance(colreg_s, NoColreg):
                 # Calculate the angles of the cone
                 angle_rel = np.arctan2(colreg_s.p12[1], colreg_s.p12[0])
                 angle1 = angle_rel + colreg_s.angle_half_cone
@@ -64,8 +71,9 @@ class ColregPlot():
             
                 line21, = plt.plot([o2.v[0] + o1.p[0], cone21[0]], [o2.v[1] + o1.p[1], cone21[1]], 'k--', label=cone_label)
                 cone_label = None
+                
                 line22, = plt.plot([o2.v[0] + o1.p[0], cone22[0]], [o2.v[1] + o1.p[1], cone22[1]], 'k--')
-            
+                
             plt.quiver(o1.p[0], o1.p[1], o2.v[0], o2.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o2.id])
 
             colreg_s.info()
@@ -94,10 +102,30 @@ class ColregPlot():
         plt.axhline(0, color='grey', lw=0.5)
         plt.axvline(0, color='grey', lw=0.5)
         plt.grid(True)
-        plt.legend()
+        legend = plt.legend()
         plt.title(f'USV situation ({title})')
         plt.xlabel('X Position (m)')
         plt.ylabel('Y Position (m)')
         plt.gca().set_aspect('equal', adjustable='box')
+            
+        # Function to toggle the legend visibility
+        def toggle_legend(event, legend):
+            if event.key == 'l':
+                xlim = plt.gca().get_xlim()
+                ylim = plt.gca().get_ylim()
+                # Toggle legend visibility
+                if legend.get_visible():
+                    legend.set_visible(False)
+                else:
+                    legend.set_visible(True)
+                
+                # Apply stored axis limits
+                plt.xlim(xlim)
+                plt.ylim(ylim)
+                
+                plt.show()
+
+        # Connect the key press event to the toggle function
+        plt.gcf().canvas.mpl_connect('key_press_event', lambda e: toggle_legend(e, legend))
 
         plt.show()

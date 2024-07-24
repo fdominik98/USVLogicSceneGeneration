@@ -3,19 +3,47 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [    
+    "configurations": [   
         {
-            "name": "TEST",
+            "name": "test pymoo",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/test.py",
+            "program": "src/test_pymoo.py",
+            "console": "integratedTerminal"
+        }, 
+        {
+            "name": "hyperparam_test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/hyperparam_test.py",
             "console": "integratedTerminal"
         },
         {
-            "name": "VIS",
+            "name": "eval_time_test",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/data_vis.py",
+            "program": "src/eval_time_test.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "hyperparam_vis",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/hyperparam_vis.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "table_preview",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/table_preview.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "eval_time_vis",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/eval_time_vis.py",
             "console": "integratedTerminal"
         },
         {

@@ -5,13 +5,13 @@ from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 import pygad
 from aggregates import NoAggregate, AggregateAll, EulerDistance
-from src.visualization.colreg_plot import ColregPlot
+from visualization.colreg_plot import ColregPlot
 from model.usv_config import *
 
 class PyGadAlgorithm(GeneticAlgorithmBase):
     
-    def __init__(self, measurement_name : str, config_name: str, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pygad_algorithm', config_name, verbose)
+    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = False) -> None:
+        super().__init__(measurement_name, 'pygad_algorithm', config_name, verbose, random_init)
     
     def get_aggregate(self, env) -> Aggregate:
         return AggregateAll(env)   
@@ -61,11 +61,11 @@ class PyGadAlgorithm(GeneticAlgorithmBase):
         #     best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
         #     for sol in best_solutions:
         #         ColregPlot(self.env.update(sol))
-        return list(solution.flatten()), [solution_fitness]
+        return list(solution.flatten()), [abs(solution_fitness)]
 
     # Attribute generator with different boundaries
     def generate_gene_space(self, actors):
-        return [{'low': low, 'high': high} for low, high in boundaries] * actors
+        return [{'low': low, 'high': high} for low, high in self.boundaries] * actors
 
 
     

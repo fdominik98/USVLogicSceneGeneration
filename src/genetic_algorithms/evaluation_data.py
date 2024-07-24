@@ -9,10 +9,11 @@ class EvaluationData:
                  random_seed: int,
                  evaluation_time: Optional[float] = None,
                  number_of_generations: Optional[int] = None,
+                 actual_number_of_generations: Optional[int] = None,
                  population_size: Optional[int] = None,
                  num_parents_mating: Optional[int] = None,
-                 best_solution: list[float] = None,
-                 best_fitness: list[float] = None,
+                 best_solution: Optional[list[float]] = None,
+                 best_fitness: Optional[list[float]] = None,
                  mutate_eta: Optional[float] = None,
                  mutate_prob: Optional[float] = None,
                  crossover_eta: Optional[float] = None,
@@ -24,6 +25,7 @@ class EvaluationData:
         self.random_seed = random_seed
         self.evaluation_time = evaluation_time
         self.number_of_generations = number_of_generations
+        self.actual_number_of_generations = actual_number_of_generations
         self.population_size = population_size
         self.num_parents_mating = num_parents_mating
         self.best_solution = best_solution
@@ -42,6 +44,7 @@ class EvaluationData:
             "random_seed": self.random_seed,
             "evaluation_time": self.evaluation_time,
             "number_of_generations": self.number_of_generations,
+            "actual_number_of_generations": self.actual_number_of_generations,
             "population_size": self.population_size,
             "num_parents_mating": self.num_parents_mating,
             "best_solution": self.best_solution,
@@ -66,6 +69,7 @@ class EvaluationData:
             random_seed=data["random_seed"],
             evaluation_time=data.get("evaluation_time"),
             number_of_generations=data.get("number_of_generations"),
+            actual_number_of_generations=data.get("actual_number_of_generations"),
             population_size=data.get("population_size"),
             num_parents_mating=data.get("num_parents_mating"),
             best_solution=data.get("best_solution"),

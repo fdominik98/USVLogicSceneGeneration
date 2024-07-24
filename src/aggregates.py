@@ -19,6 +19,11 @@ class Aggregate(ABC):
     @abstractmethod
     def _get_object_num(self) -> int:
         pass
+    
+    def _get_penalty(self, penalty) -> float:
+         if penalty <= 0:
+            return 0
+         return self.sign * penalty
 
 
 class ConstraintClassAggregate(Aggregate):    
@@ -48,41 +53,30 @@ class NoAggregate(Aggregate):
 
     def evaluate(self, individual):
         self.env.update(individual)
-        
         objectives : list = []
+        
         for colreg_sit in self.env.colreg_situations:
             for penalty in colreg_sit.penalties:
-                if penalty <= 0:
-                    objectives.append(0)
-                else:
-                    objectives.append(self.sign * penalty) 
+                objectives.append(self._get_penalty(penalty))
         return tuple(objectives)
     
-
-class PenaltyClassAggregate(Aggregate):
+class VesselAggregate(Aggregate):
     def __init__(self, env : USVEnvironment, minimize=False) -> None:
         super().__init__(env, minimize)
         
-    def _get_object_num(self) -> int:
-        return int((constraint_number * self.env.config.col_sit_num) / 2)
+    def _get_object_num(self):
+        return int(self.env.config.actor_num)
 
     def evaluate(self, individual):
         self.env.update(individual)
-        
-        objectives : list = []
+        objectives = [0] * self._get_object_num()
+      
         for colreg_sit in self.env.colreg_situations:
-            for i, penalty in enumerate(colreg_sit.penalties):
-                if penalty <= 0:
-                    penalty = 0
-                else:
-                    penalty = self.sign * penalty
-                if i % 2 == 0:
-                    objectives.append(penalty)
-                else:
-                    objectives[-1] = objectives[-1] + penalty 
+            objectives[colreg_sit.vessel1.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2])
+            objectives[colreg_sit.vessel2.id] += self._get_penalty(colreg_sit.penalties[0])
         return tuple(objectives)
     
-    
+   
 class AggregateAll(Aggregate):
     def __init__(self, env : USVEnvironment, minimize=False) -> None:
         super().__init__(env, minimize)
