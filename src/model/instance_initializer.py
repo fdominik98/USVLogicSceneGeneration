@@ -1,17 +1,17 @@
-from model.colreg_situation_config import ColregSituationConfig
-from model.usv_config import max_distance, point_max, point_min, speed_max, speed_min
+from src.model.colreg_situation_desc import ColregSituationDesc
+from model.usv_config import MAX_DISTANCE, MAX_COORD, MIN_COORD, MAX_SPEED, MIN_SPEED
 from model.vessel import Vessel
 from model.colreg_situation import ColregSituation, NoColreg
 import math
 from igraph import Graph
 
 class InstanceInitializer():
-    def __init__(self, radii : list[float], colreg_situation_configs : list[ColregSituationConfig]) -> None:
+    def __init__(self, radii : list[float], colreg_situation_descs : list[ColregSituationDesc]) -> None:
         self.radii = radii
         self.actor_num = len(radii)
-        self.colreg_situation_configs = colreg_situation_configs
+        self.colreg_situation_descs = colreg_situation_descs
         sorted_radii = sorted(self.radii, reverse=True)
-        self.max_distance = max_distance(self.actor_num)
+        self.max_distance = MAX_DISTANCE(self.actor_num)
         
         min_cell_size = sorted_radii[0] + sorted_radii[1]
         min_cell_size = self.max_distance / 8
@@ -20,7 +20,7 @@ class InstanceInitializer():
         colreg_classes_dist : dict[ColregSituation.__class__, float] = dict()
         colreg_classes_id : list[ColregSituation.__class__] = []
         
-        for colreg_situation in colreg_situation_configs:
+        for colreg_situation in colreg_situation_descs:
             colreg_class = colreg_situation.colreg_class
             if colreg_class == NoColreg:
                 continue
@@ -34,13 +34,13 @@ class InstanceInitializer():
         self.node_id = 0
         self.G = Graph(directed=True)
         
-        x = point_min + min_cell_size
+        x = MIN_COORD + min_cell_size
         
-        average_speed = (speed_max - speed_min) / 2
+        average_speed = (MAX_SPEED - MIN_SPEED) / 2
         
-        while x < point_max(self.actor_num):
-            y = point_min + min_cell_size
-            while y < point_max(self.actor_num):
+        while x < MAX_COORD(self.actor_num):
+            y = MIN_COORD + min_cell_size
+            while y < MAX_COORD(self.actor_num):
                 self.generate_node(self.G, (x, y), (average_speed, 0))
                 self.generate_node(self.G, (x, y), (-average_speed, 0))
                 self.generate_node(self.G, (x, y), (0, average_speed))
@@ -64,11 +64,11 @@ class InstanceInitializer():
         for i, _ in enumerate(self.radii):
             self.P.add_vertex(i)
             
-        for colreg_situation in colreg_situation_configs:
+        for colreg_situation in colreg_situation_descs:
             colreg_class = colreg_situation.colreg_class
             if colreg_class == NoColreg:
                 continue
-            self.P.add_edge(colreg_situation.id1, colreg_situation.id2, key=colreg_classes_id.index(colreg_class))
+            self.P.add_edge(colreg_situation.vd1, colreg_situation.vd2, key=colreg_classes_id.index(colreg_class))
             
         # print(self.G.es["key"])
         # print(self.P.es["key"])        
@@ -88,9 +88,9 @@ class InstanceInitializer():
             vessels = sorted(vessels, key=lambda obj: obj.id)
                 
             colreg_situations : set[ColregSituation] = set()        
-            for colreg_situation in self.colreg_situation_configs:
-                colreg_situations.add(colreg_situation.colreg_class(vessels[colreg_situation.id1],
-                                                                vessels[colreg_situation.id2], colreg_situation.distance, self.max_distance)) 
+            for colreg_situation in self.colreg_situation_descs:
+                colreg_situations.add(colreg_situation.colreg_class(vessels[colreg_situation.vd1],
+                                                                vessels[colreg_situation.vd2], colreg_situation.distance, self.max_distance)) 
             result.append((vessels, colreg_situations))
         return result       
                 

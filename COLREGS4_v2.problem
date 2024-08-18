@@ -13,20 +13,15 @@ class COLREGSSituation {
 
 enum SituationType {overtaking, crossingFromPort, headOn}
 
-pred isInSituation(Vessel v) <->
-    target(_, v); source(_, v).
-
-error pred notInSituation(Vessel v) <->
-    !isInSituation(v).
-
 error pred dualSituation(COLREGSSituation s1, COLREGSSituation s2) <-> 
     source(s1, v), target(s1, t), 
     source(s2, v), target(s2, t),
     s1 != s2.
 
-error pred mutualSituation(v, t) <-> 
+error pred crossDualSituation(COLREGSSituation s1, COLREGSSituation s2) <-> 
     source(s1, v), target(s1, t), 
-    source(s2, t), target(s2, v).
+    source(s2, t), target(s2, v),
+    s1 != s2.
 
 pred overtaking(Vessel v, Vessel t) <->
     source(s, v), target(s, t), type(s, type), type == overtaking.
@@ -49,17 +44,20 @@ pred isInSituationWith(Vessel v1, Vessel v2) <->
     target(s, v1), source(s, v2);
     target(s, v2), source(s, v1).
 
-pred reachable(Vessel s, Vessel t) <->
-    s == t;
-    isInSituationWith+(s, t).
-
 atom asv.
 Vessel(asv).
 
 error pred asvNotReachable(Vessel v1) <->
-    !reachable(v1, asv).
+    !isInSituationWith(v1, asv), v1 != asv.
+
+error pred twoNonAsvInSituation(Vessel v1, Vessel v2) <->
+    v1 != asv, v2 != asv, isInSituationWith(v1, v2).
+
+error pred inSituationWithSelf(Vessel v1, Vessel v2) <->
+    isInSituationWith(v1, v2),
+    v1 == v2.    
 
 default !ambigious(*).
 ambigious(asv).
 
-scope Vessel = 6, COLREGSSituation = 5, COLREGSScenario = 1.
+scope Vessel = 5, COLREGSSituation = 4, COLREGSScenario = 1.

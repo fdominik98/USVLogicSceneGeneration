@@ -16,7 +16,7 @@ import matplotlib
 from model.usv_environment import USVEnvironment
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from pymoo.core.population import Population
-from model.usv_environment_config import USVEnvironmentConfig
+from model.usv_environment_desc import USVEnvironmentDesc
 from pymoo.core.callback import Callback
 from pymoo.core.termination import Termination
 import time
@@ -71,8 +71,9 @@ class BestSolutionCallback(Callback):
 
 class PyMooAlgorithm(GeneticAlgorithmBase):
     
-    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = False) -> None:
+    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = False, runtime : int = 300) -> None:
         super().__init__(measurement_name, 'pymoo_algorithm', config_name, verbose, random_init)
+        self.runtime = runtime
     
     def get_aggregate(self, env) -> Aggregate:
         return VesselAggregate(env, minimize=True)   
@@ -81,7 +82,7 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
     def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData):
             # Define the custom multi-objective optimization problem
             class MyProblem(ElementwiseProblem):
-                def __init__(self, env_config : USVEnvironmentConfig, aggregate : Aggregate, boundaries):
+                def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate, boundaries):
                     self.aggregate = aggregate
                     self.boundaries = boundaries
                     super().__init__(n_var=env_config.variable_num,  # Number of decision variables
@@ -104,7 +105,7 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
 
             callback = BestSolutionCallback(self.verbose)
             #termination=("n_gen", eval_data.number_of_generations),
-            termination = OptimumTermination(time.time(), 300, self.verbose)
+            termination = OptimumTermination(time.time(), self.runtime, self.verbose)
             return problem, algorithm, callback, termination
 
     
@@ -131,12 +132,12 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
                 n_evals.append(entry.evaluator.n_eval)
                 opt.append(entry.opt[0].F)
 
-            plt.figure(figsize=(7, 5))
-            plt.plot(n_evals, opt, marker="o")
-            plt.title("Convergence")
-            plt.xlabel("Number of Evaluations")
-            plt.ylabel("Optimum Value")
-            plt.show()
+            fig, ax = plt.subplots(figsize=(7, 5))
+            ax.plot(n_evals, opt, marker="o")
+            ax.set_title("Convergence")
+            ax.set_xlabel("Number of Evaluations")
+            ax.set_ylabel("Optimum Value")
+            fig.show()
 
         # X = res.X.tolist()
         # X = sorted(X, key=self.env.evaluate)

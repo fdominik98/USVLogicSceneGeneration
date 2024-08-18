@@ -10,8 +10,8 @@ import gc
 import traceback
 import os
 from visualization.colreg_plot import ColregPlot
-from model.colreg_situation_configs import usv_environment_configs
-from model.usv_config import boundaries
+from model.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.usv_config import BOUNDARIES
 
 class GeneticAlgorithmBase(ABC):
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -21,12 +21,12 @@ class GeneticAlgorithmBase(ABC):
         self.measurement_name = measurement_name
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
-        self.env_config = usv_environment_configs[config_name]
+        self.env_config = USV_ENV_DESC_LIST[config_name]
         self.env = USVEnvironment(self.env_config)
         self.aggregate = self.get_aggregate(self.env)
         self.verbose = verbose
         self.current_seed = None
-        self.boundaries = boundaries(self.env_config.actor_num)
+        self.boundaries = BOUNDARIES(self.env_config.actor_num)
         
         if not random_init:
             self.initial_population_array = self.env.get_population(200)
@@ -59,7 +59,7 @@ class GeneticAlgorithmBase(ABC):
             self.set_seed(random_seed)
             
             if self.random_init:
-                initial_pop = self.env.get_random_population(population_size)
+                initial_pop = self.env.get_population(population_size)
             else:
                 initial_pop = self.initial_population_array[:population_size]
             
@@ -77,7 +77,7 @@ class GeneticAlgorithmBase(ABC):
             if self.verbose:
                 print("Best individual is:", best_solution)
                 print("Best individual fitness is:", best_fitness)
-                ColregPlot(self.env.update(best_solution))
+                
         except Exception as e:
             eval_data.error_message = f'{str(e)}\n{traceback.format_exc()}'
             print(eval_data.error_message)

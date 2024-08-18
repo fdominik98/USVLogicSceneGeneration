@@ -1,6 +1,6 @@
 from model.usv_environment import USVEnvironment
-from model.usv_config import *
 from abc import ABC, abstractmethod
+from model.usv_config import CONSTRAINT_NUMBER, interval_penalty
 
 
 class Aggregate(ABC):
@@ -31,7 +31,7 @@ class ConstraintClassAggregate(Aggregate):
         super().__init__(env, minimize)
         
     def _get_object_num(self) -> int:
-        return int(constraint_number)
+        return int(CONSTRAINT_NUMBER)
     
     def evaluate(self, individual):
         self.env.update(individual)
@@ -49,7 +49,7 @@ class NoAggregate(Aggregate):
         super().__init__(env, minimize)
         
     def _get_object_num(self):
-        return int(constraint_number * self.env.config.col_sit_num)
+        return int(CONSTRAINT_NUMBER * self.env.config.col_sit_num)
 
     def evaluate(self, individual):
         self.env.update(individual)
@@ -72,8 +72,13 @@ class VesselAggregate(Aggregate):
         objectives = [0] * self._get_object_num()
       
         for colreg_sit in self.env.colreg_situations:
-            objectives[colreg_sit.vessel1.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2])
+            objectives[colreg_sit.vessel1.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2] + colreg_sit.penalties[3])
+            #objectives[colreg_sit.vessel2.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2] + colreg_sit.penalties[3])
             objectives[colreg_sit.vessel2.id] += self._get_penalty(colreg_sit.penalties[0])
+        
+        # speed constraints
+        for vessel in self.env.vessels:
+            objectives[vessel.id] += self._get_penalty(interval_penalty(vessel.speed, (vessel.min_speed, vessel.max_speed)))
         return tuple(objectives)
     
    

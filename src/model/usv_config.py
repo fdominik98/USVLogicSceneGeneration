@@ -1,32 +1,50 @@
 import numpy as np
-import math
 
-head_on_angle = np.radians(20.0)
-overtake_angle =np.radians(140.0)
-crossing_angle = np.radians(100.0)
-visibility_range = 1852.001 # 6 neutical miles in metres
+HEAD_ON_ANGLE = np.radians(20.0)
+OVERTAKE_ANGLE =np.radians(140.0)
+CROSSING_ANGLE = np.radians(100.0)
+VISIBILITY_RANGE = 1852.001 # 6 neutical miles in metres
 
-speed_min = 5.0 * 0.5144447 # 5 knots in metres per second
-speed_max = 40.0 * 0.5144447
-point_min = 0.0
-def point_max(actor_num) -> float:
+KNOT_CONVERSION = 0.5144447
+
+MIN_SPEED = 1.0 * KNOT_CONVERSION # 1 knot in metres per second
+MAX_SPEED = 40.0 * KNOT_CONVERSION
+MIN_COORD = 0.0
+def MAX_COORD(actor_num) -> float:
     return actor_num * 1000
 
-def max_distance(actor_num) -> float:
-    return (point_max(actor_num) - point_min) * np.sqrt(2)
-velocity_min = -speed_max
-velocity_max = speed_max
+def MAX_DISTANCE(actor_num) -> float:
+    return (MAX_COORD(actor_num) - MIN_COORD) * np.sqrt(2)
+MIN_VELOCITY_COORD = -MAX_SPEED
+MAX_VELOCITY_COORD = MAX_SPEED
 
-epsilon=1e-10
+EPSILON=1e-10
 
-constraint_number = 3
+CONSTRAINT_NUMBER = 4
 
-def range_far(actor_num) -> list[float]:
-    return [visibility_range, max_distance(actor_num)]
+def RANGE_FAR(actor_num) -> list[float]:
+    return [VISIBILITY_RANGE, MAX_DISTANCE(actor_num)]
 
-range_vis = [visibility_range, visibility_range + 100] # Around the visibility range with error threshold
+RANGE_VIS = [VISIBILITY_RANGE -20, VISIBILITY_RANGE + 20] # Around the visibility range with error threshold
 
-def boundaries(actor_num) -> list[tuple[float, float]]:
-    return [(point_min, point_max(actor_num)), (point_min, point_max(actor_num)),
-              (velocity_min, velocity_max), (velocity_min, velocity_max)]
+def BOUNDARIES(actor_num) -> list[tuple[float, float]]:
+    return [(MIN_COORD, MAX_COORD(actor_num)), (MIN_COORD, MAX_COORD(actor_num)),
+              (MIN_VELOCITY_COORD, MAX_VELOCITY_COORD), (MIN_VELOCITY_COORD, MAX_VELOCITY_COORD)]
+    
+    
+def angle(dot_product, norm_a, norm_b):
+    norm_a = max(norm_a, EPSILON)
+    norm_b = max(norm_b, EPSILON)
+    cos_theta = dot_product / (norm_a * norm_b)
+    cos_theta = np.clip(cos_theta, -1, 1)
+    return np.arccos(cos_theta)
+
+def interval_penalty(value, boundaries):
+    minimum, maximum = boundaries
+    if value < minimum:
+        return minimum - value
+    elif value > maximum:
+        return value - maximum
+    else:
+        return 0.0
 

@@ -15,7 +15,7 @@ class DataParser():
         for dir in tkfilebrowser.askopendirnames(initialdir=self.assets_dir):
         
             files = self.get_all_file_paths(dir)
-            
+                
             self.data : list[dict] = [EvaluationData.load_dict_from_json(file) for file in files]
             data_lists : list[list[float]] = []
             
@@ -24,7 +24,7 @@ class DataParser():
             for data in self.data:
                 measurement_data = []
                 for column in column_names:
-                    if data['error_message'] != None:
+                    if data['error_message'] != None and data['best_solution'] != None:
                         continue
                     if column != 'result':
                         measurement_data.append(data[column])

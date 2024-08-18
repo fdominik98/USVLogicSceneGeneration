@@ -1,38 +1,45 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
-from model.usv_environment_config import USVEnvironmentConfig
 from model.usv_config import *
-import pickle
 import os
-
 from model.colreg_situation import NoColreg
+import matplotlib.image as mpimg
+from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
+from scipy.ndimage import rotate
 
 colors = ['blue', 'red', 'green', 'orange', 'purple', 'grey', 'olive']
 light_colors = ['lightblue', 'salmon', 'lightgreen', 'moccasin', 'thistle', 'lightgrey', 'y']
 
-class ColregPlotFromFile():
-    def __init__(self, env_config: USVEnvironmentConfig):
-        # Load the best solutions from the file
-        path = f'assets/{env_config.name}_sols.pkl'
-        if not os.path.exists(path):
-            return
-        with open(path, 'rb') as f:
-            loaded_solutions = pickle.load(f) 
-            env = USVEnvironment(env_config)
-        for sol in loaded_solutions:
-            ColregPlot(env.update(sol))
+script_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(script_path)
+img_dir = f'{current_dir}/../../assets/images'
 
-class ColregPlot():    
-    def __init__(self, env : USVEnvironment):       
-        # Create the plot
-        fig = plt.figure(figsize=(10, 10))        
-            
+class ColregPlot():  
+    
+    def __init__(self, env : USVEnvironment): 
+        self.env = env
+        self.dist_graphs = []
+        self.vo_cone_graphs = []
+        self.vo_cone_addition_graphs = []
+        self.angle_circle_graphs = []
+        self.legend_visible = True
+        self.dist_visible = True   
+        self.vo_cone_visible = False
+        self.vo_cone_addition_visible = False
+        self.angle_circle_visible = True
+        
+        self.image = mpimg.imread(f'{img_dir}/ship.png')
+        
+        #self.fig, self.ax = plt.subplots(figsize=(10, 10))      
+        self.fig, (self.ax, self.lax) = plt.subplots(ncols=2, gridspec_kw={"width_ratios":[4, 1]}, figsize=(10,10))     
+        self.draw()   
+        
+    def draw(self):
+        # Create the plot            
         title = ''
-        r_label = 'R Radius'
-        cone_label = 'Velocity Obstacle Cone'
         i = 0
-        for colreg_s in env.colreg_situations:
+        for colreg_s in self.env.colreg_situations:
             if not isinstance(colreg_s, NoColreg): 
                 line_break = '\n' if (i + 1) % 3 == 0 else ' '
                 title = colreg_s.name if not title else f'{title},{line_break}{colreg_s.name}'
@@ -40,92 +47,149 @@ class ColregPlot():
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2      
             
-            #'\nv1 angle to p1p2: {np.degrees(angle_p12_v1):.2f} degs'
-            plt.text(o1.p[0] + colreg_s.p12[0] / 2, o1.p[1] + colreg_s.p12[1] / 2, f'Distance: {colreg_s.norm_p12:.2f} m', fontsize=11, color='black')
-                
-            line, = plt.plot([o1.p[0], o2.p[0]], [o1.p[1], o2.p[1]], color=light_colors[5], linewidth=0.8)
-                
-            plt.quiver(o1.p[0], o1.p[1], o2.v[0], o2.v[1], angles='xy', scale_units='xy', scale=1, color='red')
-            circle = plt.Circle(o2.p, colreg_s.r, color='black', fill=False, linestyle='--', label=r_label)
-            r_label = None
+            text = self.ax.text(o1.p[0] + colreg_s.p12[0] / 2, o1.p[1] + colreg_s.p12[1] / 2, f'{colreg_s.norm_p12:.2f} m', fontsize=11, color='black')
+            line, = self.ax.plot([o1.p[0], o2.p[0]], [o1.p[1], o2.p[1]], color=light_colors[5], linewidth=0.8)
+            self.dist_graphs += [text, line]
             
-            plt.gca().add_artist(circle)
+                
+            vo_circle = plt.Circle(o2.p, colreg_s.r, color='black', fill=False, linestyle='--', linewidth=0.7)
+            self.ax.add_artist(vo_circle)
+            # Calculate the angles of the cone
+            angle_rel = np.arctan2(colreg_s.p12[1], colreg_s.p12[0])
+            angle1 = angle_rel + colreg_s.angle_half_cone
+            angle2 = angle_rel - colreg_s.angle_half_cone
             
-            if not isinstance(colreg_s, NoColreg):
-                # Calculate the angles of the cone
-                angle_rel = np.arctan2(colreg_s.p12[1], colreg_s.p12[0])
-                angle1 = angle_rel + colreg_s.angle_half_cone
-                angle2 = angle_rel - colreg_s.angle_half_cone
-                
-                # Plot the velocity obstacle cone
-                cone1_vertex = o1.p
-                cone11 = cone1_vertex + np.array([np.cos(angle1), np.sin(angle1)]) * colreg_s.norm_p12
-                cone12 = cone1_vertex + np.array([np.cos(angle2), np.sin(angle2)]) * colreg_s.norm_p12
-                
-                cone2_vertex = o2.v + o1.p
-                cone21 = cone2_vertex + np.array([np.cos(angle1), np.sin(angle1)]) * colreg_s.norm_p12
-                cone22 = cone2_vertex + np.array([np.cos(angle2), np.sin(angle2)]) * colreg_s.norm_p12
+            # Plot the velocity obstacle cone
+            cone1_vertex = o1.p
+            cone11 = cone1_vertex + np.array([np.cos(angle1), np.sin(angle1)]) * colreg_s.norm_p12
+            cone12 = cone1_vertex + np.array([np.cos(angle2), np.sin(angle2)]) * colreg_s.norm_p12
+            line11, = plt.plot([o1.p[0], cone11[0]], [o1.p[1], cone11[1]], 'k--', linewidth=0.7)
+            line12, = plt.plot([o1.p[0], cone12[0]], [o1.p[1], cone12[1]], 'k--', linewidth=0.7)    
+            self.vo_cone_addition_graphs += [vo_circle, line11, line12]
+            
+            cone2_vertex = o2.v + o1.p
+            cone21 = cone2_vertex + np.array([np.cos(angle1), np.sin(angle1)]) * colreg_s.norm_p12
+            cone22 = cone2_vertex + np.array([np.cos(angle2), np.sin(angle2)]) * colreg_s.norm_p12
 
-                #line11, = plt.plot([o1.p[0], cone11[0]], [o1.p[1], cone11[1]], 'k--')
-                #line12, = plt.plot([o1.p[0], cone12[0]], [o1.p[1], cone12[1]], 'k--')            
+            line21, = self.ax.plot([o2.v[0] + o1.p[0], cone21[0]], [o2.v[1] + o1.p[1], cone21[1]], 'k--', color=colors[o2.id], linewidth=0.7)
+            line22, = self.ax.plot([o2.v[0] + o1.p[0], cone22[0]], [o2.v[1] + o1.p[1], cone22[1]], 'k--', color=colors[o2.id], linewidth=0.7)
+            self.vo_cone_graphs += [line21, line22]
             
-                line21, = plt.plot([o2.v[0] + o1.p[0], cone21[0]], [o2.v[1] + o1.p[1], cone21[1]], 'k--', label=cone_label)
-                cone_label = None
-                
-                line22, = plt.plot([o2.v[0] + o1.p[0], cone22[0]], [o2.v[1] + o1.p[1], cone22[1]], 'k--')
-                
-            plt.quiver(o1.p[0], o1.p[1], o2.v[0], o2.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o2.id])
+            for g in self.vo_cone_addition_graphs + self.vo_cone_graphs:
+                g.set_visible(False)  
+              
+            if not isinstance(colreg_s, NoColreg):                
+                # Normalize the vector
+                v2_normalized = o2.v / o2.speed
 
+                # Define the angle and radius
+                angle_circle_slice_1 = HEAD_ON_ANGLE  # 20 degree slice
+                angle_circle_slice_2 = OVERTAKE_ANGLE # 140 degree slice
+                angle_circle_radius = VISIBILITY_RANGE / 2.8
+                circle_color = light_colors[o2.id]
+
+                circle = plt.Circle(o2.p, angle_circle_radius, fill=False, color=circle_color, linewidth=0.6)
+                self.ax.add_artist(circle)
+
+                # Draw two lines centered on the vector
+                circle_line1 = self.draw_line(o2.p, v2_normalized, -angle_circle_slice_1 / 2, circle_color, angle_circle_radius)  # Left line
+                circle_line2 = self.draw_line(o2.p, v2_normalized, angle_circle_slice_1 / 2, circle_color,  angle_circle_radius)   # Right line
+
+                # Draw two lines centered on the negated vector
+                circle_line3 = self.draw_line(o2.p, -v2_normalized, -angle_circle_slice_2 / 2, circle_color, angle_circle_radius)  # Left line
+                circle_line4 = self.draw_line(o2.p, -v2_normalized, angle_circle_slice_2 / 2, circle_color, angle_circle_radius)   # Right line
+                self.angle_circle_graphs += [circle, circle_line1, circle_line2, circle_line3, circle_line4]
+                
+                
+            self.ax.quiver(o1.p[0], o1.p[1], o2.v[0], o2.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o2.id])
             colreg_s.info()
             
             
-        for o in env.vessels:
-            plt.text(o.p[0] + o.r, o.p[1] + o.r, f'O{o.id}: ({o.p[0]:.2f}, {o.p[1]:.2f})\nv{o.id} speed: {o.speed:.2f} m/s', fontsize=11, color=colors[o.id])
+        for o in self.env.vessels:
+            #self.ax.text(o.p[0] + o.r*1.5, o.p[1] + o.r*1.5, f'O{o.id}: ({o.p[0]:.2f}, {o.p[1]:.2f})\nv{o.id} speed: {o.speed:.2f} m/s', fontsize=11, color=colors[o.id], fontweight='bold')
+            name = r'OS' if o.id == 0 else fr'$TS_{o.id}$'
+            self.ax.text(o.p[0] + o.r, o.p[1] + o.r, name, color=colors[o.id], fontweight='bold')
             
             # Plot the positions and radii as circles
-            circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'O{o.id} Radius')
-            plt.gca().add_artist(circle)
+            circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{name} Radius: {o.r}m')
+            self.ax.add_artist(circle)
 
-            v1_scaled = o.v * visibility_range / o.speed / 4
-            plt.quiver(o.p[0], o.p[1], v1_scaled[0], v1_scaled[1], angles='xy', scale_units='xy', scale=1, color=light_colors[o.id])
-            
+            # Plot vectors for better visibility
+            v1_scaled = o.v * VISIBILITY_RANGE / o.speed / 4
+            big_quiver = self.ax.quiver(o.p[0], o.p[1], v1_scaled[0], v1_scaled[1], angles='xy', scale_units='xy', scale=1, color=light_colors[o.id])
+            self.angle_circle_graphs += [big_quiver]
+            angle = fr'$\theta = {self.vector_to_angle(o.v):.2f}^\circ$'
+            speed = f'speed = {(o.speed / KNOT_CONVERSION):.2f}kn'
             # Plot the velocity vector with their actual lengths
-            plt.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=f'O{o.id} Velocity')
+            self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=f'{name} Velocity: {angle}, {speed}')
 
             # Plot the positions
-            plt.scatter(o.p[0], o.p[1], color=colors[o.id], s=100, label=f'O{o.id} Position')
+            self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=100, label=f'{name} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})')
+            rotated_image = rotate(self.image, self.vector_to_angle(o.v)-90, reshape=True)
+            imagebox = OffsetImage(rotated_image, zoom = 0.35, alpha=0.6)
+            ab = AnnotationBbox(imagebox, o.p, frameon = False, zorder=-1)
+            self.ax.add_artist(ab)
             
+        self.fig.tight_layout(pad=5)
+        self.ax.grid(False)
+        #self.fig.legend(loc=7)
+        #self.ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        h, l = self.ax.get_legend_handles_labels()
+        self.lax.legend(h, l, loc=7)
+        self.lax.axis("off")
 
-        v1_scaled_norm = np.linalg.norm(v1_scaled)
-        plt.xlim(min(env.vessels, key=lambda o: o.p[0]).p[0] - v1_scaled_norm, max(env.vessels, key=lambda o: o.p[0]).p[0] + v1_scaled_norm)
-        plt.ylim(min(env.vessels, key=lambda o: o.p[1]).p[1] - v1_scaled_norm, max(env.vessels, key=lambda o: o.p[1]).p[1] + v1_scaled_norm)
-        plt.axhline(0, color='grey', lw=0.5)
-        plt.axvline(0, color='grey', lw=0.5)
-        plt.grid(True)
-        legend = plt.legend()
-        plt.title(f'USV situation ({title})')
-        plt.xlabel('X Position (m)')
-        plt.ylabel('Y Position (m)')
-        plt.gca().set_aspect('equal', adjustable='box')
-            
-        # Function to toggle the legend visibility
-        def toggle_legend(event, legend):
-            if event.key == 'l':
-                xlim = plt.gca().get_xlim()
-                ylim = plt.gca().get_ylim()
-                # Toggle legend visibility
-                if legend.get_visible():
-                    legend.set_visible(False)
-                else:
-                    legend.set_visible(True)
-                
-                # Apply stored axis limits
-                plt.xlim(xlim)
-                plt.ylim(ylim)
-                
-                plt.show()
+        self.ax.set_title(f'USV situation ({title})')
+        self.ax.set_xlabel('X Position (m)')
+        self.ax.set_ylabel('Y Position (m)')
+        self.ax.set_aspect('equal', adjustable='box')  
 
         # Connect the key press event to the toggle function
-        plt.gcf().canvas.mpl_connect('key_press_event', lambda e: toggle_legend(e, legend))
+        self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
 
-        plt.show()
+        plt.show(block=True)
+        
+    # Function to toggle the visibility
+    def toggle_visibility(self, event):
+        if event.key == '1':
+            self.legend_visible = not self.legend_visible
+            self.lax.set_visible(self.legend_visible)
+        elif event.key == '2':
+            self.dist_visible = not self.dist_visible
+            for g in self.dist_graphs:
+                g.set_visible(self.dist_visible)
+        elif event.key == '5':
+            self.vo_cone_visible = not self.vo_cone_visible
+            for g in self.vo_cone_graphs:
+                g.set_visible(self.vo_cone_visible)
+        elif event.key == '4':
+            self.vo_cone_addition_visible = not self.vo_cone_addition_visible
+            for g in self.vo_cone_addition_graphs:
+                g.set_visible(self.vo_cone_addition_visible)
+        elif event.key == '3':
+            self.angle_circle_visible = not self.angle_circle_visible
+            for g in self.angle_circle_graphs:
+                g.set_visible(self.angle_circle_visible)
+        self.fig.canvas.draw()           
+                
+    # Function to draw lines for slices
+    def draw_line(self, origin, center_vector, angle, color, length):
+        direction = np.array([np.cos(angle), np.sin(angle)])
+        rotation_matrix = np.array([[center_vector[0], -center_vector[1]],
+                                    [center_vector[1],  center_vector[0]]])
+        rotated_direction = rotation_matrix.dot(direction)
+        end_point = origin + length * rotated_direction
+        line, = self.ax.plot([origin[0], end_point[0]], [origin[1], end_point[1]], color=color, linewidth=0.6)
+        return line
+    
+    def vector_to_angle(self, v):
+        # Calculate the angle in radians
+        angle_radians = np.arctan2(v[1], v[0])
+        
+        # Convert the angle to degrees
+        angle_degrees = np.degrees(angle_radians)
+        
+        # Normalize the angle to be between 0 and 360 degrees
+        if angle_degrees < 0:
+            angle_degrees += 360
+        
+        return angle_degrees
