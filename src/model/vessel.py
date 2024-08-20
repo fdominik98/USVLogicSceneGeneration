@@ -1,11 +1,13 @@
 import numpy as np
-from model.usv_config import MIN_SPEED
+from model.usv_config import MIN_SPEED, KNOT_TO_MS_CONVERSION
 
 class VesselDesc():
+    # r : meter
+    # max_speed: knot
     def __init__(self, id: int, r: float, max_speed: float) -> None:
         self.id = id
         self.r = r
-        self.max_speed = max_speed
+        self.max_speed = max_speed * KNOT_TO_MS_CONVERSION
         self.min_speed = MIN_SPEED
         
     def __eq__(self, value: object) -> bool:

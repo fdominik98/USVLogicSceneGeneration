@@ -1,4 +1,3 @@
-from model.usv_config import MAX_DISTANCE
 import math
 from model.random_instance_initializer import RandomInstanceInitializer
 from model.usv_environment_desc import USVEnvironmentDesc
@@ -6,7 +5,6 @@ from model.usv_environment_desc import USVEnvironmentDesc
 class USVEnvironment():
     def __init__(self, env_config : USVEnvironmentDesc) -> None:
         self.config = env_config
-        self.max_distance = MAX_DISTANCE(self.config.actor_num)                 
         self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
         self.vessels, self.colreg_situations = self.initializer.get_one_population_as_objects()
         

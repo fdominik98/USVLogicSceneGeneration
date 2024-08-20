@@ -6,7 +6,7 @@ import random
 import time
 import itertools
 
-RANDOM_SEED = 1234
+RANDOM_SEED = 4321
 
 population_sizes = [2, 4, 7, 10, 15, 20, 30, 50, 100]
 #numbers_of_generations = [50, 100, 200, 400, 1000, 2000]
@@ -19,11 +19,11 @@ mutate_etas = [1, 5, 10, 15, 20]
 crossover_etas = [1, 5, 10, 15, 20]
 
 algos = {
-    1 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='crossing_and_head_on', verbose=False, random_init=True, runtime=15),
-    2 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='two_way_overtaking_and_crossing', verbose=False, random_init=True, runtime=15),
-    3 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
-    4 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='six_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
-    5 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
+    #1 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='crossing_and_head_on', verbose=False, random_init=True, runtime=15),
+    #2 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='two_way_overtaking_and_crossing', verbose=False, random_init=True, runtime=15),
+    3 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, random_init=True, runtime=20),
+    4 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='six_vessel_colreg_scenario', verbose=False, random_init=True, runtime=20),
+    #5 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
 }
 
 all_combinations = itertools.product(population_sizes, numbers_of_generations, numbers_of_parents, mutate_probs, crossover_probs, mutate_etas, crossover_etas)

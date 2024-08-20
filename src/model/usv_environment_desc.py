@@ -1,7 +1,6 @@
 from itertools import combinations
 from model.colreg_situation_desc import ColregSituationDesc
 from model.colreg_situation import NoColreg
-from model.usv_config import RANGE_FAR
 from model.vessel import VesselDesc
 
 class USVEnvironmentDesc():
@@ -21,5 +20,5 @@ class USVEnvironmentDesc():
             vd1 = vessel_descs[i]
             vd2 = vessel_descs[j]
             if (vd2, vd1) not in existing_pairs and (vd1, vd2) not in existing_pairs:
-                colreg_situation_descs.append(ColregSituationDesc(vd1, NoColreg, vd2, RANGE_FAR(self.actor_num)))
+                colreg_situation_descs.append(ColregSituationDesc(vd1, NoColreg, vd2))
                 

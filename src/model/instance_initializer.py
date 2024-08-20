@@ -1,5 +1,5 @@
 from src.model.colreg_situation_desc import ColregSituationDesc
-from model.usv_config import MAX_DISTANCE, MAX_COORD, MIN_COORD, MAX_SPEED, MIN_SPEED
+from model.usv_config import MAX_COORD, MIN_COORD, MAX_SPEED, MIN_SPEED
 from model.vessel import Vessel
 from model.colreg_situation import ColregSituation, NoColreg
 import math
@@ -11,7 +11,7 @@ class InstanceInitializer():
         self.actor_num = len(radii)
         self.colreg_situation_descs = colreg_situation_descs
         sorted_radii = sorted(self.radii, reverse=True)
-        self.max_distance = MAX_DISTANCE(self.actor_num)
+        self.max_distance = (self.actor_num * 1000) * math.sqrt(2)
         
         min_cell_size = sorted_radii[0] + sorted_radii[1]
         min_cell_size = self.max_distance / 8

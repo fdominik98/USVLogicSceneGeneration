@@ -11,7 +11,6 @@ import traceback
 import os
 from visualization.colreg_plot import ColregPlot
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.usv_config import BOUNDARIES
 
 class GeneticAlgorithmBase(ABC):
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +25,6 @@ class GeneticAlgorithmBase(ABC):
         self.aggregate = self.get_aggregate(self.env)
         self.verbose = verbose
         self.current_seed = None
-        self.boundaries = BOUNDARIES(self.env_config.actor_num)
         
         if not random_init:
             self.initial_population_array = self.env.get_population(200)

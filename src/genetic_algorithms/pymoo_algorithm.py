@@ -82,20 +82,24 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
     def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData):
             # Define the custom multi-objective optimization problem
             class MyProblem(ElementwiseProblem):
-                def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate, boundaries):
+                def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate):
                     self.aggregate = aggregate
-                    self.boundaries = boundaries
+                    xl = []
+                    xu = []
+                    for vessel_desc in env_config.vessel_descs:
+                        xl += [MIN_COORD, MIN_COORD, -vessel_desc.max_speed, -vessel_desc.max_speed]
+                        xu += [MAX_COORD, MAX_COORD, vessel_desc.max_speed, vessel_desc.max_speed]
                     super().__init__(n_var=env_config.variable_num,  # Number of decision variables
                                     n_obj=aggregate.obj_num,  # Number of objective functions
                                     n_constr=0,  # Number of constraints
-                                    xl=[b[0] for b in self.boundaries] * env_config.actor_num, # Lower bounds for variables
-                                    xu=[b[1] for b in self.boundaries] * env_config.actor_num)  # Upper bounds for variables
+                                    xl=xl, # Lower bounds for variables
+                                    xu=xu)  # Upper bounds for variables
 
                 def _evaluate(self, x, out, *args, **kwargs):
                     out["F"] = self.aggregate.evaluate(x)
 
             # Instantiate the problem
-            problem = MyProblem(self.env_config, self.aggregate, self.boundaries)
+            problem = MyProblem(self.env_config, self.aggregate)
             initial_population = Population.new("X", initial_population)
             
             # Define the NSGA-II algorithm
