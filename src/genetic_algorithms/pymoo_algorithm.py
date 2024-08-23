@@ -84,12 +84,12 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
             class MyProblem(ElementwiseProblem):
                 def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate):
                     self.aggregate = aggregate
-                    xl = []
-                    xu = []
-                    for vessel_desc in env_config.vessel_descs:
-                        xl += [MIN_COORD, MIN_COORD, -vessel_desc.max_speed, -vessel_desc.max_speed]
-                        xu += [MAX_COORD, MAX_COORD, vessel_desc.max_speed, vessel_desc.max_speed]
-                    super().__init__(n_var=env_config.variable_num,  # Number of decision variables
+                    xl = [MIN_SPEED]
+                    xu = [env_config.vessel_descs[0].max_speed]
+                    for vessel_desc in env_config.vessel_descs[1:]:
+                        xl += [MIN_COORD, MIN_COORD, MIN_HEADING, MIN_SPEED]
+                        xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
+                    super().__init__(n_var=env_config.all_variable_num,  # Number of decision variables
                                     n_obj=aggregate.obj_num,  # Number of objective functions
                                     n_constr=0,  # Number of constraints
                                     xl=xl, # Lower bounds for variables

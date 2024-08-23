@@ -3,26 +3,67 @@ from model.colreg_situation_desc import ColregSituationDesc
 from model.usv_environment_desc import USVEnvironmentDesc
 from model.vessel import VesselDesc
 
-# Yacht:                6-30 meters,        15-50 knots
-# Fishing boat:         9-30 meter,         10-25 knots
-# Ferries:              30-150 meters,      15-30 knots
-# Small Cargo Ships:    90-180 meters,      12-20 knots
-# Container Ships:      180-365+ meters,    18-25 knots
-# Cruise Ships:         210-365 meters,     18-24 knots
-# Oil Tankers:          240-460+ meters,    12-17 knots
-# Naval Ships:          ? meters,           20-35+ knots
-# Icebreakers:          60-180 meters,      10-20 knots
+# Length/beam ratio (LBR) = WL/B
+# (WL = waterline length; B = maximum beam at the waterline)
+
+# LENGTH-TO-BEAM RATIO (LBR) AND SHIP CATEGORIES
+# 
+# Ratio       Description                                    Typical Ship Types
+# ------------------------------------------------------------------------------------------
+# 2-4         Small to midsize planing powerboats            Yachts (6-15m, 15-50 knots)
+#             Provides stability and spacious deck area      Small fishing boats (9-15m, 10-25 knots)
+#             relative to length, suitable for high-speed    
+#             recreational use.
+# ------------------------------------------------------------------------------------------
+# 3-4         Small to midsize sailboats, motor yachts       Yachts (15-30m, 15-50 knots)
+#             Balances stability and speed, suitable         Larger fishing boats (15-30m, 10-25 knots)
+#             for both sailing and powerboating.
+# ------------------------------------------------------------------------------------------
+# 4-6         Large, efficient long-range cruisers           Ferries (30-50m, 15-30 knots)
+#             Designed for fuel efficiency and stability,    Small cargo ships (90-150m, 12-20 knots)
+#             ideal for ocean passages.
+# ------------------------------------------------------------------------------------------
+# 6-10        Large freighters, cruising trimarans,          Ferries (50-150m, 15-30 knots)
+#             cruising catamarans, and large                 Larger cargo ships (150-180m, 12-20 knots)
+#             sailing monohulls                              Icebreakers (60-180m, 10-20 knots)
+#             Optimized for long-distance travel, balancing
+#             stability and carrying capacity.
+# ------------------------------------------------------------------------------------------
+# 10-16       Fast-cruising catamarans, trimarans,           Naval ships (variable length, 20-35+ knots)
+#             and racing multihulls                          Specialized racing boats
+#             High LBR for speed and agility, reducing 
+#             drag for competitive sailing.
+# ------------------------------------------------------------------------------------------
+# Over 16     Racing multihulls                              Specialized racing multihulls
+#             Extreme ratios for ultimate speed,             (e.g., America's Cup racers)
+#             lightweight, minimal beam to length for 
+#             high performance in racing.
+# ------------------------------------------------------------------------------------------
+
+# LENGTH AND SPEED CATEGORIES
+# ------------------------------------------------------------------------------------------
+# Small Ships      6-30 meters         10-50 knots         Yachts, fishing boats
+# Medium Ships     30-180 meters       12-30 knots         Ferries, small cargo ships
+# Large Ships      180-460+ meters     12-25 knots         Container ships, cruise ships, oil tankers
+# Specialized      Variable length     10-35+ knots        Naval ships, icebreakers, racing multihulls
+# ------------------------------------------------------------------------------------------
 
 
-OS = VesselDesc(id=0, r=100, max_speed=25)
-TS1 = VesselDesc(id=1, r=50, max_speed=30)
-TS2 = VesselDesc(id=2, r=200, max_speed=20)
-TS3 = VesselDesc(id=3, r=300, max_speed=15)
-TS4 = VesselDesc(id=4, r=30, max_speed=35)
-TS5 = VesselDesc(id=5, r=30, max_speed=35)
-TS6 = VesselDesc(id=6, r=20, max_speed=40)
+
+
+OS = VesselDesc(id=0, l=100, b=30, max_speed=25)
+TS1 = VesselDesc(id=1, l=50, b=18, max_speed=30)
+TS2 = VesselDesc(id=2, l=200, b=30, max_speed=20)
+TS3 = VesselDesc(id=3, l=300, b=40, max_speed=15)
+TS4 = VesselDesc(id=4, l=30, b=8, max_speed=35)
+TS5 = VesselDesc(id=5, l=30, b=10, max_speed=35)
+TS6 = VesselDesc(id=6, l=20, b=7, max_speed=40)
 
 USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
+    'single' : USVEnvironmentDesc('single',
+                                       [OS],
+                                       []),
+    
     'crossing' : USVEnvironmentDesc('crossing',
                                        [OS, TS1],
                                        [ColregSituationDesc(OS, CrossingFromPort, TS1)]),

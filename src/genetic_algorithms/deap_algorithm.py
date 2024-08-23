@@ -35,7 +35,7 @@ class DeapAlgorithm(GeneticAlgorithmBase):
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=-10, up=10, eta=eval_data.crossover_eta)
         # indpb: number of variables to mutate per indivudal
         toolbox.register("mutate", tools.mutPolynomialBounded, low=[b[0] for b in self.boundaries]* self.env_config.actor_num,
-                        up=[b[1] for b in self.boundaries] * self.env_config.actor_num, eta=eval_data.mutate_eta, indpb=1/self.env_config.variable_num)
+                        up=[b[1] for b in self.boundaries] * self.env_config.actor_num, eta=eval_data.mutate_eta, indpb=1/self.env_config.all_variable_num)
         toolbox.register("select", tools.selNSGA2)
         
         stats = None

@@ -1,119 +1,72 @@
-from src.model.colreg_situation_desc import ColregSituationDesc
-from model.usv_config import MAX_COORD, MIN_COORD, MAX_SPEED, MIN_SPEED
-from model.vessel import Vessel
-from model.colreg_situation import ColregSituation, NoColreg
-import math
-from igraph import Graph
+import random
+from model.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, MIN_SPEED, OWN_VESSEL_STATES, VARIABLE_NUM
+from model.vessel import Vessel, VesselDesc
+from model.colreg_situation import ColregSituation
+from model.colreg_situation_desc import ColregSituationDesc
+from abc import ABC, abstractmethod
 
-class InstanceInitializer():
-    def __init__(self, radii : list[float], colreg_situation_descs : list[ColregSituationDesc]) -> None:
-        self.radii = radii
-        self.actor_num = len(radii)
+class InstanceInitializer(ABC):    
+    def __init__(self, vessel_descs : list[VesselDesc], colreg_situation_descs : list[ColregSituationDesc]) -> None:
+        self.vessel_descs = vessel_descs
+        self.actor_num = len(vessel_descs)
         self.colreg_situation_descs = colreg_situation_descs
-        sorted_radii = sorted(self.radii, reverse=True)
-        self.max_distance = (self.actor_num * 1000) * math.sqrt(2)
-        
-        min_cell_size = sorted_radii[0] + sorted_radii[1]
-        min_cell_size = self.max_distance / 8
-        self.min_r = sorted_radii[-1]
-        
-        colreg_classes_dist : dict[ColregSituation.__class__, float] = dict()
-        colreg_classes_id : list[ColregSituation.__class__] = []
-        
-        for colreg_situation in colreg_situation_descs:
-            colreg_class = colreg_situation.colreg_class
-            if colreg_class == NoColreg:
-                continue
-            if colreg_class in colreg_classes_dist:
-                lower_bound = colreg_classes_dist[colreg_class][0]
-                colreg_classes_dist[colreg_class] = None if colreg_situation.distance is None else [min(colreg_situation.distance[0], lower_bound), self.max_distance]
-            else:
-                colreg_classes_dist[colreg_class] = None if colreg_situation.distance is None else (colreg_situation.distance[0], self.max_distance)
-                colreg_classes_id.append(colreg_class)
-                   
-        self.node_id = 0
-        self.G = Graph(directed=True)
-        
-        x = MIN_COORD + min_cell_size
-        
-        average_speed = (MAX_SPEED - MIN_SPEED) / 2
-        
-        while x < MAX_COORD(self.actor_num):
-            y = MIN_COORD + min_cell_size
-            while y < MAX_COORD(self.actor_num):
-                self.generate_node(self.G, (x, y), (average_speed, 0))
-                self.generate_node(self.G, (x, y), (-average_speed, 0))
-                self.generate_node(self.G, (x, y), (0, average_speed))
-                self.generate_node(self.G, (x, y), (0, -average_speed))
-                y += min_cell_size
-            x+= min_cell_size
+       
+    @abstractmethod     
+    def get_population(self, pop_size) -> list[list[float]]:
+        pass
+
+    def convert_population_to_objects(self, states: list[float]) -> tuple[list[Vessel], set[ColregSituation]]:
+        states = OWN_VESSEL_STATES + states
+        vessels: list[Vessel] = []
+        for vessel_desc in self.vessel_descs:
+            vessel = Vessel(vessel_desc)
+            vessel.update(states[vessel.id * VARIABLE_NUM],
+                            states[vessel.id * VARIABLE_NUM + 1],
+                            states[vessel.id * VARIABLE_NUM + 2],
+                            states[vessel.id * VARIABLE_NUM + 3])
+            vessels.append(vessel)
             
-        for node1 in self.G.vs:
-            for node2 in self.G.vs:
-                if node1 == node2:
-                    continue
-                vessel1 = node1['attribute']
-                vessel2 = node2['attribute']
-                for colreg_class in colreg_classes_dist.keys():
-                    colreg_situation = colreg_class(distance=colreg_classes_dist[colreg_class], vessel1=vessel1, vessel2=vessel2, max_distance=self.max_distance)
-                    if colreg_situation.penalties[0] + colreg_situation.penalties[2] == 0.0:
-                        self.G.add_edge(node1, node2, key=colreg_classes_id.index(colreg_class))
-                
-        self.P = Graph(directed=True)
-        
-        for i, _ in enumerate(self.radii):
-            self.P.add_vertex(i)
-            
-        for colreg_situation in colreg_situation_descs:
-            colreg_class = colreg_situation.colreg_class
-            if colreg_class == NoColreg:
-                continue
-            self.P.add_edge(colreg_situation.vd1, colreg_situation.vd2, key=colreg_classes_id.index(colreg_class))
-            
-        # print(self.G.es["key"])
-        # print(self.P.es["key"])        
-                
-                
-    def get_population(self, num : int) -> list[tuple[list[Vessel], set[ColregSituation]]]:
-        result : list[tuple[list[Vessel], set[ColregSituation]]] = []
-        
-        for subgraph in self.get_limited_matches(num):
-            vessels : list[Vessel] = []
-            for i, G_node in enumerate(subgraph):
-                G_vessel : Vessel = self.G.vs[G_node]['attribute']
-                vessel = Vessel(i, self.radii[i])
-                vessel.update(G_vessel.p[0], G_vessel.p[1], G_vessel.v[0], G_vessel.v[1])
-                vessels.append(vessel)
-                
-            vessels = sorted(vessels, key=lambda obj: obj.id)
-                
-            colreg_situations : set[ColregSituation] = set()        
-            for colreg_situation in self.colreg_situation_descs:
-                colreg_situations.add(colreg_situation.colreg_class(vessels[colreg_situation.vd1],
-                                                                vessels[colreg_situation.vd2], colreg_situation.distance, self.max_distance)) 
-            result.append((vessels, colreg_situations))
-        return result       
-                
-    def generate_node(self, G : Graph, p, v):
-        vessel = Vessel(id=-1, r=self.min_r)
-        vessel.update(p[0], p[1], v[0], v[1])
-        G.add_vertex(self.node_id, attribute=vessel)
-        self.node_id += 1
-        
-    def get_limited_matches(self, limit) -> list[dict]:
-        matches = []
-        count = 0
-        all_matches = self.G.get_subisomorphisms_vf2(self.P, edge_color1=self.G.es['key'], edge_color2=self.P.es['key'])
-        for match in all_matches:
-            if self.has_unique_positions(match):
-                matches.append(match)
-                count += 1
-                if count >= limit:
-                    break
-        if count < limit:
-            matches = (matches * math.ceil(limit/count))[:limit]
-        return matches
+        colreg_situations : set[ColregSituation] = set()        
+        for colreg_situation_desc in self.colreg_situation_descs:
+            vd1 = colreg_situation_desc.vd1
+            vd2 = colreg_situation_desc.vd2
+            colreg_class = colreg_situation_desc.colreg_class
+            colreg_situations.add(colreg_class(vessels[vd1.id], vessels[vd2.id]))
+        return vessels, colreg_situations
     
-    def has_unique_positions(self, match : list):
-        remainders = {tuple(self.G.vs[node]['attribute'].p.flatten()) for node in match}
-        return len(remainders) == len(match)
+    
+    def get_one_population_as_objects(self) -> tuple[list[Vessel], set[ColregSituation]]:
+        return self.convert_population_to_objects(self.get_population(1)[0])
+    
+class RandomInstanceInitializer(InstanceInitializer):
+    def __init__(self, vessel_descs : list[VesselDesc], colreg_situation_descs : list[ColregSituationDesc]) -> None:
+        super().__init__(vessel_descs, colreg_situation_descs)
+        
+    def get_population(self, pop_size) -> list[list[float]]:
+        result : list[list[float]] = []
+        for i in range(int(pop_size)):
+            population : list[float] = [random.uniform(MIN_SPEED, self.vessel_descs[0].max_speed)]
+            for vessel_desc in self.vessel_descs[1:]:
+                group = [random.uniform(MIN_COORD, MAX_COORD),
+                        random.uniform(MIN_COORD, MAX_COORD),
+                        random.uniform(MIN_HEADING, MAX_HEADING),
+                        random.uniform(MIN_SPEED, vessel_desc.max_speed)]
+                population.extend(group)
+            result.append(population)
+        return result  
+    
+class DeterministicInitializer(InstanceInitializer):
+    def __init__(self, vessel_descs : list[VesselDesc], colreg_situation_descs : list[ColregSituationDesc]) -> None:
+        super().__init__(vessel_descs, colreg_situation_descs)
+        
+    def get_population(self, pop_size) -> list[list[float]]:
+        result : list[list[float]] = []
+        for i in range(int(pop_size)):
+            population : list[float] = [self.vessel_descs[0].max_speed / 2.0]
+            for vessel_desc in self.vessel_descs[1:]:
+                group = [MAX_COORD / 2, MAX_COORD / 2, 0, vessel_desc.max_speed / 2]
+                population.extend(group)
+            result.append(population)
+        return result  
+    
+    

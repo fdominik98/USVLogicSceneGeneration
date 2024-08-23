@@ -3,10 +3,10 @@ import numpy as np
 HEAD_ON_ANGLE = np.radians(10.0)
 OVERTAKE_ANGLE = np.radians(135)
 CROSSING_ANGLE = np.radians(107.5)
-MASTHEAD_ANGLE = HEAD_ON_ANGLE + 2 * CROSSING_ANGLE
+MASTHEAD_ANGLE = np.pi * 2 - OVERTAKE_ANGLE
 
-KNOT_TO_MS_CONVERSION = 0.5144447
-N_MILE_TO_M_CONVERSION = 1852.001 # a nautical miles in metres
+KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
+N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
 
 DIST_DRIFT = 50.0
 
@@ -16,26 +16,20 @@ DIST_DRIFT = 50.0
 # 3 nautical miles = 5556,003 meters
 # 2 nautical miles = 3704,002 meters
 
-MIN_SPEED = 0.0 * KNOT_TO_MS_CONVERSION # 1 knot in metres per second
-MAX_SPEED = 45.0 * KNOT_TO_MS_CONVERSION
+MIN_SPEED = 0.0
+MIN_HEADING = -np.pi
+MAX_HEADING = np.pi
 MIN_COORD = 0.0
-MAX_COORD = 2 * 6 * N_MILE_TO_M_CONVERSION
+MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION
 
 EPSILON=1e-10
 
 CONSTRAINT_NUMBER = 4
-    
-BOUNDARIES = [(MIN_COORD, MAX_COORD), (MIN_COORD, MAX_COORD),
-              (-MAX_SPEED, MAX_SPEED), (-MAX_SPEED, MAX_SPEED)]
-    
-    
-def angle(dot_product, norm_a, norm_b):
-    norm_a = max(norm_a, EPSILON)
-    norm_b = max(norm_b, EPSILON)
-    cos_theta = dot_product / (norm_a * norm_b)
-    cos_theta = np.clip(cos_theta, -1, 1)
-    return np.arccos(cos_theta)
 
+VARIABLE_NUM = 4
+
+OWN_VESSEL_STATES = [MAX_COORD / 2, MAX_COORD / 2, np.pi/2]
+    
 def interval_penalty(value : float, boundaries: tuple[float, float]):
     minimum, maximum = boundaries[0] + EPSILON, boundaries[1] - EPSILON # Penalize values on the edges as well
     if value < minimum:
@@ -47,7 +41,7 @@ def interval_penalty(value : float, boundaries: tuple[float, float]):
     
     
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_radius):
-    if o2RelativeBearingToo1 > MASTHEAD_ANGLE / 2:
+    if o2RelativeBearingToo1 >= MASTHEAD_ANGLE / 2:
         if o2_radius < 12:
             return 2
         elif o2_radius < 20:
@@ -65,4 +59,29 @@ def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_radius):
             return 5
         else:
             return 6
+        
+def heading(v):
+    # Calculate the angle in radians
+    return np.arctan2(v[1], v[0])
+
+def vector_angle_diff(v, angle):
+    return angle_angle_diff(heading(v), angle)
+
+def angle_angle_diff(angle1, angle2):
+    return min(abs(angle1-angle2), abs(angle2-angle1))
+
+
+
+# Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.
+
+# Encounter/Safety Condition                      | Own Domain Not Violated | Target's Domain Not Violated | Neither Domain is Violated | Domains Not Overlapping
+# ---------------------------------------------------------------------------------------------------------------------------
+# Head-on (port to a target)                      | 1.75L1 - 0.5B1          | 1.75L2 - 0.5B2               | 1.75L2 - 0.5B2             | 1.75L1 - 0.5B1 + 1.75L2 - 0.5B2
+# Head-on (starboard to a target)                 | 3.25L1 - 0.5B1          | 3.25L2 - 0.5B2               | 3.25L2 - 0.5B2             | 3.25L1 - 0.5B1 + 3.25L2 - 0.5B2
+# Crossing ahead of a target on starboard         | 3.25L1 - 0.5B1          | 6.1L2 - 0.5L2                | 6.1L2 - 0.5L2              | 3.25L1 - 0.5B1 + 6.1L2 - 0.5L2
+# Crossing astern of a target from starboard      | 1.75L1 - 0.5B1          | 3.9L2 - 0.5L2                | 3.9L2 - 0.5L2              | 1.75L1 - 0.5B1 + 3.9L2 - 0.5L2
+# Crossing ahead of a target on port              | 1.75L1 - 0.5B1          | 6.1L2 - 0.5L2                | 6.1L2 - 0.5L2              | 1.75L1 - 0.5B1 + 6.1L2 - 0.5L2
+# Crossing astern of a target from port           | 3.25L1 - 0.5B1          | 3.9L2 - 0.5L2                | 3.9L2 - 0.5L2              | 3.25L1 - 0.5B1 + 3.9L2 - 0.5L2
+# Overtaking (port to a target or starboard)      | 1.75L1 - 0.5B1          | 1.75L2 - 0.5B2               | 1.75L2 - 0.5B2             | 1.75L1 - 0.5B1 + 1.75L2 - 0.5B2
+
 

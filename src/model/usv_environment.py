@@ -1,6 +1,8 @@
 import math
-from model.random_instance_initializer import RandomInstanceInitializer
+from model.instance_initializer import RandomInstanceInitializer, DeterministicInitializer
 from model.usv_environment_desc import USVEnvironmentDesc
+from model.usv_config import OWN_VESSEL_STATES, VARIABLE_NUM
+
 
 class USVEnvironment():
     def __init__(self, env_config : USVEnvironmentDesc) -> None:
@@ -8,11 +10,20 @@ class USVEnvironment():
         self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
         self.vessels, self.colreg_situations = self.initializer.get_one_population_as_objects()
         
+        self.smallest_ship = min(self.vessels, key=lambda v: v.l)
+        self.largest_ship = max(self.vessels, key=lambda v: v.l)
+        
     def update(self, states : list[float]):
-        if len(states) != len(self.vessels) * 4:
+        if len(states) != self.config.all_variable_num:
             raise Exception("the variable number is insufficient.")
-        for i in range(len(self.vessels)):
-            self.vessels[i].update(states[i * 4], states[i * 4 + 1], states[i * 4 + 2], states[i * 4 + 3])
+        
+        states = OWN_VESSEL_STATES + states
+        for vessel in self.vessels:
+            vessel.update(states[vessel.id * VARIABLE_NUM],
+                                states[vessel.id * VARIABLE_NUM + 1],
+                                states[vessel.id * VARIABLE_NUM + 2],
+                                states[vessel.id * VARIABLE_NUM + 3])
+            
         for colreg_situation in self.colreg_situations:
             colreg_situation.update()
             

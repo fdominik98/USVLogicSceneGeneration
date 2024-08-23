@@ -1,9 +1,17 @@
 from model.usv_environment import USVEnvironment
 from abc import ABC, abstractmethod
-from model.usv_config import CONSTRAINT_NUMBER, interval_penalty
-
+from model.usv_config import CONSTRAINT_NUMBER, MIN_SPEED, interval_penalty
+import numpy as np
 
 class Aggregate(ABC):
+    
+    precedence = [
+        1,
+        1,
+        10e6,
+        10e6
+    ]
+    
     def __init__(self, env : USVEnvironment, minimize) -> None:
         super().__init__()
         self.env = env
@@ -13,7 +21,7 @@ class Aggregate(ABC):
         self.weights= (-self.sign,) * self.obj_num 
         
     @abstractmethod    
-    def evaluate(self, individual):
+    def evaluate(self, individual : np.ndarray):
         pass
     
     @abstractmethod
@@ -33,8 +41,8 @@ class ConstraintClassAggregate(Aggregate):
     def _get_object_num(self) -> int:
         return int(CONSTRAINT_NUMBER)
     
-    def evaluate(self, individual):
-        self.env.update(individual)
+    def evaluate(self, individual : np.ndarray):
+        self.env.update(individual.tolist())
         
         objectives = [0,] * self.obj_num
         for colreg_sit in self.env.colreg_situations:
@@ -52,7 +60,7 @@ class NoAggregate(Aggregate):
         return int(CONSTRAINT_NUMBER * self.env.config.col_sit_num)
 
     def evaluate(self, individual):
-        self.env.update(individual)
+        self.env.update(individual.tolist())
         objectives : list = []
         
         for colreg_sit in self.env.colreg_situations:
@@ -67,18 +75,14 @@ class VesselAggregate(Aggregate):
     def _get_object_num(self):
         return int(self.env.config.actor_num)
 
-    def evaluate(self, individual):
-        self.env.update(individual)
+    def evaluate(self, individual : np.ndarray):
+        self.env.update(individual.tolist())
         objectives = [0] * self._get_object_num()
       
-        # speed constraints
-        for vessel in self.env.vessels:
-            objectives[vessel.id] += self._get_penalty(interval_penalty(vessel.speed, (vessel.min_speed, vessel.max_speed)))
-            
         for colreg_sit in self.env.colreg_situations:
-            objectives[colreg_sit.vessel1.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2] + colreg_sit.penalties[3])
-            #objectives[colreg_sit.vessel2.id] += self._get_penalty(colreg_sit.penalties[0] + colreg_sit.penalties[1] + colreg_sit.penalties[2] + colreg_sit.penalties[3])
-            objectives[colreg_sit.vessel2.id] += self._get_penalty(colreg_sit.penalties[0])
+            for i, penalty in enumerate(colreg_sit.penalties):
+                objectives[colreg_sit.vessel1.id] += self._get_penalty(penalty * self.precedence[i])
+                objectives[colreg_sit.vessel2.id] += self._get_penalty(penalty * self.precedence[i])
         
         return tuple(objectives)
     
@@ -90,8 +94,8 @@ class AggregateAll(Aggregate):
     def _get_object_num(self) -> int:
         return 1
 
-    def evaluate(self, individual):
-        self.env.update(individual)       
+    def evaluate(self, individual : np.ndarray):
+        self.env.update(individual.tolist())       
         
         fitness = 0.0
         for colreg_sit in self.env.colreg_situations:
@@ -107,5 +111,5 @@ class EulerDistance(Aggregate):
     def _get_object_num(self) -> int:
         return 1
 
-    def evaluate(self, individual):
-        return (self.sign * self.env.evaluate(individual),)
+    def evaluate(self, individual : np.ndarray):
+        return (self.sign * self.env.evaluate(individual.tolist()),)

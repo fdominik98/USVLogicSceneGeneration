@@ -33,7 +33,7 @@ class PyGadAlgorithm(GeneticAlgorithmBase):
                 num_parents_mating=eval_data.num_parents_mating,
                 fitness_func=fitness_func,
                 sol_per_pop=eval_data.population_size,
-                num_genes=self.env_config.variable_num,
+                num_genes=self.env_config.all_variable_num,
                 gene_space=self.generate_gene_space(self.env_config.actor_num),
                 initial_population=initial_population,
                 on_generation=on_generation_func,
