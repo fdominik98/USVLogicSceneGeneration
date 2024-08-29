@@ -1,10 +1,9 @@
 
 from genetic_algorithms.evaluation_data import EvaluationData
-from model.usv_config import *
 from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 from aggregates import VesselAggregate
-from model.usv_config import *
+from model.usv_config import MAX_HEADING, MIN_COORD, MAX_COORD, MIN_HEADING
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -49,13 +48,14 @@ class OptimumTermination(Termination):
 
 
 class BestSolutionCallback(Callback):
-    def __init__(self, verbose : bool):
+    def __init__(self, start_time, verbose : bool):
         super().__init__()
         self.verbose = verbose
         self.best_solution = None
         self.best_objective = None
         self.best_dist = None
         self.number_of_generations = 0
+        self.start_time = start_time
 
     def notify(self, algorithm):
         current_pop = algorithm.pop
@@ -66,7 +66,7 @@ class BestSolutionCallback(Callback):
                 self.best_objective = ind.F
                 self.best_dist = f_dist
                 if self.verbose:
-                    print(f"New best solution found: {ind.X} with objective: {ind.F}")
+                    print(f"{int(time.time() - self.start_time)} - New best solution found: {ind.X} with objective: {ind.F}")
         self.number_of_generations += 1
 
 class PyMooAlgorithm(GeneticAlgorithmBase):
@@ -84,10 +84,10 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
             class MyProblem(ElementwiseProblem):
                 def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate):
                     self.aggregate = aggregate
-                    xl = [MIN_SPEED]
+                    xl = [env_config.vessel_descs[0].min_speed]
                     xu = [env_config.vessel_descs[0].max_speed]
                     for vessel_desc in env_config.vessel_descs[1:]:
-                        xl += [MIN_COORD, MIN_COORD, MIN_HEADING, MIN_SPEED]
+                        xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
                         xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
                     super().__init__(n_var=env_config.all_variable_num,  # Number of decision variables
                                     n_obj=aggregate.obj_num,  # Number of objective functions
@@ -107,7 +107,7 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
                               crossover=SBX(eta=eval_data.crossover_eta, prob=eval_data.crossover_prob,),
                               mutation=PM(eta=eval_data.mutate_eta, prob=eval_data.mutate_prob), sampling=initial_population,)
 
-            callback = BestSolutionCallback(self.verbose)
+            callback = BestSolutionCallback(time.time(), self.verbose)
             #termination=("n_gen", eval_data.number_of_generations),
             termination = OptimumTermination(time.time(), self.runtime, self.verbose)
             return problem, algorithm, callback, termination

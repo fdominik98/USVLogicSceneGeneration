@@ -7,7 +7,8 @@ from model.colreg_situation import NoColreg
 import matplotlib.image as mpimg
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 from scipy.ndimage import rotate
-from visualization.detailed_angle_circle_component import DetailedAngleCircleComponent
+from visualization.prime_component import PrimeComponent
+from visualization.centered_angle_circle_component import CenteredAngleCircleComponent
 from visualization.ship_markings_component import ShipMarkingsComponent
 from visualization.angle_circle_component import AngleCircleComponent
 from visualization.distance_component import DistanceComponent
@@ -35,9 +36,10 @@ class ColregPlot():
         self.vo_cone_component = VOConeComponent(self.ax, False, self.env)
         self.additional_vo_cone_component = AdditionalVOConeComponent(self.ax, False, self.env)
         self.distance_component = DistanceComponent(self.ax, True, self.env)
-        self.angle_circle_component = AngleCircleComponent(self.ax, True, self.env, linewidth=2.0)
-        self.detailed_angle_circle_component = DetailedAngleCircleComponent(self.ax, True, self.env)
+        self.angle_circle_component = AngleCircleComponent(self.ax, True, self.env, linewidth=1.5)
+        self.detailed_angle_circle_component = CenteredAngleCircleComponent(self.ax, True, self.env, center_vessel_id=0)
         self.ship_markings_component = ShipMarkingsComponent(self.ax, True, self.env)
+        self.prime_component = PrimeComponent(self.ax, False, self.env)
         
         
         self.image = mpimg.imread(f'{img_dir}/ship2.png')
@@ -55,8 +57,9 @@ class ColregPlot():
         self.vo_cone_component.draw(-1)
         self.additional_vo_cone_component.draw(-2)
         self.distance_component.draw(-3)
-        self.angle_circle_component.draw(-4)
-        self.detailed_angle_circle_component.draw(-4)
+        self.angle_circle_component.draw(-20)
+        self.detailed_angle_circle_component.draw(-20)
+        self.prime_component.draw(-5)
         
         for colreg_s in self.env.colreg_situations:
             if not isinstance(colreg_s, NoColreg): 
@@ -76,7 +79,7 @@ class ColregPlot():
         for o in self.env.vessels:
             # Rotate and plot image
             rotated_image = rotate(self.image, np.degrees(o.heading)-90, reshape=True)
-            imagebox = OffsetImage(rotated_image, zoom = 0.35, alpha=0.9)
+            imagebox = OffsetImage(rotated_image, zoom = 0.3, alpha=0.9)
             ab = AnnotationBbox(imagebox, o.p, frameon = False, zorder=-4)
             self.ax.add_artist(ab)
                         
@@ -108,11 +111,11 @@ class ColregPlot():
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
         # Define a padding percentage (e.g., 5% of the range)
-        x_padding = (x_max - x_min) * 0.02
-        y_padding = (y_max - y_min) * 0.02
+        x_padding = (x_max - x_min) * 0.03
+        y_padding = (y_max - y_min) * 0.03
         # Set new limits with padding applied
-        self.ax.set_xlim(x_min - x_padding, x_max + x_padding)
-        self.ax.set_ylim(y_min - y_padding, y_max + y_padding)
+        self.ax.set_xlim(x_min + x_padding, x_max - x_padding)
+        self.ax.set_ylim(y_min + y_padding, y_max - y_padding)
         
         
     # Function to toggle the visibility
@@ -136,6 +139,8 @@ class ColregPlot():
             self.angle_circle_component.toggle()
         elif event.key == '7':
             self.detailed_angle_circle_component.toggle()
+        elif event.key == '8':
+            self.prime_component.toggle()
         self.fig.canvas.draw()    
         
         

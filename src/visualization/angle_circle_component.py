@@ -1,33 +1,31 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
-from model.usv_config import HEAD_ON_ANGLE, MAX_COORD, OVERTAKE_ANGLE
+from model.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from model.vessel import Vessel
 from visualization.plot_component import PlotComponent, light_colors
 
 
 class AngleCircleComponent(PlotComponent):
     # Define the angle and radius
-    angle_circle_slice_1 = HEAD_ON_ANGLE  # 20 degree slice
-    angle_circle_slice_2 = OVERTAKE_ANGLE # 140 degree slice
+    angle_circle_slice_1 = BOW_ANGLE  # 20 degree slice
+    angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
     
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment, linewidth=0.8, radius_ratio = 10, only_os=False) -> None:
+    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment, linewidth=0.8, radius_ratio = 10, center_vessel_id=None) -> None:
         super().__init__(ax, initial_visibility, env)
         self.linewidth = linewidth
         self.angle_circle_radius = MAX_COORD / radius_ratio
-        self.only_ego = only_os
+        self.center_vessel_id = center_vessel_id
             
     def do_draw(self, zorder : int):
-        if self.only_ego:
-            self.one_draw(self.env.vessels[0], zorder)
+        if self.center_vessel_id is not None:
+            self.one_draw(self.env.vessels[self.center_vessel_id], zorder, 'black')
         else:
             for o in self.env.vessels:
-                self.one_draw(o, zorder)
+                self.one_draw(o, zorder, light_colors[o.id])
             
     
-    def one_draw(self, o : Vessel,  zorder : int):
-        circle_color = light_colors[o.id]
-
+    def one_draw(self, o : Vessel,  zorder : int, circle_color):
         self.circle = plt.Circle(o.p, self.angle_circle_radius, fill=False, color=circle_color, linewidth=self.linewidth, zorder=zorder)
         self.ax.add_artist(self.circle)
 

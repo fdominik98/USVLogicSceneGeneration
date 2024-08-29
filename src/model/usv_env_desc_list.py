@@ -1,4 +1,4 @@
-from model.colreg_situation import CrossingFromPort, HeadOn, Overtaking
+from model.colreg_situation import CrossingFromPort, HeadOn, NoColreg, Overtaking
 from model.colreg_situation_desc import ColregSituationDesc
 from model.usv_environment_desc import USVEnvironmentDesc
 from model.vessel import VesselDesc
@@ -53,11 +53,15 @@ from model.vessel import VesselDesc
 
 OS = VesselDesc(id=0, l=100, b=30, max_speed=25)
 TS1 = VesselDesc(id=1, l=50, b=18, max_speed=30)
-TS2 = VesselDesc(id=2, l=200, b=30, max_speed=20)
-TS3 = VesselDesc(id=3, l=300, b=40, max_speed=15)
-TS4 = VesselDesc(id=4, l=30, b=8, max_speed=35)
-TS5 = VesselDesc(id=5, l=30, b=10, max_speed=35)
-TS6 = VesselDesc(id=6, l=20, b=7, max_speed=40)
+TS2 = VesselDesc(id=2, l=100, b=30, max_speed=25)
+TS3 = VesselDesc(id=3, l=100, b=40, max_speed=25)
+TS4 = VesselDesc(id=4, l=50, b=8, max_speed=30)
+TS5 = VesselDesc(id=5, l=50, b=10, max_speed=30)
+TS6 = VesselDesc(id=6, l=100, b=7, max_speed=25)
+
+OS_BIG = VesselDesc(id=0, l=1000, b=18, min_speed= 3000, max_speed=5000)
+TS1_BIG = VesselDesc(id=1, l=1000, b=30, min_speed= 3000, max_speed=5000)
+TS2_BIG = VesselDesc(id=2, l=1000, b=30, min_speed= 3000, max_speed=5000)
 
 USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
     'single' : USVEnvironmentDesc('single',
@@ -68,13 +72,29 @@ USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
                                        [OS, TS1],
                                        [ColregSituationDesc(OS, CrossingFromPort, TS1)]),
     
+    'crossing_big' : USVEnvironmentDesc('crossing_big',
+                                       [OS_BIG, TS1_BIG],
+                                       [ColregSituationDesc(OS_BIG, CrossingFromPort, TS1_BIG)]),
+    
+    'nocolreg' : USVEnvironmentDesc('nocolreg',
+                                       [OS_BIG, TS1_BIG],
+                                       [ColregSituationDesc(OS_BIG, NoColreg, TS1_BIG)]),
+    
     'headon' : USVEnvironmentDesc('headon',
                                        [OS, TS1],
                                        [ColregSituationDesc(OS, HeadOn, TS1)]),
     
+    'headon_big' : USVEnvironmentDesc('headon_big',
+                                       [OS_BIG, TS1_BIG],
+                                       [ColregSituationDesc(OS_BIG, HeadOn, TS1_BIG)]),
+    
     'overtaking' : USVEnvironmentDesc('overtaking',
                                        [OS, TS1],
                                        [ColregSituationDesc(OS, Overtaking, TS1)]),
+    
+    'overtaking_big' : USVEnvironmentDesc('overtaking_big',
+                                       [OS_BIG, TS1_BIG],
+                                       [ColregSituationDesc(OS_BIG, Overtaking, TS1_BIG)]),
     
     'overtaking_and_crossing' : USVEnvironmentDesc('overtaking_and_crossing',
                                                      [OS, TS1, TS2],
@@ -100,6 +120,11 @@ USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
                                                 [OS, TS1, TS2],
                                                 [ColregSituationDesc(OS, Overtaking, TS1),
                                                  ColregSituationDesc(TS2, Overtaking, OS)]),
+    
+    'ego_crossing_and_overtaking' : USVEnvironmentDesc('ego_crossing_and_overtaking',
+                                                [OS_BIG, TS1_BIG, TS2_BIG],
+                                                [ColregSituationDesc(OS_BIG, CrossingFromPort, TS1_BIG),
+                                                 ColregSituationDesc(OS_BIG, Overtaking, TS2_BIG)]),
     
     'two_way_overtaking_and_crossing' : USVEnvironmentDesc('two_way_overtaking_and_crossing',
                                                              [OS,TS1, TS2, TS3],
@@ -135,6 +160,14 @@ USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
                                                               ColregSituationDesc(OS, HeadOn, TS5),
                                                               ColregSituationDesc(OS, Overtaking, TS4)]),
     
+    'six_vessel_colreg_scenario2' : USVEnvironmentDesc('six_vessel_colreg_scenario',
+                                                             [OS, TS1, TS2, TS3, TS4, TS5],
+                                                              [ColregSituationDesc(OS, Overtaking, TS1),
+                                                              ColregSituationDesc(OS, HeadOn, TS2),
+                                                              ColregSituationDesc(TS3, CrossingFromPort, OS),
+                                                              ColregSituationDesc(OS, CrossingFromPort, TS5),
+                                                              ColregSituationDesc(TS4, HeadOn, OS)]),
+    
     'seven_vessel_colreg_scenario' : USVEnvironmentDesc('seven_vessel_colreg_scenario',
                                                              [OS, TS1, TS2, TS3, TS4, TS5, TS6],
                                                               [ColregSituationDesc(TS1, CrossingFromPort, OS),
@@ -143,4 +176,13 @@ USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
                                                               ColregSituationDesc(OS, Overtaking, TS6),
                                                               ColregSituationDesc(TS4, Overtaking, OS),
                                                               ColregSituationDesc(OS, HeadOn, TS5)]),
+    
+    'seven_vessel_colreg_scenario2' : USVEnvironmentDesc('seven_vessel_colreg_scenario2',
+                                                             [OS, TS1, TS2, TS3, TS4, TS5, TS6],
+                                                              [ColregSituationDesc(TS3, Overtaking, OS),
+                                                              ColregSituationDesc(TS5, HeadOn, OS),
+                                                              ColregSituationDesc(TS2, CrossingFromPort, OS),
+                                                              ColregSituationDesc(TS4, CrossingFromPort, OS),
+                                                              ColregSituationDesc(TS1, HeadOn, OS),
+                                                              ColregSituationDesc(TS6, Overtaking, OS)]),
 }

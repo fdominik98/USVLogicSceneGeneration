@@ -1,5 +1,5 @@
 import random
-from model.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, MIN_SPEED, OWN_VESSEL_STATES, VARIABLE_NUM
+from model.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
 from model.vessel import Vessel, VesselDesc
 from model.colreg_situation import ColregSituation
 from model.colreg_situation_desc import ColregSituationDesc
@@ -45,12 +45,12 @@ class RandomInstanceInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> list[list[float]]:
         result : list[list[float]] = []
         for i in range(int(pop_size)):
-            population : list[float] = [random.uniform(MIN_SPEED, self.vessel_descs[0].max_speed)]
+            population : list[float] = [random.uniform(self.vessel_descs[0].min_speed, self.vessel_descs[0].max_speed)]
             for vessel_desc in self.vessel_descs[1:]:
                 group = [random.uniform(MIN_COORD, MAX_COORD),
                         random.uniform(MIN_COORD, MAX_COORD),
                         random.uniform(MIN_HEADING, MAX_HEADING),
-                        random.uniform(MIN_SPEED, vessel_desc.max_speed)]
+                        random.uniform(vessel_desc.min_speed, vessel_desc.max_speed)]
                 population.extend(group)
             result.append(population)
         return result  
@@ -62,9 +62,9 @@ class DeterministicInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> list[list[float]]:
         result : list[list[float]] = []
         for i in range(int(pop_size)):
-            population : list[float] = [self.vessel_descs[0].max_speed / 2.0]
+            population : list[float] = [(self.vessel_descs[0].min_speed + self.vessel_descs[0].max_speed) / 2.0]
             for vessel_desc in self.vessel_descs[1:]:
-                group = [MAX_COORD / 2, MAX_COORD / 2, 0, vessel_desc.max_speed / 2]
+                group = [MAX_COORD / 2, MAX_COORD / 2, 0, (vessel_desc.min_speed + vessel_desc.max_speed) / 2]
                 population.extend(group)
             result.append(population)
         return result  

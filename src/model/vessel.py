@@ -1,14 +1,16 @@
 import numpy as np
-from model.usv_config import KNOT_TO_MS_CONVERSION, MAX_COORD
+from model.usv_config import KNOT_TO_MS_CONVERSION
 
 class VesselDesc():
     # r : meter
     # max_speed: knot
-    def __init__(self, id: int, l: float, b: float, max_speed: float) -> None:
+    def __init__(self, id: int, l: float, b: float, max_speed: float, min_speed : float = 1.0) -> None:
         self.id = id
         self.l = l
         self.b = b
         self.max_speed = max_speed * KNOT_TO_MS_CONVERSION
+        self.min_speed = min_speed * KNOT_TO_MS_CONVERSION
+        self.name = r'OS' if self.id == 0 else fr'$TS_{self.id}$'
         
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, VesselDesc) and
@@ -20,7 +22,7 @@ class Vessel():
         self.id = desc.id
         self.l = desc.l
         self.b = desc.b
-        self.max_speed = desc.max_speed
+        self.name = desc.name
         
     def update(self, p_x, p_y, heading, speed):
         self.p = np.array([p_x, p_y])
@@ -30,4 +32,5 @@ class Vessel():
         
     def v_norm(self):
         return self.v / self.speed
+    
  

@@ -13,7 +13,7 @@ plt.boxplot(data, patch_artist=True)
 plt.xticks(list(range(1, len(dp.dfs) + 1)), dp.df_names)
 plt.xlabel('Measurement')
 plt.ylabel('Evaluation Time')
-plt.title('Boxplot of the evaluation time of the measurements each with different random seed')
+plt.title('Boxplot of the evaluation time of the measurements')
 
 # Show the plot
 plt.show()

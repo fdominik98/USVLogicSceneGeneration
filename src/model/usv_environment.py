@@ -33,7 +33,7 @@ class USVEnvironment():
         self.update(states)
         penalties = []
         for colreg_situation in self.colreg_situations: 
-            penalties += colreg_situation.penalties
+            penalties += colreg_situation.penalties()[1]
         return self.euler_distance(penalties)
         
     @staticmethod  
