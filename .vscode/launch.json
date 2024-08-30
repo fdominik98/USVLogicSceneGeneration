@@ -5,10 +5,24 @@
     "version": "0.2.0",
     "configurations": [   
         {
+            "name": "scenario_viewer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scenario_viewer.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "test pymoo",
             "type": "debugpy",
             "request": "launch",
             "program": "src/test_pymoo.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "trajectory_generator",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/trajectory_generator.py",
             "console": "integratedTerminal"
         }, 
         {
@@ -46,19 +60,5 @@
             "program": "src/eval_time_vis.py",
             "console": "integratedTerminal"
         },
-        {
-            "name": "Dreal script",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "src/dreal_script.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "PYMC script",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "pymc_script.py",
-            "console": "integratedTerminal"
-        }
     ]
 }

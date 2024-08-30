@@ -31,7 +31,7 @@ VARIABLE_NUM = 4
 OWN_VESSEL_STATES = [MAX_COORD / 2, MAX_COORD / 2, np.pi/2]
     
 def interval_distance(value : float, boundaries: tuple[float, float], is_angle=True) -> tuple[float, float]:
-    minimum, maximum = boundaries[0] + EPSILON, boundaries[1] - EPSILON # Penalize values on the edges as well
+    minimum, maximum = boundaries[0], boundaries[1] 
     if value < minimum:
         distance =  minimum - value
     elif value > maximum:

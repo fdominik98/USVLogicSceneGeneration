@@ -38,7 +38,7 @@ class VesselAggregate(Aggregate):
         objectives = [0] * self._get_object_num()
       
         for colreg_sit in self.env.colreg_situations:
-            for penalty, normed_penalty in colreg_sit.penalties():
+            for penalty, normed_penalty in colreg_sit.strict_penalties():
                 objectives[colreg_sit.vessel1.id] += self._get_penalty(normed_penalty)
                 objectives[colreg_sit.vessel2.id] += self._get_penalty(normed_penalty)
         

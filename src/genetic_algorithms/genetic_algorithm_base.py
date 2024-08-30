@@ -52,7 +52,7 @@ class GeneticAlgorithmBase(ABC):
             eval_data = EvaluationData(algorithm_desc = self.algorithm_desc, config_name = self.config_name, random_seed = random_seed, 
                                     number_of_generations = number_of_generations, population_size = population_size, num_parents_mating = num_parents_mating,
                                     mutate_eta = mutate_eta, mutate_prob = mutate_prob, crossover_eta=crossover_eta, crossover_prob=crossover_prob,
-                                    timestamp=timestamp)
+                                    timestamp=timestamp, measurement_name=self.measurement_name)
             
             self.set_seed(random_seed)
             

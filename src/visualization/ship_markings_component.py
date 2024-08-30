@@ -9,7 +9,10 @@ class ShipMarkingsComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
         self.radius_visibility = True
-        self.radius_graphs : list[plt.Artist] = []
+        self.radius_graphs : list[plt.Circle] = []
+        self.velocitiy_graphs : list[plt.Quiver] = []
+        self.ship_dot_graphs : list[plt.PathCollection] = []
+        
             
     def do_draw(self, zorder : int):
         for o in self.env.vessels:
@@ -17,21 +20,25 @@ class ShipMarkingsComponent(PlotComponent):
             #name_text = self.ax.text(o.p[0] + o.l, o.p[1] + o.l, name, color=colors[o.id], fontweight='bold', zorder=zorder)
             
             #Plot the positions and radius as circles
-            radius_circle = plt.Circle(o.p, o.l, color=colors[o.id], fill=False, linestyle='--', label=f'{o.name} Radius: {o.l}m', zorder=zorder)
+            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o.name} Radius: {o.r}m', zorder=zorder)
             self.ax.add_artist(radius_circle)
             self.radius_graphs.append(radius_circle)
 
             angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
             speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
+            velocity_label =f'{o.name} Velocity: {angle}, {speed}'
             # Plot the velocity vector with their actual lengths
-            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=f'{o.name} Velocity: {angle}, {speed}', zorder=zorder-10)
-
-            # Plot the positions
-            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=100, label=f'{o.name} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})', zorder=zorder)
+            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=velocity_label, zorder=zorder-10)
+            self.velocitiy_graphs.append(ship_vel)
             
+            # Plot the positions
+            dot_label = f'{o.name} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
+            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=100, label=dot_label, zorder=zorder)
+            self.ship_dot_graphs.append(ship_dot)
             #self.graphs += [name_text, radius_circle, ship_vel, ship_dot]
-            self.graphs += [ship_vel, ship_dot]
-        self.refresh_radius_graphs()
+            self.graphs += [radius_circle, ship_vel, ship_dot]
+        self.refresh_visible()
+        
         
     def toggle(self):
         if self.visible and self.radius_visibility:
@@ -41,9 +48,31 @@ class ShipMarkingsComponent(PlotComponent):
         else:
             self.visible = True
             self.radius_visibility = True
-        self.refresh_radius_graphs()
         self.refresh_visible()
-        
-    def refresh_radius_graphs(self):
+            
+    def refresh_visible(self):
         for g in self.radius_graphs:
             g.set_visible(self.radius_visibility)
+        for g in self.ship_dot_graphs:
+            g.set_visible(self.visible)
+        for g in self.velocitiy_graphs:
+            g.set_visible(self.visible)
+        
+             
+    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+        for o in new_env.vessels:
+            self.radius_graphs[o.id].set_center(o.p)
+            self.radius_graphs[o.id].set_radius(o.r)
+            dot_label = f'{o.name} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
+            self.ship_dot_graphs[o.id].set_label(dot_label)
+            self.ship_dot_graphs[o.id].set_offsets([o.p])
+            
+            angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
+            speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
+            velocity_label =f'{o.name} Velocity: {angle}, {speed}'
+            self.velocitiy_graphs[o.id].set_label(velocity_label)
+            self.velocitiy_graphs[o.id].set_offsets(o.p)
+            self.velocitiy_graphs[o.id].set_UVC(o.v[0], o.v[1])
+        return self.graphs
+            
+    

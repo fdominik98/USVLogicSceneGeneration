@@ -7,9 +7,15 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 dp = DataParser()
-df = dp.dfs[0]
+dfs, _ = dp.load_dirs()
+
+if len(dfs) == 0:
+    exit()
+
+df = dfs[0]
+    
 df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
-df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name'])
+df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name'])
 #df_sorted = df_sorted.drop(columns=['actual_number_of_generations'])
 
 df_simple_sorted = df_sorted.drop(columns=['evaluation_time'])

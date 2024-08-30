@@ -10,8 +10,8 @@ class USVEnvironment():
         self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
         self.vessels, self.colreg_situations = self.initializer.get_one_population_as_objects()
         
-        self.smallest_ship = min(self.vessels, key=lambda v: v.l)
-        self.largest_ship = max(self.vessels, key=lambda v: v.l)
+        self.smallest_ship = min(self.vessels, key=lambda v: v.r)
+        self.largest_ship = max(self.vessels, key=lambda v: v.r)
         
     def update(self, states : list[float]):
         if len(states) != self.config.all_variable_num:

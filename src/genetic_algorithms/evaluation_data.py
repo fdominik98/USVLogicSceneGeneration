@@ -19,7 +19,8 @@ class EvaluationData:
                  crossover_eta: Optional[float] = None,
                  crossover_prob: Optional[float] = None,
                  error_message: Optional[str] = None,
-                 timestamp: Optional[str] = None):
+                 timestamp: Optional[str] = None,
+                 measurement_name: Optional[str] = None):  # New attribute
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -36,6 +37,7 @@ class EvaluationData:
         self.crossover_prob = crossover_prob
         self.error_message = error_message
         self.timestamp = timestamp
+        self.measurement_name = measurement_name  # New attribute initialization
 
     def to_dict(self):
         return {
@@ -54,7 +56,8 @@ class EvaluationData:
             "crossover_eta": self.crossover_eta,
             "crossover_prob": self.crossover_prob,
             "error_message": self.error_message,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
+            "measurement_name": self.measurement_name  # Include new attribute in dict
         }
 
     def save_to_json(self, file_path: str):
@@ -79,7 +82,8 @@ class EvaluationData:
             crossover_eta=data.get("crossover_eta"),
             crossover_prob=data.get("crossover_prob"),
             error_message=data.get("error_message"),
-            timestamp=data.get("timestamp")
+            timestamp=data.get("timestamp"),
+            measurement_name=data.get("measurement_name")  # Extract new attribute
         )
         
     @classmethod

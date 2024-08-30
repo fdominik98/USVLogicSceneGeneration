@@ -6,14 +6,15 @@ from model.usv_environment import USVEnvironment
 
 while(True):
     dp = DataParser()
+    dfs, _ = dp.load_dirs()
 
-    if len(dp.dfs) == 0:
+    if len(dfs) == 0:
         exit()
 
-    for df in dp.dfs:
+    for df in dfs:
         df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
         
-        df_best = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name'])
+        df_best = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'measurement_name'])
         #df_best = df_best.drop(columns=['actual_number_of_generations'])
         df_best = df_best.head(45)
 
@@ -74,7 +75,5 @@ while(True):
                     
         # Connect the click event to the function
         fig.canvas.mpl_connect('button_press_event', on_click)
-        
-
         
         plt.show()

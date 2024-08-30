@@ -20,8 +20,7 @@ class VesselDesc():
 class Vessel():
     def __init__(self, desc: VesselDesc):
         self.id = desc.id
-        self.l = desc.l
-        self.b = desc.b
+        self.r = desc.l * 2.0
         self.name = desc.name
         
     def update(self, p_x, p_y, heading, speed):

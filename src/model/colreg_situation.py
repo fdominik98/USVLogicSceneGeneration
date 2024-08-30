@@ -1,16 +1,15 @@
 from model.usv_config import (DIST_DRIFT, EPSILON, BOW_ANGLE, BEAM_ANGLE, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, STERN_ANGLE,
-                              CONSTRAINT_NUMBER, angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_distance, vector_angle_diff)
+                              angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_distance, vector_angle_diff)
 from model.vessel import Vessel
 import numpy as np
 from abc import ABC, abstractmethod
-import sys
 
 class ColregSituation(ABC):
     def __init__(self, name, vessel1 : Vessel, vessel2 : Vessel) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.name = name
-        self.safety_dist = vessel1.l + vessel2.l  
+        self.safety_dist = vessel1.r + vessel2.r  
         self.update()
         
     def update(self):
@@ -28,8 +27,8 @@ class ColregSituation(ABC):
         
         self.angle_p12_v1 = angle_angle_diff(self.p12_heading, self.vessel1.heading)
         
-        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.l),
-                           o2VisibilityByo1(self.angle_p21_v2, self.vessel2.l)) *  N_MILE_TO_M_CONVERSION
+        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.r),
+                           o2VisibilityByo1(self.angle_p21_v2, self.vessel2.r)) *  N_MILE_TO_M_CONVERSION
         self.vo_computes()
         
     @abstractmethod

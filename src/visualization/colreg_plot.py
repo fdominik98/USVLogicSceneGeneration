@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
-import os
 from model.colreg_situation import NoColreg
-import matplotlib.image as mpimg
-from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
-from scipy.ndimage import rotate
+from visualization.legend_component import LegendComponent
+from visualization.colreg_animation import ColregAnimation
+from visualization.ship_image_component import ShipImageComponent
+from visualization.plot_component import PlotComponent
 from visualization.prime_component import PrimeComponent
 from visualization.centered_angle_circle_component import CenteredAngleCircleComponent
 from visualization.ship_markings_component import ShipMarkingsComponent
@@ -15,22 +14,13 @@ from visualization.distance_component import DistanceComponent
 from visualization.vo_cone_component import VOConeComponent
 from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
-import matplotlib.gridspec as gridspec
-
-script_path = os.path.abspath(__file__)
-current_dir = os.path.dirname(script_path)
-img_dir = f'{current_dir}/../../assets/images'
-
 class ColregPlot():  
-    
-    def __init__(self, env : USVEnvironment): 
-        self.env = env
-        self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 0])
+    def __init__(self, env : USVEnvironment, block=True): 
+        self.env = env        
         self.fig = plt.figure(figsize=(10,10)) 
-        self.ax = self.fig.add_subplot(self.gs[0])
-        self.lax = self.fig.add_subplot(self.gs[1])
+        self.ax = self.fig.add_subplot()
            
-        self.legend_visible = True
+        self.block = block
         self.axis_visible = True
         
         self.vo_cone_component = VOConeComponent(self.ax, False, self.env)
@@ -40,19 +30,31 @@ class ColregPlot():
         self.detailed_angle_circle_component = CenteredAngleCircleComponent(self.ax, True, self.env, center_vessel_id=0)
         self.ship_markings_component = ShipMarkingsComponent(self.ax, True, self.env)
         self.prime_component = PrimeComponent(self.ax, False, self.env)
+        self.ship_image_component = ShipImageComponent(self.ax, True, self.env)
+        self.legend_component = LegendComponent(self.ax, True, self.env)
         
-        
-        self.image = mpimg.imread(f'{img_dir}/ship2.png')
-        #self.image = self.convert_non_white_to_gray(self.image)
+        self.components : list[PlotComponent] = [
+            self.vo_cone_component,
+            self.additional_vo_cone_component,
+            self.distance_component,
+            self.angle_circle_component,
+            self.detailed_angle_circle_component,
+            self.ship_markings_component,
+            self.prime_component,
+            self.ship_image_component,
+            self.legend_component
+        ]
         
         self.draw()   
         
-    def draw(self):
-        # Create the plot            
-        self.title = ''
-        i = 0
-        self.min_distances : dict[int, float]= {}
+        self.animation = ColregAnimation(self.fig, self.env, self.components)
+        # Connect the key press event to the toggle function
+        self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
+        self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
+        plt.show(block=self.block)
         
+        
+    def draw(self):
         self.ship_markings_component.draw(0)
         self.vo_cone_component.draw(-1)
         self.additional_vo_cone_component.draw(-2)
@@ -60,43 +62,25 @@ class ColregPlot():
         self.angle_circle_component.draw(-20)
         self.detailed_angle_circle_component.draw(-20)
         self.prime_component.draw(-5)
+        self.ship_image_component.draw(-4)
+        self.legend_component.draw(0)
         
+        self.title = ''
+        i = 0
         for colreg_s in self.env.colreg_situations:
             if not isinstance(colreg_s, NoColreg): 
                 line_break = '\n' if (i + 1) % 3 == 0 else ' '
                 self.title = colreg_s.name if not self.title else f'{self.title},{line_break}{colreg_s.name}'
                 i += 1
-            o1 = colreg_s.vessel1
-            o2 = colreg_s.vessel2
-            
-            if o1.id not in self.min_distances or self.min_distances[o1.id] > colreg_s.o_distance:
-                self.min_distances[o1.id] = colreg_s.o_distance
-            if o2.id not in self.min_distances or self.min_distances[o2.id] > colreg_s.o_distance:
-                self.min_distances[o2.id] = colreg_s.o_distance
-            
-            colreg_s.info()            
-            
-        for o in self.env.vessels:
-            # Rotate and plot image
-            rotated_image = rotate(self.image, np.degrees(o.heading)-90, reshape=True)
-            imagebox = OffsetImage(rotated_image, zoom = 0.3, alpha=0.9)
-            ab = AnnotationBbox(imagebox, o.p, frameon = False, zorder=-4)
-            self.ax.add_artist(ab)
+            colreg_s.info()                       
                         
-        self.set_layout()        
-
-        # Connect the key press event to the toggle function
-        self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
-
-        plt.show(block=True)
+        self.set_layout()    
+        
         
     def set_layout(self):
         self.fig.tight_layout(pad=5)
         self.ax.grid(False)
-        h, l = self.ax.get_legend_handles_labels()
-        self.lax.legend(h, l, loc=7)
-        self.lax.axis("off")
-
+       
         self.ax.set_title(f'USV situation ({self.title})')
         self.ax.set_xlabel('X Position (m)')
         self.ax.set_ylabel('Y Position (m)')
@@ -104,7 +88,6 @@ class ColregPlot():
            
         # Recalculate the limits based on the current data     
         self.ax.relim()
-
         # Automatically adjust xlim and ylim
         self.ax.autoscale_view()
         # Get current x and y limits
@@ -121,8 +104,7 @@ class ColregPlot():
     # Function to toggle the visibility
     def toggle_visibility(self, event):
         if event.key == '0':
-            self.legend_visible = not self.legend_visible
-            self.lax.set_visible(self.legend_visible)
+            self.legend_component.toggle()
         elif event.key == '1':
             self.distance_component.toggle()
         elif event.key == '2':
@@ -143,21 +125,3 @@ class ColregPlot():
             self.prime_component.toggle()
         self.fig.canvas.draw()    
         
-        
-    def convert_non_white_to_gray(self, image, alpha=255):
-        # Create a copy of the image to modify
-        gray_image = image.copy()
-        
-        # Define the gray color with an alpha channel
-        gray_color = np.array([128, 128, 128, alpha])  # RGBA value for gray (255 is full opacity)
-        
-        # Identify non-white pixels (assuming white is [255, 255, 255, 255] in RGBA)
-        non_white_pixels = np.all(image[:, :, :3] != [255, 255, 255], axis=-1)
-        
-        # Assign gray color to non-white pixels, preserving the alpha channel
-        gray_image[non_white_pixels, :3] = gray_color[:3]
-        # Optionally, you can set the alpha channel to a specific value as well
-        gray_image[non_white_pixels, 3] = gray_color[3]
-        return gray_image
-        
-                

@@ -30,4 +30,10 @@ class PlotComponent(ABC):
     @abstractmethod  
     def do_draw(self, zorder : int):
         pass
-        
+    
+    @abstractmethod
+    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+        pass        
+    
+    def reset(self) -> list[plt.Artist]:
+        return self.update(self.env)
