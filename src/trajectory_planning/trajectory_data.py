@@ -1,22 +1,23 @@
 import json
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 class TrajectoryData:
     def __init__(self, 
-                 algorithm_desc: str,
-                 env_path: str,
-                 config_name: str,
-                 random_seed: int,
-                 max_iter: int,
-                 goal_sample_rate: float,
-                 expand_distance: float,
-                 timestamp: str,
-                 measurement_name: str,
-                 path: str,
-                 iter_number: Optional[int] = None,  # Can exceed max_iter
+                 algorithm_desc: Optional[str] = None,
+                 env_path: Optional[str] = None,
+                 config_name: Optional[str] = None,
+                 random_seed: Optional[int] = None,
+                 max_iter: Optional[int] = None,
+                 goal_sample_rate: Optional[float] = None,
+                 expand_distance: Optional[float] = None,
+                 timestamp: Optional[str] = None,
+                 measurement_name: Optional[str] = None,
+                 path: Optional[str] = None,
+                 iter_numbers: Optional[Dict[str, Tuple[float, float]]] = None,
                  error_message: Optional[str] = None,
-                 evaluation_time: Optional[float] = None,
-                 trajectories: Optional[List[Tuple[float, float, float, float]]] = None):
+                 rrt_evaluation_times: Optional[Dict[str, Tuple[float, float]]] = None,
+                 overall_eval_time: Optional[float] = None,
+                 trajectories: Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None):
         self.algorithm_desc = algorithm_desc
         self.env_path = env_path
         self.config_name = config_name
@@ -27,12 +28,13 @@ class TrajectoryData:
         self.timestamp = timestamp
         self.measurement_name = measurement_name
         self.path = path
-        self.iter_number = iter_number
+        self.iter_numbers = iter_numbers or {}
         self.error_message = error_message
-        self.evaluation_time = evaluation_time
-        self.trajectories = trajectories or []
+        self.overall_eval_time = overall_eval_time
+        self.trajectories = trajectories or {}
+        self.rrt_evaluation_times = rrt_evaluation_times or {}
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "algorithm_desc": self.algorithm_desc,
             "env_path": self.env_path,
@@ -44,10 +46,11 @@ class TrajectoryData:
             "timestamp": self.timestamp,
             "measurement_name": self.measurement_name,
             "path": self.path,
-            "iter_number": self.iter_number,
+            "iter_numbers": self.iter_numbers,
             "error_message": self.error_message,
-            "evaluation_time": self.evaluation_time,
+            "overall_eval_time": self.overall_eval_time,
             "trajectories": self.trajectories,
+            "rrt_evaluation_times" : self.rrt_evaluation_times
         }
 
     def save_to_json(self, file_path: str):
@@ -57,20 +60,21 @@ class TrajectoryData:
     @classmethod
     def from_dict(cls, data: dict):
         return cls(
-            algorithm_desc=data["algorithm_desc"],
-            env_path=data["env_path"],
-            config_name=data["config_name"],
-            random_seed=data["random_seed"],
-            max_iter=data["max_iter"],
-            goal_sample_rate=data["goal_sample_rate"],
-            expand_distance=data["expand_distance"],
-            timestamp=data["timestamp"],
-            measurement_name=data["measurement_name"],
-            path=data["path"],
-            iter_number=data.get("iter_number"),
+            algorithm_desc=data.get("algorithm_desc"),
+            env_path=data.get("env_path"),
+            config_name=data.get("config_name"),
+            random_seed=data.get("random_seed"),
+            max_iter=data.get("max_iter"),
+            goal_sample_rate=data.get("goal_sample_rate"),
+            expand_distance=data.get("expand_distance"),
+            timestamp=data.get("timestamp"),
+            measurement_name=data.get("measurement_name"),
+            path=data.get("path"),
+            iter_numbers=data.get("iter_numbers", []),
             error_message=data.get("error_message"),
-            evaluation_time=data.get("evaluation_time"),
-            trajectories=data.get("trajectories", [])
+            overall_eval_time=data.get("overall_eval_time"),
+            trajectories=data.get("trajectories", {}),
+            rrt_evaluation_times=data.get("rrt_evaluation_times", [])
         )
         
     @classmethod

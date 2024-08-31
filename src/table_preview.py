@@ -1,11 +1,11 @@
 from visualization.colreg_plot import ColregPlot
-from visualization.data_parser import DataParser
+from visualization.data_parser import EvalDataParser
 import matplotlib.pyplot as plt
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.usv_environment import USVEnvironment
 
 while(True):
-    dp = DataParser()
+    dp = EvalDataParser()
     dfs, _ = dp.load_dirs()
 
     if len(dfs) == 0:
@@ -14,7 +14,7 @@ while(True):
     for df in dfs:
         df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
         
-        df_best = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'measurement_name'])
+        df_best = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'measurement_name', 'path'])
         #df_best = df_best.drop(columns=['actual_number_of_generations'])
         df_best = df_best.head(45)
 

@@ -104,10 +104,11 @@ class RRTStarFND():
         self.goalSampleRate = goalSampleRate
         self.maxIter = maxIter
         self.obstacleList : list[Obstacle] = obstacleList
+        self.current_i = 0
 
-    def do_plan(self, animation : bool, current_i) -> Optional[list[np.ndarray]]:
-        for i in range(current_i, self.maxIter):
-            print(i)
+    def do_plan(self, animation : bool) -> Optional[list[np.ndarray]]:
+        while self.current_i < self.maxIter:
+            print(self.current_i)
 
             rnd = self.get_random_point()
             nind = self.GetNearestListIndex(rnd) # get nearest node index to random point
@@ -117,9 +118,9 @@ class RRTStarFND():
 
                 nearinds = self.find_near_nodes(newNode, 5) # find nearest nodes to newNode
                 newNode = self.choose_parent(newNode, nearinds) # from that nearest nodes find the best parent to newNode
-                self.nodeList[i+100] = newNode # add newNode to nodeList
-                self.rewire(i+100, newNode, nearinds) # make newNode a parent of another node if necessary
-                self.nodeList[newNode.parent].children.add(i+100)
+                self.nodeList[self.current_i + 100] = newNode # add newNode to nodeList
+                self.rewire(self.current_i + 100, newNode, nearinds) # make newNode a parent of another node if necessary
+                self.nodeList[newNode.parent].children.add(self.current_i + 100)
 
                 if len(self.nodeList) > self.maxIter:
                     leaves = [ key for key, node in self.nodeList.items() if len(node.children) == 0 and len(self.nodeList[node.parent].children) > 1 ]
@@ -133,7 +134,7 @@ class RRTStarFND():
                         self.nodeList[self.nodeList[ind].parent].children.discard(ind)
                         self.nodeList.pop(ind)
 
-            if animation and i % 25 == 0:
+            if animation and self.current_i % 25 == 0:
                 self.DrawGraph(rnd)
 
             for e in pygame.event.get():
@@ -145,6 +146,8 @@ class RRTStarFND():
                         self.end.p[0] = e.pos[0]
                         self.end.p[1] = e.pos[1]
                         self.path_validation()
+                        
+            self.current_i += 1
                         
         # generate coruse
         lastIndex = self.get_best_last_index()
@@ -161,11 +164,9 @@ class RRTStarFND():
         """
         self.nodeList = {0 : self.start}
         path = None
-        current_i = 0
         while(path is None):
-            path = self.do_plan(animation, current_i)
+            path = self.do_plan(animation)
             if path is None:
-                current_i = self.maxIter
                 self.maxIter += 100
                 print("No solution repeating for 100 more iterations.")
         path.reverse()

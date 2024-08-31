@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from visualization.data_parser import DataParser
+from visualization.data_parser import EvalDataParser
 
-dp = DataParser()
+dp = EvalDataParser()
 
 dfs, df_names = dp.load_dirs()
 

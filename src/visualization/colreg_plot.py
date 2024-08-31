@@ -1,3 +1,4 @@
+from typing import Optional
 import matplotlib.pyplot as plt
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
@@ -15,7 +16,8 @@ from visualization.vo_cone_component import VOConeComponent
 from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
 class ColregPlot():  
-    def __init__(self, env : USVEnvironment, block=True): 
+    def __init__(self, env : USVEnvironment, block=True, 
+                 trajectories : Optional[dict[int, list[tuple[float, float, float, float]]]] = None): 
         self.env = env        
         self.fig = plt.figure(figsize=(10,10)) 
         self.ax = self.fig.add_subplot()
@@ -47,7 +49,7 @@ class ColregPlot():
         
         self.draw()   
         
-        self.animation = ColregAnimation(self.fig, self.env, self.components)
+        self.animation = ColregAnimation(self.fig, self.ax, self.env, self.components, trajectories)
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
@@ -84,21 +86,22 @@ class ColregPlot():
         self.ax.set_title(f'USV situation ({self.title})')
         self.ax.set_xlabel('X Position (m)')
         self.ax.set_ylabel('Y Position (m)')
-        self.ax.set_aspect('equal', adjustable='box')                  
-           
+        self.ax.set_aspect('equal', adjustable='box')      
+        
         # Recalculate the limits based on the current data     
         self.ax.relim()
         # Automatically adjust xlim and ylim
-        self.ax.autoscale_view()
-        # Get current x and y limits
-        x_min, x_max = self.ax.get_xlim()
-        y_min, y_max = self.ax.get_ylim()
-        # Define a padding percentage (e.g., 5% of the range)
-        x_padding = (x_max - x_min) * 0.03
-        y_padding = (y_max - y_min) * 0.03
-        # Set new limits with padding applied
-        self.ax.set_xlim(x_min + x_padding, x_max - x_padding)
-        self.ax.set_ylim(y_min + y_padding, y_max - y_padding)
+        self.ax.autoscale_view(tight=True)
+        # # Get current x and y limits
+        # x_min, x_max = self.ax.get_xlim()
+        # y_min, y_max = self.ax.get_ylim()
+        # # Define a padding percentage (e.g., 5% of the range)
+        # x_padding = (x_max - x_min) * 0.03
+        # y_padding = (y_max - y_min) * 0.03
+        # # Set new limits with padding applied
+        # self.ax.set_xlim(x_min + x_padding, x_max - x_padding)
+        # self.ax.set_ylim(y_min + y_padding, y_max - y_padding)      
+           
         
         
     # Function to toggle the visibility

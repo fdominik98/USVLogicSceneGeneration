@@ -10,7 +10,7 @@ class LegendComponent(PlotComponent):
     def do_draw(self, zorder : int):
         self.legend = self.ax.legend(loc=7)
         self.graphs = [self.legend]
-            
+        
     def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         if self.visible:
             self.legend.remove()

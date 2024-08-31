@@ -1,25 +1,26 @@
 import json
-from typing import Optional
+from typing import Optional, List
 
 class EvaluationData:
-    def __init__(self, algorithm_desc: str,
-                 config_name: str,
-                 random_seed: int,
+    def __init__(self, 
+                 algorithm_desc: Optional[str] = None,
+                 config_name: Optional[str] = None,
+                 random_seed: Optional[int] = None,
                  evaluation_time: Optional[float] = None,
                  number_of_generations: Optional[int] = None,
                  actual_number_of_generations: Optional[int] = None,
                  population_size: Optional[int] = None,
                  num_parents_mating: Optional[int] = None,
-                 best_solution: Optional[list[float]] = None,
-                 best_fitness: Optional[list[float]] = None,
+                 best_solution: Optional[List[float]] = None,
+                 best_fitness: Optional[List[float]] = None,
                  mutate_eta: Optional[float] = None,
                  mutate_prob: Optional[float] = None,
                  crossover_eta: Optional[float] = None,
                  crossover_prob: Optional[float] = None,
                  error_message: Optional[str] = None,
                  timestamp: Optional[str] = None,
-                 measurement_name: Optional[str] = None,  # New attribute
-                 path: Optional[str] = None):  # New attribute
+                 measurement_name: Optional[str] = None,
+                 path: Optional[str] = None):
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -36,8 +37,8 @@ class EvaluationData:
         self.crossover_prob = crossover_prob
         self.error_message = error_message
         self.timestamp = timestamp
-        self.measurement_name = measurement_name  # New attribute initialization
-        self.path = path  # New attribute initialization
+        self.measurement_name = measurement_name
+        self.path = path
 
     def to_dict(self):
         return {
@@ -57,8 +58,8 @@ class EvaluationData:
             "crossover_prob": self.crossover_prob,
             "error_message": self.error_message,
             "timestamp": self.timestamp,
-            "measurement_name": self.measurement_name,  # Include new attribute in dict
-            "path": self.path  # Include new attribute in dict
+            "measurement_name": self.measurement_name,
+            "path": self.path
         }
 
     def save_to_json(self, file_path: str):
@@ -68,9 +69,9 @@ class EvaluationData:
     @classmethod
     def from_dict(cls, data: dict):
         return cls(
-            algorithm_desc=data["algorithm_desc"],
-            config_name=data["config_name"],
-            random_seed=data["random_seed"],
+            algorithm_desc=data.get("algorithm_desc"),
+            config_name=data.get("config_name"),
+            random_seed=data.get("random_seed"),
             evaluation_time=data.get("evaluation_time"),
             number_of_generations=data.get("number_of_generations"),
             actual_number_of_generations=data.get("actual_number_of_generations"),
@@ -84,8 +85,8 @@ class EvaluationData:
             crossover_prob=data.get("crossover_prob"),
             error_message=data.get("error_message"),
             timestamp=data.get("timestamp"),
-            measurement_name=data.get("measurement_name"),  # Extract new attribute
-            path=data.get("path")  # Extract new attribute
+            measurement_name=data.get("measurement_name"),
+            path=data.get("path")
         )
         
     @classmethod

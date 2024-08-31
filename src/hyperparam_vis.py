@@ -1,4 +1,4 @@
-from visualization.data_parser import DataParser
+from visualization.data_parser import EvalDataParser
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -6,7 +6,7 @@ from pandas.plotting import parallel_coordinates
 from mpl_toolkits.mplot3d import Axes3D
 
 
-dp = DataParser()
+dp = EvalDataParser()
 dfs, _ = dp.load_dirs()
 
 if len(dfs) == 0:
@@ -15,7 +15,7 @@ if len(dfs) == 0:
 df = dfs[0]
     
 df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
-df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name'])
+df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name', 'path'])
 #df_sorted = df_sorted.drop(columns=['actual_number_of_generations'])
 
 df_simple_sorted = df_sorted.drop(columns=['evaluation_time'])
