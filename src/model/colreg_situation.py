@@ -39,6 +39,14 @@ class ColregSituation(ABC):
     def strict_penalties(self) -> list[tuple[float, float]]:
         pass
     
+    def get_penalties(self):
+        penalties = self.penalties()
+        penalties = [penalties[0] * 2, penalties[1], penalties[2] * 3, penalties[3] * 3]
+        
+    def get_strict_penalties(self):
+        penalties = self.strict_penalties()
+        penalties = [penalties[0] * 2, penalties[1], penalties[2] * 3, penalties[3] * 3]
+    
     def vo_computes(self):
         # angle between the relative velocity and the relative position vector
         self.angle_v12_p12 = vector_angle_diff(self.v12, self.p12_heading)      
@@ -78,6 +86,41 @@ class ColregSituation(ABC):
     @abstractmethod
     def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
         pass
+    
+    
+    def get_colision_points(self, time_limit):
+        # Relative position and velocity
+        v_21 = self.vessel2.v - self.vessel1.v
+
+        # Coefficients for the quadratic equation
+        a = np.dot(v_21, v_21)
+        b = 2 * np.dot(self.p12, v_21)
+        c = np.dot(self.p12, self.p12) - self.safety_dist**2
+
+        # Calculate discriminant
+        discriminant = b**2 - 4*a*c
+
+        collision_points = []
+
+        # Check for real solutions (collision possible)
+        if discriminant >= 0:
+            sqrt_discriminant = np.sqrt(discriminant)
+
+            # Find times of collision
+            t1 = (-b + sqrt_discriminant) / (2 * a)
+            t2 = (-b - sqrt_discriminant) / (2 * a)
+
+            # Check if times are within the time limit and positive
+            for t in [t1, t2]:
+                if 0 <= t <= time_limit:
+                    # Compute the collision points
+                    collision_point_vessel1 = self.vessel1.p + self.vessel1.v * t
+                    collision_point_vessel2 = self.vessel2.p + self.vessel2.v * t
+                    collision_points.append((collision_point_vessel1, collision_point_vessel2))
+                    
+        all_points = [point for pair in collision_points for point in pair]    
+        # Convert the list of points to a numpy array for easier calculations
+        return np.array(all_points)
     
 class Overtaking(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):

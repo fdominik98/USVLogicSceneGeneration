@@ -1,14 +1,24 @@
-from model.usv_config import MAX_COORD, MIN_COORD
+from model.usv_config import MAX_COORD
+from model.vessel import Vessel
+from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.colreg_plot import ColregPlot
 from visualization.data_parser import DataParser
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.usv_environment import USVEnvironment
 from visualization.colreg_animation import ColregAnimation
-from rrt_algorithms.rrt.rrt import RRT
-from rrt_algorithms.search_space.search_space import SearchSpace
-from rrt_algorithms.utilities.plotting import Plot
-
 import numpy as np
+from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, RRTStarFND, DIM, LineObstacle
+
+scaler = 1 / MAX_COORD  * DIM / 1.5
+
+def find_center_and_radius(points_array):
+    # Calculate the center (centroid) by averaging the coordinates
+    center = np.mean(points_array, axis=0)
+    # Calculate the radius as the maximum distance from the center to any point
+    distances = np.linalg.norm(points_array - center, axis=1)
+    radius = np.max(distances)
+    return center, radius
+
 
 dp = DataParser()
 df, _ = dp.load_files()
@@ -24,84 +34,36 @@ colreg_s = list(env.colreg_situations)[0]
 o1 = env.vessels[0]
 o2 = env.vessels[1]
 
-from ompl import base as ob
-from ompl import geometric as og
-from ompl import control as oc
+colision_points = colreg_s.get_colision_points(np.inf)
+center, radius = find_center_and_radius(colision_points)
 
-def distance(p1, p2):
-    return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+center = center * scaler
+radius = radius * scaler * 2
+start = (o1.p + o1.v) * scaler
+goal = start + o1.v_norm() * (np.linalg.norm(start-center) + 2 * radius) 
 
-def is_safe(state1, state2, safety_distance):
-    return distance(state1, state2) >= safety_distance
+o1p_scaled = o1.p * scaler
+print("start RRT path planning")
 
+# ====Search Path with RRT====
+obstacleList = [
+    CircularObstacle(center[0], center[1], radius),
+    LineObstacle(o1p_scaled[0], o1p_scaled[1], o1.v_norm(), True, 20),
+    LineObstacle(o1p_scaled[0], o1p_scaled[1], o1.v_norm(), False, radius * 2)
+]  # [x,y,size]
+# Set Initial parameters
+rrt = RRTStarFND(start=start,
+                 goal=goal,
+                randArea=[DIM, DIM],
+                obstacleList=obstacleList,
+                expandDis=10.0,
+                goalSampleRate=15,
+                maxIter=100)
+path = rrt.Planning(animation=True)
 
-class SafeMotionPlanner:
-    def __init__(self, safety_distance):
-        # Define the state space
-        self.space = ob.RealVectorStateSpace(4)  # Two objects, each with 2D position (x, y)
+path.reverse()
+path = [np.array(pos) * (1.0 / scaler) for pos in path]
 
-        # Set bounds for the state space
-        bounds = ob.RealVectorBounds(4)
-        bounds.setLow(0, -10)
-        bounds.setHigh(0, 10)
-        bounds.setLow(1, -10)
-        bounds.setHigh(1, 10)
-        bounds.setLow(2, -1)
-        bounds.setHigh(2, 1)
-        bounds.setLow(3, -1)
-        bounds.setHigh(3, 1)
-        self.space.setBounds(bounds)
-
-        # Create the space information
-        self.si = ob.SpaceInformation(self.space)
-        self.safety_distance = safety_distance
-
-        # Define the state validity checker
-        self.si.setStateValidityChecker(self.state_validity_checker)
-
-    def state_validity_checker(self, state):
-        state = np.array(state)
-        pos1 = state[:2]
-        pos2 = state[2:4]
-        return is_safe(pos1, pos2, self.safety_distance)
-
-    def plan(self, start, goal):
-        # Set the start and goal states
-        start_state = ob.State(self.space)
-        goal_state = ob.State(self.space)
-        start_state[:] = start
-        goal_state[:] = goal
-
-        # Define the problem
-        problem = ob.ProblemDefinition(self.si)
-        problem.setStartAndGoalStates(start_state, goal_state)
-
-        # Define the planner
-        planner = og.RRTConnect(self.si)
-        planner.setProblemDefinition(problem)
-        planner.setup()
-
-        # Solve the problem
-        if planner.solve(10.0):
-            print("Solution found")
-            path = problem.getSolutionPath()
-            path.interpolate()
-            return path
-        else:
-            print("No solution found")
-            return None
-
-# Example usage
-planner = SafeMotionPlanner(safety_distance=1.0)
-
-# Define start and goal states for two objects
-start_state = [0, 0, 2, 2]  # (x1, y1, x2, y2)
-goal_state = [5, 5, 7, 7]
-
-# Plan the trajectory
-path = planner.plan(start_state, goal_state)
-
-if path:
-    print("Path found")
-else:
-    print("No path found")
+interpolator = PathInterpolator(o1, path)
+interpolated_path = interpolator.interpolate_path()
+print(interpolated_path)

@@ -1,7 +1,5 @@
 import json
-import traceback
 from typing import Optional
-from datetime import datetime
 
 class EvaluationData:
     def __init__(self, algorithm_desc: str,
@@ -20,7 +18,8 @@ class EvaluationData:
                  crossover_prob: Optional[float] = None,
                  error_message: Optional[str] = None,
                  timestamp: Optional[str] = None,
-                 measurement_name: Optional[str] = None):  # New attribute
+                 measurement_name: Optional[str] = None,  # New attribute
+                 path: Optional[str] = None):  # New attribute
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -38,6 +37,7 @@ class EvaluationData:
         self.error_message = error_message
         self.timestamp = timestamp
         self.measurement_name = measurement_name  # New attribute initialization
+        self.path = path  # New attribute initialization
 
     def to_dict(self):
         return {
@@ -57,7 +57,8 @@ class EvaluationData:
             "crossover_prob": self.crossover_prob,
             "error_message": self.error_message,
             "timestamp": self.timestamp,
-            "measurement_name": self.measurement_name  # Include new attribute in dict
+            "measurement_name": self.measurement_name,  # Include new attribute in dict
+            "path": self.path  # Include new attribute in dict
         }
 
     def save_to_json(self, file_path: str):
@@ -83,7 +84,8 @@ class EvaluationData:
             crossover_prob=data.get("crossover_prob"),
             error_message=data.get("error_message"),
             timestamp=data.get("timestamp"),
-            measurement_name=data.get("measurement_name")  # Extract new attribute
+            measurement_name=data.get("measurement_name"),  # Extract new attribute
+            path=data.get("path")  # Extract new attribute
         )
         
     @classmethod

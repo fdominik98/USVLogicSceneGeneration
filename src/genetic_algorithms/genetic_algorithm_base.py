@@ -99,8 +99,9 @@ class GeneticAlgorithmBase(ABC):
         asset_folder = f'{self.current_file_directory}/../../assets/{self.algorithm_desc}/{self.config_name}/{self.measurement_id}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
-        
-        eval_data.save_to_json(file_path=f"{asset_folder}/{eval_data.timestamp.replace(':','-')}.json")
+        file_path=f"{asset_folder}/{eval_data.timestamp.replace(':','-')}.json"
+        eval_data.path = file_path
+        eval_data.save_to_json(file_path=file_path)
         
     def set_seed(self, seed):
         if self.current_seed == seed:

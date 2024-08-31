@@ -57,7 +57,7 @@ class AggregateAll(Aggregate):
         
         fitness = 0.0
         for colreg_sit in self.env.colreg_situations:
-            for penalty, normed_penalty in colreg_sit.penalties():
+            for penalty, normed_penalty in colreg_sit.get_strict_penalties():
                 if penalty > 0.0:
                     fitness += self.sign * normed_penalty
         return (fitness,)
