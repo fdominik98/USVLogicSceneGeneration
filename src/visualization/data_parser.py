@@ -10,9 +10,9 @@ from trajectory_planning.trajectory_data import TrajectoryData
 class DataParser(ABC):
     script_path = os.path.abspath(__file__)
     current_dir = os.path.dirname(script_path)
-    assets_dir = f'{current_dir}/../../assets'
-    PYMOO_DIR = f'{assets_dir}/pymoo_algorithm'
-    RRT_DIR = f'{assets_dir}/RRTStar_algo'
+    gen_data_dir = f'{current_dir}/../../assets/gen_data'
+    PYMOO_DIR = f'{gen_data_dir}/pymoo_algorithm'
+    RRT_DIR = f'{gen_data_dir}/RRTStar_algo'
     EVAL_DATA_COLUMN_NAMES = ['best_solution', 'config_name',
                               'measurement_name', 'evaluation_time',
                               'population_size', 'actual_number_of_generations',

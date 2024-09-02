@@ -96,7 +96,7 @@ class GeneticAlgorithmBase(ABC):
         pass
     
     def save_eval_data(self, eval_data : EvaluationData):
-        asset_folder = f'{self.current_file_directory}/../../assets/{self.algorithm_desc}/{self.config_name}/{self.measurement_id}'
+        asset_folder = f'{self.current_file_directory}/../../assets/gen_data/{self.algorithm_desc}/{self.config_name}/{self.measurement_id}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         file_path=f"{asset_folder}/{eval_data.timestamp.replace(':','-')}.json"
