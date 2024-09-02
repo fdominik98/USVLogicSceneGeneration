@@ -132,7 +132,7 @@ traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-asset_folder = f'{current_file_directory}/../assets/{traj_data.algorithm_desc}/{traj_data.config_name}/{measurement_id}'
+asset_folder = f'{current_file_directory}/../assets/gen_data/{traj_data.algorithm_desc}/{traj_data.config_name}/{measurement_id}'
 if not os.path.exists(asset_folder):
     os.makedirs(asset_folder)
 file_path=f"{asset_folder}/{traj_data.timestamp.replace(':','-')}.json"
