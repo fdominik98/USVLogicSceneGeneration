@@ -20,6 +20,7 @@ class VesselDesc():
 class Vessel():
     def __init__(self, desc: VesselDesc):
         self.id = desc.id
+        self.l = desc.l
         self.r = desc.l * 2.0
         self.name = desc.name
         
@@ -31,5 +32,9 @@ class Vessel():
         
     def v_norm(self):
         return self.v / self.speed
+    
+    def v_norm_perp(self):
+        v_norm = self.v_norm()
+        return np.array([v_norm[1], -v_norm[0]])
     
  

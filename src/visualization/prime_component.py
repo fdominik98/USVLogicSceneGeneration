@@ -7,7 +7,8 @@ from model.usv_config import N_MILE_TO_M_CONVERSION
 class PrimeComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
-        self.secondary_visibility = False
+        self.p21_visible = False
+        self.p12_visible = initial_visibility
         self.p12_vec_graphs : dict[str, plt.Quiver] = {}
         self.p21_vec_graphs : dict[str, plt.Quiver] = {}
             
@@ -28,22 +29,25 @@ class PrimeComponent(PlotComponent):
             self.refresh_visible()
     
     def toggle(self):
-        if self.visible:
+        if self.p12_visible:
+            self.p12_visible = False
+            self.p21_visible = True
+            self.visible = True
+        elif self.p21_visible:
+            self.p12_visible = self.p21_visible = False
             self.visible = False
-            self.secondary_visibility = True
-        elif self.secondary_visibility:
-            self.visible = self.secondary_visibility = False
         else:
+            self.p12_visible = True
             self.visible = True
         self.refresh_visible()
     
     def refresh_visible(self):        
         for g in self.p12_vec_graphs.values():
-            g.set_visible(self.visible)
+            g.set_visible(self.p12_visible)
         for g in self.p21_vec_graphs.values():
-            g.set_visible(self.secondary_visibility)
+            g.set_visible(self.p21_visible)
         
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         for colreg_s in new_env.colreg_situations:
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2

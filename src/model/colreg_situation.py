@@ -27,8 +27,8 @@ class ColregSituation(ABC):
         
         self.angle_p12_v1 = angle_angle_diff(self.p12_heading, self.vessel1.heading)
         
-        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.r),
-                           o2VisibilityByo1(self.angle_p21_v2, self.vessel2.r)) *  N_MILE_TO_M_CONVERSION
+        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.l),
+                           o2VisibilityByo1(self.angle_p21_v2, self.vessel2.l)) *  N_MILE_TO_M_CONVERSION
         self.vo_computes()
         
     @abstractmethod
@@ -41,11 +41,11 @@ class ColregSituation(ABC):
     
     def get_penalties(self):
         penalties = self.penalties()
-        penalties = [penalties[0] * 2, penalties[1], penalties[2] * 3, penalties[3] * 3]
+        return [penalties[0], penalties[1], penalties[2], penalties[3]]
         
     def get_strict_penalties(self):
         penalties = self.strict_penalties()
-        penalties = [penalties[0] * 2, penalties[1], penalties[2] * 3, penalties[3] * 3]
+        return [penalties[0], penalties[1], penalties[2], penalties[3]]
     
     def vo_computes(self):
         # angle between the relative velocity and the relative position vector

@@ -3,12 +3,13 @@ from typing import Optional
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from model.usv_environment import USVEnvironment
+from model.vessel import Vessel
 from visualization.plot_component import PlotComponent
 
 class ColregAnimation():
     
-    ANIM_MAX_REAL_TIME = 60.0 * 30.0
-    ANIM_MAX_SIM_TIME = 30.0
+    ANIM_MAX_REAL_TIME = 60.0 * 45.0
+    ANIM_MAX_SIM_TIME = 25.0
     
     FRAMES_PER_SEC = 10.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
@@ -33,20 +34,25 @@ class ColregAnimation():
         while self.anim_frame_counter < self.ANIM_MAX_FRAMES:
             if not self.is_anim_paused:
                 for o in self.din_env.vessels:
-                    if self.trajectories is None:
-                        vec = o.v * self.REAL_TIME * self.SPEED_UP_RATIO
-                        o.update(o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
-                    else:
-                        traj = self.trajectories[str(o.id)]
-                        frame = traj[int(self.anim_frame_counter * self.REAL_TIME * self.SPEED_UP_RATIO)]
-                        o.update(frame[0], frame[1], frame[2], frame[3])
+                   o.update(*self.select_next_state(o))
                 for colreg_s in self.din_env.colreg_situations:
                     colreg_s.update()
                 self.anim_frame_counter += 1
             yield self.din_env, self.anim_frame_counter
+            
+            
+    def select_next_state(self, o: Vessel):
+        if self.trajectories is not None:
+            traj = self.trajectories[o.id]
+            frame_index = int(self.anim_frame_counter * self.REAL_TIME * self.SPEED_UP_RATIO)
+            if frame_index < len(traj):                
+                return traj[frame_index]
+            
+        vec = o.v * self.REAL_TIME * self.SPEED_UP_RATIO
+        return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
         
     def update_graphs(self, data):
-        #self.auto_scale()
+        self.auto_scale()
         new_env, frame_id = data
         if frame_id % self.FRAMES_PER_SEC == 0 and not self.is_anim_paused:
             sim_time = frame_id / self.FRAMES_PER_SEC

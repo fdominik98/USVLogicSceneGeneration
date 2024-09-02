@@ -46,7 +46,7 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         self.graphs += [self.wedge_stern, self.wedge_masthead, self.wedge_bow]
         super().do_draw(zorder)
             
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         o = new_env.vessels[self.center_vessel_id]
         
         angle1_masthead = np.degrees(o.heading + MASTHEAD_LIGHT_ANGLE / 2)

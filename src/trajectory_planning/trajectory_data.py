@@ -59,6 +59,7 @@ class TrajectoryData:
 
     @classmethod
     def from_dict(cls, data: dict):
+        trajectories = {int(k): v for k, v in data.get("trajectories", {}).items()}
         return cls(
             algorithm_desc=data.get("algorithm_desc"),
             env_path=data.get("env_path"),
@@ -70,11 +71,11 @@ class TrajectoryData:
             timestamp=data.get("timestamp"),
             measurement_name=data.get("measurement_name"),
             path=data.get("path"),
-            iter_numbers=data.get("iter_numbers", []),
+            iter_numbers=data.get("iter_numbers", {}),
             error_message=data.get("error_message"),
             overall_eval_time=data.get("overall_eval_time"),
-            trajectories=data.get("trajectories", {}),
-            rrt_evaluation_times=data.get("rrt_evaluation_times", [])
+            trajectories=trajectories,
+            rrt_evaluation_times=data.get("rrt_evaluation_times", {})
         )
         
     @classmethod

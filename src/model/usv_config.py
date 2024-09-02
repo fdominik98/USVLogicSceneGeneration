@@ -19,8 +19,8 @@ DIST_DRIFT = 50.0
 MIN_HEADING = -np.pi
 MAX_HEADING = np.pi
 MIN_COORD = 0.0
-MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION
-MAX_DISTANCE = MAX_COORD * np.sqrt(2)
+MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
 
 EPSILON=1e-10
 
@@ -51,22 +51,22 @@ def normed_distance(distance, boundaries, is_angle) -> float:
     return distance / (boundaries[0] + (np.pi if is_angle else MAX_DISTANCE) - boundaries[1])
     
     
-def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_radius):
+def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
-        if o2_radius < 12:
+        if o2_length < 12:
             return 2
-        elif o2_radius < 20:
+        elif o2_length < 20:
             return 2
-        elif o2_radius < 50:
+        elif o2_length < 50:
             return 2
         else:
             return 3
     else:
-        if o2_radius < 12:
+        if o2_length < 12:
             return 2
-        elif o2_radius < 20:
+        elif o2_length < 20:
             return 3
-        elif o2_radius < 50:
+        elif o2_length < 50:
             return 5
         else:
             return 6
@@ -79,7 +79,13 @@ def vector_angle_diff(v, angle):
     return angle_angle_diff(heading(v), angle)
 
 def angle_angle_diff(angle1, angle2):
-    return min(abs(angle1-angle2), abs(angle2-angle1))
+    delta_theta = angle2 - angle1
+    
+    # Normalize the difference to the range [-pi, pi]
+    delta_theta = (delta_theta + np.pi) % (2 * np.pi) - np.pi
+    
+    # Return the absolute value of the difference
+    return abs(delta_theta)
 
 
 # FOR FUTURE WORK

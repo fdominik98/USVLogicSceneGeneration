@@ -24,7 +24,7 @@ class DistanceComponent(PlotComponent):
             
             self.graphs += [text, line]
         
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         for colreg_s in new_env.colreg_situations:
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2   

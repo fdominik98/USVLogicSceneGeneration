@@ -71,7 +71,7 @@ class AngleCircleComponent(PlotComponent):
         end_point = origin + length * rotated_direction
         return [origin[0], end_point[0]], [origin[1], end_point[1]]
             
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         for o in new_env.vessels:
             self.update_one(o)
             

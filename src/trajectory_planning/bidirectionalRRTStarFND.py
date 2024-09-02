@@ -6,7 +6,7 @@ import timeit, time
 import numpy as np
 show_animation = True
 
-DIM = 1000
+DIM = 1200
 windowSize = [DIM, DIM]
 
 pygame.init()
@@ -30,7 +30,7 @@ class Node():
         
         
 class Obstacle(ABC):
-    MARGIN = 0.05
+    MARGIN = 0.02
     def __init__(self, x : float, y : float) -> None:
         super().__init__()
         self.p = np.array([x, y])
@@ -295,6 +295,9 @@ class RRTStarFND():
 
         return True
 
+    def reverse_coord(self, coords: np.ndarray):
+        return np.array([coords[0], DIM - coords[1] + DIM / 4])
+
     def DrawGraph(self, rnd=None):
         u"""
         Draw Graph
@@ -302,21 +305,29 @@ class RRTStarFND():
         screen.fill((255, 255, 255))
         for node in self.nodeList.values():
             if node.parent is not None:
-                pygame.draw.line(screen,(0,255,0), self.nodeList[node.parent].p, node.p)
+                start = self.reverse_coord(self.nodeList[node.parent].p)
+                end = self.reverse_coord(node.p)
+                pygame.draw.line(screen,(0,255,0), start, end)
 
         for node in self.nodeList.values():
             if len(node.children) == 0: 
-                pygame.draw.circle(screen, (255,0,255), node.p, 2)
+                center = self.reverse_coord(node.p)
+                pygame.draw.circle(screen, (255,0,255), center, 2)
                 
 
         for o in self.obstacleList:
             if isinstance(o, LineObstacle):
-                pygame.draw.line(screen,(0,0,0), o.shifted_point + o.dir_vec*10000, o.shifted_point - o.dir_vec*10000, 5)
+                start = self.reverse_coord(o.shifted_point + o.dir_vec * 2 * DIM)
+                end = self.reverse_coord(o.shifted_point - o.dir_vec * 2 * DIM)
+                pygame.draw.line(screen,(0,0,0), start, end, 8)
             elif isinstance(o, CircularObstacle):
-                pygame.draw.circle(screen,(0,0,0), o.p, o.radius)
+                center = self.reverse_coord(o.p)
+                pygame.draw.circle(screen,(0,0,0), center, o.radius)
 
-        pygame.draw.circle(screen, (255,0,0), self.start.p, 10)
-        pygame.draw.circle(screen, (0,0,255), self.end.p, 10)
+        start_center = self.reverse_coord(self.start.p)
+        end_center = self.reverse_coord(self.end.p)
+        pygame.draw.circle(screen, (0,0,255), start_center, 10)
+        pygame.draw.circle(screen, (255,0,0), end_center, 10)
 
         lastIndex = self.get_best_last_index()
         if lastIndex is not None:
@@ -324,7 +335,9 @@ class RRTStarFND():
 
             ind = len(path)
             while ind > 1:
-                pygame.draw.line(screen,(255,0,0),path[ind-2],path[ind-1])
+                start =  self.reverse_coord(path[ind-2])
+                end =  self.reverse_coord(path[ind-1])
+                pygame.draw.line(screen, (255,0,0), start, end)
                 ind-=1
 
         pygame.display.update()
@@ -342,21 +355,3 @@ class RRTStarFND():
                 return False
         return True  # safe
 
-
-
-def main():
-    print("start RRT path planning")
-
-    # ====Search Path with RRT====
-    obstacleList = [
-        CircularObstacle(215, 300, 120),
-        CircularObstacle(380, 300, 40),
-    ]  # [x,y,size]
-    # Set Initial parameters
-    rrt = RRTStarFND(start=[20, 300], goal=[700, 300],
-              randArea=[DIM, DIM], obstacleList=obstacleList)
-    path = rrt.Planning(animation=show_animation)
-
-
-if __name__ == '__main__':
-    main()

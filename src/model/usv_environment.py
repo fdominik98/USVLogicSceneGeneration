@@ -28,14 +28,7 @@ class USVEnvironment():
             colreg_situation.update()
             
         return self
-    
-    def evaluate(self, states : list[float]):
-        self.update(states)
-        penalties = []
-        for colreg_situation in self.colreg_situations: 
-            penalties += colreg_situation.get_penalties()[1]
-        return self.euler_distance(penalties)
-        
+         
     @staticmethod  
     def euler_distance(fitness : list[float]):
         return math.sqrt(sum([x**2 for x in fitness]))

@@ -31,8 +31,13 @@ class PlotComponent(ABC):
     def do_draw(self, zorder : int):
         pass
     
-    @abstractmethod
     def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+        if self.visible:
+            return self.do_update(new_env)      
+        return []  
+    
+    @abstractmethod
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
         pass        
     
     def reset(self) -> list[plt.Artist]:

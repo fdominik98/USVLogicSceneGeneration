@@ -11,14 +11,10 @@ class LegendComponent(PlotComponent):
         self.legend = self.ax.legend(loc=7)
         self.graphs = [self.legend]
         
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
-        if self.visible:
-            self.legend.remove()
-            self.legend = self.ax.legend(loc=7)
-            self.graphs = [self.legend]
-        else:
-            self.legend.remove()
-            self.graphs = []
+    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+        self.legend.remove()
+        self.legend = self.ax.legend(loc=7)
+        self.graphs = [self.legend]
         return self.graphs
     
     

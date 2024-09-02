@@ -40,7 +40,7 @@ class ColregPlot():
             self.additional_vo_cone_component,
             self.distance_component,
             self.angle_circle_component,
-            self.detailed_angle_circle_component,
+            #self.detailed_angle_circle_component,
             self.ship_markings_component,
             self.prime_component,
             self.ship_image_component,
@@ -62,7 +62,7 @@ class ColregPlot():
         self.additional_vo_cone_component.draw(-2)
         self.distance_component.draw(-3)
         self.angle_circle_component.draw(-20)
-        self.detailed_angle_circle_component.draw(-20)
+        #self.detailed_angle_circle_component.draw(-20)
         self.prime_component.draw(-5)
         self.ship_image_component.draw(-4)
         self.legend_component.draw(0)

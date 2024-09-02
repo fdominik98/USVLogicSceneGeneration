@@ -3,7 +3,7 @@ from model.vessel import Vessel
 
 
 class PathInterpolator():
-    def __init__(self, vessels : list[Vessel],) -> None:
+    def __init__(self, vessels : list[Vessel], expand_distance : float) -> None:
         self.vessels = vessels
         self.paths :  dict[int, list[list[np.ndarray]]] = {}
         self.interpolated_paths : dict[int, list[tuple[float,float,float,float]]] = {}
@@ -51,8 +51,10 @@ class PathInterpolator():
         :param speed: Speed of the vessel (units per second).
         :return: List of interpolated (position, heading) tuples.
         """
-        interpolated_positions = [vessel.p]
-        interpolated_headings = [vessel.heading]
+        interpolated_positions = []
+        interpolated_headings = []
+        interpolated_speeds = []
+        
 
         for i in range(len(path) - 1):
             # Start and end points
@@ -61,27 +63,81 @@ class PathInterpolator():
             
             # Calculate the distance and heading between the points
             delta_pos =  p_end - p_start
-            d = np.linalg.norm(delta_pos)
             heading = np.arctan2(delta_pos[1], delta_pos[0])
+            d = np.linalg.norm(delta_pos)
             
+            seconds_per_expand = int(d // vessel.speed)
             # Calculate the number of seconds required to cover the distance
-            time_steps = int(d // vessel.speed)
+            fraction_second = d / vessel.speed - seconds_per_expand
+            if fraction_second > 0.0001:
+                seconds_per_expand += 1
+                
             
             # Interpolate positions for each second
-            for t in range(time_steps):
-                fraction = t / time_steps
+            for t in range(seconds_per_expand):
+                fraction = t / seconds_per_expand
                 new_p = p_start + delta_pos * fraction
                 interpolated_positions.append(new_p)
                 interpolated_headings.append(heading)
+                interpolated_speeds.append(vessel.speed)                
+            if fraction_second > 0.0001: # Bigger than some small value
+                speed = vessel.speed * fraction_second
+                interpolated_speeds[-1] = speed 
         
         # Append the final position and heading
         interpolated_positions.append(path[-1])
         interpolated_headings.append(vessel.heading)
+        interpolated_speeds.append(vessel.speed)
+        
+        interpolated_headings = self.interpolate_headings(interpolated_headings)
         
         result : list[tuple[float,float,float,float]] = []
         
         for i, heading in enumerate(interpolated_headings):
             pos = interpolated_positions[i]
-            result.append((pos[0], pos[1], heading, vessel.speed))
+            speed = interpolated_speeds[i]
+            result.append((pos[0], pos[1], heading, speed))
         
         return result
+    
+    
+    def interpolate_headings(self, headings):
+        def interpolate_chunk(start, end, num_steps):
+            """Linearly interpolate between start and end in num_steps steps."""
+            step_values = []
+            for i in range(num_steps):
+                ratio = i / (num_steps - 1) if num_steps > 1 else 0
+                interpolated_value = start * (1 - ratio) + end * ratio
+                step_values.append(interpolated_value)
+            return step_values
+
+        # Find blocks of same heading
+        blocks = []
+        current_block = [0]
+        for i in range(1, len(headings)):
+            if headings[i] == headings[current_block[0]]:
+                current_block.append(i)
+            else:
+                blocks.append(current_block)
+                current_block = [i]
+        blocks.append(current_block)
+
+        # Interpolate between the end of one block to the start of the next
+        for i in range(len(blocks) - 1):
+            start_block = blocks[i]
+            end_block = blocks[i + 1]
+            
+            start_value = headings[start_block[-1]]
+            end_value = headings[end_block[0]]
+            
+            # Interpolate from the last index of the current block to the first index of the next block
+            num_steps = len(start_block) + len(end_block)
+            interpolated_values = interpolate_chunk(start_value, end_value, num_steps)
+            
+            # Replace values in the original list
+            for j in range(len(start_block)):
+                headings[start_block[j]] = interpolated_values[j]
+            for j in range(len(end_block)):
+                headings[end_block[j]] = interpolated_values[len(start_block) + j]
+        
+        return headings
