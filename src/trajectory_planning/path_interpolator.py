@@ -1,48 +1,47 @@
+from typing import Dict, List, Tuple
 import numpy as np
 from model.vessel import Vessel
+from model.usv_environment import USVEnvironment
 
 
 class PathInterpolator():
-    def __init__(self, vessels : list[Vessel], expand_distance : float) -> None:
-        self.vessels = vessels
-        self.paths :  dict[int, list[list[np.ndarray]]] = {}
-        self.interpolated_paths : dict[int, list[tuple[float,float,float,float]]] = {}
+    def __init__(self, env: USVEnvironment) -> None:
+        self.env = env
+        self.interpolated_paths : Dict[int, List[Tuple[float,float,float,float]]] = {}
+        self.path_length = 45 * 60
 
-    def add_path(self, vessel : Vessel, path : list[np.ndarray]):
-        if vessel.id in self.paths:
-            self.paths[vessel.id].append(path)
+    def add_path(self, vessel : Vessel, path : List[np.ndarray]):
+        if vessel.id in self.interpolated_paths:
+            raise Exception("Cannot add two path for one vessel")
+        if len(path) == 0:
+            self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.speed)]
         else:
-            self.paths[vessel.id] = [path]
-            
-            
-    def interpolate(self):
-        for vessel in self.vessels:
-            # Interpolate the longest path in case of multiple path. Other strategy can be used also
-            # If a vessel is give-way and stand on in the same time, give-way is prioritized
-            longest_path = max(self.paths[vessel.id], key=len)  
-                      
-            if len(longest_path) == 0:
-                self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.speed)]
-                continue
-            self.interpolated_paths[vessel.id] = self.interpolate_path(vessel, longest_path)
-            
-        longest_key = max(self.interpolated_paths, key=lambda k: len(self.interpolated_paths[k]))
-        # Find the interpolated longest path length
-        longest_ipath_length = len(self.interpolated_paths[longest_key])
-        for vessel in self.vessels:
-            interpolated_path = self.interpolated_paths[vessel.id]
-            while len(interpolated_path) < longest_ipath_length:
+            self.interpolate_path(vessel, path)
+        self.extend_paths_to_path_length()       
+    
+           
+                
+    def extend_paths_to_path_length(self):
+        for id, path in self.interpolated_paths.items():
+            o = self.env.get_vessel_by_id(id)
+            while len(path) < self.path_length:
                 # Lengthen path
-                last_state = interpolated_path[-1]
-                interpolated_path.append((
-                    last_state[0] + vessel.v[0],
-                    last_state[1] + vessel.v[1],
-                    vessel.heading,
-                    vessel.speed
+                last_state = path[-1]
+                path.append((
+                    last_state[0] + o.v[0],
+                    last_state[1] + o.v[1],
+                    o.heading,
+                    o.speed
                 ))
                 
+    def get_positions_by_second(self, second) -> List[Tuple[Vessel, np.ndarray]]:
+        if second <= self.path_length:
+            self.path_length = second + 50
+            self.extend_paths_to_path_length()
+        return [(self.env.get_vessel_by_id(id), path[second]) for id, path in self.interpolated_paths.items()]
+                
 
-    def interpolate_path(self, vessel: Vessel, path : list[np.ndarray]) -> list[tuple[float,float,float,float]]:
+    def interpolate_path(self, vessel: Vessel, path : List[np.ndarray]) -> List[Tuple[float,float,float,float]]:
         """
         Interpolates the given path to have positions at one-second intervals
         and calculates the heading based on the direction of movement.
@@ -89,9 +88,7 @@ class PathInterpolator():
         interpolated_headings.append(vessel.heading)
         interpolated_speeds.append(vessel.speed)
         
-        interpolated_headings = self.interpolate_headings(interpolated_headings)
-        
-        result : list[tuple[float,float,float,float]] = []
+        result : List[Tuple[float,float,float,float]] = []
         
         for i, heading in enumerate(interpolated_headings):
             pos = interpolated_positions[i]
@@ -100,8 +97,9 @@ class PathInterpolator():
         
         return result
     
-    
-    def interpolate_headings(self, headings):
+    @staticmethod
+    def interpolate_headings(trajectory : List[Tuple[float,float,float,float]])  -> List[Tuple[float,float,float,float]]:
+        headings = [t[2] for t in trajectory]
         def interpolate_chunk(start, end, num_steps):
             """Linearly interpolate between start and end in num_steps steps."""
             step_values = []
@@ -140,4 +138,4 @@ class PathInterpolator():
             for j in range(len(end_block)):
                 headings[end_block[j]] = interpolated_values[len(start_block) + j]
         
-        return headings
+        return [(trajectory[i][0], trajectory[i][1], headings[i], trajectory[i][3]) for i in range(len(headings))]

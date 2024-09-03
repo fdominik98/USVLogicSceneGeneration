@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from model.usv_config import (DIST_DRIFT, EPSILON, BOW_ANGLE, BEAM_ANGLE, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, STERN_ANGLE,
                               angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_distance, vector_angle_diff)
 from model.vessel import Vessel
@@ -32,11 +33,11 @@ class ColregSituation(ABC):
         self.vo_computes()
         
     @abstractmethod
-    def penalties(self) -> list[tuple[float, float]]:
+    def penalties(self) -> List[Tuple[float, float]]:
         pass
         
     @abstractmethod
-    def strict_penalties(self) -> list[tuple[float, float]]:
+    def strict_penalties(self) -> List[Tuple[float, float]]:
         pass
     
     def get_penalties(self):
@@ -56,22 +57,22 @@ class ColregSituation(ABC):
         self.angle_half_cone = abs(np.arcsin(sin_theta)) # [0, pi/2]
         
         
-    def visibility_dist(self) -> tuple[float, float]:
+    def visibility_dist(self) -> Tuple[float, float]:
         return interval_distance(self.o_distance, (self.vis_distance - DIST_DRIFT, self.vis_distance + DIST_DRIFT), is_angle=False) 
     
-    def strict_visibility_dist(self) -> tuple[float, float]:
+    def strict_visibility_dist(self) -> Tuple[float, float]:
         return strict_distance(self.o_distance, self.vis_distance, is_angle=False)        
         
-    def v2_in_front_v1_dist(self, vision_boundary) -> tuple[float, float]:
+    def v2_in_front_v1_dist(self, vision_boundary) -> Tuple[float, float]:
         return interval_distance(self.angle_p12_v1, vision_boundary)
     
-    def strict_v2_in_front_v1_dist(self, goal_angle) -> tuple[float, float]:
+    def strict_v2_in_front_v1_dist(self, goal_angle) -> Tuple[float, float]:
         return strict_distance(self.angle_p12_v1, goal_angle)
 
-    def vo_collision_dist(self) -> tuple[float, float]:
+    def vo_collision_dist(self) -> Tuple[float, float]:
         return interval_distance(self.angle_v12_p12, (0, self.angle_half_cone))
     
-    def strict_vo_collision_dist(self) -> tuple[float, float]:
+    def strict_vo_collision_dist(self) -> Tuple[float, float]:
         return strict_distance(self.angle_v12_p12, 0)
         
     def info(self):
@@ -84,7 +85,7 @@ class ColregSituation(ABC):
         self.do_info(penalties, strict_penalties)
         
     @abstractmethod
-    def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
+    def do_info(self, penalties : List[Tuple[float, float]], strict_penalties : List[Tuple[float, float]]):
         pass
     
     
@@ -126,7 +127,7 @@ class Overtaking(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is overtaking {vessel2.name}', vessel1, vessel2)
         
-    def penalties(self) -> list[tuple[float, float]]:
+    def penalties(self) -> List[Tuple[float, float]]:
         return [
             self.visibility_dist(),
             self.vo_collision_dist(),
@@ -134,7 +135,7 @@ class Overtaking(ColregSituation):
             self.v2_in_front_v1_dist((0, MASTHEAD_LIGHT_ANGLE /2))
         ]
         
-    def strict_penalties(self) -> list[tuple[float, float]]:
+    def strict_penalties(self) -> List[Tuple[float, float]]:
         return [
             self.strict_visibility_dist(),
             self.strict_vo_collision_dist(),
@@ -143,7 +144,7 @@ class Overtaking(ColregSituation):
         ]
         
   
-    def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
+    def do_info(self, penalties : List[Tuple[float, float]], strict_penalties : List[Tuple[float, float]]):
         print(f'Angular penalty of v1 behind v2: {np.degrees(penalties[2][0])} degs, penalty norm: {penalties[2][1]}, strict penalty: {np.degrees(strict_penalties[2][0])}, strict penalty norm: {strict_penalties[2][1]}')
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
     
@@ -152,7 +153,7 @@ class HeadOn(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} and {vessel2.name} are head on', vessel1, vessel2)
         
-    def penalties(self) -> list[tuple[float, float]]:
+    def penalties(self) -> List[Tuple[float, float]]:
         return [
             self.visibility_dist(),
             self.vo_collision_dist(),
@@ -160,7 +161,7 @@ class HeadOn(ColregSituation):
             self.v2_in_front_v1_dist((0.0, BOW_ANGLE / 2.0))
         ]
         
-    def strict_penalties(self) -> list[tuple[float, float]]:
+    def strict_penalties(self) -> List[Tuple[float, float]]:
         return [
             self.strict_visibility_dist(),
             self.strict_vo_collision_dist(),
@@ -168,7 +169,7 @@ class HeadOn(ColregSituation):
             self.strict_v2_in_front_v1_dist(0)
         ]   
         
-    def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
+    def do_info(self, penalties : List[Tuple[float, float]], strict_penalties : List[Tuple[float, float]]):
         print(f'Angular penalty of v1 in front v2: {np.degrees(penalties[2][0])} degs, penalty norm: {penalties[2][1]}, strict penalty: {np.degrees(strict_penalties[2][0])}, strict penalty norm: {strict_penalties[2][1]}')
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
         
@@ -177,7 +178,7 @@ class CrossingFromPort(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is crossing {vessel2.name} from port', vessel1, vessel2)
         
-    def penalties(self) -> list[tuple[float, float]]:
+    def penalties(self) -> List[Tuple[float, float]]:
         angle_p21_v2_rot = vector_angle_diff(self.rotated_v2(), self.p21_heading)
         return [
             self.visibility_dist(),
@@ -186,7 +187,7 @@ class CrossingFromPort(ColregSituation):
             self.v2_in_front_v1_dist((0, MASTHEAD_LIGHT_ANGLE /2))
         ]
         
-    def strict_penalties(self) -> list[tuple[float, float]]:
+    def strict_penalties(self) -> List[Tuple[float, float]]:
         angle_p21_v2_rot = vector_angle_diff(self.rotated_v2(), self.p21_heading)
         return [
             self.strict_visibility_dist(),
@@ -203,7 +204,7 @@ class CrossingFromPort(ColregSituation):
         # Rotate vector
         return np.dot(rotation_matrix, self.vessel2.v)
         
-    def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
+    def do_info(self, penalties : List[Tuple[float, float]], strict_penalties : List[Tuple[float, float]]):
         print(f'Angular penalty of v1 left of v2: {np.degrees(penalties[2][0])} degs, penalty norm: {penalties[2][1]}, strict penalty: {np.degrees(strict_penalties[2][0])}, strict penalty norm: {strict_penalties[2][1]}')
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
 
@@ -211,7 +212,7 @@ class NoColreg(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is not colliding with {vessel2.name}', vessel1, vessel2)
         
-    def penalties(self) -> list[tuple[float, float]]:
+    def penalties(self) -> List[Tuple[float, float]]:
         vo_collision_penalty = interval_distance(self.angle_v12_p12, (self.angle_half_cone, np.pi))
         visibility_dist_penalty = interval_distance(self.o_distance, (self.vis_distance, MAX_DISTANCE), is_angle=False)
         
@@ -226,9 +227,9 @@ class NoColreg(ColregSituation):
             (0.0, 0.0)
         ]
         
-    def strict_penalties(self) -> list[tuple[float, float]]:
+    def strict_penalties(self) -> List[Tuple[float, float]]:
         return self.penalties()  
 
-    def do_info(self, penalties : list[tuple, tuple], strict_penalties : list[tuple, tuple]):
+    def do_info(self, penalties : List[Tuple[float, float]], strict_penalties : List[Tuple[float, float]]):
         pass
         

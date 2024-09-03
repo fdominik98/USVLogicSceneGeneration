@@ -1,4 +1,5 @@
 
+from typing import List, Tuple
 from genetic_algorithms.evaluation_data import EvaluationData
 from model.usv_config import *
 from aggregates import Aggregate
@@ -17,7 +18,7 @@ class PyGadAlgorithm(GeneticAlgorithmBase):
         return AggregateAll(env)   
     
     
-    def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData) -> None:
+    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
             def fitness_func(cls, solution, solution_idx):
                 return self.aggregate.evaluate(solution)[0]
             
@@ -49,7 +50,7 @@ class PyGadAlgorithm(GeneticAlgorithmBase):
         some_input.run()
         return some_input
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float]]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float]]:
         ga_instance = some_results
         # After the GA run, print the best solution found
         solution, solution_fitness, solution_idx = ga_instance.best_solution()

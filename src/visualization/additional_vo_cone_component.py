@@ -1,3 +1,4 @@
+from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
@@ -7,9 +8,9 @@ from visualization.plot_component import PlotComponent
 class AdditionalVOConeComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
-        self.circle_graphs : dict[str, plt.Circle] = {}
-        self.line1_graphs : dict[str, plt.Line2D] = {}
-        self.line2_graphs : dict[str, plt.Line2D] = {}
+        self.circle_graphs : Dict[str, plt.Circle] = {}
+        self.line1_graphs : Dict[str, plt.Line2D] = {}
+        self.line2_graphs : Dict[str, plt.Line2D] = {}
             
     def do_draw(self, zorder : int):
         for colreg_s in self.env.colreg_situations:
@@ -35,7 +36,7 @@ class AdditionalVOConeComponent(PlotComponent):
             self.graphs += [vo_circle, line1, line2]
             
             
-    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for colreg_s in new_env.colreg_situations:
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2

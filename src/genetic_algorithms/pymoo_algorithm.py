@@ -1,4 +1,5 @@
 
+from typing import List, Tuple
 from genetic_algorithms.evaluation_data import EvaluationData
 from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
@@ -79,7 +80,7 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
         return VesselAggregate(env, minimize=True)   
     
     
-    def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData):
+    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData):
             # Define the custom multi-objective optimization problem
             class MyProblem(ElementwiseProblem):
                 def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate):
@@ -125,7 +126,7 @@ class PyMooAlgorithm(GeneticAlgorithmBase):
                   callback=callback)
         return res, callback
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float], int]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
         res, callback = some_results
         if self.verbose:
             # Plot the convergence

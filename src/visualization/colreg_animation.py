@@ -1,15 +1,16 @@
 import copy
-from typing import Optional
+from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from model.usv_environment import USVEnvironment
 from model.vessel import Vessel
 from visualization.plot_component import PlotComponent
+from trajectory_planning.path_interpolator import PathInterpolator
 
 class ColregAnimation():
     
-    ANIM_MAX_REAL_TIME = 60.0 * 45.0
-    ANIM_MAX_SIM_TIME = 25.0
+    ANIM_MAX_REAL_TIME = 60.0 * 60.0
+    ANIM_MAX_SIM_TIME = 40.0
     
     FRAMES_PER_SEC = 10.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
@@ -18,16 +19,22 @@ class ColregAnimation():
     
     ANIM_MAX_FRAMES = ANIM_MAX_SIM_TIME * FRAMES_PER_SEC
     
-    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : USVEnvironment, components : list[PlotComponent],
-                 trajectories : Optional[dict[int, list[tuple[float, float, float, float]]]] = None) -> None:
+    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : USVEnvironment, components : List[PlotComponent],
+                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
         self.ax = ax
         self.fig = fig
         self.env = env
         self.components = components
         self.is_anim_paused = True
         self.anim_frame_counter = 0
+            
         self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / self.FRAMES_PER_SEC) * 1000), save_count=int(self.ANIM_MAX_FRAMES))
-        self.trajectories = trajectories
+        
+        self.trajectories = None
+        if trajectories is not None:
+            self.trajectories = copy.deepcopy(trajectories)
+            for id in self.trajectories.keys():
+                self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
         
     def update_anim(self):
         self.init_anim()
@@ -86,6 +93,6 @@ class ColregAnimation():
         # Recalculate the limits based on the current data     
         self.ax.relim()
         # Automatically adjust xlim and ylim
-        self.ax.autoscale_view(tight=True)
+        self.ax.autoscale_view()
      
        

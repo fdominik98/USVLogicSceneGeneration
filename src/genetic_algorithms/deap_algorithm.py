@@ -1,4 +1,5 @@
 
+from typing import List, Tuple
 from genetic_algorithms.evaluation_data import EvaluationData
 from model.usv_config import *
 from aggregates import Aggregate
@@ -16,7 +17,7 @@ class DeapAlgorithm(GeneticAlgorithmBase):
         return VesselAggregate(env, minimize=True)   
     
     
-    def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData) -> None:
+    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData):
         # Attribute generator with different boundaries
         def generate_individual(actors):
             return [np.random.uniform(low, high) for low, high in self.boundaries] * actors
@@ -65,7 +66,7 @@ class DeapAlgorithm(GeneticAlgorithmBase):
         return halloffame
         
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float]]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float]]:
         halloffame = some_results
         best_ind = tools.selBest(halloffame, 1)[0]
         return list(best_ind), list(best_ind.fitness.values)

@@ -1,3 +1,4 @@
+from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
@@ -13,19 +14,19 @@ class AngleCircleComponent(PlotComponent):
     
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment, linewidth=0.8, radius_ratio = 10, center_vessel_id=None) -> None:
         super().__init__(ax, initial_visibility, env)
-        self.circle_graphs : list[plt.Circle] = []
-        self.line1_graphs : list[plt.Line2D] = []
-        self.line2_graphs : list[plt.Line2D] = []
-        self.line3_graphs : list[plt.Line2D] = []
-        self.line4_graphs : list[plt.Line2D] = []
+        self.circle_graphs : List[plt.Circle] = []
+        self.line1_graphs : List[plt.Line2D] = []
+        self.line2_graphs : List[plt.Line2D] = []
+        self.line3_graphs : List[plt.Line2D] = []
+        self.line4_graphs : List[plt.Line2D] = []
         
         self.linewidth = linewidth
         self.angle_circle_radius = MAX_COORD / radius_ratio
-        self.center_vessel_id = center_vessel_id
+        self.center_vessel  = None if center_vessel_id is None else env.get_vessel_by_id(center_vessel_id)
             
     def do_draw(self, zorder : int):
-        if self.center_vessel_id is not None:
-            self.one_draw(self.env.vessels[self.center_vessel_id], zorder, 'black')
+        if self.center_vessel is not None:
+            self.one_draw(self.center_vessel, zorder, 'black')
         else:
             for o in self.env.vessels:
                 self.one_draw(o, zorder, light_colors[o.id])
@@ -71,7 +72,7 @@ class AngleCircleComponent(PlotComponent):
         end_point = origin + length * rotated_direction
         return [origin[0], end_point[0]], [origin[1], end_point[1]]
             
-    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for o in new_env.vessels:
             self.update_one(o)
             

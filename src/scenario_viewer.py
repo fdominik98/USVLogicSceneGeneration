@@ -1,3 +1,4 @@
+from typing import List
 from genetic_algorithms.evaluation_data import EvaluationData
 from visualization.colreg_plot import ColregPlot
 from visualization.data_parser import EvalDataParser
@@ -6,7 +7,7 @@ from model.usv_environment import USVEnvironment
 
 while(True):
     dp = EvalDataParser()
-    data_models : list[EvaluationData] = dp.load_data_models()
+    data_models : List[EvaluationData] = dp.load_data_models()
     
     if len(data_models) == 0:
         exit(0)

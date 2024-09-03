@@ -9,13 +9,13 @@ class TrajectoryData:
                  random_seed: Optional[int] = None,
                  max_iter: Optional[int] = None,
                  goal_sample_rate: Optional[float] = None,
-                 expand_distance: Optional[float] = None,
+                 expand_distances: Optional[Dict[int, float]] = None,
                  timestamp: Optional[str] = None,
                  measurement_name: Optional[str] = None,
                  path: Optional[str] = None,
-                 iter_numbers: Optional[Dict[str, Tuple[float, float]]] = None,
+                 iter_numbers: Optional[Dict[int, int]] = None,
                  error_message: Optional[str] = None,
-                 rrt_evaluation_times: Optional[Dict[str, Tuple[float, float]]] = None,
+                 rrt_evaluation_times: Optional[Dict[int, float]] = None,
                  overall_eval_time: Optional[float] = None,
                  trajectories: Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None):
         self.algorithm_desc = algorithm_desc
@@ -24,7 +24,7 @@ class TrajectoryData:
         self.random_seed = random_seed
         self.max_iter = max_iter
         self.goal_sample_rate = goal_sample_rate
-        self.expand_distance = expand_distance
+        self.expand_distances = expand_distances
         self.timestamp = timestamp
         self.measurement_name = measurement_name
         self.path = path
@@ -42,7 +42,7 @@ class TrajectoryData:
             "random_seed": self.random_seed,
             "max_iter": self.max_iter,
             "goal_sample_rate": self.goal_sample_rate,
-            "expand_distance": self.expand_distance,
+            "expand_distances": self.expand_distances,
             "timestamp": self.timestamp,
             "measurement_name": self.measurement_name,
             "path": self.path,
@@ -60,6 +60,9 @@ class TrajectoryData:
     @classmethod
     def from_dict(cls, data: dict):
         trajectories = {int(k): v for k, v in data.get("trajectories", {}).items()}
+        iter_numbers = {int(k): v for k, v in data.get("iter_numbers", {}).items()}
+        expand_distances = {int(k): v for k, v in data.get("expand_distances", {}).items()}
+        rrt_evaluation_times = {int(k): v for k, v in data.get("rrt_evaluation_times", {}).items()}
         return cls(
             algorithm_desc=data.get("algorithm_desc"),
             env_path=data.get("env_path"),
@@ -67,15 +70,15 @@ class TrajectoryData:
             random_seed=data.get("random_seed"),
             max_iter=data.get("max_iter"),
             goal_sample_rate=data.get("goal_sample_rate"),
-            expand_distance=data.get("expand_distance"),
+            expand_distances=expand_distances,
             timestamp=data.get("timestamp"),
             measurement_name=data.get("measurement_name"),
             path=data.get("path"),
-            iter_numbers=data.get("iter_numbers", {}),
+            iter_numbers=iter_numbers,
             error_message=data.get("error_message"),
             overall_eval_time=data.get("overall_eval_time"),
             trajectories=trajectories,
-            rrt_evaluation_times=data.get("rrt_evaluation_times", {})
+            rrt_evaluation_times=rrt_evaluation_times
         )
         
     @classmethod

@@ -1,9 +1,10 @@
 from datetime import datetime
 import os
 import random
+from typing import List, Tuple, Dict
 from model.usv_config import MAX_COORD
 from model.vessel import Vessel
-from model.colreg_situation import HeadOn
+from model.colreg_situation import ColregSituation, HeadOn, NoColreg
 from trajectory_planning.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.colreg_plot import ColregPlot
@@ -11,12 +12,11 @@ from visualization.data_parser import EvalDataParser
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.usv_environment import USVEnvironment
 import numpy as np
-from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, RRTStarFND, DIM, LineObstacle
+from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, Obstacle, RRTStarFND, DIM, LineObstacle
 
-scaler = 1 / MAX_COORD  * DIM / 1.2
+SCALER = 1 / MAX_COORD  * DIM * 2
 
-DIRECTION_THRESHOLD = 1
-AREA = 2 * MAX_COORD
+DIRECTION_THRESHOLD = 50 # meter
 EXPAND_DISTANCE = MAX_COORD / 120
 GOAL_SAMPLE_RATE = 50.0 #%
 MAX_ITER = 30000
@@ -48,84 +48,107 @@ config = USV_ENV_DESC_LIST[data.config_name]
 env = USVEnvironment(config).update(data.best_solution)
 ColregPlot(env)
 
-interpolator = PathInterpolator(env.vessels, EXPAND_DISTANCE)
+def run_traj_generation(o : Vessel, colregs : List[ColregSituation]):
+    if len(colregs) == 0:
+        return [], 0
+    
+    obstacle_list : List[Obstacle] = []
+    all_collision_points : List[np.ndarray] = []
+    
+    expand_distance = 1000 / o.maneuverability() 
+    v_expand = o.v_norm() * expand_distance   
+    start = o.p + v_expand
+    
+    for colreg_s in colregs:
+        collision_points = colreg_s.get_colision_points(np.inf)
+        all_collision_points.append(collision_points)
+        #collision_center, collision_radius = find_center_and_radius(collision_points)          
+    all_collision_points = np.concatenate(all_collision_points, axis=0)
+        
+    collision_center, collision_radius = find_center_and_radius(all_collision_points)
+    
+    goal = o.p + o.v_norm() * (np.linalg.norm(o.p - collision_center) + 3 * collision_radius) 
+    
+    # Define the bounding lines
+    bounding_lines = [
+        LineObstacle(o.p[0], o.p[1], o.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm(), False, collision_radius * 1.5), # Right bounding line
+        LineObstacle(o.p[0], o.p[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
+    ]
+
+    # Add circular obstacle and bounding lines to obstacle list
+    obstacle_list += [CircularObstacle(collision_center[0], collision_center[1], collision_radius)] + bounding_lines
+
+    # Calculate X and Y distances
+    shifted_points_x = [line.shifted_point[0] for line in bounding_lines]
+    shifted_points_y = [line.shifted_point[1] for line in bounding_lines]
+
+    X_DIST = (min(shifted_points_x), max(shifted_points_x))
+    Y_DIST = (min(shifted_points_y), max(shifted_points_y))
+    # ====Search Path with RRT====
+    print(f"start RRT path planning for {o}")
+    # Set Initial parameters
+    rrt = RRTStarFND(
+                    vessel=o,
+                    start=start,
+                    goal=goal,
+                    randArea=[X_DIST, Y_DIST],
+                    obstacleList=obstacle_list,
+                    expandDis=expand_distance,
+                    goalSampleRate=GOAL_SAMPLE_RATE,
+                    maxIter=MAX_ITER,
+                    collision_points=all_collision_points,
+                    scaler = SCALER)
+    # Add the original position to start the path
+    path = [o.p] + rrt.plan_trajectory(animation=True)
+    # # Add a last sections to restore original path
+    # for i in range(3):
+    #     path += [goal + v_expand * (i + 1)]
+    
+    return path, rrt.current_i, expand_distance
+    
+    
+    
+interpolator = PathInterpolator(env)
+
+give_way_vessels : Dict[int, Tuple[Vessel, List[ColregSituation]]] = {o.id : (o, []) for o in env.vessels}
+
+for colreg_s in env.colreg_situations:
+    if isinstance(colreg_s, NoColreg):
+        continue
+    give_way_vessels[colreg_s.vessel1.id][1].append(colreg_s)
+    if isinstance(colreg_s, HeadOn):
+        give_way_vessels[colreg_s.vessel2.id][1].append(colreg_s)
+    
+        
+give_way_vessels_precedence = sorted(
+    list(give_way_vessels.values()),
+    key=lambda item: (len(item[1]), item[0].maneuverability())  # Sort firstly by the give-way numbers (how many corrections the vessel has to make) then by maneuverability (less maneuverable ships has to adapt to less other trajectories)
+)
 
 start_time = datetime.now()
-iter_numbers : dict[str, tuple[int, int]] = {}
-eval_times : dict[str, tuple[float, float]] = {}
-
-
-def run_traj_generation(o : Vessel, collision_center : np.ndarray, collision_radius : float):
-    p_scaled = o.p * scaler
-    v_expand_scaled = o.v_norm() * EXPAND_DISTANCE * scaler
-    start = p_scaled + v_expand_scaled
-    goal = p_scaled + o.v_norm() * (np.linalg.norm(p_scaled - collision_center) + 3 * collision_radius) 
-
-    print("start RRT path planning for o")
-
-    # ====Search Path with RRT====
-    obstacleList = [
-        CircularObstacle(collision_center[0], collision_center[1], collision_radius),
-        LineObstacle(p_scaled[0], p_scaled[1], o.v_norm(), True, DIRECTION_THRESHOLD),
-        LineObstacle(p_scaled[0], p_scaled[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD),
-        LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),
-        LineObstacle(p_scaled[0], p_scaled[1], o.v_norm(), False, collision_radius * 1.5)
-    ]
-    # Set Initial parameters
-    rrt = RRTStarFND(start=start,
-                    goal=goal,
-                    randArea=[AREA * scaler, AREA * scaler],
-                    obstacleList=obstacleList,
-                    expandDis=EXPAND_DISTANCE * scaler,
-                    goalSampleRate=GOAL_SAMPLE_RATE,
-                    maxIter=MAX_ITER)
-    # Add the original position to start the path
-    path = [p_scaled] + rrt.Planning(animation=True)
-    # Add a last sections to restore original path
-    for i in range(3):
-        path += [goal + v_expand_scaled * (i + 1)]
-    path = [np.array(pos) * (1.0 / scaler) for pos in path]
-    
-    return path, rrt.current_i
+iter_numbers : Dict[int, int] = {}
+eval_times : Dict[int, float] = {}
+expand_distances : Dict[int, float] = {}
         
-        
-for colreg_s in env.colreg_situations:
+for o, colregs in give_way_vessels_precedence:
+    o_start_time = datetime.now()
     
-    o1 = env.vessels[0]
-    o2 = env.vessels[1]
-
-    colision_points = colreg_s.get_colision_points(np.inf)
-    center, radius = find_center_and_radius(colision_points)
-
-    center = center * scaler
-    radius = radius * 3 * scaler
+    path, iter_number, expand_distance = run_traj_generation(o, colreg_s)  
+    interpolator.add_path(o, path)
     
-    o1_start_time = datetime.now()
-    path1, iter_number1 = run_traj_generation(o1, center, radius)
-    o1_eval_time = (datetime.now() - o1_start_time).total_seconds()
-    interpolator.add_path(o1, path1)
+    o_eval_time = (datetime.now() - o_start_time).total_seconds()
+    eval_times[o.id] = o_eval_time
+    iter_numbers[o.id] = iter_number
+    expand_distances[o.id] = expand_distance
     
-    if isinstance(colreg_s, HeadOn):
-        o2_start_time = datetime.now()
-        path2, iter_number2 = run_traj_generation(o2, center, radius)
-        o2_eval_time = (datetime.now() - o2_start_time).total_seconds()
-    else:
-        path2, iter_number2 = [], 0
-        o2_eval_time = 0
-    interpolator.add_path(o2, path2)
-    
-    eval_times[colreg_s.name] = (o1_eval_time, o2_eval_time)
-    iter_numbers[colreg_s.name] = (iter_number1, iter_number2)
-    
-        
- 
-interpolator.interpolate()
 overall_eval_time = (datetime.now() - start_time).total_seconds()
 timestamp = datetime.now().isoformat()
 
 traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_numbers, algorithm_desc='RRTStar_algo', 
                         config_name=data.config_name, env_path=data.path, random_seed=seed,
-                        expand_distance=EXPAND_DISTANCE, goal_sample_rate=GOAL_SAMPLE_RATE,
+                        expand_distances=expand_distances, goal_sample_rate=GOAL_SAMPLE_RATE,
                         max_iter=MAX_ITER, timestamp=timestamp, trajectories=interpolator.interpolated_paths,
                         overall_eval_time=overall_eval_time, rrt_evaluation_times=eval_times)
 

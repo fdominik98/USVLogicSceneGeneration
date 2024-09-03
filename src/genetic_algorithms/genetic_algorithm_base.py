@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import List, Optional, Tuple
 import numpy as np
 from aggregates import Aggregate
 from genetic_algorithms.evaluation_data import EvaluationData
@@ -84,7 +84,7 @@ class GeneticAlgorithmBase(ABC):
             return eval_data
         
     @abstractmethod   
-    def init_problem(self, initial_population : list[list[float]], eval_data : EvaluationData):
+    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData):
         pass
     
     @abstractmethod   
@@ -92,7 +92,7 @@ class GeneticAlgorithmBase(ABC):
         pass
     
     @abstractmethod   
-    def convert_results(self, some_results, eval_data : EvaluationData) -> tuple[list[float], list[float], int]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
         pass
     
     def save_eval_data(self, eval_data : EvaluationData):

@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 
 BOW_ANGLE = np.radians(10.0)
@@ -29,8 +30,9 @@ CONSTRAINT_NUMBER = 4
 VARIABLE_NUM = 4
 
 OWN_VESSEL_STATES = [MAX_COORD / 2, MAX_COORD / 2, np.pi/2]
+
     
-def interval_distance(value : float, boundaries: tuple[float, float], is_angle=True) -> tuple[float, float]:
+def interval_distance(value : float, boundaries: Tuple[float, float], is_angle=True) -> Tuple[float, float]:
     minimum, maximum = boundaries[0], boundaries[1] 
     if value < minimum:
         distance =  minimum - value
@@ -40,7 +42,7 @@ def interval_distance(value : float, boundaries: tuple[float, float], is_angle=T
         return 0.0, 0.0
     return distance, normed_distance(distance, boundaries, is_angle)
     
-def strict_distance(value : float, goal : float, is_angle=True) -> tuple[float, float]:
+def strict_distance(value : float, goal : float, is_angle=True) -> Tuple[float, float]:
     distance = abs(goal - value)
     return distance, normed_distance(distance, (goal, goal), is_angle)
 

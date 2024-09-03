@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
@@ -17,7 +17,7 @@ from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
 class ColregPlot():  
     def __init__(self, env : USVEnvironment, block=True, 
-                 trajectories : Optional[dict[int, list[tuple[float, float, float, float]]]] = None): 
+                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
         self.env = env        
         self.fig = plt.figure(figsize=(10,10)) 
         self.ax = self.fig.add_subplot()
@@ -35,7 +35,7 @@ class ColregPlot():
         self.ship_image_component = ShipImageComponent(self.ax, True, self.env)
         self.legend_component = LegendComponent(self.ax, True, self.env)
         
-        self.components : list[PlotComponent] = [
+        self.components : List[PlotComponent] = [
             self.vo_cone_component,
             self.additional_vo_cone_component,
             self.distance_component,
@@ -80,7 +80,7 @@ class ColregPlot():
         
         
     def set_layout(self):
-        self.fig.tight_layout(pad=5)
+        #self.fig.tight_layout(pad=5)
         self.ax.grid(False)
        
         self.ax.set_title(f'USV situation ({self.title})')
@@ -126,5 +126,7 @@ class ColregPlot():
             self.detailed_angle_circle_component.toggle()
         elif event.key == '8':
             self.prime_component.toggle()
+        elif event.key == '9':
+            self.ship_image_component.toggle()
         self.fig.canvas.draw()    
         

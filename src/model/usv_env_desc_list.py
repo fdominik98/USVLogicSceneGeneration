@@ -1,3 +1,4 @@
+from typing import Dict
 from model.colreg_situation import CrossingFromPort, HeadOn, NoColreg, Overtaking
 from model.colreg_situation_desc import ColregSituationDesc
 from model.usv_environment_desc import USVEnvironmentDesc
@@ -63,7 +64,7 @@ OS_BIG = VesselDesc(id=0, l=1000, b=18, min_speed= 3000, max_speed=5000)
 TS1_BIG = VesselDesc(id=1, l=1000, b=30, min_speed= 3000, max_speed=5000)
 TS2_BIG = VesselDesc(id=2, l=1000, b=30, min_speed= 3000, max_speed=5000)
 
-USV_ENV_DESC_LIST : dict[str, USVEnvironmentDesc] = {
+USV_ENV_DESC_LIST : Dict[str, USVEnvironmentDesc] = {
     'single' : USVEnvironmentDesc('single',
                                        [OS],
                                        []),

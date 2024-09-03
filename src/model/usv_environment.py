@@ -1,4 +1,5 @@
 import math
+from typing import List
 from model.instance_initializer import RandomInstanceInitializer, DeterministicInitializer
 from model.usv_environment_desc import USVEnvironmentDesc
 from model.usv_config import OWN_VESSEL_STATES, VARIABLE_NUM
@@ -13,7 +14,7 @@ class USVEnvironment():
         self.smallest_ship = min(self.vessels, key=lambda v: v.r)
         self.largest_ship = max(self.vessels, key=lambda v: v.r)
         
-    def update(self, states : list[float]):
+    def update(self, states : List[float]):
         if len(states) != self.config.all_variable_num:
             raise Exception("the variable number is insufficient.")
         
@@ -30,11 +31,17 @@ class USVEnvironment():
         return self
          
     @staticmethod  
-    def euler_distance(fitness : list[float]):
+    def euler_distance(fitness : List[float]):
         return math.sqrt(sum([x**2 for x in fitness]))
           
           
-    def get_population(self, pop_size) -> list[list[float]]:
+    def get_population(self, pop_size) -> List[List[float]]:
         population = self.initializer.get_population(pop_size=pop_size)
         return population
+    
+    def get_vessel_by_id(self, id):
+        vessel = next((v for v in self.vessels if v.id == id), None)
+        if vessel is None:
+            raise Exception(f"No vessel with id {id}")
+        return vessel
     

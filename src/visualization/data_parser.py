@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+from typing import List, Tuple
 import pandas as pd
 from model.usv_environment import USVEnvironment
 from genetic_algorithms.evaluation_data import EvaluationData
@@ -24,12 +25,12 @@ class DataParser(ABC):
                          'goal_sample_rate', 'random_seed']
     
     
-    def __init__(self, column_names : list[str], dir : str) -> None:
+    def __init__(self, column_names : List[str], dir : str) -> None:
         self.column_names = column_names
         self.dir = dir
         
     @abstractmethod    
-    def get_data_lines(self, files : list[str]) -> list[dict]:
+    def get_data_lines(self, files : List[str]) -> List[dict]:
         pass
 
     def get_all_file_paths(self, directory):
@@ -41,9 +42,9 @@ class DataParser(ABC):
         return file_paths
     
         
-    def load_dirs(self) -> tuple[list[pd.DataFrame], list[str]]:
-        dfs : list[pd.DataFrame] = []    
-        df_names : list[str] = []
+    def load_dirs(self) -> Tuple[List[pd.DataFrame], List[str]]:
+        dfs : List[pd.DataFrame] = []    
+        df_names : List[str] = []
         for dir in tkfilebrowser.askopendirnames(initialdir=self.dir):
             files = self.get_all_file_paths(dir)
             if len(files) == 0:
@@ -55,7 +56,7 @@ class DataParser(ABC):
         return dfs, df_names
     
     
-    def load_df(self) -> tuple[pd.DataFrame, str]:
+    def load_df(self) -> Tuple[pd.DataFrame, str]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
         df = self.load_df_from_files(files)
         if len(files) == 0:
@@ -65,9 +66,9 @@ class DataParser(ABC):
         return df, df_name
         
             
-    def load_df_from_files(self, files : list[str]) -> pd.DataFrame:        
+    def load_df_from_files(self, files : List[str]) -> pd.DataFrame:        
         data_lines = self.get_data_lines(files)
-        data_lists : list[list[float]] = []
+        data_lists : List[List[float]] = []
         
         for data in data_lines:
             measurement_data = []
@@ -89,14 +90,14 @@ class EvalDataParser(DataParser):
         super().__init__(self.EVAL_DATA_COLUMN_NAMES, self.PYMOO_DIR)
 
     
-    def get_data_lines(self, files : list[str]) -> list[dict]:
+    def get_data_lines(self, files : List[str]) -> List[dict]:
         return [EvaluationData.load_dict_from_json(file) for file in files]
     
-    def load_data_models(self) -> list[EvaluationData]:
+    def load_data_models(self) -> List[EvaluationData]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
         return self.load_data_models_from_files(files)
     
-    def load_data_models_from_files(self, files : list[str]) -> list[EvaluationData]:
+    def load_data_models_from_files(self, files : List[str]) -> List[EvaluationData]:
         return [EvaluationData.load_from_json(file) for file in files]
     
 class TrajDataParser(DataParser):    
@@ -104,13 +105,13 @@ class TrajDataParser(DataParser):
         super().__init__(self.TRAJ_COLUMN_NAMES, self.RRT_DIR)
 
     
-    def get_data_lines(self, files : list[str]) -> list[dict]:
+    def get_data_lines(self, files : List[str]) -> List[dict]:
         return [TrajectoryData.load_dict_from_json(file) for file in files]
     
-    def load_data_models(self) -> list[TrajectoryData]:
+    def load_data_models(self) -> List[TrajectoryData]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
         return self.load_data_models_from_files(files)
     
-    def load_data_models_from_files(self, files : list[str]) -> list[TrajectoryData]:
+    def load_data_models_from_files(self, files : List[str]) -> List[TrajectoryData]:
         return [TrajectoryData.load_from_json(file) for file in files]
     

@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 import random
-from typing import Optional
+from typing import List, Optional, Tuple
 import pygame
-import timeit, time
 import numpy as np
+from model.vessel import Vessel
+from trajectory_planning.path_interpolator import PathInterpolator
+
 show_animation = True
 
 DIM = 1200
@@ -22,12 +24,28 @@ class Node():
     """
     RRT Node
     """
-    def __init__(self, x : float, y : float):
-        self.p = np.array([x, y])
-        self.cost = 0.0
-        self.parent : Optional[int] = None
+    def __init__(self, p : np.ndarray):
+        self.p = p
+        self.distance_cost = 0.0
+        self.time_cost : int = 0
+        self.s_fraction = False
+        self.parent : int = -1
         self.children : set[int] = set()
         
+    @staticmethod
+    def calc_cost(vessel : Vessel, d : float) -> Tuple[int, bool]:
+        # Calculate the distance and heading between the points
+        s_dist = int(d // vessel.speed)
+        # Calculate the number of seconds required to cover the distance
+        s_fraction = d / vessel.speed - s_dist
+        if s_fraction > 0.0001:
+            return s_dist + 1, True 
+        return s_dist, False
+    
+    def set_cost(self, d : float, time : float, fraction : bool):
+        self.distance_cost = d
+        self.time_cost = time
+        self.s_fraction = fraction       
         
 class Obstacle(ABC):
     MARGIN = 0.02
@@ -36,7 +54,7 @@ class Obstacle(ABC):
         self.p = np.array([x, y])
         
     @abstractmethod    
-    def no_collision_check(self, node : Node) -> bool:
+    def check_no_collision(self, node : Node) -> bool:
         pass
   
     
@@ -45,7 +63,7 @@ class CircularObstacle(Obstacle):
         super().__init__(x, y)
         self.radius = radius
         
-    def no_collision_check(self, node : Node) -> bool:
+    def check_no_collision(self, node : Node) -> bool:
         d = np.linalg.norm(node.p - self.p)
         if d <= self.radius + self.radius * self.MARGIN:
             return False  # collision
@@ -70,7 +88,7 @@ class LineObstacle(Obstacle):
         self.shifted_point = self.p + self.shift * self.perpendicular
 
         
-    def no_collision_check(self, node : Node) -> bool:
+    def check_no_collision(self, node : Node) -> bool:
         # Compute the cross product to determine the position relative to the shifted line
         # Line equation is implicit: (P - shifted_point) dotted with the perpendicular vector should be checked
         position_value = np.dot(self.perpendicular, node.p - self.shifted_point)
@@ -93,59 +111,67 @@ class RRTStarFND():
     """
     Class for RRT Planning
     """
-    def __init__(self, start, goal, obstacleList : list[Obstacle],
-                 randArea, expandDis=10.0, goalSampleRate=15, maxIter=1500):
-
-        self.start = Node(start[0], start[1])
-        self.end = Node(goal[0], goal[1])
-        self.Xrand = randArea[0]
-        self.Yrand = randArea[1]
-        self.expandDis = expandDis
+    def __init__(self, vessel : Vessel, start : np.ndarray, goal : np.ndarray,
+                 obstacleList : List[Obstacle], randArea : List[Tuple[float, float]], 
+                 collision_points : List[np.ndarray], interpolator : PathInterpolator,
+                expandDis=10.0, goalSampleRate=15, maxIter=1500, scaler = 1.0):
+        self.vessel = vessel
+        self.collision_points = collision_points
+        self.interpolator = interpolator
+        self.start = Node(start)
+        self.end = Node(goal)
+        self.randArea = randArea
+        self.expand_dist = expandDis
         self.goalSampleRate = goalSampleRate
-        self.maxIter = maxIter
-        self.obstacleList : list[Obstacle] = obstacleList
+        self.max_iter = maxIter
+        self.obstacleList : List[Obstacle] = obstacleList
         self.current_i = 0
+        self.stop = False
+        self.scaler = scaler
 
-    def do_plan(self, animation : bool) -> Optional[list[np.ndarray]]:
-        while self.current_i < self.maxIter:
+    def do_plan(self, animation : bool) -> Optional[List[Node]]:
+        while self.current_i < self.max_iter and not self.stop:
             print(self.current_i)
 
             rnd = self.get_random_point()
-            nind = self.GetNearestListIndex(rnd) # get nearest node index to random point
-            newNode = self.steer(rnd, nind) # generate new node from that nearest node in direction of random point
+            nearest_index = self.get_nearest_list_index(rnd) # get nearest node index to random point
+            new_node = self.steer(rnd, nearest_index) # generate new node from that nearest node in direction of random point
 
-            if self.__CollisionCheck(newNode, self.obstacleList): # if it does not collide
+            if self.check_no_collision(new_node, self.obstacleList): # if it does not collide
 
-                nearinds = self.find_near_nodes(newNode, 5) # find nearest nodes to newNode
-                newNode = self.choose_parent(newNode, nearinds) # from that nearest nodes find the best parent to newNode
-                self.nodeList[self.current_i + 100] = newNode # add newNode to nodeList
-                self.rewire(self.current_i + 100, newNode, nearinds) # make newNode a parent of another node if necessary
-                self.nodeList[newNode.parent].children.add(self.current_i + 100)
+                nearest_indexes = self.find_near_nodes(new_node, 5) # find nearest nodes to newNode
+                new_node = self.choose_parent(new_node, nearest_indexes) # from that nearest nodes find the best parent to newNode
+                self.node_list[self.current_i + 100] = new_node # add newNode to nodeList
+                self.rewire(self.current_i + 100, new_node, nearest_indexes) # make newNode a parent of another node if necessary
+                self.node_list[new_node.parent].children.add(self.current_i + 100)
 
-                if len(self.nodeList) > self.maxIter:
-                    leaves = [ key for key, node in self.nodeList.items() if len(node.children) == 0 and len(self.nodeList[node.parent].children) > 1 ]
+                if len(self.node_list) > self.max_iter:
+                    leaves = [ key for key, node in self.node_list.items() if len(node.children) == 0 and len(self.node_list[node.parent].children) > 1 ]
                     if len(leaves) > 1:
                         ind = leaves[random.randint(0, len(leaves)-1)]
-                        self.nodeList[self.nodeList[ind].parent].children.discard(ind)
-                        self.nodeList.pop(ind)
+                        self.node_list[self.node_list[ind].parent].children.discard(ind)
+                        self.node_list.pop(ind)
                     else:
-                        leaves = [ key for key, node in self.nodeList.items() if len(node.children) == 0 ]
+                        leaves = [ key for key, node in self.node_list.items() if len(node.children) == 0 ]
                         ind = leaves[random.randint(0, len(leaves)-1)]
-                        self.nodeList[self.nodeList[ind].parent].children.discard(ind)
-                        self.nodeList.pop(ind)
+                        self.node_list[self.node_list[ind].parent].children.discard(ind)
+                        self.node_list.pop(ind)
 
             if animation and self.current_i % 25 == 0:
-                self.DrawGraph(rnd)
+                self.draw_graph(rnd)
 
             for e in pygame.event.get():
                 if e.type == pygame.MOUSEBUTTONDOWN:
                     if e.button == 1:
-                        self.obstacleList.append(CircularObstacle(e.pos[0],e.pos[1], 50))
+                        self.obstacleList.append(CircularObstacle(e.pos[0],e.pos[1], 400))
                         self.path_validation()
                     elif e.button == 3:
                         self.end.p[0] = e.pos[0]
                         self.end.p[1] = e.pos[1]
                         self.path_validation()
+                elif e.type == pygame.KEYDOWN:
+                        if e.key == pygame.K_SPACE:
+                            self.stop = True
                         
             self.current_i += 1
                         
@@ -157,31 +183,32 @@ class RRTStarFND():
         return path
         
 
-    def Planning(self, animation=True) -> list[np.ndarray]:
+    def plan_trajectory(self, animation=True) -> List[Node]:
         """
-        Pathplanning
+        plan_trajectory
         animation: flag for animation on or off
         """
-        self.nodeList = {0 : self.start}
+        self.node_list = {0 : self.start}
         path = None
         while(path is None):
             path = self.do_plan(animation)
             if path is None:
-                self.maxIter += 100
-                print("No solution repeating for 100 more iterations.")
+                if self.current_i == self.max_iter:
+                    self.max_iter += 100
+                    print("No solution repeating for 100 more iterations.")
         path.reverse()
         return path     
 
     def path_validation(self):
         lastIndex = self.get_best_last_index()
         if lastIndex is not None:
-            while self.nodeList[lastIndex].parent is not None:
+            while self.node_list[lastIndex].parent != -1:
                 nodeInd = lastIndex
-                lastIndex = self.nodeList[lastIndex].parent
-                d, theta = self.get_d_theta(self.nodeList[nodeInd], self.nodeList[lastIndex])
+                lastIndex = self.node_list[lastIndex].parent
+                dist, theta = self.get_d_theta(self.node_list[nodeInd], self.node_list[lastIndex])
                 
-                if not self.check_collision_extend(self.nodeList[lastIndex].p, theta, d):
-                    self.nodeList[lastIndex].children.discard(nodeInd)
+                if not self.check_collision_extend(self.node_list[lastIndex].p, theta, dist):
+                    self.node_list[lastIndex].children.discard(nodeInd)
                     self.remove_branch(nodeInd)
     
     
@@ -190,168 +217,176 @@ class RRTStarFND():
         return np.linalg.norm(delta_pos), np.arctan2(delta_pos[1], delta_pos[0])
 
     def remove_branch(self, nodeInd):
-        for ix in self.nodeList[nodeInd].children:
+        for ix in self.node_list[nodeInd].children:
             self.remove_branch(ix)
-        self.nodeList.pop(nodeInd)
+        self.node_list.pop(nodeInd)
 
-    def choose_parent(self, newNode : Node, nearinds):
-        if len(nearinds) == 0:
+    def choose_parent(self, newNode : Node, nearest_indexes):
+        if len(nearest_indexes) == 0:
             return newNode
 
-        dlist = []
-        for i in nearinds:
-            d, theta = self.get_d_theta(newNode, self.nodeList[i])
-            if self.check_collision_extend(self.nodeList[i].p, theta, d):
-                dlist.append(self.nodeList[i].cost + d)
+        distance_list = []
+        for i in nearest_indexes:
+            dist, theta = self.get_d_theta(newNode, self.node_list[i])
+            if self.check_collision_extend(self.node_list[i].p, theta, dist):
+                distance_list.append(self.node_list[i].distance_cost + dist)
             else:
-                dlist.append(float("inf"))
+                distance_list.append(float("inf"))
 
 
-        mincost = min(dlist)
-        minind = nearinds[dlist.index(mincost)]
+        min_cost = min(distance_list)
+        min_index = nearest_indexes[distance_list.index(min_cost)]
 
-        if mincost == float("inf"):
-            print("mincost is inf")
+        if min_cost == float("inf"):
+            print("min_cost is inf")
             return newNode
 
-        newNode.cost = mincost
-        newNode.parent = minind
+        newNode.distance_cost = min_cost
+        newNode.parent = min_index
         return newNode
 
-    def steer(self, rnd, nind):
+    def steer(self, rnd, nearest_index : int):
         # expand tree
-        nearestNode = self.nodeList[nind]
-        theta = np.arctan2(rnd[1] - nearestNode.p[1], rnd[0] - nearestNode.p[0])
-        newNode = Node(nearestNode.p[0], nearestNode.p[1])
-        newNode.p += np.array([np.cos(theta), np.sin(theta)]) * self.expandDis
-
-        newNode.cost = nearestNode.cost + self.expandDis
-        newNode.parent = nind 
-        return newNode
+        nearest_node = self.node_list[nearest_index]
+        v = np.linalg.norm([rnd[0] - nearest_node.p[0], rnd[1] - nearest_node.p[1]])
+        new_point = nearest_node.p + v * self.expand_dist
+        new_node = Node(new_point)
+        
+        s_dist, s_fraction = Node.calc_cost(self.vessel, self.expand_dist)
+        new_node.set_cost(nearest_node.distance_cost + self.expand_dist, nearest_node.time_cost + s_dist, s_fraction)
+        new_node.parent = nearest_index
+        return new_node
 
     def get_random_point(self):
         if random.randint(0, 100) > self.goalSampleRate:
-            rnd = [random.uniform(0, self.Xrand), random.uniform(0, self.Yrand)]
+            rnd = [random.uniform(*self.randArea[0]), random.uniform(*self.randArea[1])]
         else:  # goal point sampling
             rnd = [self.end.p[0], self.end.p[1]]
         return rnd
 
     def get_best_last_index(self):
-        disglist = [(key, np.linalg.norm(self.end.p - node.p)) for key, node in self.nodeList.items()]
-        goalinds = [key for key, distance in disglist if distance <= self.expandDis]
+        dist_to_goal_list = [(key, np.linalg.norm(self.end.p - node.p)) for key, node in self.node_list.items()]
+        near_goal_indexes = [key for key, distance in dist_to_goal_list if distance <= self.expand_dist]
 
-        if len(goalinds) == 0:
+        if len(near_goal_indexes) == 0:
             return None
 
-        mincost = min([self.nodeList[key].cost for key in goalinds])
-        for i in goalinds:
-            if self.nodeList[i].cost == mincost:
+        min_cost = min([self.node_list[key].distance_cost for key in near_goal_indexes])
+        for i in near_goal_indexes:
+            if self.node_list[i].distance_cost == min_cost:
                 return i
 
         return None
 
-    def gen_final_course(self, goalind : int):
-        path = [self.end.p]
-        while self.nodeList[goalind].parent is not None:
-            node = self.nodeList[goalind]
-            path.append(node.p)
-            goalind = node.parent
-        path.append(self.start.p)
+    def gen_final_course(self, goal_index : int):
+        path = [self.end]
+        while self.node_list[goal_index].parent != -1:
+            node = self.node_list[goal_index]
+            path.append(node)
+            goal_index = node.parent
+        path.append(self.start)
         return path
 
     def find_near_nodes(self, newNode : Node, value):
-        r = self.expandDis * value
+        r = self.expand_dist * value
 
-        dlist = np.subtract( np.array([node.p for node in self.nodeList.values()]), newNode.p)**2
-        dlist = np.sum(dlist, axis=1)
-        nearinds = np.where(dlist <= r ** 2)
-        nearinds = np.array(list(self.nodeList.keys()))[nearinds]
+        distance_list = np.subtract( np.array([node.p for node in self.node_list.values()]), newNode.p)**2
+        distance_list = np.sum(distance_list, axis=1)
+        nearest_indexes = np.where(distance_list <= r ** 2)
+        nearest_indexes = np.array(list(self.node_list.keys()))[nearest_indexes]
+        return nearest_indexes
+    
 
-        return nearinds
+    def rewire(self, new_node_index : int, new_node : Node, near_indexes : List[int]):
+        for i in near_indexes:
+            near_node = self.node_list[i]
 
-    def rewire(self, newNodeInd : int, newNode : Node, nearinds : list[int]):
-        nnode = len(self.nodeList)
-        for i in nearinds:
-            nearNode = self.nodeList[i]
+            d, theta = self.get_d_theta(new_node, near_node)
 
-            d, theta = self.get_d_theta(newNode, nearNode)
+            new_cost = new_node.distance_cost + d
 
-            scost = newNode.cost + d
+            if near_node.distance_cost > new_cost:
+                if self.check_collision_extend(near_node.p, theta, d):
+                    self.node_list[near_node.parent].children.discard(i)
+                    near_node.parent = new_node_index
+                    s_d, s_fraction = Node.calc_cost(self.vessel, d)
+                    near_node.set_cost(new_cost, s_d + new_node.time_cost, s_fraction)
+                    new_node.children.add(i)
+                    
 
-            if nearNode.cost > scost:
-                if self.check_collision_extend(nearNode.p, theta, d):
-                    self.nodeList[nearNode.parent].children.discard(i)
-                    nearNode.parent = newNodeInd
-                    nearNode.cost = scost
-                    newNode.children.add(i)
-
-    def check_collision_extend(self, niP: np.ndarray, theta : float, d : float):
-        tmpNode = Node(niP[0], niP[1])
-
-        for i in range(int(d/5)):
-            tmpNode.p += np.array([5 * np.cos(theta), 5 * np.sin(theta)])
-            if not self.__CollisionCheck(tmpNode, self.obstacleList):
-                return False
-
-        return True
-
-    def reverse_coord(self, coords: np.ndarray):
-        return np.array([coords[0], DIM - coords[1] + DIM / 4])
-
-    def DrawGraph(self, rnd=None):
+    def draw_graph(self, rnd=None):
+        def reverse_coord(coords: np.ndarray):
+            return np.array([(coords[0] - self.randArea[0][0]) * self.scaler  + 40, (DIM - (coords[1] - self.randArea[1][1])) * self.scaler])
+        
         u"""
         Draw Graph
         """
         screen.fill((255, 255, 255))
-        for node in self.nodeList.values():
-            if node.parent is not None:
-                start = self.reverse_coord(self.nodeList[node.parent].p)
-                end = self.reverse_coord(node.p)
-                pygame.draw.line(screen,(0,255,0), start, end)
-
-        for node in self.nodeList.values():
-            if len(node.children) == 0: 
-                center = self.reverse_coord(node.p)
-                pygame.draw.circle(screen, (255,0,255), center, 2)
-                
 
         for o in self.obstacleList:
             if isinstance(o, LineObstacle):
-                start = self.reverse_coord(o.shifted_point + o.dir_vec * 2 * DIM)
-                end = self.reverse_coord(o.shifted_point - o.dir_vec * 2 * DIM)
-                pygame.draw.line(screen,(0,0,0), start, end, 8)
+                start = reverse_coord(o.shifted_point + o.dir_vec * 2 * DIM / self.scaler)
+                end = reverse_coord(o.shifted_point - o.dir_vec * 2 * DIM / self.scaler)
+                pygame.draw.line(screen,(0,0,0), start, end, 4)
+                pygame.draw.circle(screen,(23,231,5), reverse_coord(o.shifted_point), 5) 
             elif isinstance(o, CircularObstacle):
-                center = self.reverse_coord(o.p)
-                pygame.draw.circle(screen,(0,0,0), center, o.radius)
+                pygame.draw.circle(screen,(0,0,0), reverse_coord(o.p), o.radius * self.scaler)
 
-        start_center = self.reverse_coord(self.start.p)
-        end_center = self.reverse_coord(self.end.p)
-        pygame.draw.circle(screen, (0,0,255), start_center, 10)
-        pygame.draw.circle(screen, (255,0,0), end_center, 10)
-
+        pygame.draw.circle(screen, (0,0,255), reverse_coord(self.start.p), 7)
+        pygame.draw.circle(screen, (0,255,255), reverse_coord(self.end.p), 7)
+        
+        for cp in self.collision_points:
+            pygame.draw.circle(screen,(255,0,0), reverse_coord(cp), 3)
+            
+        
+        # Branches        
+        for node in self.node_list.values():
+            if node.parent != -1:
+                pygame.draw.line(screen,(0,255,0), reverse_coord(self.node_list[node.parent].p), reverse_coord(node.p))
+        for node in self.node_list.values():
+            if len(node.children) == 0: 
+                pygame.draw.circle(screen, (255,0,255), reverse_coord(node.p), 2)
+                
+        # Final path
         lastIndex = self.get_best_last_index()
         if lastIndex is not None:
             path = self.gen_final_course(lastIndex)
 
             ind = len(path)
             while ind > 1:
-                start =  self.reverse_coord(path[ind-2])
-                end =  self.reverse_coord(path[ind-1])
-                pygame.draw.line(screen, (255,0,0), start, end)
+                pygame.draw.line(screen, (255,0,0), reverse_coord(path[ind-2]), reverse_coord(path[ind-1]))
                 ind-=1
+        
 
         pygame.display.update()
 
 
-    def GetNearestListIndex(self, rnd):
-        dlist = np.subtract( np.array([ node.p for node in self.nodeList.values() ]), (rnd[0],rnd[1]))**2
-        dlist = np.sum(dlist, axis=1)
-        minind = list(self.nodeList.keys())[np.argmin(dlist)]
-        return minind
+    def get_nearest_list_index(self, rnd):
+        dist_list = np.subtract( np.array([ node.p for node in self.node_list.values() ]), (rnd[0],rnd[1]))**2
+        dist_list = np.sum(dist_list, axis=1)
+        min_index = list(self.node_list.keys())[np.argmin(dist_list)]
+        return min_index
 
-    def __CollisionCheck(self, node : Node, obstacleList : list[Obstacle]):
-        for o in obstacleList:
-            if not o.no_collision_check(node):
+
+    def check_collision_extend(self, niP: np.ndarray, theta : float, d : float):
+        tmpNode = Node(niP)
+
+        for i in range(int(d/5)):
+            tmpNode.p += np.array([5 * np.cos(theta), 5 * np.sin(theta)])
+            if not self.check_no_collision(tmpNode, self.obstacleList):
+                return False
+
+        return True
+
+
+    def check_no_collision(self, node : Node, obstacleList : List[Obstacle]):
+        for obs in obstacleList:
+            if not obs.check_no_collision(node):
+                return False
+            
+        # The two trajectories will collide at the specific second
+        for vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
+            if np.linalg.norm(node.p - pos) <= (self.vessel.r + vessel.r) * 1.1:
                 return False
         return True  # safe
 

@@ -24,17 +24,23 @@ class Vessel():
         self.r = desc.l * 2.0
         self.name = desc.name
         
-    def update(self, p_x, p_y, heading, speed):
+    def update(self, p_x, p_y, heading, speed) -> None:
         self.p = np.array([p_x, p_y])
         self.v = np.array([np.cos(heading), np.sin(heading)]) * speed
         self.speed = speed    
         self.heading = heading
         
-    def v_norm(self):
+    def v_norm(self) -> np.ndarray:
         return self.v / self.speed
     
-    def v_norm_perp(self):
+    def v_norm_perp(self) -> np.ndarray:
         v_norm = self.v_norm()
         return np.array([v_norm[1], -v_norm[0]])
+    
+    def maneuverability(self) -> float:
+        return 9.81 / (9.81 * self.l + self.speed * self.speed)
+    
+    def __str__(self) -> str:
+        return self.name
     
  

@@ -1,3 +1,4 @@
+from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
@@ -8,10 +9,10 @@ from visualization.plot_component import PlotComponent, colors
 class VOConeComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
-        self.other_velocity_graphs : dict[str, plt.Quiver] = {}
-        self.line1_graphs : dict[str, plt.Line2D] = {}
-        self.line2_graphs : dict[str, plt.Line2D] = {}
-        self.filling_graphs : dict[str, plt.Polygon] = {}
+        self.other_velocity_graphs : Dict[str, plt.Quiver] = {}
+        self.line1_graphs : Dict[str, plt.Line2D] = {}
+        self.line2_graphs : Dict[str, plt.Line2D] = {}
+        self.filling_graphs : Dict[str, plt.Polygon] = {}
             
     def do_draw(self, zorder : int):
         for colreg_s in self.env.colreg_situations:
@@ -44,7 +45,7 @@ class VOConeComponent(PlotComponent):
             
             self.graphs += [line1, line2, other_velocity, filling[0]] 
         
-    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for colreg_s in new_env.colreg_situations:
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2

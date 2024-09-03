@@ -1,11 +1,12 @@
 from itertools import combinations
+from typing import List
 from model.colreg_situation_desc import ColregSituationDesc
 from model.colreg_situation import NoColreg
 from model.vessel import VesselDesc
 from model.usv_config import VARIABLE_NUM
 
 class USVEnvironmentDesc():
-    def __init__(self, name, vessel_descs : list[VesselDesc], colreg_situation_descs : list[ColregSituationDesc]) -> None:
+    def __init__(self, name, vessel_descs : List[VesselDesc], colreg_situation_descs : List[ColregSituationDesc]) -> None:
         self.name = name
         self.vessel_descs = sorted(vessel_descs, key=lambda v: v.id)
         self.colreg_situation_descs = colreg_situation_descs

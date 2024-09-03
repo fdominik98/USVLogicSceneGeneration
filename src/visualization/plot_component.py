@@ -1,3 +1,4 @@
+from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
@@ -11,7 +12,7 @@ class PlotComponent(ABC):
         self.ax = ax
         self.env = env
         self.visible = initial_visibility
-        self.graphs : list[plt.Artist] = []
+        self.graphs : List[plt.Artist] = []
         
     def draw(self, zorder : int):
         self.do_draw(zorder)
@@ -31,14 +32,14 @@ class PlotComponent(ABC):
     def do_draw(self, zorder : int):
         pass
     
-    def update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         if self.visible:
             return self.do_update(new_env)      
         return []  
     
     @abstractmethod
-    def do_update(self, new_env : USVEnvironment) -> list[plt.Artist]:
+    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         pass        
     
-    def reset(self) -> list[plt.Artist]:
+    def reset(self) -> List[plt.Artist]:
         return self.update(self.env)
