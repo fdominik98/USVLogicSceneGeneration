@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 from model.vessel import Vessel
 from model.usv_environment import USVEnvironment
+from trajectory_planning.rrt_utils import Node
 
 
 class PathInterpolator():
@@ -10,13 +11,13 @@ class PathInterpolator():
         self.interpolated_paths : Dict[int, List[Tuple[float,float,float,float]]] = {}
         self.path_length = 45 * 60
 
-    def add_path(self, vessel : Vessel, path : List[np.ndarray]):
+    def add_path(self, vessel : Vessel, path : List[Node]):
         if vessel.id in self.interpolated_paths:
             raise Exception("Cannot add two path for one vessel")
         if len(path) == 0:
             self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.speed)]
         else:
-            self.interpolate_path(vessel, path)
+            self.interpolated_paths[vessel.id] = self.interpolate_path(vessel, path)
         self.extend_paths_to_path_length()       
     
            
@@ -35,13 +36,13 @@ class PathInterpolator():
                 ))
                 
     def get_positions_by_second(self, second) -> List[Tuple[Vessel, np.ndarray]]:
-        if second <= self.path_length:
-            self.path_length = second + 50
+        if second >= self.path_length:
+            self.path_length = self.path_length + (second - self.path_length) + 60
             self.extend_paths_to_path_length()
-        return [(self.env.get_vessel_by_id(id), path[second]) for id, path in self.interpolated_paths.items()]
+        return [(self.env.get_vessel_by_id(id), path[second][:2]) for id, path in self.interpolated_paths.items()]
                 
 
-    def interpolate_path(self, vessel: Vessel, path : List[np.ndarray]) -> List[Tuple[float,float,float,float]]:
+    def interpolate_path(self, vessel: Vessel, path : List[Node]) -> List[Tuple[float,float,float,float]]:
         """
         Interpolates the given path to have positions at one-second intervals
         and calculates the heading based on the direction of movement.
@@ -57,11 +58,11 @@ class PathInterpolator():
 
         for i in range(len(path) - 1):
             # Start and end points
-            p_start = path[i]
-            p_end = path[i + 1]
+            node_start = path[i]
+            node_end = path[i + 1]
             
             # Calculate the distance and heading between the points
-            delta_pos =  p_end - p_start
+            delta_pos =  node_end.p - node_start.p
             heading = np.arctan2(delta_pos[1], delta_pos[0])
             d = np.linalg.norm(delta_pos)
             
@@ -75,7 +76,7 @@ class PathInterpolator():
             # Interpolate positions for each second
             for t in range(seconds_per_expand):
                 fraction = t / seconds_per_expand
-                new_p = p_start + delta_pos * fraction
+                new_p = node_start.p + delta_pos * fraction
                 interpolated_positions.append(new_p)
                 interpolated_headings.append(heading)
                 interpolated_speeds.append(vessel.speed)                
@@ -84,7 +85,7 @@ class PathInterpolator():
                 interpolated_speeds[-1] = speed 
         
         # Append the final position and heading
-        interpolated_positions.append(path[-1])
+        interpolated_positions.append(path[-1].p)
         interpolated_headings.append(vessel.heading)
         interpolated_speeds.append(vessel.speed)
         

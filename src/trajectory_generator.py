@@ -16,10 +16,10 @@ from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, Obstac
 
 SCALER = 1 / MAX_COORD  * DIM * 2
 
-DIRECTION_THRESHOLD = 50 # meter
+DIRECTION_THRESHOLD = 100 # meter
 EXPAND_DISTANCE = MAX_COORD / 120
 GOAL_SAMPLE_RATE = 50.0 #%
-MAX_ITER = 30000
+MAX_ITER = 6000
 measurement_name = 'test'
 measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
 
@@ -48,16 +48,14 @@ config = USV_ENV_DESC_LIST[data.config_name]
 env = USVEnvironment(config).update(data.best_solution)
 ColregPlot(env)
 
-def run_traj_generation(o : Vessel, colregs : List[ColregSituation]):
+def run_traj_generation(o : Vessel, colregs : List[ColregSituation], interpolator : PathInterpolator):
+    expand_distance = 1 / o.maneuverability() 
+    
     if len(colregs) == 0:
-        return [], 0
+        return [], 0, expand_distance
     
     obstacle_list : List[Obstacle] = []
-    all_collision_points : List[np.ndarray] = []
-    
-    expand_distance = 1000 / o.maneuverability() 
-    v_expand = o.v_norm() * expand_distance   
-    start = o.p + v_expand
+    all_collision_points : List[np.ndarray] = []    
     
     for colreg_s in colregs:
         collision_points = colreg_s.get_colision_points(np.inf)
@@ -66,7 +64,6 @@ def run_traj_generation(o : Vessel, colregs : List[ColregSituation]):
     all_collision_points = np.concatenate(all_collision_points, axis=0)
         
     collision_center, collision_radius = find_center_and_radius(all_collision_points)
-    
     goal = o.p + o.v_norm() * (np.linalg.norm(o.p - collision_center) + 3 * collision_radius) 
     
     # Define the bounding lines
@@ -91,17 +88,18 @@ def run_traj_generation(o : Vessel, colregs : List[ColregSituation]):
     # Set Initial parameters
     rrt = RRTStarFND(
                     vessel=o,
-                    start=start,
+                    start=o.p,
                     goal=goal,
-                    randArea=[X_DIST, Y_DIST],
-                    obstacleList=obstacle_list,
-                    expandDis=expand_distance,
-                    goalSampleRate=GOAL_SAMPLE_RATE,
-                    maxIter=MAX_ITER,
+                    sample_area=[X_DIST, Y_DIST],
+                    obstacle_list=obstacle_list,
+                    expand_dist=expand_distance,
+                    goal_sample_rate=GOAL_SAMPLE_RATE,
+                    max_iter=MAX_ITER,
                     collision_points=all_collision_points,
+                    interpolator=interpolator,
                     scaler = SCALER)
     # Add the original position to start the path
-    path = [o.p] + rrt.plan_trajectory(animation=True)
+    path = rrt.plan_trajectory(animation=True)
     # # Add a last sections to restore original path
     # for i in range(3):
     #     path += [goal + v_expand * (i + 1)]
@@ -135,7 +133,7 @@ expand_distances : Dict[int, float] = {}
 for o, colregs in give_way_vessels_precedence:
     o_start_time = datetime.now()
     
-    path, iter_number, expand_distance = run_traj_generation(o, colreg_s)  
+    path, iter_number, expand_distance = run_traj_generation(o, colregs, interpolator)  
     interpolator.add_path(o, path)
     
     o_eval_time = (datetime.now() - o_start_time).total_seconds()

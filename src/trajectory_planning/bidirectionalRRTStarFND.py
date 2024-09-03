@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
 import random
 from typing import List, Optional, Tuple
 import pygame
 import numpy as np
 from model.vessel import Vessel
+from trajectory_planning.rrt_utils import CircularObstacle, LineObstacle, Node, Obstacle
 from trajectory_planning.path_interpolator import PathInterpolator
 
 show_animation = True
@@ -17,114 +17,24 @@ fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode(windowSize)
 pygame.display.set_caption('Performing RRT')
 
-
-
-
-class Node():
-    """
-    RRT Node
-    """
-    def __init__(self, p : np.ndarray):
-        self.p = p
-        self.distance_cost = 0.0
-        self.time_cost : int = 0
-        self.s_fraction = False
-        self.parent : int = -1
-        self.children : set[int] = set()
-        
-    @staticmethod
-    def calc_cost(vessel : Vessel, d : float) -> Tuple[int, bool]:
-        # Calculate the distance and heading between the points
-        s_dist = int(d // vessel.speed)
-        # Calculate the number of seconds required to cover the distance
-        s_fraction = d / vessel.speed - s_dist
-        if s_fraction > 0.0001:
-            return s_dist + 1, True 
-        return s_dist, False
-    
-    def set_cost(self, d : float, time : float, fraction : bool):
-        self.distance_cost = d
-        self.time_cost = time
-        self.s_fraction = fraction       
-        
-class Obstacle(ABC):
-    MARGIN = 0.02
-    def __init__(self, x : float, y : float) -> None:
-        super().__init__()
-        self.p = np.array([x, y])
-        
-    @abstractmethod    
-    def check_no_collision(self, node : Node) -> bool:
-        pass
-  
-    
-class CircularObstacle(Obstacle):
-    def __init__(self, x : float, y : float, radius : float) -> None:
-        super().__init__(x, y)
-        self.radius = radius
-        
-    def check_no_collision(self, node : Node) -> bool:
-        d = np.linalg.norm(node.p - self.p)
-        if d <= self.radius + self.radius * self.MARGIN:
-            return False  # collision
-        return True  # safe
-    
-    
-class LineObstacle(Obstacle):
-    def __init__(self, x : float, y : float, dir_vec : np.ndarray, above_initial_point : bool, shift) -> None:
-        super().__init__(x, y)
-        self.shift = shift
-        self.dir_vec = dir_vec
-        self.above_initial_point = above_initial_point
-        if above_initial_point:
-            perpendicular = np.array([-dir_vec[1], dir_vec[0]])
-        else:
-            perpendicular = np.array([dir_vec[1], -dir_vec[0]])
-            
-        # Normalize the perpendicular vector
-        self.perpendicular = perpendicular / np.linalg.norm(perpendicular)
-
-        # Compute the shifted point on the line
-        self.shifted_point = self.p + self.shift * self.perpendicular
-
-        
-    def check_no_collision(self, node : Node) -> bool:
-        # Compute the cross product to determine the position relative to the shifted line
-        # Line equation is implicit: (P - shifted_point) dotted with the perpendicular vector should be checked
-        position_value = np.dot(self.perpendicular, node.p - self.shifted_point)
-
-        if self.above_initial_point:
-            if position_value > 0:
-                return False # collision
-            else:
-                return True # safe
-        else:
-            if position_value < 0:
-                return True # collision
-            else:
-                return False # safe
-        # Determine if point is above or below the shifted line
-    
-
-
 class RRTStarFND():
     """
     Class for RRT Planning
     """
     def __init__(self, vessel : Vessel, start : np.ndarray, goal : np.ndarray,
-                 obstacleList : List[Obstacle], randArea : List[Tuple[float, float]], 
+                 obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,
-                expandDis=10.0, goalSampleRate=15, maxIter=1500, scaler = 1.0):
+                expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0):
         self.vessel = vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
         self.start = Node(start)
         self.end = Node(goal)
-        self.randArea = randArea
-        self.expand_dist = expandDis
-        self.goalSampleRate = goalSampleRate
-        self.max_iter = maxIter
-        self.obstacleList : List[Obstacle] = obstacleList
+        self.sample_area = sample_area
+        self.expand_dist = expand_dist
+        self.goal_sample_rate = goal_sample_rate
+        self.max_iter = max_iter
+        self.obstacleList : List[Obstacle] = obstacle_list
         self.current_i = 0
         self.stop = False
         self.scaler = scaler
@@ -202,12 +112,12 @@ class RRTStarFND():
     def path_validation(self):
         lastIndex = self.get_best_last_index()
         if lastIndex is not None:
-            while self.node_list[lastIndex].parent != -1:
+            while self.node_list[lastIndex].parent is not None:
                 nodeInd = lastIndex
                 lastIndex = self.node_list[lastIndex].parent
                 dist, theta = self.get_d_theta(self.node_list[nodeInd], self.node_list[lastIndex])
                 
-                if not self.check_collision_extend(self.node_list[lastIndex].p, theta, dist):
+                if not self.check_collision_extend(self.node_list[lastIndex], theta, dist):
                     self.node_list[lastIndex].children.discard(nodeInd)
                     self.remove_branch(nodeInd)
     
@@ -228,7 +138,7 @@ class RRTStarFND():
         distance_list = []
         for i in nearest_indexes:
             dist, theta = self.get_d_theta(newNode, self.node_list[i])
-            if self.check_collision_extend(self.node_list[i].p, theta, dist):
+            if self.check_collision_extend(self.node_list[i], theta, dist):
                 distance_list.append(self.node_list[i].distance_cost + dist)
             else:
                 distance_list.append(float("inf"))
@@ -248,8 +158,8 @@ class RRTStarFND():
     def steer(self, rnd, nearest_index : int):
         # expand tree
         nearest_node = self.node_list[nearest_index]
-        v = np.linalg.norm([rnd[0] - nearest_node.p[0], rnd[1] - nearest_node.p[1]])
-        new_point = nearest_node.p + v * self.expand_dist
+        theta = np.arctan2(rnd[1] - nearest_node.p[1], rnd[0] - nearest_node.p[0])        
+        new_point = nearest_node.p + np.array([np.cos(theta), np.sin(theta)]) * self.expand_dist
         new_node = Node(new_point)
         
         s_dist, s_fraction = Node.calc_cost(self.vessel, self.expand_dist)
@@ -258,8 +168,8 @@ class RRTStarFND():
         return new_node
 
     def get_random_point(self):
-        if random.randint(0, 100) > self.goalSampleRate:
-            rnd = [random.uniform(*self.randArea[0]), random.uniform(*self.randArea[1])]
+        if random.randint(0, 100) > self.goal_sample_rate:
+            rnd = [random.uniform(*self.sample_area[0]), random.uniform(*self.sample_area[1])]
         else:  # goal point sampling
             rnd = [self.end.p[0], self.end.p[1]]
         return rnd
@@ -278,9 +188,9 @@ class RRTStarFND():
 
         return None
 
-    def gen_final_course(self, goal_index : int):
+    def gen_final_course(self, goal_index : int) -> List[Node]:
         path = [self.end]
-        while self.node_list[goal_index].parent != -1:
+        while self.node_list[goal_index].parent is not None:
             node = self.node_list[goal_index]
             path.append(node)
             goal_index = node.parent
@@ -306,7 +216,7 @@ class RRTStarFND():
             new_cost = new_node.distance_cost + d
 
             if near_node.distance_cost > new_cost:
-                if self.check_collision_extend(near_node.p, theta, d):
+                if self.check_collision_extend(near_node, theta, d):
                     self.node_list[near_node.parent].children.discard(i)
                     near_node.parent = new_node_index
                     s_d, s_fraction = Node.calc_cost(self.vessel, d)
@@ -316,7 +226,7 @@ class RRTStarFND():
 
     def draw_graph(self, rnd=None):
         def reverse_coord(coords: np.ndarray):
-            return np.array([(coords[0] - self.randArea[0][0]) * self.scaler  + 40, (DIM - (coords[1] - self.randArea[1][1])) * self.scaler])
+            return np.array([(coords[0] - self.sample_area[0][0]) * self.scaler  + 40, (DIM - (coords[1] - self.sample_area[1][1])) * self.scaler])
         
         u"""
         Draw Graph
@@ -341,7 +251,7 @@ class RRTStarFND():
         
         # Branches        
         for node in self.node_list.values():
-            if node.parent != -1:
+            if node.parent is not None:
                 pygame.draw.line(screen,(0,255,0), reverse_coord(self.node_list[node.parent].p), reverse_coord(node.p))
         for node in self.node_list.values():
             if len(node.children) == 0: 
@@ -354,7 +264,7 @@ class RRTStarFND():
 
             ind = len(path)
             while ind > 1:
-                pygame.draw.line(screen, (255,0,0), reverse_coord(path[ind-2]), reverse_coord(path[ind-1]))
+                pygame.draw.line(screen, (255,0,0), reverse_coord(path[ind-2].p), reverse_coord(path[ind-1].p))
                 ind-=1
         
 
@@ -368,14 +278,15 @@ class RRTStarFND():
         return min_index
 
 
-    def check_collision_extend(self, niP: np.ndarray, theta : float, d : float):
-        tmpNode = Node(niP)
+    def check_collision_extend(self, parent_node : Node, theta : float, d : float):
+        tmpNode = Node(np.array([parent_node.p[0], parent_node.p[1]]))
 
         for i in range(int(d/5)):
             tmpNode.p += np.array([5 * np.cos(theta), 5 * np.sin(theta)])
+            s_d, s_fraction = Node.calc_cost(self.vessel, i * 5)
+            tmpNode.set_cost(0, parent_node.time_cost + s_d, s_fraction)
             if not self.check_no_collision(tmpNode, self.obstacleList):
                 return False
-
         return True
 
 
@@ -385,8 +296,8 @@ class RRTStarFND():
                 return False
             
         # The two trajectories will collide at the specific second
-        for vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
-            if np.linalg.norm(node.p - pos) <= (self.vessel.r + vessel.r) * 1.1:
+        for obs_vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
+            if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
                 return False
         return True  # safe
 
