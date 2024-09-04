@@ -6,7 +6,6 @@ from matplotlib.widgets import Slider
 from model.usv_environment import USVEnvironment
 from model.vessel import Vessel
 from visualization.plot_component import PlotComponent
-from trajectory_planning.path_interpolator import PathInterpolator
 
 class ColregAnimation():
     THREE_HOURS = 3 * 60 * 60
@@ -18,9 +17,16 @@ class ColregAnimation():
     FRAMES_PER_SEC = 10.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
     
-    SPEED_UP_RATIO = ANIM_REAL_TIME / ANIM_SIM_TIME
+    def speed_up_ratio(self):
+        return self.real_time_slider.val / self.sim_time_slider.val
     
-    ANIM_MAX_FRAMES = ANIM_SIM_TIME * FRAMES_PER_SEC
+    def anim_max_frames(self):
+        return self.sim_time_slider.val * self.FRAMES_PER_SEC
+    
+    def get_sim_time_count(self, frame_id) -> str:
+        sim_time = frame_id / self.FRAMES_PER_SEC
+        real_time = sim_time * self.speed_up_ratio()
+        return f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)} s'
     
     def __init__(self, fig : plt.Figure,
                  env : USVEnvironment, components : List[PlotComponent],
@@ -29,12 +35,16 @@ class ColregAnimation():
         self.env = env
         self.components = components
         self.is_anim_paused = True
-        self.anim_frame_counter = 0
-        self.rt_slider_ax = plt.axes((0.25, 0.15, 0.65, 0.03), facecolor='lightgoldenrodyellow')
-        self.st_slider_ax = plt.axes((0.25, 0.05, 0.65, 0.03), facecolor='lightgoldenrodyellow')
+        
+        self.time_counter_ax : plt.Axes = plt.axes((0.25, 0.08, 0.65, 0.03), facecolor='white')
+        self.time_counter_ax.axis(False)
+        self.rt_slider_ax : plt.Axes = plt.axes((0.25, 0.05, 0.65, 0.03))
+        self.st_slider_ax : plt.Axes = plt.axes((0.25, 0.03, 0.65, 0.03))
         
         self.real_time_slider = Slider(self.rt_slider_ax, 'Real time', 10, self.THREE_HOURS, valinit=self.ANIM_REAL_TIME, valstep=10)
-        self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 1, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)
+        self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 10, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)
+        self.time_counter_text = self.time_counter_ax.text(0, 0, self.get_sim_time_count(0), fontsize=12, color='black')
+
       
         self.trajectories = None
         if trajectories is not None:
@@ -45,11 +55,11 @@ class ColregAnimation():
         self.anim = None
             
     def start(self):
-        self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / self.FRAMES_PER_SEC) * 1000), save_count=int(self.ANIM_MAX_FRAMES))
+        self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / self.FRAMES_PER_SEC) * 1000), cache_frame_data=False)
         
     def update_anim(self):
         self.init_anim()
-        while self.anim_frame_counter < self.ANIM_MAX_FRAMES:
+        while self.anim_frame_counter < self.anim_max_frames():
             if not self.is_anim_paused:
                 for o in self.din_env.vessels:
                    o.update(*self.select_next_state(o))
@@ -60,30 +70,30 @@ class ColregAnimation():
             
             
     def select_next_state(self, o: Vessel):
+        speed_up = self.speed_up_ratio()
         if self.trajectories is not None:
             traj = self.trajectories[o.id]
-            frame_index = int(self.anim_frame_counter * self.REAL_TIME * self.SPEED_UP_RATIO)
+            frame_index = int(self.anim_frame_counter * self.REAL_TIME * speed_up)
             if frame_index < len(traj):                
                 return traj[frame_index]
             
-        vec = o.v * self.REAL_TIME * self.SPEED_UP_RATIO
+        vec = o.v * self.REAL_TIME * speed_up
         return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
         
     def update_graphs(self, data):
         self.auto_scale()
         new_env, frame_id = data
         if frame_id % self.FRAMES_PER_SEC == 0 and not self.is_anim_paused:
-            sim_time = frame_id / self.FRAMES_PER_SEC
-            real_time = sim_time * self.SPEED_UP_RATIO
-            print(f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)}')
-        return [graph for component in self.components for graph in component.update(new_env)]
+            self.time_counter_text.set_text(self.get_sim_time_count(frame_id))
+        return [graph for component in self.components for graph in component.update(new_env)] + [self.time_counter_text]
             
             
     def init_anim(self):
         self.din_env = copy.deepcopy(self.env)
         self.anim_frame_counter = 0
         self.is_anim_paused = True
-        return [graph for component in self.components for graph in component.reset()]
+        self.time_counter_text.set_text(self.get_sim_time_count(0))
+        return [graph for component in self.components for graph in component.reset()] + [self.time_counter_text]
     
     
     # Function to start or pause the animation
@@ -108,5 +118,5 @@ class ColregAnimation():
             ax.relim()
             # Automatically adjust xlim and ylim
             ax.autoscale_view()
-     
-       
+            
+            

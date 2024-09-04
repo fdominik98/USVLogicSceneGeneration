@@ -82,7 +82,7 @@ class ColregPlot():
         
         
     def set_layout(self):
-        #self.fig.subplots_adjust(bottom=0.25)
+        self.fig.subplots_adjust(bottom=0.35)
         #self.fig.tight_layout(pad=5)
         self.ax.grid(False)
        
