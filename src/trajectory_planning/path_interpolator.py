@@ -64,24 +64,17 @@ class PathInterpolator():
             # Calculate the distance and heading between the points
             delta_pos =  node_end.p - node_start.p
             heading = np.arctan2(delta_pos[1], delta_pos[0])
-            d = np.linalg.norm(delta_pos)
-            
-            seconds_per_expand = int(d // vessel.speed)
-            # Calculate the number of seconds required to cover the distance
-            fraction_second = d / vessel.speed - seconds_per_expand
-            if fraction_second > 0.0001:
-                seconds_per_expand += 1
-                
+            time_cost = node_end.time_cost - node_start.time_cost
             
             # Interpolate positions for each second
-            for t in range(seconds_per_expand):
-                fraction = t / seconds_per_expand
+            for s in range(time_cost):
+                fraction = s / time_cost
                 new_p = node_start.p + delta_pos * fraction
                 interpolated_positions.append(new_p)
                 interpolated_headings.append(heading)
                 interpolated_speeds.append(vessel.speed)                
-            if fraction_second > 0.0001: # Bigger than some small value
-                speed = vessel.speed * fraction_second
+            if node_end.s_fraction > 0.0001: # Bigger than some small value
+                speed = vessel.speed * node_end.s_fraction
                 interpolated_speeds[-1] = speed 
         
         # Append the final position and heading

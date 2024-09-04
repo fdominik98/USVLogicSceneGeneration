@@ -89,7 +89,7 @@ class ColregSituation(ABC):
         pass
     
     
-    def get_colision_points(self, time_limit):
+    def get_collision_points(self, time_limit=np.inf) -> List[np.ndarray]:
         # Relative position and velocity
         v_21 = self.vessel2.v - self.vessel1.v
 
@@ -117,11 +117,12 @@ class ColregSituation(ABC):
                     # Compute the collision points
                     collision_point_vessel1 = self.vessel1.p + self.vessel1.v * t
                     collision_point_vessel2 = self.vessel2.p + self.vessel2.v * t
-                    collision_points.append((collision_point_vessel1, collision_point_vessel2))
-                    
-        all_points = [point for pair in collision_points for point in pair]    
-        # Convert the list of points to a numpy array for easier calculations
-        return np.array(all_points)
+                    collision_points.append(collision_point_vessel1)
+                    collision_points.append(collision_point_vessel2)
+        
+        # Return the list of collision points as standard list of np.ndarray
+        return collision_points
+
     
 class Overtaking(ColregSituation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):

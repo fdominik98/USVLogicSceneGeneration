@@ -33,8 +33,8 @@ class ColregAnimation():
         self.trajectories = None
         if trajectories is not None:
             self.trajectories = copy.deepcopy(trajectories)
-            for id in self.trajectories.keys():
-                self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
+            # for id in self.trajectories.keys():
+            #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
         
     def update_anim(self):
         self.init_anim()

@@ -14,10 +14,9 @@ from model.usv_environment import USVEnvironment
 import numpy as np
 from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, Obstacle, RRTStarFND, DIM, LineObstacle
 
-SCALER = 1 / MAX_COORD  * DIM * 2
+SCALER = 1 / MAX_COORD  * DIM * 2 / 1.2
 
 DIRECTION_THRESHOLD = 100 # meter
-EXPAND_DISTANCE = MAX_COORD / 120
 GOAL_SAMPLE_RATE = 50.0 #%
 MAX_ITER = 6000
 measurement_name = 'test'
@@ -48,34 +47,47 @@ config = USV_ENV_DESC_LIST[data.config_name]
 env = USVEnvironment(config).update(data.best_solution)
 ColregPlot(env)
 
-def run_traj_generation(o : Vessel, colregs : List[ColregSituation], interpolator : PathInterpolator):
+def run_traj_generation(o : Vessel, colreg_situations : List[ColregSituation], interpolator : PathInterpolator):
+    print(f'Calculation {o}:')
     expand_distance = 1 / o.maneuverability() 
     
-    if len(colregs) == 0:
+    if len(colreg_situations) == 0:
         return [], 0, expand_distance
     
     obstacle_list : List[Obstacle] = []
-    all_collision_points : List[np.ndarray] = []    
+    collision_points : List[np.ndarray] = []    
     
-    for colreg_s in colregs:
-        collision_points = colreg_s.get_colision_points(np.inf)
-        all_collision_points.append(collision_points)
-        #collision_center, collision_radius = find_center_and_radius(collision_points)          
-    all_collision_points = np.concatenate(all_collision_points, axis=0)
+    for id, path in interpolator.interpolated_paths.items():
+        vessel = env.get_vessel_by_id(id)
+        for i in range(interpolator.path_length):
+            new_pos = o.p + i * o.v
+            if np.linalg.norm(new_pos - np.array([path[i][0], path[i][1]])) < o.r + vessel.r:
+                collision_points.append(new_pos)
+    
+    for colreg_s in colreg_situations:
+        print(f'Collision points for static colreg {colreg_s}')
+        colreg_collision_points = colreg_s.get_collision_points()
+        colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
         
-    collision_center, collision_radius = find_center_and_radius(all_collision_points)
-    goal = o.p + o.v_norm() * (np.linalg.norm(o.p - collision_center) + 3 * collision_radius) 
+        obstacle_list += [CircularObstacle(colreg_collision_center[0], colreg_collision_center[1], max(1000, colreg_collision_radius * 2))]
+        collision_points += colreg_collision_points
+   
+   
+        
+    collision_center, collision_radius = find_center_and_radius(collision_points)
+    goal = o.p + o.v_norm() * (np.linalg.norm(o.p - collision_center) + max(np.linalg.norm(o.p - collision_center), collision_radius * 3)) 
     
     # Define the bounding lines
     bounding_lines = [
         LineObstacle(o.p[0], o.p[1], o.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal[0], goal[1], o.v_norm(), False, collision_radius * 1.5), # Right bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm(), False, collision_radius * 15), # Right bounding line
         LineObstacle(o.p[0], o.p[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
 
     # Add circular obstacle and bounding lines to obstacle list
-    obstacle_list += [CircularObstacle(collision_center[0], collision_center[1], collision_radius)] + bounding_lines
+    #obstacle_list += [CircularObstacle(collision_center[0], collision_center[1], collision_radius)] + bounding_lines
+    obstacle_list += bounding_lines
 
     # Calculate X and Y distances
     shifted_points_x = [line.shifted_point[0] for line in bounding_lines]
@@ -95,7 +107,7 @@ def run_traj_generation(o : Vessel, colregs : List[ColregSituation], interpolato
                     expand_dist=expand_distance,
                     goal_sample_rate=GOAL_SAMPLE_RATE,
                     max_iter=MAX_ITER,
-                    collision_points=all_collision_points,
+                    collision_points=collision_points,
                     interpolator=interpolator,
                     scaler = SCALER)
     # Add the original position to start the path

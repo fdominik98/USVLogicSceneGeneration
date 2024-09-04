@@ -11,19 +11,19 @@ class Node():
         self.p = p
         self.distance_cost = 0.0
         self.time_cost : int = 0
-        self.s_fraction = False
+        self.s_fraction  : float = 0.0
         self.parent : Optional[int] = None
         self.children : set[int] = set()
         
     @staticmethod
-    def calc_cost(vessel : Vessel, d : float) -> Tuple[int, bool]:
+    def calc_cost(vessel : Vessel, d : float) -> Tuple[int, float]:
         # Calculate the distance and heading between the points
         s_dist = int(d // vessel.speed)
         # Calculate the number of seconds required to cover the distance
         s_fraction = d / vessel.speed - s_dist
         if s_fraction > 0.0001:
-            return s_dist + 1, True 
-        return s_dist, False
+            return s_dist + 1, d / vessel.speed - s_dist 
+        return s_dist, 0.0
     
     def set_cost(self, d : float, time : int, fraction : bool):
         self.distance_cost = d
