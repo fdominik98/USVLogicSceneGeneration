@@ -218,10 +218,10 @@ class RRTStarFND():
                     
     
     def reverse_coord(self, coords: np.ndarray):
-        return np.array([(coords[0] - self.sample_area[0][0]) * self.scaler  + 40, (DIM - (coords[1] - self.sample_area[1][1])) * self.scaler])
+        return np.array([(coords[0] - self.sample_area[0][0]) * self.scaler + 50, DIM - (coords[1] - self.sample_area[1][0]) * self.scaler - 50])
     
     def inverse_reverse_coord(self, coords: np.ndarray):
-        return np.array([(coords[0] - 40) / self.scaler + self.sample_area[0][0], (DIM - (coords[1] / self.scaler)) + self.sample_area[1][1]])
+        return np.array([(coords[0] - 50) / self.scaler + self.sample_area[0][0], (DIM - coords[1] - 50) / self.scaler + self.sample_area[1][0]])
     
     def draw_graph(self, rnd=None):
         
@@ -289,13 +289,6 @@ class RRTStarFND():
             if not self.check_no_collision(tmpNode, self.obstacleList):
                 return False, dist
         return True, dist
-        
-        for s in range(int(s_d)):
-            tmpNode.p += np.array([np.cos(theta), np.sin(theta)]) * self.vessel.speed
-            tmpNode.set_cost(0, parent_node.time_cost + s, 0.0)
-            if not self.check_no_collision(tmpNode, self.obstacleList):
-                return False
-        return True  
 
 
     def check_no_collision(self, node : Node, obstacleList : List[Obstacle]):

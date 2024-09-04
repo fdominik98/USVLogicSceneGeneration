@@ -2,39 +2,50 @@ import copy
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Slider
 from model.usv_environment import USVEnvironment
 from model.vessel import Vessel
 from visualization.plot_component import PlotComponent
 from trajectory_planning.path_interpolator import PathInterpolator
 
 class ColregAnimation():
+    THREE_HOURS = 3 * 60 * 60
+    TWO_MINUTES = 2 * 60
     
-    ANIM_MAX_REAL_TIME = 60.0 * 60.0
-    ANIM_MAX_SIM_TIME = 40.0
+    ANIM_REAL_TIME = THREE_HOURS / 3
+    ANIM_SIM_TIME = TWO_MINUTES / 2
     
     FRAMES_PER_SEC = 10.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
     
-    SPEED_UP_RATIO = ANIM_MAX_REAL_TIME / ANIM_MAX_SIM_TIME
+    SPEED_UP_RATIO = ANIM_REAL_TIME / ANIM_SIM_TIME
     
-    ANIM_MAX_FRAMES = ANIM_MAX_SIM_TIME * FRAMES_PER_SEC
+    ANIM_MAX_FRAMES = ANIM_SIM_TIME * FRAMES_PER_SEC
     
-    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : USVEnvironment, components : List[PlotComponent],
+    def __init__(self, fig : plt.Figure,
+                 env : USVEnvironment, components : List[PlotComponent],
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
-        self.ax = ax
         self.fig = fig
         self.env = env
         self.components = components
         self.is_anim_paused = True
         self.anim_frame_counter = 0
-            
-        self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / self.FRAMES_PER_SEC) * 1000), save_count=int(self.ANIM_MAX_FRAMES))
+        self.rt_slider_ax = plt.axes((0.25, 0.15, 0.65, 0.03), facecolor='lightgoldenrodyellow')
+        self.st_slider_ax = plt.axes((0.25, 0.05, 0.65, 0.03), facecolor='lightgoldenrodyellow')
         
+        self.real_time_slider = Slider(self.rt_slider_ax, 'Real time', 10, self.THREE_HOURS, valinit=self.ANIM_REAL_TIME, valstep=10)
+        self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 1, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)
+      
         self.trajectories = None
         if trajectories is not None:
             self.trajectories = copy.deepcopy(trajectories)
             # for id in self.trajectories.keys():
             #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
+            
+        self.anim = None
+            
+    def start(self):
+        self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / self.FRAMES_PER_SEC) * 1000), save_count=int(self.ANIM_MAX_FRAMES))
         
     def update_anim(self):
         self.init_anim()
@@ -83,6 +94,8 @@ class ColregAnimation():
         elif event.key == 'up':
             if self.is_anim_paused:
                 self.is_anim_paused = False
+                if self.anim == None:
+                    self.start()
                 print('Animation started')
             else:
                 self.is_anim_paused = True
@@ -90,9 +103,10 @@ class ColregAnimation():
                 
                 
     def auto_scale(self):
-        # Recalculate the limits based on the current data     
-        self.ax.relim()
-        # Automatically adjust xlim and ylim
-        self.ax.autoscale_view()
+        for ax in self.fig.get_axes():
+            # Recalculate the limits based on the current data    
+            ax.relim()
+            # Automatically adjust xlim and ylim
+            ax.autoscale_view()
      
        

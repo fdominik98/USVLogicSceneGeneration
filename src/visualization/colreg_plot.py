@@ -47,12 +47,14 @@ class ColregPlot():
             self.legend_component
         ]
         
+        self.animation = ColregAnimation(self.fig, self.env, self.components, trajectories)
+        
         self.draw()   
         
-        self.animation = ColregAnimation(self.fig, self.ax, self.env, self.components, trajectories)
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
+        
         plt.show(block=self.block)
         
         
@@ -80,6 +82,7 @@ class ColregPlot():
         
         
     def set_layout(self):
+        #self.fig.subplots_adjust(bottom=0.25)
         #self.fig.tight_layout(pad=5)
         self.ax.grid(False)
        

@@ -1,14 +1,12 @@
 from typing import Dict, List, Tuple
 import numpy as np
 from model.vessel import Vessel
-from model.usv_environment import USVEnvironment
 from trajectory_planning.rrt_utils import Node
 
-
 class PathInterpolator():
-    def __init__(self, env: USVEnvironment) -> None:
-        self.env = env
+    def __init__(self) -> None:
         self.interpolated_paths : Dict[int, List[Tuple[float,float,float,float]]] = {}
+        self.vessels : Dict[int, Vessel] = {}
         self.path_length = 45 * 60
 
     def add_path(self, vessel : Vessel, path : List[Node]):
@@ -18,28 +16,28 @@ class PathInterpolator():
             self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.speed)]
         else:
             self.interpolated_paths[vessel.id] = self.interpolate_path(vessel, path)
+        self.vessels[vessel.id] = vessel
         self.extend_paths_to_path_length()       
     
-           
-                
+    
     def extend_paths_to_path_length(self):
         for id, path in self.interpolated_paths.items():
-            o = self.env.get_vessel_by_id(id)
+            vessel = self.vessels[id]
             while len(path) < self.path_length:
                 # Lengthen path
                 last_state = path[-1]
                 path.append((
-                    last_state[0] + o.v[0],
-                    last_state[1] + o.v[1],
-                    o.heading,
-                    o.speed
+                    last_state[0] + vessel.v[0],
+                    last_state[1] + vessel.v[1],
+                    vessel.heading,
+                    vessel.speed
                 ))
                 
     def get_positions_by_second(self, second) -> List[Tuple[Vessel, np.ndarray]]:
         if second >= self.path_length:
             self.path_length = self.path_length + (second - self.path_length) + 60
             self.extend_paths_to_path_length()
-        return [(self.env.get_vessel_by_id(id), path[second][:2]) for id, path in self.interpolated_paths.items()]
+        return [(self.vessels[id], path[second][:2]) for id, path in self.interpolated_paths.items()]
                 
 
     def interpolate_path(self, vessel: Vessel, path : List[Node]) -> List[Tuple[float,float,float,float]]:

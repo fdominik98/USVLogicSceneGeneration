@@ -1,10 +1,9 @@
 from datetime import datetime
 import os
 import random
-from typing import List, Tuple, Dict
+from typing import List, Dict
 from model.usv_config import MAX_COORD
-from model.vessel import Vessel
-from model.colreg_situation import ColregSituation, HeadOn, NoColreg
+from trajectory_planning.vessel_order_graph import VesselNode, VesselOrderGraph
 from trajectory_planning.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.colreg_plot import ColregPlot
@@ -14,10 +13,10 @@ from model.usv_environment import USVEnvironment
 import numpy as np
 from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, Obstacle, RRTStarFND, DIM, LineObstacle
 
-SCALER = 1 / MAX_COORD  * DIM * 2 / 1.2
+SCALER = 1 / MAX_COORD  * DIM
 
 DIRECTION_THRESHOLD = 100 # meter
-GOAL_SAMPLE_RATE = 50.0 #%
+GOAL_SAMPLE_RATE = 20.0 #%
 MAX_ITER = 6000
 measurement_name = 'test'
 measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
@@ -47,35 +46,35 @@ config = USV_ENV_DESC_LIST[data.config_name]
 env = USVEnvironment(config).update(data.best_solution)
 ColregPlot(env)
 
-def run_traj_generation(o : Vessel, colreg_situations : List[ColregSituation], interpolator : PathInterpolator):
+def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
+    o = v_node.vessel
     print(f'Calculation {o}:')
     expand_distance = 1 / o.maneuverability() 
     
-    if len(colreg_situations) == 0:
+    if len(v_node.colreg_situations) == 0:
         return [], 0, expand_distance
     
     obstacle_list : List[Obstacle] = []
     collision_points : List[np.ndarray] = []    
     
+    for colreg_s in v_node.colreg_situations:
+        print(f'Collision points for static colreg {colreg_s}')
+        colreg_collision_points = colreg_s.get_collision_points()
+        collision_points += colreg_collision_points
+    colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
+    obstacle_list += [CircularObstacle(colreg_collision_center[0], colreg_collision_center[1], max(1000, colreg_collision_radius * 2))]
+   
     for id, path in interpolator.interpolated_paths.items():
         vessel = env.get_vessel_by_id(id)
         for i in range(interpolator.path_length):
             new_pos = o.p + i * o.v
             if np.linalg.norm(new_pos - np.array([path[i][0], path[i][1]])) < o.r + vessel.r:
-                collision_points.append(new_pos)
-    
-    for colreg_s in colreg_situations:
-        print(f'Collision points for static colreg {colreg_s}')
-        colreg_collision_points = colreg_s.get_collision_points()
-        colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
-        
-        obstacle_list += [CircularObstacle(colreg_collision_center[0], colreg_collision_center[1], max(1000, colreg_collision_radius * 2))]
-        collision_points += colreg_collision_points
-   
-   
+                collision_points.append(new_pos)   
         
     collision_center, collision_radius = find_center_and_radius(collision_points)
-    goal = o.p + o.v_norm() * (np.linalg.norm(o.p - collision_center) + max(np.linalg.norm(o.p - collision_center), collision_radius * 3)) 
+    
+    start_goal_dist = np.linalg.norm(o.p - collision_center) + max(np.linalg.norm(o.p - collision_center), collision_radius * 3)
+    goal = o.p + o.v_norm() * start_goal_dist 
     
     # Define the bounding lines
     bounding_lines = [
@@ -109,49 +108,37 @@ def run_traj_generation(o : Vessel, colreg_situations : List[ColregSituation], i
                     max_iter=MAX_ITER,
                     collision_points=collision_points,
                     interpolator=interpolator,
-                    scaler = SCALER)
+                    scaler = SCALER * MAX_COORD / start_goal_dist / 1.5)
     # Add the original position to start the path
     path = rrt.plan_trajectory(animation=True)
-    # # Add a last sections to restore original path
-    # for i in range(3):
-    #     path += [goal + v_expand * (i + 1)]
     
     return path, rrt.current_i, expand_distance
     
-    
-    
-interpolator = PathInterpolator(env)
 
-give_way_vessels : Dict[int, Tuple[Vessel, List[ColregSituation]]] = {o.id : (o, []) for o in env.vessels}
+interpolator = PathInterpolator()
 
-for colreg_s in env.colreg_situations:
-    if isinstance(colreg_s, NoColreg):
-        continue
-    give_way_vessels[colreg_s.vessel1.id][1].append(colreg_s)
-    if isinstance(colreg_s, HeadOn):
-        give_way_vessels[colreg_s.vessel2.id][1].append(colreg_s)
-    
+ordered_vessels = VesselOrderGraph(env.colreg_situations).sort()
         
-give_way_vessels_precedence = sorted(
-    list(give_way_vessels.values()),
-    key=lambda item: (len(item[1]), item[0].maneuverability())  # Sort firstly by the give-way numbers (how many corrections the vessel has to make) then by maneuverability (less maneuverable ships has to adapt to less other trajectories)
-)
+# give_way_vessels_precedence = sorted(
+#     list(give_way_vessels.values()),
+#     key=lambda item: (len(item[1]), item[0].maneuverability())  # Sort firstly by the give-way numbers (how many corrections the vessel has to make) then by maneuverability (less maneuverable ships has to adapt to less other trajectories)
+# )
 
 start_time = datetime.now()
 iter_numbers : Dict[int, int] = {}
 eval_times : Dict[int, float] = {}
 expand_distances : Dict[int, float] = {}
         
-for o, colregs in give_way_vessels_precedence:
+for v_node in ordered_vessels:
     o_start_time = datetime.now()
     
-    path, iter_number, expand_distance = run_traj_generation(o, colregs, interpolator)  
-    interpolator.add_path(o, path)
+    path, iter_number, expand_distance = run_traj_generation(v_node, interpolator)  
+    interpolator.add_path(v_node.vessel, path)
     
     o_eval_time = (datetime.now() - o_start_time).total_seconds()
-    eval_times[o.id] = o_eval_time
-    iter_numbers[o.id] = iter_number
-    expand_distances[o.id] = expand_distance
+    eval_times[v_node.vessel.id] = o_eval_time
+    iter_numbers[v_node.vessel.id] = iter_number
+    expand_distances[v_node.vessel.id] = expand_distance
     
 overall_eval_time = (datetime.now() - start_time).total_seconds()
 timestamp = datetime.now().isoformat()
