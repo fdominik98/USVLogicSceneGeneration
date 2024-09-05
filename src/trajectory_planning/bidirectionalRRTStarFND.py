@@ -2,7 +2,7 @@ import random
 from typing import List, Optional, Tuple
 import pygame
 import numpy as np
-from model.vessel import Vessel
+from trajectory_planning.vessel_order_graph import VesselNode
 from trajectory_planning.rrt_utils import CircularObstacle, LineObstacle, Node, Obstacle
 from trajectory_planning.path_interpolator import PathInterpolator
 
@@ -12,20 +12,19 @@ DIM = 1200
 windowSize = [DIM, DIM]
 
 pygame.init()
-fpsClock = pygame.time.Clock()
 
 screen = pygame.display.set_mode(windowSize)
-pygame.display.set_caption('Performing RRT')
+
 
 class RRTStarFND():
     """
     Class for RRT Planning
     """
-    def __init__(self, vessel : Vessel, start : np.ndarray, goal : np.ndarray,
+    def __init__(self, v_node : VesselNode, start : np.ndarray, goal : np.ndarray,
                  obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,
                 expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0):
-        self.vessel = vessel
+        self.vessel = v_node.vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
         self.start = Node(start)
@@ -38,6 +37,16 @@ class RRTStarFND():
         self.current_i = 0
         self.stop = False
         self.scaler = scaler
+        
+        conf_colregs = ""
+        for colreg_s in v_node.colreg_situations:           
+            conf_colregs = colreg_s.name if not conf_colregs else f'{conf_colregs}, {colreg_s.name}'
+        
+        conf_trajs = ""
+        for obs_vessel in interpolator.vessels.values():
+             conf_trajs = obs_vessel.name if not conf_trajs else f'{conf_trajs}, {obs_vessel.name}'
+            
+        pygame.display.set_caption(f'{conf_colregs}, Conflicting trajectories: {conf_trajs}')
 
     def do_plan(self, animation : bool) -> Optional[List[Node]]:
         while self.current_i < self.max_iter and not self.stop:

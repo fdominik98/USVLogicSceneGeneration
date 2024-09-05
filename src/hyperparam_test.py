@@ -1,7 +1,4 @@
-from genetic_algorithms.deap_algorithm import DeapAlgorithm
-from genetic_algorithms.pygad_algorithm import PyGadAlgorithm
 from genetic_algorithms.pymoo_algorithm import PyMooAlgorithm
-from model.usv_environment import USVEnvironment
 import random
 import time
 import itertools
@@ -25,7 +22,8 @@ algos = {
     #4 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='six_vessel_colreg_scenario', verbose=False, random_init=True, runtime=20),
     #5 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
     #6 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario2', verbose=False, random_init=True, runtime=25),
-    7 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='crossing_big', verbose=False, random_init=True, runtime=10),
+    #7 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_and_crossing', verbose=False, random_init=True, runtime=10),
+    8 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_headon_crossing', verbose=False, random_init=True, runtime=10),
 }
 
 all_combinations = itertools.product(population_sizes, numbers_of_generations, numbers_of_parents, mutate_probs, crossover_probs, mutate_etas, crossover_etas)

@@ -8,13 +8,13 @@ from model.vessel import Vessel
 from visualization.plot_component import PlotComponent
 
 class ColregAnimation():
-    THREE_HOURS = 3 * 60 * 60
+    TWO_HOURS = 2 * 60 * 60
     TWO_MINUTES = 2 * 60
     
-    ANIM_REAL_TIME = THREE_HOURS / 3
+    ANIM_REAL_TIME = TWO_HOURS * 2
     ANIM_SIM_TIME = TWO_MINUTES / 2
     
-    FRAMES_PER_SEC = 10.0
+    FRAMES_PER_SEC = 25.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
     
     def speed_up_ratio(self):
@@ -41,7 +41,7 @@ class ColregAnimation():
         self.rt_slider_ax : plt.Axes = plt.axes((0.25, 0.05, 0.65, 0.03))
         self.st_slider_ax : plt.Axes = plt.axes((0.25, 0.03, 0.65, 0.03))
         
-        self.real_time_slider = Slider(self.rt_slider_ax, 'Real time', 10, self.THREE_HOURS, valinit=self.ANIM_REAL_TIME, valstep=10)
+        self.real_time_slider = Slider(self.rt_slider_ax, 'Real time', 10, self.TWO_HOURS * 4, valinit=self.ANIM_REAL_TIME, valstep=10)
         self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 10, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)
         self.time_counter_text = self.time_counter_ax.text(0, 0, self.get_sim_time_count(0), fontsize=12, color='black')
 
@@ -81,7 +81,7 @@ class ColregAnimation():
         return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
         
     def update_graphs(self, data):
-        self.auto_scale()
+        #self.auto_scale()
         new_env, frame_id = data
         if frame_id % self.FRAMES_PER_SEC == 0 and not self.is_anim_paused:
             self.time_counter_text.set_text(self.get_sim_time_count(frame_id))

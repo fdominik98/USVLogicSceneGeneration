@@ -52,13 +52,13 @@ from model.vessel import VesselDesc
 
 
 
-OS = VesselDesc(id=0, l=100, b=30, max_speed=25)
-TS1 = VesselDesc(id=1, l=50, b=18, max_speed=30)
-TS2 = VesselDesc(id=2, l=100, b=30, max_speed=25)
-TS3 = VesselDesc(id=3, l=100, b=40, max_speed=25)
-TS4 = VesselDesc(id=4, l=50, b=8, max_speed=30)
-TS5 = VesselDesc(id=5, l=50, b=10, max_speed=30)
-TS6 = VesselDesc(id=6, l=100, b=7, max_speed=25)
+OS = VesselDesc(id=0, l=100, b=30, min_speed= 5.0, max_speed=25)
+TS1 = VesselDesc(id=1, l=50, b=18, min_speed= 5.0, max_speed=30)
+TS2 = VesselDesc(id=2, l=100, b=30, min_speed= 5.0, max_speed=25)
+TS3 = VesselDesc(id=3, l=100, b=40, min_speed= 5.0, max_speed=25)
+TS4 = VesselDesc(id=4, l=50, b=8, min_speed= 5.0, max_speed=30)
+TS5 = VesselDesc(id=5, l=50, b=10, min_speed= 5.0, max_speed=30)
+TS6 = VesselDesc(id=6, l=100, b=7, min_speed= 5.0, max_speed=25)
 
 OS_BIG = VesselDesc(id=0, l=1000, b=18, min_speed= 3000, max_speed=5000)
 TS1_BIG = VesselDesc(id=1, l=1000, b=30, min_speed= 3000, max_speed=5000)

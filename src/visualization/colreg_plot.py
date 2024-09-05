@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
 from model.colreg_situation import NoColreg
+from visualization.drawing_component import DrawingComponent
 from visualization.legend_component import LegendComponent
 from visualization.colreg_animation import ColregAnimation
 from visualization.ship_image_component import ShipImageComponent
@@ -34,6 +35,7 @@ class ColregPlot():
         self.prime_component = PrimeComponent(self.ax, False, self.env)
         self.ship_image_component = ShipImageComponent(self.ax, True, self.env)
         self.legend_component = LegendComponent(self.ax, True, self.env)
+        self.drawing_component = DrawingComponent(self.fig, self.ax, True, self.env)
         
         self.components : List[PlotComponent] = [
             self.vo_cone_component,
@@ -44,7 +46,8 @@ class ColregPlot():
             self.ship_markings_component,
             self.prime_component,
             self.ship_image_component,
-            self.legend_component
+            self.legend_component,
+            self.drawing_component
         ]
         
         self.animation = ColregAnimation(self.fig, self.env, self.components, trajectories)
@@ -54,6 +57,9 @@ class ColregPlot():
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
+        # Connect the click and move events to their handlers
+        self.fig.canvas.mpl_connect('button_press_event', self.drawing_component.on_click)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.drawing_component.on_move)
         
         plt.show(block=self.block)
         
@@ -70,12 +76,12 @@ class ColregPlot():
         self.legend_component.draw(0)
         
         self.title = ''
-        i = 0
+        columns = 0
         for colreg_s in self.env.colreg_situations:
             if not isinstance(colreg_s, NoColreg): 
-                line_break = '\n' if (i + 1) % 3 == 0 else ' '
+                line_break = '\n' if (columns + 1) % 3 == 0 else ' '
                 self.title = colreg_s.name if not self.title else f'{self.title},{line_break}{colreg_s.name}'
-                i += 1
+                columns += 1
             colreg_s.info()                       
                         
         self.set_layout()    
@@ -83,7 +89,7 @@ class ColregPlot():
         
     def set_layout(self):
         self.fig.subplots_adjust(bottom=0.35)
-        #self.fig.tight_layout(pad=5)
+        self.fig.tight_layout(pad=10)
         self.ax.grid(False)
        
         self.ax.set_title(f'USV situation ({self.title})')
@@ -94,7 +100,8 @@ class ColregPlot():
         # Recalculate the limits based on the current data     
         self.ax.relim()
         # Automatically adjust xlim and ylim
-        self.ax.autoscale_view(tight=True)
+        #self.ax.autoscale_view()
+        self.ax.margins(x=0.2, y=0.2)
         # # Get current x and y limits
         # x_min, x_max = self.ax.get_xlim()
         # y_min, y_max = self.ax.get_ylim()
@@ -133,3 +140,5 @@ class ColregPlot():
             self.ship_image_component.toggle()
         self.fig.canvas.draw()    
         
+
+    

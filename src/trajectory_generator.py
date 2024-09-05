@@ -17,7 +17,7 @@ SCALER = 1 / MAX_COORD  * DIM
 
 DIRECTION_THRESHOLD = 100 # meter
 GOAL_SAMPLE_RATE = 20.0 #%
-MAX_ITER = 6000
+MAX_ITER = np.inf
 measurement_name = 'test'
 measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
 
@@ -98,7 +98,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     print(f"start RRT path planning for {o}")
     # Set Initial parameters
     rrt = RRTStarFND(
-                    vessel=o,
+                    v_node=v_node,
                     start=o.p,
                     goal=goal,
                     sample_area=[X_DIST, Y_DIST],

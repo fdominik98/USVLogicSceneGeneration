@@ -48,7 +48,7 @@ class ShipImageComponent(PlotComponent):
         
     def do_draw(self, zorder : int):
         for o in self.env.vessels:
-            (line,) = self.ax.plot([], [], 'r--', lw=1, color=light_colors[o.id], zorder=zorder-10)
+            (line,) = self.ax.plot([], [], ':', lw=3, color=light_colors[o.id], zorder=zorder-10)
             self.traj_line_graphs.append(line)
             
             # Rotate and plot image

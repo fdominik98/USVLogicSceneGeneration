@@ -65,15 +65,8 @@ class ShipMarkingsComponent(PlotComponent):
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for o in new_env.vessels:
             self.radius_graphs[o.id].set_center(o.p)
-            self.radius_graphs[o.id].set_radius(o.r)
-            dot_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
-            self.ship_dot_graphs[o.id].set_label(dot_label)
-            self.ship_dot_graphs[o.id].set_offsets([o.p])
-            
-            angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
-            speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
-            velocity_label =f'{o} Velocity: {angle}, {speed}'
-            self.velocity_graphs[o.id].set_label(velocity_label)
+            self.radius_graphs[o.id].set_radius(o.r)            
+            self.ship_dot_graphs[o.id].set_offsets([o.p])  
             self.velocity_graphs[o.id].set_offsets(o.p)
             self.velocity_graphs[o.id].set_UVC(o.v[0], o.v[1])
         return self.graphs

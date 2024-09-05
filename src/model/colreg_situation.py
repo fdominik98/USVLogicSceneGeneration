@@ -13,6 +13,9 @@ class ColregSituation(ABC):
         self.safety_dist = vessel1.r + vessel2.r  
         self.update()
         
+    def __repr__(self) -> str:
+        return self.name
+        
     def update(self):
         self.p12 = self.vessel2.p - self.vessel1.p
         self.p21 = self.vessel1.p - self.vessel2.p
