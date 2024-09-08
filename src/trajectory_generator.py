@@ -3,6 +3,7 @@ import os
 import random
 from typing import List, Dict
 from model.usv_config import MAX_COORD
+from trajectory_planning.rrt_utils import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from trajectory_planning.vessel_order_graph import VesselNode, VesselOrderGraph
 from trajectory_planning.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
@@ -11,7 +12,7 @@ from visualization.data_parser import EvalDataParser
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.usv_environment import USVEnvironment
 import numpy as np
-from trajectory_planning.bidirectionalRRTStarFND import CircularObstacle, Obstacle, RRTStarFND, DIM, LineObstacle
+from trajectory_planning.bidirectionalRRTStarFND import RRTStarFND, DIM
 
 SCALER = 1 / MAX_COORD  * DIM
 
@@ -49,7 +50,7 @@ ColregPlot(env)
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
     print(f'Calculation {o}:')
-    expand_distance = 1 / o.maneuverability() 
+    expand_distance = o.speed * 60 # 1 minute precision
     
     if len(v_node.colreg_situations) == 0:
         return [], 0, expand_distance
@@ -61,8 +62,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
         print(f'Collision points for static colreg {colreg_s}')
         colreg_collision_points = colreg_s.get_collision_points()
         collision_points += colreg_collision_points
-    colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
-    obstacle_list += [CircularObstacle(colreg_collision_center[0], colreg_collision_center[1], max(1000, colreg_collision_radius * 2))]
+    #colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
    
     for id, path in interpolator.interpolated_paths.items():
         vessel = env.get_vessel_by_id(id)
@@ -74,12 +74,20 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     collision_center, collision_radius = find_center_and_radius(collision_points)
     
     start_goal_dist = np.linalg.norm(o.p - collision_center) + max(np.linalg.norm(o.p - collision_center), collision_radius * 3)
-    goal = o.p + o.v_norm() * start_goal_dist 
+    goal_vector = o.v_norm() * start_goal_dist
+    goal = o.p + goal_vector
+    poly_p1 = o.p + goal_vector / 4
+    poly_p2 = o.p + goal_vector / 4 * 3
+    poly_p3 = poly_p2 + o.v_norm_perp() * collision_radius * 4
+    poly_p4 = poly_p1 + o.v_norm_perp() * collision_radius * 4
+    obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]
+    obstacle_list += [CircularObstacle(collision_center, collision_radius)]
     
     # Define the bounding lines
     bounding_lines = [
         LineObstacle(o.p[0], o.p[1], o.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal[0], goal[1], o.v_norm(), False, collision_radius * 15), # Right bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm(), False, collision_radius * 8), # Right bounding line
+        LineObstacle(o.p[0], o.p[1], o.v_norm(), False, collision_radius * 8), # Right bounding line
         LineObstacle(o.p[0], o.p[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
@@ -110,7 +118,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
                     interpolator=interpolator,
                     scaler = SCALER * MAX_COORD / start_goal_dist / 1.5)
     # Add the original position to start the path
-    path = rrt.plan_trajectory(animation=True)
+    path = rrt.plan_trajectory()
     
     return path, rrt.current_i, expand_distance
     

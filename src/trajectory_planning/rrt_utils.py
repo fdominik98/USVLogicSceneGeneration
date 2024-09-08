@@ -1,7 +1,25 @@
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from typing import Optional, Tuple
 import numpy as np
+from shapely import Point, Polygon
 from model.vessel import Vessel
+
+
+class TrajectoryState(Enum):
+    START = auto()
+    STAND_ON_1 = auto()
+    GIVE_WAY_ARC = auto()
+    GIVE_WAY_ARC_ADJUST = auto()
+    STAND_ON_2 = auto()
+    RETURN_ARC = auto()
+    RETURN_ARC_ADJUST = auto()
+    STAND_ON_3 = auto()
+
+class RandomPoint():
+    def __init__(self, p : np.ndarray, towards_goal : bool) -> None:
+        self.p = p
+        self.towards_goal = towards_goal
 
 class Node():
     """
@@ -14,6 +32,7 @@ class Node():
         self.s_fraction  : float = 0.0
         self.parent : Optional[int] = None
         self.children : set[int] = set()
+        self.state = TrajectoryState.START
         
     @staticmethod
     def calc_cost(vessel : Vessel, d : float) -> Tuple[int, float]:
@@ -42,8 +61,8 @@ class Obstacle(ABC):
   
     
 class CircularObstacle(Obstacle):
-    def __init__(self, x : float, y : float, radius : float) -> None:
-        super().__init__(x, y)
+    def __init__(self, p : np.ndarray, radius : float) -> None:
+        super().__init__(p[0], p[1])
         self.radius = radius
         
     def check_no_collision(self, node : Node) -> bool:
@@ -51,6 +70,23 @@ class CircularObstacle(Obstacle):
         if d <= self.radius + self.radius * self.MARGIN:
             return False  # collision
         return True  # safe
+    
+    def __str__(self) -> str:
+        return f'Circle'
+    
+class PolygonalObstacle(Obstacle):
+    def __init__(self, p1: np.ndarray, p2: np.ndarray, p3: np.ndarray, p4: np.ndarray) -> None:
+        super().__init__(p1[0], p1[1])
+        self.polygon = [p1, p2, p3, p4]
+        # Create a Polygon object
+        self.polygon_shape = Polygon(self.polygon)
+
+    def check_no_collision(self, node : Node) -> bool:
+        point = Point(node.p[0], node.p[1])
+        return not self.polygon_shape.contains(point)
+    
+    def __str__(self) -> str:
+        return f'Polygon'
     
     
 class LineObstacle(Obstacle):
@@ -69,6 +105,9 @@ class LineObstacle(Obstacle):
 
         # Compute the shifted point on the line
         self.shifted_point = self.p + self.shift * self.perpendicular
+        
+    def __str__(self) -> str:
+        return f'Line {"above" if self.above_initial_point else "below"} initial'
 
         
     def check_no_collision(self, node : Node) -> bool:

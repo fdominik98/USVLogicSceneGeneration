@@ -1,4 +1,3 @@
-from collections import defaultdict, deque
 from typing import Dict, List
 from model.colreg_situation import ColregSituation, HeadOn, NoColreg
 from model.vessel import Vessel
