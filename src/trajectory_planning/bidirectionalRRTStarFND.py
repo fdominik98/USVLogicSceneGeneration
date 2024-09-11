@@ -284,7 +284,7 @@ class RRTStarFND():
             
         # The two trajectories will collide at the specific second
         for obs_vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
-            if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r) * 2:
+            if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
                 print(f'Hit trajectory of {obs_vessel} at {pos}.')
                 return False
         return True  # safe

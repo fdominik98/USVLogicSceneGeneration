@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
 from model.colreg_situation import NoColreg
+from trajectory_planning.proximity_evaluator import ProximityEvaluator
+from visualization.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 from visualization.drawing_component import DrawingComponent
 from visualization.legend_component import LegendComponent
 from visualization.colreg_animation import ColregAnimation
@@ -16,17 +18,23 @@ from visualization.distance_component import DistanceComponent
 from visualization.vo_cone_component import VOConeComponent
 from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
-class ColregPlot():  
+class ColregPlotComplex():  
     def __init__(self, env : USVEnvironment, block=True, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
         self.env = env        
-        self.fig = plt.figure(figsize=(10,10)) 
-        self.ax = self.fig.add_subplot()
+        self.fig, self.axes = plt.subplots(1, 4, figsize=(12, 4), gridspec_kw={'width_ratios': [1, 1, 1, 1]})
+        self.ax : plt.Axes = self.axes[0]
         
         self.components : List[PlotComponent] = []
            
         self.block = block
         self.axis_visible = True
+        
+        if trajectories is not None:            
+            self.proximity_evaluator = ProximityEvaluator(trajectories=trajectories, env=env)
+            self.components += [DistanceAxesComponent(self.axes[1], True, self.env, self.proximity_evaluator.metrics)]
+            self.components += [DCPAAxesComponent(self.axes[2], True, self.env, self.proximity_evaluator.metrics)]
+            self.components += [TCPAAxesComponent(self.axes[3], True, self.env, self.proximity_evaluator.metrics)]
         
         self.vo_cone_component = VOConeComponent(self.ax, False, self.env)
         self.additional_vo_cone_component = AdditionalVOConeComponent(self.ax, False, self.env)

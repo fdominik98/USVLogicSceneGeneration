@@ -25,6 +25,7 @@ class ShipImageComponent(PlotComponent):
         self.traj_line_visible = True
         self.xs : Dict[int, List[float]] = {o.id : [] for o in env.vessels}
         self.ys : Dict[int, List[float]] = {o.id : [] for o in env.vessels}
+        self.zorder = -4
         
         
     def toggle(self):
@@ -46,15 +47,15 @@ class ShipImageComponent(PlotComponent):
         for g in self.traj_line_graphs:
             g.set_visible(self.traj_line_visible)
         
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         for o in self.env.vessels:
-            (line,) = self.ax.plot([], [], ':', lw=3, color=light_colors[o.id], zorder=zorder-10)
+            (line,) = self.ax.plot([], [], ':', lw=3, color=light_colors[o.id], zorder=self.zorder-10)
             self.traj_line_graphs.append(line)
             
             # Rotate and plot image
             rotated_image = np.clip(rotate(self.image, np.degrees(o.heading)-90, reshape=True), 0, 1)
             image_box = OffsetImage(rotated_image, zoom = self.DINAMIC_ZOOM, alpha=0.9)
-            ab = AnnotationBbox(image_box, o.p, xybox= o.p, xycoords='data', frameon = False, zorder=zorder)
+            ab = AnnotationBbox(image_box, o.p, xybox= o.p, xycoords='data', frameon = False, zorder=self.zorder)
             self.ax.add_artist(ab)
             self.ship_image_graphs.append(ab)
             self.ship_offset_images.append(image_box)

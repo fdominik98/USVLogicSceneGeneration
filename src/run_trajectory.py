@@ -1,5 +1,6 @@
 from typing import List
 from genetic_algorithms.evaluation_data import EvaluationData
+from visualization.colreg_plot_complex import ColregPlotComplex
 from trajectory_planning.trajectory_data import TrajectoryData
 from visualization.colreg_plot import ColregPlot
 from visualization.data_parser import EvalDataParser, TrajDataParser
@@ -19,6 +20,6 @@ while(True):
     
     config = USV_ENV_DESC_LIST[eval_data_models[0].config_name]
     env = USVEnvironment(config).update(eval_data_models[0].best_solution)
-    ColregPlot(env, trajectories=traj_data_models[0].trajectories)
+    ColregPlotComplex(env, trajectories=traj_data_models[0].trajectories)
         
         

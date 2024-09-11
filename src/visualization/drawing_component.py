@@ -12,7 +12,7 @@ class DrawingComponent(PlotComponent):
         self.draw_x : List[List[float]] = []
         self.draw_y : List[List[float]] = []
             
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         pass
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:

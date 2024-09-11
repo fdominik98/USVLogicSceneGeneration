@@ -13,9 +13,10 @@ class PlotComponent(ABC):
         self.env = env
         self.visible = initial_visibility
         self.graphs : List[plt.Artist] = []
+        self.zorder = 0
         
-    def draw(self, zorder : int):
-        self.do_draw(zorder)
+    def draw(self):
+        self.do_draw()
         self.refresh_visible()
         
         
@@ -29,7 +30,7 @@ class PlotComponent(ABC):
             g.set_visible(self.visible)
           
     @abstractmethod  
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         pass
     
     def update(self, new_env : USVEnvironment) -> List[plt.Artist]:

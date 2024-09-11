@@ -11,12 +11,13 @@ class AdditionalVOConeComponent(PlotComponent):
         self.circle_graphs : Dict[str, plt.Circle] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
         self.line2_graphs : Dict[str, plt.Line2D] = {}
+        self.zorder = -2
             
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         for colreg_s in self.env.colreg_situations:
             o1 = colreg_s.vessel1
             o2 = colreg_s.vessel2
-            vo_circle = plt.Circle(o2.p, colreg_s.safety_dist, color='black', fill=False, linestyle='--', linewidth=0.7, zorder=zorder)
+            vo_circle = plt.Circle(o2.p, colreg_s.safety_dist, color='black', fill=False, linestyle='--', linewidth=0.7, zorder=self.zorder)
             self.ax.add_artist(vo_circle)
             self.circle_graphs[colreg_s.name] = vo_circle
             # Calculate the angles of the cone
@@ -28,10 +29,10 @@ class AdditionalVOConeComponent(PlotComponent):
             cone1 = o1.p + np.array([np.cos(angle1), np.sin(angle1)]) * colreg_s.o_distance
             cone2 = o1.p + np.array([np.cos(angle2), np.sin(angle2)]) * colreg_s.o_distance
             
-            line1, = self.ax.plot([o1.p[0], cone1[0]], [o1.p[1], cone1[1]], 'k--', linewidth=0.7, zorder=zorder)
+            line1, = self.ax.plot([o1.p[0], cone1[0]], [o1.p[1], cone1[1]], 'k--', linewidth=0.7, zorder=self.zorder)
             self.line1_graphs[colreg_s.name] = line1
             
-            line2, = self.ax.plot([o1.p[0], cone2[0]], [o1.p[1], cone2[1]], 'k--', linewidth=0.7, zorder=zorder)   
+            line2, = self.ax.plot([o1.p[0], cone2[0]], [o1.p[1], cone2[1]], 'k--', linewidth=0.7, zorder=self.zorder)   
             self.line2_graphs[colreg_s.name] = line2 
             self.graphs += [vo_circle, line1, line2]
             

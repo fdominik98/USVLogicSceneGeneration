@@ -36,7 +36,7 @@ class ColregAnimation():
         self.components = components
         self.is_anim_paused = True
         
-        self.time_counter_ax : plt.Axes = plt.axes((0.25, 0.08, 0.65, 0.03), facecolor='white')
+        self.time_counter_ax : plt.Axes = plt.axes((0.25, 0.08, 0.65, 0.03))
         self.time_counter_ax.axis(False)
         self.rt_slider_ax : plt.Axes = plt.axes((0.25, 0.05, 0.65, 0.03))
         self.st_slider_ax : plt.Axes = plt.axes((0.25, 0.03, 0.65, 0.03))
@@ -61,12 +61,12 @@ class ColregAnimation():
         self.init_anim()
         while self.anim_frame_counter < self.anim_max_frames():
             if not self.is_anim_paused:
-                for o in self.din_env.vessels:
+                for o in self.dyn_env.vessels:
                    o.update(*self.select_next_state(o))
-                for colreg_s in self.din_env.colreg_situations:
+                for colreg_s in self.dyn_env.colreg_situations:
                     colreg_s.update()
                 self.anim_frame_counter += 1
-            yield self.din_env, self.anim_frame_counter
+            yield self.dyn_env, self.anim_frame_counter
             
             
     def select_next_state(self, o: Vessel):
@@ -89,7 +89,7 @@ class ColregAnimation():
             
             
     def init_anim(self):
-        self.din_env = copy.deepcopy(self.env)
+        self.dyn_env = copy.deepcopy(self.env)
         self.anim_frame_counter = 0
         self.is_anim_paused = True
         self.time_counter_text.set_text(self.get_sim_time_count(0))

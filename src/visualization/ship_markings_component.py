@@ -16,12 +16,13 @@ class ShipMarkingsComponent(PlotComponent):
         self.radius_graphs : List[plt.Circle] = []
         self.velocity_graphs : List[plt.Quiver] = []
         self.ship_dot_graphs : List[plt.PathCollection] = []
+        self.zorder = 0
         
             
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         for o in self.env.vessels:
             #Plot the positions and radius as circles
-            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o} Radius: {o.r}m', zorder=zorder)
+            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o} Radius: {o.r}m', zorder=self.zorder)
             self.ax.add_artist(radius_circle)
             self.radius_graphs.append(radius_circle)
 
@@ -29,12 +30,12 @@ class ShipMarkingsComponent(PlotComponent):
             speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
             velocity_label =f'{o} Velocity: {angle}, {speed}'
             # Plot the velocity vector with their actual lengths
-            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=velocity_label, zorder=zorder-10)
+            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=velocity_label, zorder=self.zorder-10)
             self.velocity_graphs.append(ship_vel)
             
             # Plot the positions
             dot_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
-            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=dot_label, zorder=zorder)
+            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=dot_label, zorder=self.zorder)
             self.ship_dot_graphs.append(ship_dot)
             #self.graphs += [name_text, radius_circle, ship_vel, ship_dot]
             self.graphs += [radius_circle, ship_vel, ship_dot]

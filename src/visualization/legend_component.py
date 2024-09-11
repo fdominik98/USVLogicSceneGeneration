@@ -10,8 +10,9 @@ class LegendComponent(PlotComponent):
     
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
+        self.zorder = 0
 
-    def do_draw(self, zorder : int):
+    def do_draw(self):
         self.legend : Legend = self.ax.legend()
         self.graphs += [self.legend]
         

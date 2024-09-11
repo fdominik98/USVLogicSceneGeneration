@@ -80,7 +80,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     poly_p2 = o.p + goal_vector / 4 * 3
     poly_p3 = poly_p2 + o.v_norm_perp() * collision_radius * 4
     poly_p4 = poly_p1 + o.v_norm_perp() * collision_radius * 4
-    obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]
+    #obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]
     obstacle_list += [CircularObstacle(collision_center, collision_radius)]
     
     # Define the bounding lines
