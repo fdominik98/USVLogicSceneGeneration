@@ -44,21 +44,22 @@ class ProximityEvaluator():
         
     def calculate_pair(self, colreg_s : ColregSituation) -> DynamicMetrics:
         dyn_colreg_s = copy.deepcopy(colreg_s)
-        ego_vessel = dyn_colreg_s.vessel1 if dyn_colreg_s.vessel1.id == 0 else dyn_colreg_s.vessel2
-        other_vessel = dyn_colreg_s.vessel1 if dyn_colreg_s.vessel1.id != 0 else dyn_colreg_s.vessel2
+        v1 = dyn_colreg_s.vessel1
+        v2 = dyn_colreg_s.vessel2
         
-        traj1 = self.trajectories[ego_vessel.id]
-        traj2 = self.trajectories[other_vessel.id]
+        traj1 = self.trajectories[v1.id]
+        traj2 = self.trajectories[v2.id]
         closest_index, closest_pos1, closest_pos2 = self.find_closest_positions(traj1, traj2)
         
         metrics = DynamicMetrics(colreg_s, closest_index, closest_pos1)
         for s, (pos1, pos2) in enumerate(zip(traj1, traj2)):
-            ego_vessel.update(*pos1)
-            other_vessel.update(*pos2)
+            v1.update(*pos1)
+            v2.update(*pos2)
             dyn_colreg_s.update()
             dist = dyn_colreg_s.o_distance
-            dcpa = np.linalg.norm(closest_pos1[:2] - np.array(pos1[:2]))
-            tcpa = closest_index - s
+            theta = np.pi - colreg_s.angle_v12_p12
+            dcpa = dist * abs(np.sin(theta))
+            tcpa = -dist * np.cos(theta) / np.linalg.norm(colreg_s.v12)
             metrics.append(dist, dcpa, tcpa)
             
         return metrics

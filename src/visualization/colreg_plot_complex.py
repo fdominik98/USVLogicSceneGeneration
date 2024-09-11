@@ -44,8 +44,8 @@ class ColregPlotComplex():
         self.ship_markings_component = ShipMarkingsComponent(self.ax, True, self.env)
         self.prime_component = PrimeComponent(self.ax, False, self.env)
         self.ship_image_component = ShipImageComponent(self.ax, True, self.env)
-        self.legend_component = LegendComponent(self.ax, True, self.env)
         self.drawing_component = DrawingComponent(self.fig, self.ax, True, self.env)
+        self.legend_component = LegendComponent(self.ax, True, self.env)
         
         self.components += [
             self.vo_cone_component,
@@ -56,8 +56,8 @@ class ColregPlotComplex():
             self.ship_markings_component,
             self.prime_component,
             self.ship_image_component,
+            self.drawing_component,
             self.legend_component,
-            self.drawing_component
         ]
         
         self.animation = ColregAnimation(self.fig, self.env, self.components, trajectories)
@@ -98,7 +98,7 @@ class ColregPlotComplex():
         self.ax.set_title(f'USV situation ({self.title})')
         self.ax.set_xlabel('X Position (m)')
         self.ax.set_ylabel('Y Position (m)')
-        self.ax.set_aspect('equal', adjustable='box')      
+        self.ax.set_aspect('equal', adjustable=None)      
         
         # Recalculate the limits based on the current data     
         self.ax.relim()

@@ -14,10 +14,10 @@ class AxesComponent(PlotComponent, ABC):
         self.line_graphs : Dict[str, plt.Line2D] = {}
         self.ax = ax
         
-        self.ax.set_title(f'{self.get_metric_str()} over time')
+        self.ax.set_title(self.get_title())
         self.ax.set_xlabel('Time (s)')
         self.ax.set_ylabel(f'{self.get_metric_str()} (m)')
-        self.ax.set_aspect('equal', adjustable='box')      
+        self.ax.set_aspect('auto', adjustable='box')      
     
     @abstractmethod
     def get_y_metric(self, metric : DynamicMetrics) -> list[float]:
@@ -29,6 +29,10 @@ class AxesComponent(PlotComponent, ABC):
     
     @abstractmethod
     def get_y_lim(self) -> Tuple[float, float]:
+        pass
+    
+    @abstractmethod
+    def get_title(self) -> str:
         pass
     
     def do_draw(self):
@@ -57,10 +61,14 @@ class DistanceAxesComponent(AxesComponent):
         return metric.distances
     
     def get_metric_str(self) -> str:
-        return 'Distance' 
+        return 'Distance'
+    
+    def get_title(self) -> str:
+        return 'Distance'
 
     def get_y_lim(self) -> Tuple[float, float]:
-        return 0, max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
+        dist = max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
+        return 0, dist*2
     
 class DCPAAxesComponent(AxesComponent):
     def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
@@ -72,8 +80,12 @@ class DCPAAxesComponent(AxesComponent):
     def get_metric_str(self) -> str:
         return 'DCPA'
     
+    def get_title(self) -> str:
+        return 'Distance at closest point of approach'
+    
     def get_y_lim(self) -> Tuple[float, float]:
-        return 0, max(self.metrics, key=lambda metric: metric.get_first_dcpa()).get_first_dcpa()
+        dcpa = max(self.metrics, key=lambda metric: metric.get_first_dcpa()).get_first_dcpa()
+        return 0, dcpa * 2
     
 class TCPAAxesComponent(AxesComponent):
     def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
@@ -85,7 +97,10 @@ class TCPAAxesComponent(AxesComponent):
     def get_metric_str(self) -> str:
         return 'TCPA'
     
+    def get_title(self) -> str:
+        return 'Time to closest point of approach'
+    
     def get_y_lim(self) -> Tuple[float, float]:
         tcpa0 = max(self.metrics, key=lambda metric: metric.get_first_tcpa()).get_first_tcpa()
-        return -tcpa0, tcpa0
+        return 0, tcpa0 * 2
     
