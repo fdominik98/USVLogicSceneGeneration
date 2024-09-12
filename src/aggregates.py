@@ -35,14 +35,27 @@ class VesselAggregate(Aggregate):
 
     def evaluate(self, individual : np.ndarray):
         self.env.update(individual.tolist())
-        objectives = [0] * self._get_object_num()
-      
+        return self.loose_evaluate()
+    
+    def strict_evaluate(self):
+        objectives = [0] * self._get_object_num()      
+        for colreg_sit in self.env.colreg_situations:
+            for penalty, normed_penalty in colreg_sit.get_strict_penalties():
+                objectives[colreg_sit.vessel1.id] += self._get_penalty(normed_penalty)
+                objectives[colreg_sit.vessel2.id] += self._get_penalty(normed_penalty)
+        
+        return tuple(objectives)
+    
+    def loose_evaluate(self):
+        objectives = [0] * self._get_object_num()      
         for colreg_sit in self.env.colreg_situations:
             for penalty, normed_penalty in colreg_sit.get_penalties():
                 objectives[colreg_sit.vessel1.id] += self._get_penalty(normed_penalty)
                 objectives[colreg_sit.vessel2.id] += self._get_penalty(normed_penalty)
         
         return tuple(objectives)
+    
+    
     
    
 class AggregateAll(Aggregate):

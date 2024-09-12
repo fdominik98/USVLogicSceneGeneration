@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
 from trajectory_planning.proximity_evaluator import DynamicMetrics
-from visualization.plot_component import PlotComponent, colors
+from visualization.plot_component import PlotComponent, colors, light_colors
 import matplotlib.colors as mcolors
 
 class AxesComponent(PlotComponent, ABC):
@@ -12,6 +12,7 @@ class AxesComponent(PlotComponent, ABC):
         super().__init__(ax, initial_visibility, env)
         self.metrics = metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
+        self.threshold_graphs : Dict[str, plt.Line2D] = {}
         self.ax = ax
         
         self.ax.set_title(self.get_title())
@@ -28,6 +29,10 @@ class AxesComponent(PlotComponent, ABC):
         pass
     
     @abstractmethod
+    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+        pass
+    
+    @abstractmethod
     def get_y_lim(self) -> Tuple[float, float]:
         pass
     
@@ -37,13 +42,15 @@ class AxesComponent(PlotComponent, ABC):
     
     def do_draw(self):
         for metric in self.metrics:
+            ts_vessel = metric.colreg_s.vessel1 if metric.colreg_s.vessel1.id != 0 else metric.colreg_s.vessel2
+            threshold_y = self.get_threshold_y(metric)
             y = self.get_y_metric(metric)
-            c1 = mcolors.to_rgb(colors[metric.colreg_s.vessel1.id])
-            c2 = mcolors.to_rgb(colors[metric.colreg_s.vessel2.id])
-            color = [(c1[0] + c2[0])/2, (c1[1] + c2[1])/2, (c1[2] + c2[2])/2]
-            line, = self.ax.plot(range(0, metric.len), y, color=color, linewidth=1.5, label=metric.colreg_s.name, linestyle='-')
+            x = range(0, metric.len)
+            line, = self.ax.plot(x, y, color=colors[ts_vessel.id], linewidth=1.5, label=metric.colreg_s.name, linestyle='-')
+            threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
             self.line_graphs[metric.colreg_s.name] = line
-            self.graphs += [line]
+            self.threshold_graphs[metric.colreg_s.name] = threshold
+            self.graphs += [line, threshold]
            
         self.ax.margins(x=0.2, y=0.2) 
         self.ax.set_xlim(0, metric.len)
@@ -70,6 +77,9 @@ class DistanceAxesComponent(AxesComponent):
         dist = max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
         return 0, dist*2
     
+    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+        return [metric.colreg_s.safety_dist] * metric.len
+    
 class DCPAAxesComponent(AxesComponent):
     def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
         super().__init__(ax, initial_visibility, env, metrics)  
@@ -87,6 +97,9 @@ class DCPAAxesComponent(AxesComponent):
         dcpa = max(self.metrics, key=lambda metric: metric.get_first_dcpa()).get_first_dcpa()
         return 0, dcpa * 2
     
+    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+        return [metric.colreg_s.safety_dist] * metric.len
+    
 class TCPAAxesComponent(AxesComponent):
     def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
         super().__init__(ax, initial_visibility, env, metrics)  
@@ -103,4 +116,7 @@ class TCPAAxesComponent(AxesComponent):
     def get_y_lim(self) -> Tuple[float, float]:
         tcpa0 = max(self.metrics, key=lambda metric: metric.get_first_tcpa()).get_first_tcpa()
         return 0, tcpa0 * 2
+    
+    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+        return [0] * metric.len
     

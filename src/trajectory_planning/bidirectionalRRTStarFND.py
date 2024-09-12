@@ -252,7 +252,7 @@ class RRTStarFND():
         if parent_node.parent is not None:
              delta_pos_parent = parent_node.p - self.node_list[parent_node.parent].p
              angle_parent = self.angle_between_vectors(delta_pos_parent, delta_pos, dist)
-             if not (np.radians(0) <= angle_parent <= np.radians(5) or
+             if not (np.radians(0) <= angle_parent <= np.radians(3) or
                      np.radians(30) <= angle_parent <= np.radians(60)):
                  return False, dist, next_state
         #     next_state = self.state_transitions(parent_node, delta_pos_parent, delta_pos, dist)

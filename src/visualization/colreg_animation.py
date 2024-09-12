@@ -12,7 +12,7 @@ class ColregAnimation():
     TWO_MINUTES = 2 * 60
     
     ANIM_REAL_TIME = TWO_HOURS * 2
-    ANIM_SIM_TIME = TWO_MINUTES / 2
+    ANIM_SIM_TIME = TWO_MINUTES / 4
     
     FRAMES_PER_SEC = 25.0
     REAL_TIME = 1.0 / FRAMES_PER_SEC
