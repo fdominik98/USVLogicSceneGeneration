@@ -5,9 +5,9 @@ from model.usv_environment import USVEnvironment
 from model.vessel import Vessel
 import copy
 
-from model.colreg_situation import ColregSituation
+from model.colreg_situation import ColregSituation, NoColreg
 
-class DynamicMetrics():
+class ProximityMetrics():
     def __init__(self, colreg_s : ColregSituation, closest_index : int, closest_dist : np.ndarray) -> None:
         self.distances : List[float] = []
         self.dcpas : List[float] = [] # Distance at the Closest Point of Approach
@@ -36,13 +36,13 @@ class ProximityEvaluator():
     def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
         self.env = env
         self.trajectories = trajectories
-        self.metrics : List[DynamicMetrics] = []
+        self.metrics : List[ProximityMetrics] = []
         
         for colreg_s in env.colreg_situations:
-            if colreg_s.vessel1.id == 0 or colreg_s.vessel2.id == 0:
+            if colreg_s.vessel1.is_OS() or colreg_s.vessel2.is_OS():
                 self.metrics.append(self.calculate_pair(colreg_s))
         
-    def calculate_pair(self, colreg_s : ColregSituation) -> DynamicMetrics:
+    def calculate_pair(self, colreg_s : ColregSituation) -> ProximityMetrics:
         dyn_colreg_s = copy.deepcopy(colreg_s)
         v1 = dyn_colreg_s.vessel1
         v2 = dyn_colreg_s.vessel2
@@ -51,7 +51,7 @@ class ProximityEvaluator():
         traj2 = self.trajectories[v2.id]
         closest_index, closest_pos1, closest_pos2 = self.find_closest_positions(traj1, traj2)
         
-        metrics = DynamicMetrics(colreg_s, closest_index, closest_pos1)
+        metrics = ProximityMetrics(colreg_s, closest_index, closest_pos1)
         for s, (pos1, pos2) in enumerate(zip(traj1, traj2)):
             v1.update(*pos1)
             v2.update(*pos2)
@@ -79,3 +79,42 @@ class ProximityEvaluator():
                 closest_position2 = np.array([traj2[i][0], traj2[i]][1])
 
         return closest_index, closest_position1, closest_position2
+    
+    
+class RiskEvaluator():
+    def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
+        self.env = env
+        self.trajectories = trajectories
+        self.risk_metrics : Dict[int, List[float]] = {v.id : [] for v in env.vessels}
+        
+        dyn_env = copy.deepcopy(env)
+        
+        for t in range(len(trajectories[0])):
+            
+            for o in dyn_env.vessels:
+                traj = trajectories[o.id]
+                o.update(*(traj[t]))
+            for vessel1 in dyn_env.vessels:
+                # if not vessel1.is_OS():
+                #     continue
+                for i in range(0, 180, 5):
+                    new_vcclkw = copy.deepcopy(vessel1)
+                    new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading + np.radians(i), vessel1.speed)
+                    new_vclkw = copy.deepcopy(vessel1)
+                    new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading - np.radians(i), vessel1.speed)
+                    if not (self.will_collide(dyn_env, new_vcclkw) and self.will_collide(dyn_env, new_vclkw)):
+                        break
+                self.risk_metrics[vessel1.id].append(i / 180)        
+                    
+                    
+                    
+    def will_collide(self, env: USVEnvironment, vessel1: Vessel):
+        for vessel2 in env.vessels:
+            if vessel2.id == vessel1.id:
+                continue
+            colreg = NoColreg(vessel1, vessel2)
+            if colreg.get_penalties()[1][0] > 0.0:
+                return True
+        return False
+                        
+                    

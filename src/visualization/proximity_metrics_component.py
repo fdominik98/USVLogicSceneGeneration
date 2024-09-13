@@ -1,14 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
-import numpy as np
 from model.usv_environment import USVEnvironment
-from trajectory_planning.proximity_evaluator import DynamicMetrics
+from trajectory_planning.proximity_evaluator import ProximityMetrics
 from visualization.plot_component import PlotComponent, colors, light_colors
-import matplotlib.colors as mcolors
 
-class AxesComponent(PlotComponent, ABC):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
+class ProximityMetricComponent(PlotComponent, ABC):
+    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
         super().__init__(ax, initial_visibility, env)
         self.metrics = metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
@@ -21,7 +19,7 @@ class AxesComponent(PlotComponent, ABC):
         self.ax.set_aspect('auto', adjustable='box')      
     
     @abstractmethod
-    def get_y_metric(self, metric : DynamicMetrics) -> list[float]:
+    def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         pass
     
     @abstractmethod
@@ -29,7 +27,7 @@ class AxesComponent(PlotComponent, ABC):
         pass
     
     @abstractmethod
-    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+    def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
         pass
     
     @abstractmethod
@@ -60,11 +58,11 @@ class AxesComponent(PlotComponent, ABC):
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         return self.graphs 
 
-class DistanceAxesComponent(AxesComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
+class DistanceAxesComponent(ProximityMetricComponent):
+    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
         super().__init__(ax, initial_visibility, env, metrics)  
           
-    def get_y_metric(self, metric : DynamicMetrics) -> list[float]:
+    def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.distances
     
     def get_metric_str(self) -> str:
@@ -77,14 +75,14 @@ class DistanceAxesComponent(AxesComponent):
         dist = max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
         return 0, dist*2
     
-    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+    def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
         return [metric.colreg_s.safety_dist] * metric.len
     
-class DCPAAxesComponent(AxesComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
+class DCPAAxesComponent(ProximityMetricComponent):
+    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
         super().__init__(ax, initial_visibility, env, metrics)  
           
-    def get_y_metric(self, metric : DynamicMetrics) -> list[float]:
+    def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.dcpas
     
     def get_metric_str(self) -> str:
@@ -97,14 +95,14 @@ class DCPAAxesComponent(AxesComponent):
         dcpa = max(self.metrics, key=lambda metric: metric.get_first_dcpa()).get_first_dcpa()
         return 0, dcpa * 2
     
-    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+    def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
         return [metric.colreg_s.safety_dist] * metric.len
     
-class TCPAAxesComponent(AxesComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[DynamicMetrics]) -> None:
+class TCPAAxesComponent(ProximityMetricComponent):
+    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
         super().__init__(ax, initial_visibility, env, metrics)  
           
-    def get_y_metric(self, metric : DynamicMetrics) -> list[float]:
+    def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.tcpas
     
     def get_metric_str(self) -> str:
@@ -117,6 +115,6 @@ class TCPAAxesComponent(AxesComponent):
         tcpa0 = max(self.metrics, key=lambda metric: metric.get_first_tcpa()).get_first_tcpa()
         return 0, tcpa0 * 2
     
-    def get_threshold_y(self, metric : DynamicMetrics) -> list[float]:
+    def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
         return [0] * metric.len
     

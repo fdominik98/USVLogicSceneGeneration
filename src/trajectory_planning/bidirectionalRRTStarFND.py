@@ -255,6 +255,10 @@ class RRTStarFND():
              if not (np.radians(0) <= angle_parent <= np.radians(3) or
                      np.radians(30) <= angle_parent <= np.radians(60)):
                  return False, dist, next_state
+        else:
+             angle_start_end = self.angle_between_vectors(self.delta_pos_start_end, delta_pos, dist)
+             if not (np.radians(0) <= angle_start_end <= np.radians(3)):
+                 return False, dist, next_state
         #     next_state = self.state_transitions(parent_node, delta_pos_parent, delta_pos, dist)
         #else:
         #     if parent_node.state != TrajectoryState.START:

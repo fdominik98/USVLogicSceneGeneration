@@ -73,9 +73,11 @@ class ColregSituation(ABC):
         return strict_distance(self.angle_p12_v1, goal_angle)
 
     def vo_collision_dist(self) -> Tuple[float, float]:
+        return 0.0, 0.0
         return interval_distance(self.angle_v12_p12, (0, self.angle_half_cone))
     
     def strict_vo_collision_dist(self) -> Tuple[float, float]:
+        return 0.0, 0.0
         return strict_distance(self.angle_v12_p12, 0)
         
     def info(self):

@@ -4,6 +4,7 @@ from model.usv_environment import USVEnvironment
 from model.usv_config import *
 from model.colreg_situation import NoColreg
 from aggregates import VesselAggregate
+from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.drawing_component import DrawingComponent
 from visualization.legend_component import LegendComponent
 from visualization.colreg_animation import ColregAnimation
@@ -21,7 +22,14 @@ class ColregPlot():
     def __init__(self, env : USVEnvironment, block=True, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
         self.env = env
+        
         self.trajectories = trajectories
+        if self.trajectories is None:
+            interpolator = PathInterpolator()
+            for v in env.vessels:
+                interpolator.add_path(v, [])
+            self.trajectories = interpolator.interpolated_paths
+            
         self.block = block
         self.axis_visible = True
         self.create_fig()
@@ -34,7 +42,7 @@ class ColregPlot():
         self.configure()
         
            
-        self.animation = ColregAnimation(self.fig, self.env, self.components.values(), trajectories)
+        self.animation = ColregAnimation(self.fig, self.env, self.components.values(), self.trajectories)
         
         self.draw()   
         
@@ -71,6 +79,9 @@ class ColregPlot():
             self.axis_visible = not self.axis_visible
             self.ax.axis(self.axis_visible)
             self.ax.title.set_visible(self.axis_visible)
+        elif event.key == 'escape':
+            plt.close(event.canvas.figure)
+            return
         else:
             for id, comp in self.components.items():
                 if event.key == id:

@@ -44,20 +44,20 @@ pred isInSituationWith(Vessel v1, Vessel v2) <->
     target(s, v1), source(s, v2);
     target(s, v2), source(s, v1).
 
-atom asv.
-Vessel(asv).
+atom OS.
+Vessel(OS).
 
-error pred asvNotReachable(Vessel v1) <->
-    !isInSituationWith(v1, asv), v1 != asv.
+error pred notInSituationWithOS(Vessel v1) <->
+    !isInSituationWith(v1, OS), v1 != OS.
 
-error pred twoNonAsvInSituation(Vessel v1, Vessel v2) <->
-    v1 != asv, v2 != asv, isInSituationWith(v1, v2).
+error pred twoNonOSInSituation(Vessel v1, Vessel v2) <->
+    v1 != OS, v2 != OS, isInSituationWith(v1, v2).
 
 error pred inSituationWithSelf(Vessel v1, Vessel v2) <->
     isInSituationWith(v1, v2),
     v1 == v2.    
 
 default !ambigious(*).
-ambigious(asv).
+ambigious(OS).
 
-scope Vessel = 5, COLREGSSituation = 4, COLREGSScenario = 1.
+scope Vessel = 4, COLREGSSituation = 3, COLREGSScenario = 1.

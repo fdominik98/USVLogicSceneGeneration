@@ -46,4 +46,7 @@ class Vessel():
     def __repr__(self) -> str:
         return self.name
     
+    def is_OS(self):
+        return self.id == 0
+    
  

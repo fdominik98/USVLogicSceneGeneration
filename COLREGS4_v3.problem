@@ -1,0 +1,84 @@
+class COLREGSScenario {
+    contains Vessel[] vessels
+    contains Relation[] situations
+}
+
+class Vessel {}
+
+class Relation {
+    RelationType[1] type
+    Vessel[1] source
+    Vessel[1] target
+}
+
+enum RelationType {overtaking, crossingFromPort, headOn, collision}
+
+error pred collisionWithoutColreg(Vessel v1, Vessel v2) <->
+    !isInSituationWith(v1, v2) , collide(v1, v2).
+
+error pred selfRelation(Relation r, Vessel v) <->
+    target(r, v) , source(r, v).
+
+error pred doubleRelation(Vessel v1, Vessel v2) <->
+    source(r1, v1), target(r1, v2),
+    source(r2, v1), target(r2, v2),
+    colreg(r1) , colreg(r2), r1!=r2;
+    
+    source(r1, v1), target(r1, v2),
+    source(r2, v1), target(r2, v2),
+    collision(r1), collision(r2), r1!=r2;
+    
+    source(r1, v1), target(r1, v2),
+    source(r2, v2), target(r2, v1),
+    colreg(r1), colreg(r2), r1!=r2;
+    
+    source(r1, v1), target(r1, v2),
+    source(r2, v2), target(r2, v1),
+    collision(r1), collision(r2), r1!=r2.
+
+pred overtaking(Vessel v, Vessel t) <->
+    source(s, v), target(s, t), type(s, type), type == overtaking.
+
+pred crossingFromPort(Vessel v, Vessel t) <->
+    source(s, v), target(s, t), type(s, type), type == crossingFromPort.
+
+pred headOn(Vessel v, Vessel t) <->
+    source(s, v), target(s, t), type(s, type), type == headOn;
+    source(s, t), target(s, v), type(s, type), type == headOn.
+
+pred colreg(Relation r) <->
+    type(r, type), type == crossingFromPort;
+    type(r, type), type == overtaking;
+    type(r, type), type == headOn.
+
+pred collision(Relation r) <->
+    type(r, type), type == collision.
+
+pred collide(Vessel v, Vessel t) <->
+    source(s, v), target(s, t), collision(s);
+    source(s, t), target(s, s), collision(s).                          
+
+pred giveWay(Vessel v) <-> source(_, v); headOn(_, v).
+
+pred standOn(Vessel t) <->
+    overtaking(_, t) ; crossingFromPort(_, t) ; !collide(_, t).
+
+pred ambigious(Vessel v) <->
+    giveWay(v), standOn(v).
+
+pred isInSituationWith(Vessel v1, Vessel v2) <->
+    headOn(v1, v2) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
+
+
+atom OS.
+Vessel(OS).
+error pred notInSituationWithOS(Vessel v1) <->
+    !isInSituationWith(v1, OS), v1 != OS.
+
+error pred twoNonOSCollide(Vessel v1, Vessel v2) <->
+    v1 != OS, v2 != OS, collide(v1, v2).
+
+default !ambigious(*).
+ambigious(OS).
+
+scope Vessel = 3, Relation = 0..*, COLREGSScenario = 1.

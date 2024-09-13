@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.widgets import Slider
@@ -30,7 +30,7 @@ class ColregAnimation():
     
     def __init__(self, fig : plt.Figure,
                  env : USVEnvironment, components : List[PlotComponent],
-                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
+                 trajectories : Dict[int, List[Tuple[float, float, float, float]]]) -> None:
         self.fig = fig
         self.env = env
         self.components = components
@@ -45,12 +45,9 @@ class ColregAnimation():
         self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 10, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)
         self.time_counter_text = self.time_counter_ax.text(0, 0, self.get_sim_time_count(0), fontsize=12, color='black')
 
-      
-        self.trajectories = None
-        if trajectories is not None:
-            self.trajectories = copy.deepcopy(trajectories)
-            # for id in self.trajectories.keys():
-            #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
+        self.trajectories = copy.deepcopy(trajectories)
+        # for id in self.trajectories.keys():
+        #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
             
         self.anim = None
             
@@ -71,11 +68,10 @@ class ColregAnimation():
             
     def select_next_state(self, o: Vessel):
         speed_up = self.speed_up_ratio()
-        if self.trajectories is not None:
-            traj = self.trajectories[o.id]
-            frame_index = int(self.anim_frame_counter * self.REAL_TIME * speed_up)
-            if frame_index < len(traj):                
-                return traj[frame_index]
+        traj = self.trajectories[o.id]
+        frame_index = int(self.anim_frame_counter * self.REAL_TIME * speed_up)
+        if frame_index < len(traj):                
+            return traj[frame_index]
             
         vec = o.v * self.REAL_TIME * speed_up
         return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
