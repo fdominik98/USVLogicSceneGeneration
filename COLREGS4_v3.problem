@@ -58,16 +58,16 @@ pred collide(Vessel v, Vessel t) <->
     source(s, v), target(s, t), collision(s);
     source(s, t), target(s, s), collision(s).                          
 
-pred giveWay(Vessel v) <-> source(_, v); headOn(_, v).
+pred giveWay(Vessel v) <-> source(r, v), colreg(r); headOn(_, v).
 
 pred standOn(Vessel t) <->
-    overtaking(_, t) ; crossingFromPort(_, t) ; !collide(_, t).
+    overtaking(_, t) ; crossingFromPort(_, t).
 
 pred ambigious(Vessel v) <->
     giveWay(v), standOn(v).
 
 pred isInSituationWith(Vessel v1, Vessel v2) <->
-    headOn(v1, v2) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
+    headOn(v1, v2); headOn(v2, v1) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
 
 
 atom OS.
@@ -81,4 +81,12 @@ error pred twoNonOSCollide(Vessel v1, Vessel v2) <->
 default !ambigious(*).
 ambigious(OS).
 
-scope Vessel = 3, Relation = 0..*, COLREGSScenario = 1.
+atom TS1.
+atom TS2.
+atom TS3.
+Relation(relation1). source(relation1, TS1). target(relation1, OS). type(relation1, RelationType::overtaking).
+Relation(relation2). source(relation2, TS2). target(relation2, OS). type(relation2, RelationType::headOn).
+Relation(relation3). source(relation3, OS). target(relation3, TS3). type(relation3, RelationType::crossingFromPort).
+
+
+scope Vessel = 4, Relation = 3, COLREGSScenario = 1.
