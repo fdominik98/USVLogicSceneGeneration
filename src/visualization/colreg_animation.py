@@ -38,8 +38,8 @@ class ColregAnimation():
         
         self.time_counter_ax : plt.Axes = plt.axes((0.25, 0.08, 0.65, 0.03))
         self.time_counter_ax.axis(False)
-        self.rt_slider_ax : plt.Axes = plt.axes((0.25, 0.05, 0.65, 0.03))
-        self.st_slider_ax : plt.Axes = plt.axes((0.25, 0.03, 0.65, 0.03))
+        self.rt_slider_ax : plt.Axes = plt.axes((0.25, 0.05, 0.65, 0.015))
+        self.st_slider_ax : plt.Axes = plt.axes((0.25, 0.03, 0.65, 0.015))
         
         self.real_time_slider = Slider(self.rt_slider_ax, 'Real time', 10, self.TWO_HOURS * 4, valinit=self.ANIM_REAL_TIME, valstep=10)
         self.sim_time_slider = Slider(self.st_slider_ax, 'Sim time', 10, self.TWO_MINUTES, valinit=self.ANIM_SIM_TIME, valstep=10)

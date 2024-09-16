@@ -1,0 +1,83 @@
+class FunctionalModel {
+    contains Vessel[] object
+}
+
+abstract class Vessel {
+    Vessel[0..*] overtaking
+    Vessel[0..*] crossingFromPort
+    Vessel[0..*] headOn
+    Vessel[0..*] colliding
+}
+
+class OS extends Vessel.
+class TS extends Vessel.
+
+                      
+
+pred giveWay(Vessel v1) <-> overtaking(v1, v2), colliding(v1, v2);
+                            crossingFromPort(v1, v2), colliding(v1, v2);
+                            headOn(v2, v1), colliding(v1, v2).
+
+pred standOn(Vessel v1) <->
+    overtaking(v2, v1), colliding(v1, v2); crossingFromPort(v2, v1), colliding(v1, v2).
+
+pred ambiguous(Vessel v) <->
+    giveWay(v), standOn(v).
+
+pred isInSituationWith(Vessel v1, Vessel v2) <->
+    headOn(v2, v1) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
+
+
+error pred collisionWithoutColreg(Vessel v1, Vessel v2) <->
+    !isInSituationWith(v1, v2) , colliding(v1, v2).
+
+error pred bidirectionalRelations(Vessel v1, Vessel v2) <->
+    colliding(v1, v2), !colliding(v2, v1);
+    headOn(v1, v2), !headOn(v2, v1).   
+
+error pred unidirectionalRelations(Vessel v1, Vessel v2) <->
+    crossingFromPort(v1, v2), crossingFromPort(v2, v1);
+    overtaking(v1, v2), overtaking(v2, v1).  
+
+error pred selfRelation(Vessel v) <->
+    overtaking(v, v); crossingFromPort(v, v); headOn(v, v); colliding(v, v).
+
+
+error pred doubleRelation(Vessel v1, Vessel v2) <->
+    headOn(v1, v2), crossingFromPort(v1, v2);
+    headOn(v1, v2), overtaking(v1, v2);
+    overtaking(v1, v2), crossingFromPort(v1, v2);
+
+    headOn(v1, v2), crossingFromPort(v2, v1);
+    headOn(v1, v2), overtaking(v2, v1);
+    overtaking(v1, v2), crossingFromPort(v2, v1).
+
+
+error pred notInSituationWithOS(Vessel v1) <->
+    !isInSituationWith(v1, v2), !OS(v1), OS(v2).
+
+error pred twoNonOSCollide(Vessel v1, Vessel v2) <->
+    !OS(v1), !OS(v2), colliding(v1, v2).
+
+error pred moreThanOneOS(Vessel v1, Vessel v2) <->
+    OS(v1), OS(v2), v1 != v2.
+
+error pred noOS() <->
+    !OS(_).
+
+    
+default !ambiguous(*).
+
+OS(OS).
+ambiguous(OS).
+
+atom COLREGSScenario.
+FunctionalModel(COLREGSScenario).
+
+TS(TS1).
+TS(TS2).
+TS(TS3).
+
+
+
+scope Vessel = 4, FunctionalModel = 1.

@@ -19,6 +19,9 @@ from visualization.vo_cone_component import VOConeComponent
 from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
 class ColregPlot():  
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    
     def __init__(self, env : USVEnvironment, block=True, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
         self.env = env
