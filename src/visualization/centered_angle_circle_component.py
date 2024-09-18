@@ -9,7 +9,7 @@ from visualization.angle_circle_component import AngleCircleComponent
 class CenteredAngleCircleComponent(AngleCircleComponent):
     radius_ratio = 1.7
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment, center_vessel_id = 0) -> None:
-        super().__init__(ax, initial_visibility, env, linewidth=1.5, radius_ratio = self.radius_ratio, center_vessel_id=center_vessel_id)
+        super().__init__(ax, initial_visibility, env, linewidth=1.8, radius_ratio = self.radius_ratio, center_vessel_id=center_vessel_id)
             
     def do_draw(self):
         
@@ -21,21 +21,21 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         
         # Create the wedge (filled circle slice)
         self.wedge_stern = patches.Wedge(self.center_vessel.p,
-                                       self.angle_circle_radius * 0.95,
+                                       self.angle_circle_radius,
                                        angle1_masthead, angle2_masthead,
                                        color='lightskyblue',
                                        alpha=0.3, zorder=self.zorder)
         self.ax.add_patch(self.wedge_stern)
         
         self.wedge_bow = patches.Wedge(self.center_vessel.p,
-                                self.angle_circle_radius * 0.95,
+                                self.angle_circle_radius,
                                 angle2_bow, angle1_bow,
                                 color='hotpink',
                                 alpha=0.3, zorder=self.zorder)
         self.ax.add_patch(self.wedge_bow)
         
         self.wedge_masthead = patches.Wedge(self.center_vessel.p,
-                                self.angle_circle_radius * 0.95,
+                                self.angle_circle_radius,
                                 angle2_masthead, angle1_masthead,
                                 color='sandybrown',
                                 alpha=0.3, zorder=self.zorder)

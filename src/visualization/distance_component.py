@@ -18,10 +18,10 @@ class DistanceComponent(PlotComponent):
             o2 = colreg_s.vessel2    
             
             text_str = f'{colreg_s.o_distance / N_MILE_TO_M_CONVERSION:.1f} NM'
-            text = self.ax.text(o1.p[0] + colreg_s.p12[0] / 2, o1.p[1] + colreg_s.p12[1] / 2, text_str, fontsize=10, color='grey', zorder=self.zorder + 10)
+            text = self.ax.text(o1.p[0] + colreg_s.p12[0] / 2, o1.p[1] + colreg_s.p12[1] / 2, text_str, fontsize=10, color='black', zorder=self.zorder + 10)
             self.text_graphs[colreg_s.name] = text
             
-            line, = self.ax.plot([o1.p[0], o2.p[0]], [o1.p[1], o2.p[1]], color=light_colors[5], linewidth=0.8, zorder=self.zorder)
+            line, = self.ax.plot([o1.p[0], o2.p[0]], [o1.p[1], o2.p[1]], color='black', linewidth=0.8, zorder=self.zorder)
             self.line_graphs[colreg_s.name] = line
             
             self.graphs += [text, line]

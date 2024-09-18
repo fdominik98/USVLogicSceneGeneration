@@ -71,7 +71,7 @@ class ColregPlot():
             '3' : AdditionalVOConeComponent(self.ax, False, self.env),
             '1' : DistanceComponent(self.ax, True, self.env),
             '6' : AngleCircleComponent(self.ax, True, self.env, linewidth=1.5),
-            #'7' : CenteredAngleCircleComponent(self.ax, True, self.env, center_vessel_id=0),            
+            '7' : CenteredAngleCircleComponent(self.ax, False, self.env, center_vessel_id=0),            
             '8' : PrimeComponent(self.ax, False, self.env),
             '9' : ShipImageComponent(self.ax, True, self.env)                   
         }
