@@ -20,6 +20,6 @@ while(True):
     
     config = USV_ENV_DESC_LIST[eval_data_models[0].config_name]
     env = USVEnvironment(config).update(eval_data_models[0].best_solution)
-    ColregPlotComplex(env, trajectories=traj_data_models[0].trajectories)
+    ColregPlot(env, trajectories=traj_data_models[0].trajectories)
         
         

@@ -11,8 +11,9 @@ class ShipMarkingsComponent(PlotComponent):
     DYNAMIC_ZOOM = 50
     def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
         super().__init__(ax, initial_visibility, env)
-        self.radius_visible = True
+        self.radius_visible = initial_visibility
         self.markings_visible = initial_visibility
+        self.velocity_visible = initial_visibility
         self.radius_graphs : List[plt.Circle] = []
         self.velocity_graphs : List[plt.Quiver] = []
         self.ship_dot_graphs : List[plt.PathCollection] = []
@@ -43,13 +44,20 @@ class ShipMarkingsComponent(PlotComponent):
         
         
     def toggle(self):
-        if self.markings_visible and self.radius_visible:
+        if self.markings_visible and self.radius_visible and self.velocity_visible:
             self.radius_visible = False
-        elif self.markings_visible and not self.radius_visible:
+        elif self.markings_visible and self.velocity_visible and not self.radius_visible:
+            self.velocity_visible = False
+        elif self.markings_visible and not self.velocity_visible and not self.radius_visible: 
             self.markings_visible = False
+        elif not self.markings_visible and not self.velocity_visible and not self.radius_visible: 
+            self.radius_visible = True
+        elif self.radius_visible and not self.velocity_visible and not self.markings_visible: 
+            self.markings_visible = True
         else:
             self.markings_visible = True
             self.radius_visible = True
+            self.velocity_visible = True
             
         self.visible = self.markings_visible or self.radius_visible
         self.refresh_visible()
@@ -60,7 +68,7 @@ class ShipMarkingsComponent(PlotComponent):
         for g in self.ship_dot_graphs:
             g.set_visible(self.markings_visible)
         for g in self.velocity_graphs:
-            g.set_visible(self.markings_visible)
+            g.set_visible(self.velocity_visible)
         
              
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
