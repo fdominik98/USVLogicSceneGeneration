@@ -5,10 +5,8 @@ from visualization.plot_component import PlotComponent
 
 
 class PrimeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, initial_visibility: bool, env: USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
-        self.p21_visible = False
-        self.p12_visible = initial_visibility
+    def __init__(self, ax: plt.Axes, env: USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.p12_vec_graphs: Dict[str, plt.Quiver] = {}
         self.p21_vec_graphs: Dict[str, plt.Quiver] = {}
         self.zorder = -15
@@ -29,25 +27,6 @@ class PrimeComponent(PlotComponent):
             self.p21_vec_graphs[colreg_s.name] = p21_vec
 
             self.graphs += [p12_vec, p21_vec]
-            self.refresh_visible()
-
-    def toggle(self):
-        if self.p12_visible:
-            self.p12_visible = False
-            self.p21_visible = True
-        elif self.p21_visible:
-            self.p12_visible = self.p21_visible = False
-        else:
-            self.p12_visible = True
-            
-        self.visible = self.p12_visible or self.p21_visible
-        self.refresh_visible()
-
-    def refresh_visible(self):
-        for g in self.p12_vec_graphs.values():
-            g.set_visible(self.p12_visible)
-        for g in self.p21_vec_graphs.values():
-            g.set_visible(self.p21_visible)
 
     def do_update(self, new_env: USVEnvironment) -> List[plt.Artist]:
         for colreg_s in new_env.colreg_situations:

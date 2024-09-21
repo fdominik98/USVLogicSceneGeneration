@@ -19,6 +19,7 @@ while(True):
 
     config = USV_ENV_DESC_LIST[data_models[0].config_name]
     env = USVEnvironment(config).update(data_models[0].best_solution)
-    ColregPlot(env)
+    ColregPlotManager(env)
+    #ColregPlot(env)
         
         

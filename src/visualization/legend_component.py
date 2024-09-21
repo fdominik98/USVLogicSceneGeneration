@@ -8,8 +8,8 @@ from visualization.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):
     
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.zorder = 0
 
     def do_draw(self):

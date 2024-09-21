@@ -10,6 +10,7 @@ class ColregSituation(ABC):
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.name = name
+        self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
         self.safety_dist = vessel1.r + vessel2.r  
         self.update()
         

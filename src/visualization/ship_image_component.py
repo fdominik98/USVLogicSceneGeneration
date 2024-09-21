@@ -15,37 +15,15 @@ class ShipImageComponent(PlotComponent):
     current_dir = os.path.dirname(script_path)
     img_dir = f'{current_dir}/../../assets/images'
     
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.image = mpimg.imread(f'{self.img_dir}/ship2.png')
         self.ship_image_graphs : List[AnnotationBbox] = []
         self.ship_offset_images : List[OffsetImage] = []
         self.traj_line_graphs : List[plt.Line2D] = []
-        self.ship_image_visible = initial_visibility
-        self.traj_line_visible = True
         self.xs : Dict[int, List[float]] = {o.id : [] for o in env.vessels}
         self.ys : Dict[int, List[float]] = {o.id : [] for o in env.vessels}
         self.zorder = -4
-        
-        
-    def toggle(self):
-        if self.ship_image_visible and self.traj_line_visible:
-            self.traj_line_visible = False
-        elif self.ship_image_visible and not self.traj_line_visible:
-            self.ship_image_visible = False
-        elif not self.ship_image_visible and not self.traj_line_visible:
-            self.traj_line_visible = True
-        else:
-            self.ship_image_visible = True
-        
-        self.visible = self.ship_image_visible or self.traj_line_visible
-        self.refresh_visible()
-            
-    def refresh_visible(self):
-        for g in self.ship_image_graphs:
-            g.set_visible(self.ship_image_visible)
-        for g in self.traj_line_graphs:
-            g.set_visible(self.traj_line_visible)
         
     def do_draw(self):
         for o in self.env.vessels:

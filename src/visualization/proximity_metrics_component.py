@@ -6,8 +6,8 @@ from trajectory_planning.proximity_evaluator import ProximityMetrics
 from visualization.plot_component import PlotComponent, colors, light_colors
 
 class ProximityMetricComponent(PlotComponent, ABC):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
+        super().__init__(ax, env)
         self.metrics = metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
         self.threshold_graphs : Dict[str, plt.Line2D] = {}

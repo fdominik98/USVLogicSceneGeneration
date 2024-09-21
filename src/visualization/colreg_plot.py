@@ -21,6 +21,7 @@ from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 class ColregPlot():  
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['font.size'] = 12
     
     def __init__(self, env : USVEnvironment, block=True, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
@@ -37,63 +38,49 @@ class ColregPlot():
         self.axis_visible = True
         self.create_fig()
         
-        self.components : Dict[str, PlotComponent] = {
-            '5' : ShipMarkingsComponent(self.ax, True, self.env),
-            'drawing' : DrawingComponent(self.fig, self.ax, True, self.env),
-            '0' : LegendComponent(self.ax, True, self.env),
-        }
-        self.configure()
+        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.env)
+        self.drawing_component = DrawingComponent(self.fig, self.ax, self.env)
+        self.legend_component = LegendComponent(self.ax, self.env)
+        self.vo_cone_component = VOConeComponent(self.ax, self.env)
+        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.env)
+        self.distance_component = DistanceComponent(self.ax, self.env)
+        self.angle_circle_component = AngleCircleComponent(self.ax, self.env, linewidth=1.5)
+        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.env)          
+        self.prime_component = PrimeComponent(self.ax, self.env)
+        self.ship_image_component = ShipImageComponent(self.ax, self.env)    
         
+        self.components : List[PlotComponent] = [
+            self.ship_markings_component,
+            self.drawing_component,
+            self.legend_component,
+            self.vo_cone_component,
+            self.add_vo_cone_component,
+            self.distance_component,
+            self.angle_circle_component,
+            self.centered_angle_circle_component,
+            self.prime_component,
+            self.ship_image_component
+        ]
            
-        self.animation = ColregAnimation(self.fig, self.env, self.components.values(), self.trajectories)
+        self.animation = ColregAnimation(self.fig, self.env, self.components, self.trajectories)
         
         self.draw()   
         
         # Connect the key press event to the toggle function
-        self.fig.canvas.mpl_connect('key_press_event', lambda e: self.toggle_visibility(e))
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
         # Connect the click and move events to their handlers
-        drawing_component : DrawingComponent = self.components['drawing']
-        self.fig.canvas.mpl_connect('button_press_event', drawing_component.on_click)
-        self.fig.canvas.mpl_connect('motion_notify_event', drawing_component.on_move)
-        
-        plt.show(block=self.block)
+        self.fig.canvas.mpl_connect('button_press_event', self.drawing_component.on_click)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.drawing_component.on_move)
      
         
     def create_fig(self):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 10), gridspec_kw={'width_ratios': [1]})
+        fig, ax = plt.subplots(1, 1, gridspec_kw={'width_ratios': [1]})
         self.fig : plt.Figure = fig
-        self.ax : plt.Axes = ax
-     
-    def configure(self):
-        self.components |= {
-            '2' : VOConeComponent(self.ax, False, self.env),
-            '3' : AdditionalVOConeComponent(self.ax, False, self.env),
-            '1' : DistanceComponent(self.ax, True, self.env),
-            '6' : AngleCircleComponent(self.ax, True, self.env, linewidth=1.5),
-            '7' : CenteredAngleCircleComponent(self.ax, False, self.env, center_vessel_id=0),            
-            '8' : PrimeComponent(self.ax, False, self.env),
-            '9' : ShipImageComponent(self.ax, True, self.env)                   
-        }
-           
-    # Function to toggle the visibility
-    def toggle_visibility(self, event):
-        if event.key == '4':
-            self.axis_visible = not self.axis_visible
-            self.ax.axis(self.axis_visible)
-            self.ax.title.set_visible(self.axis_visible)
-        elif event.key == 'escape':
-            plt.close(event.canvas.figure)
-            return
-        else:
-            for id, comp in self.components.items():
-                if event.key == id:
-                    comp.toggle()
-        self.fig.canvas.draw()    
-        
+        self.ax : plt.Axes = ax     
+
         
     def draw(self):
-        for component in self.components.values():
+        for component in self.components:
             component.draw()
         
         self.title = ''
@@ -112,7 +99,6 @@ class ColregPlot():
         
         
     def set_layout(self):
-        self.fig.subplots_adjust(bottom=0.35)
         #self.fig.tight_layout(pad=10)
         self.ax.grid(False)
        
@@ -125,7 +111,6 @@ class ColregPlot():
         self.ax.relim()
         # Automatically adjust xlim and ylim
         #self.ax.autoscale_view()
-        self.ax.margins(x=0.2, y=0.2)
         # # Get current x and y limits
         # x_min, x_max = self.ax.get_xlim()
         # y_min, y_max = self.ax.get_ylim()

@@ -6,11 +6,12 @@ from visualization.plot_component import PlotComponent
 
 
 class AdditionalVOConeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.circle_graphs : Dict[str, plt.Circle] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
         self.line2_graphs : Dict[str, plt.Line2D] = {}
+        self.graphs_by_colregs = [self.circle_graphs, self.line1_graphs, self.line2_graphs]
         self.zorder = -2
             
     def do_draw(self):

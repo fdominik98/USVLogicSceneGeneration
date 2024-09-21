@@ -6,10 +6,11 @@ from model.usv_config import N_MILE_TO_M_CONVERSION
 
 
 class DistanceComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.text_graphs : Dict[str, plt.Text] = {}
         self.line_graphs : Dict[str, plt.Line2D] = {}
+        self.graphs_by_colregs = [self.text_graphs, self.line_graphs]
         self.zorder = -3
             
     def do_draw(self):

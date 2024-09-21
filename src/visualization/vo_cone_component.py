@@ -2,17 +2,17 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.usv_environment import USVEnvironment
-from model.colreg_situation import ColregSituation
 from visualization.plot_component import PlotComponent, colors
 
 
 class VOConeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.other_velocity_graphs : Dict[str, plt.Quiver] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
         self.line2_graphs : Dict[str, plt.Line2D] = {}
         self.filling_graphs : Dict[str, plt.Polygon] = {}
+        self.graphs_by_colregs = [self.other_velocity_graphs, self.line1_graphs, self.line2_graphs, self.filling_graphs]
         self.zorder = -1
             
     def do_draw(self):

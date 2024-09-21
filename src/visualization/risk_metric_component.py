@@ -5,8 +5,8 @@ from model.usv_environment import USVEnvironment
 from visualization.plot_component import PlotComponent, colors
 
 class RiskMetricComponent(PlotComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : Dict[int, List[float]]) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : Dict[int, List[float]]) -> None:
+        super().__init__(ax, env)
         self.metrics = metrics
         self.line_graphs : Dict[int, plt.Line2D] = {}
         self.ax = ax

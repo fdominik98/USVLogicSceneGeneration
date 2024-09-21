@@ -12,25 +12,22 @@ class AngleCircleComponent(PlotComponent):
     angle_circle_slice_1 = BOW_ANGLE  # 20 degree slice
     angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
     
-    def __init__(self, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment, linewidth=0.8, radius_ratio = 10, center_vessel_id=None) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, ax: plt.Axes, env : USVEnvironment, linewidth=0.8, radius_ratio = 10) -> None:
+        super().__init__(ax, env)
         self.circle_graphs : List[plt.Circle] = []
         self.line1_graphs : List[plt.Line2D] = []
         self.line2_graphs : List[plt.Line2D] = []
         self.line3_graphs : List[plt.Line2D] = []
         self.line4_graphs : List[plt.Line2D] = []
+        self.graphs_by_vessel = [self.circle_graphs, self.line1_graphs, self.line2_graphs, self.line3_graphs, self.line4_graphs]
         self.zorder = -20
         
         self.linewidth = linewidth
         self.angle_circle_radius = MAX_COORD / radius_ratio
-        self.center_vessel  = None if center_vessel_id is None else env.get_vessel_by_id(center_vessel_id)
             
     def do_draw(self):
-        if self.center_vessel is not None:
-            self.one_draw(self.center_vessel, self.zorder, 'black')
-        else:
-            for o in self.env.vessels:
-                self.one_draw(o, self.zorder, light_colors[o.id])
+        for o in self.env.vessels:
+            self.one_draw(o, self.zorder, light_colors[o.id])
             
     
     def one_draw(self, o : Vessel,  zorder : int, circle_color):

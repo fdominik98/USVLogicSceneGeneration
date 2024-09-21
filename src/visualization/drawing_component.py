@@ -6,8 +6,8 @@ from model.usv_config import N_MILE_TO_M_CONVERSION
 
 
 class DrawingComponent(PlotComponent):
-    def __init__(self, fig : plt.Figure, ax: plt.Axes, initial_visibility : bool, env : USVEnvironment) -> None:
-        super().__init__(ax, initial_visibility, env)
+    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : USVEnvironment) -> None:
+        super().__init__(ax, env)
         self.fig = fig
         self.draw_x : List[List[float]] = []
         self.draw_y : List[List[float]] = []
