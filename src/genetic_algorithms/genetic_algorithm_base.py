@@ -9,7 +9,6 @@ from datetime import datetime
 import gc
 import traceback
 import os
-from visualization.colreg_plot import ColregPlot
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 
 class GeneticAlgorithmBase(ABC):

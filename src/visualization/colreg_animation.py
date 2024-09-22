@@ -34,9 +34,6 @@ class ColregAnimation():
         self.fig = fig
         self.env = env
         self.components = components
-        self.is_anim_paused = True
-        
-        self.anim_frame_counter = 0
         
         self.real_time_value = ANIM_REAL_TIME
         self.sim_time_value = ANIM_SIM_TIME
@@ -46,6 +43,7 @@ class ColregAnimation():
         #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
             
         self.anim = None
+        self.init_anim()
             
     def start(self):
         self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / FRAMES_PER_SEC) * 1000), cache_frame_data=False)

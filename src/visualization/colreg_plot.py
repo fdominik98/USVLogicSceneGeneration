@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
+import matplotlib
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
 from model.colreg_situation import NoColreg
@@ -23,7 +24,7 @@ class ColregPlot():
     plt.rcParams['font.serif'] = ['Times New Roman']
     plt.rcParams['font.size'] = 12
     
-    def __init__(self, env : USVEnvironment, block=True, 
+    def __init__(self, env : USVEnvironment, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
         self.env = env
         
@@ -34,7 +35,6 @@ class ColregPlot():
                 interpolator.add_path(v, [])
             self.trajectories = interpolator.interpolated_paths
             
-        self.block = block
         self.axis_visible = True
         self.create_fig()
         
@@ -61,10 +61,10 @@ class ColregPlot():
             self.prime_component,
             self.ship_image_component
         ]
-           
-        self.animation = ColregAnimation(self.fig, self.env, self.components, self.trajectories)
         
-        self.draw()   
+        self.draw()  
+         
+        self.animation = ColregAnimation(self.fig, self.env, self.components, self.trajectories)
         
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
@@ -93,7 +93,7 @@ class ColregPlot():
             colreg_s.info() 
             
         vessel_aggr = VesselAggregate(env=self.env, minimize=True)
-        print(f'Loost penalty: {vessel_aggr.loose_evaluate()}, strict penalty: {vessel_aggr.strict_evaluate()}')                      
+        print(f'Loose penalty: {vessel_aggr.loose_evaluate()}, strict penalty: {vessel_aggr.strict_evaluate()}')                      
                         
         self.set_layout()    
         

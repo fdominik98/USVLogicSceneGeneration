@@ -8,9 +8,9 @@ from trajectory_planning.proximity_evaluator import ProximityEvaluator, RiskEval
 from visualization.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
 class ColregPlotComplex(ColregPlot):  
-    def __init__(self, env : USVEnvironment, block=True, 
+    def __init__(self, env : USVEnvironment, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
-        super().__init__(env, block, trajectories)  
+        super().__init__(env, trajectories)  
         
         self.proximity_evaluator = ProximityEvaluator(trajectories=self.trajectories, env=self.env)
         self.risk_evaluator = RiskEvaluator(trajectories=self.trajectories, env=self.env)

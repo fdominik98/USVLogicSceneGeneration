@@ -1,4 +1,4 @@
-from visualization.colreg_plot import ColregPlot
+from visualization.colreg_plot_manager import ColregPlotManager
 from visualization.data_parser import EvalDataParser
 import matplotlib.pyplot as plt
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
@@ -71,7 +71,7 @@ while(True):
                 print(data)
                 config = USV_ENV_DESC_LIST[data['config_name']]
                 env = USVEnvironment(config).update(data['best_solution'])
-                ColregPlot(env)
+                ColregPlotManager(env)
                     
         # Connect the click event to the function
         fig.canvas.mpl_connect('button_press_event', on_click)

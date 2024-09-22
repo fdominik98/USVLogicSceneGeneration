@@ -59,8 +59,8 @@ class ProximityMetricComponent(PlotComponent, ABC):
         return self.graphs 
 
 class DistanceAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
-        super().__init__(ax, initial_visibility, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
+        super().__init__(ax, env, metrics)  
           
     def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.distances
@@ -79,8 +79,8 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return [metric.colreg_s.safety_dist] * metric.len
     
 class DCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
-        super().__init__(ax, initial_visibility, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
+        super().__init__(ax, env, metrics)  
           
     def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.dcpas
@@ -99,8 +99,8 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return [metric.colreg_s.safety_dist] * metric.len
     
 class TCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, initial_visibility : bool, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
-        super().__init__(ax, initial_visibility, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
+        super().__init__(ax, env, metrics)  
           
     def get_y_metric(self, metric : ProximityMetrics) -> list[float]:
         return metric.tcpas

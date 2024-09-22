@@ -6,7 +6,6 @@ from aggregates import Aggregate
 from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
 import pygad
 from aggregates import AggregateAll
-from visualization.colreg_plot import ColregPlot
 from model.usv_config import *
 
 class PyGadAlgorithm(GeneticAlgorithmBase):

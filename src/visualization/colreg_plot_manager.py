@@ -1,8 +1,10 @@
+import os
 import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.usv_environment import USVEnvironment
+from visualization.colreg_plot_complex import ColregPlotComplex
 from visualization.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from visualization.plot_component import light_colors
 from visualization.colreg_plot import ColregPlot
@@ -79,15 +81,18 @@ class Checkbox(StandaloneCheckbox):
 class ColregPlotManager():
     def __init__(self, env : USVEnvironment,
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
-        self.colreg_plot = ColregPlot(env, False, trajectories)  
+        self.colreg_plot = ColregPlotComplex(env, trajectories)  
         self.env = env
-        root = tk.Tk()
-        root.option_add("*Font", ("Times New Roman", 14))
+        self.root = tk.Tk()
+        #self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         
-        root.title("COLREG situation visualizer")
+        self.sim_time_update_id = None
+        self.root.option_add("*Font", ("Times New Roman", 14))
+        
+        self.root.title("COLREG situation visualizer")
 
         # CANVAS FRAME
-        self.canvas_frame = tk.Frame(master=root)
+        self.canvas_frame = tk.Frame(master=self.root)
         self.canvas_frame.pack(fill=tk.BOTH, expand=True)
             
         ## PLOT FRAME
@@ -98,7 +103,7 @@ class ColregPlotManager():
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # TOOLBAR FRAME
-        self.toolbar_frame = tk.Frame(master=root, height=50)
+        self.toolbar_frame = tk.Frame(master=self.root, height=50)
         self.toolbar_frame.pack(side=tk.BOTTOM, fill=tk.X)
         self.toolbar_frame.pack_propagate(False)
         ## SLIDERS
@@ -109,10 +114,17 @@ class ColregPlotManager():
         toolbar.update()
         toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
+        ## BUTTONS
+        exit_button = tk.Button(self.toolbar_frame, text="Exit", command=self.exit_application)
+        exit_button.pack(side=tk.RIGHT, padx=5)
+        continue_button = tk.Button(self.toolbar_frame, text="Continue", command=self.continue_application)
+        continue_button.pack(side=tk.RIGHT, padx=5)
+        
+        
         
         ## CONTROL FRAME
-        self.control_frame = tk.Frame(master=self.canvas_frame)
-        self.control_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        self.control_frame = tk.Frame(master=self.canvas_frame, width=70)
+        self.control_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False)
         
         ### TIME CONTROL
         self.time_control_frame = tk.Frame(self.control_frame, background='white')
@@ -122,24 +134,42 @@ class ColregPlotManager():
         self.time_label.pack(side=tk.TOP, anchor='w', fill=tk.NONE)
         self.update_sim_time()
         
+        ### ACTOR INFO FRAME
+        self.actor_info_frame = tk.Frame(self.control_frame, background='white')
+        self.actor_info_frame.pack(side=tk.TOP, fill=tk.BOTH, pady=(10, 0), expand=True)
+        #### ACTOR INFOS
+        self.actor_info_columns : List[tk.Frame] = []
+        col=self.create_actor_info_col('grey')
+        actors_label = tk.Label(master=col, text='Attribute', background='grey')
+        actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
+        for vessel in env.vessels:
+            col = self.create_actor_info_col(light_colors[vessel.id])
+            actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
+            actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
+            
+        self.actor_info_labels = self.create_actor_info_labels()
+        self.update_actor_info_labels()
+        
+        
+        
         #### LEGEND CHECKBOX
         self.legend_frame = tk.Frame(self.control_frame)
-        self.legend_frame.pack(side=tk.TOP, fill=tk.NONE, expand=True)
+        self.legend_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
         StandaloneCheckbox(self.legend_frame, 
                            self.colreg_plot.legend_component.graphs, 'white', False,
                            canvas = self.canvas, text='Legend')
         
         ### ACTOR CONTROL
         self.actor_control_frame = tk.Frame(self.control_frame)
-        self.actor_control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
+        self.actor_control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 0), expand=True)
         
         #### ACTOR CHECKBOXES        
-        self.actor_columns : List[tk.Misc] = []
-        col=self.create_actor_col('grey')
+        self.actor_control_columns : List[tk.Frame] = []
+        col=self.create_actor_control_col('grey')
         actors_label = tk.Label(master=col, text='Component', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         for vessel in env.vessels:
-            col = self.create_actor_col(light_colors[vessel.id])
+            col = self.create_actor_control_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         
@@ -156,14 +186,14 @@ class ColregPlotManager():
         self.colreg_control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
         
         #### CORLEG CHECKBOXES
-        self.colreg_columns : List[tk.Misc] = []
-        col=self.create_colreg_col('grey')
+        self.colreg_control_columns : List[tk.Frame] = []
+        col=self.create_colreg_control_col('grey')
         colregs_label = tk.Label(master=col, text='Component', background='grey')
         colregs_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         self.colregs_sorted = sorted(self.env.colreg_situations, key=lambda colreg_s: colreg_s.name)
         for colreg_s in self.colregs_sorted:
-            col = self.create_colreg_col(light_colors[colreg_s.vessel1.id])
-            colregs_label = tk.Label(master=col, text=colreg_s.short_name, background=light_colors[colreg_s.vessel1.id])
+            col = self.create_colreg_control_col(light_colors[colreg_s.vessel2.id])
+            colregs_label = tk.Label(master=col, text=colreg_s.short_name, background=light_colors[colreg_s.vessel2.id])
             colregs_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.distance_component.graphs_by_colregs), 'Dist', True)
@@ -172,41 +202,46 @@ class ColregPlotManager():
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p12_vec_graphs]), 'P12', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p21_vec_graphs]), 'P21', False)
         
-        
-        root.mainloop()
+        self.root.wait_window()
         
     def create_actor_checkbox_row(self, plot_components: List[List[plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
-            if len(self.actor_columns) != len(pc) + 1:
+            if len(self.actor_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
-        cb_array = CheckboxArray(self.actor_columns[0], text, self.canvas)
-        actor_columns = self.actor_columns[1:]
+        cb_array = CheckboxArray(self.actor_control_columns[0], text, self.canvas)
+        actor_columns = self.actor_control_columns[1:]
         for o in self.env.vessels:
             Checkbox(actor_columns[o.id], [cp[o.id] for cp in plot_components], cb_array, light_colors[o.id], init_checked)
             
             
     def create_colreg_checkbox_row(self, plot_components: List[List[plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
-            if len(self.colreg_columns) != len(pc) + 1:
+            if len(self.colreg_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
-        cb_array = CheckboxArray(self.colreg_columns[0], text, self.canvas)
-        colreg_columns = self.colreg_columns[1:]
+        cb_array = CheckboxArray(self.colreg_control_columns[0], text, self.canvas)
+        colreg_columns = self.colreg_control_columns[1:]
         for i, colreg_s in enumerate(self.colregs_sorted):
             Checkbox(colreg_columns[i], [cp[i] for cp in plot_components], cb_array,
-                     light_colors[colreg_s.vessel2.id], init_checked)
+                     light_colors[colreg_s.vessel1.id], init_checked)
         
-    def create_actor_col(self, color):
+    def create_actor_control_col(self, color):
         col = tk.Frame(self.actor_control_frame, background=color)
         col.pack(side=tk.LEFT, fill=tk.NONE, expand=True)
-        self.actor_columns.append(col)
+        self.actor_control_columns.append(col)
         return col
     
-    def create_colreg_col(self, color):
+    def create_actor_info_col(self, color):
+        col = tk.Frame(self.actor_info_frame, background=color)
+        col.pack(side=tk.LEFT, fill=tk.NONE, expand=True)
+        self.actor_info_columns.append(col)
+        return col
+    
+    def create_colreg_control_col(self, color):
         col = tk.Frame(self.colreg_control_frame, background=color)
         col.pack(side=tk.LEFT, fill=tk.NONE, expand=True)
-        self.colreg_columns.append(col)
+        self.colreg_control_columns.append(col)
         return col
     
     def create_slider(self, label, min_val, max_val, init_val, step_value, command):
@@ -230,13 +265,48 @@ class ColregPlotManager():
         self.colreg_plot.animation.get_sim_time_count()
         self.time_label.config(text=self.colreg_plot.animation.get_sim_time_count())
         # Schedule the next update
-        self.time_label.after(1000, self.update_sim_time) 
+        self.root.after(1000, self.update_sim_time) 
+        
+    def update_actor_info_labels(self):
+        actor_infos = self.get_actor_infos()
+        for o in self.env.vessels:
+            for i, info in enumerate(actor_infos[o.id]):
+                self.actor_info_labels[o.id][i].config(text=info)
+        self.root.after(50, self.update_actor_info_labels) 
         
     def sort_dict(self, dicts : List[Dict[str, plt.Artist]]) -> List[List[plt.Artist]]:
         artists = []
         for dict in dicts:
             artists.append([value for key, value in sorted(dict.items())])
         return artists
-
-
+    
+    def exit_application(self):
+        self.root.destroy()
+        os._exit(0)
+        
+    def continue_application(self):
+        self.root.destroy()
+        
+    def create_actor_info_labels(self) -> List[List[tk.Label]]:
+        tk.Label(master=self.actor_info_columns[0], text='Position (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
+        tk.Label(master=self.actor_info_columns[0], text='Heading (rad)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
+        tk.Label(master=self.actor_info_columns[0], text='Speed (m/s)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
+        actor_infos = self.get_actor_infos()
+        actor_info_labels = []
+        actor_info_columns = self.actor_info_columns[1:]
+        for o in self.env.vessels:
+            actor_info_label_list : List[tk.Label] = []
+            actor_info_labels.append(actor_info_label_list)
+            for info in actor_infos[o.id]:
+                actor_info_label = tk.Label(master=actor_info_columns[o.id], text=info, background=light_colors[o.id], width=16)
+                actor_info_label.pack(side=tk.TOP, fill=tk.NONE)
+                actor_info_label_list.append(actor_info_label)
+        return actor_info_labels
+    
+    def get_actor_infos(self) -> List[List[str]]:
+        actor_infos : List[List[str]] = []
+        for o in self.colreg_plot.animation.dyn_env.vessels:
+            actor_infos.append([f'({o.p[0]:.2f}, {o.p[1]:.2f})', f'{o.heading:.2f}', f'{o.speed:.2f}'])
+        return actor_infos
+    
 

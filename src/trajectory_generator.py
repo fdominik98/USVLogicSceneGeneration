@@ -3,12 +3,11 @@ import os
 import random
 from typing import List, Dict
 from model.usv_config import MAX_COORD
-from visualization.colreg_plot_complex import ColregPlotComplex
+from visualization.colreg_plot_manager import ColregPlotManager
 from trajectory_planning.rrt_utils import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from trajectory_planning.vessel_order_graph import VesselNode, VesselOrderGraph
 from trajectory_planning.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
-from visualization.colreg_plot import ColregPlot
 from visualization.data_parser import EvalDataParser
 from model.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.usv_environment import USVEnvironment
@@ -46,7 +45,7 @@ data = data_models[0]
 
 config = USV_ENV_DESC_LIST[data.config_name]
 env = USVEnvironment(config).update(data.best_solution)
-ColregPlotComplex(env)
+ColregPlotManager(env)
 
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
@@ -172,4 +171,4 @@ file_path=f"{asset_folder}/{traj_data.timestamp.replace(':','-')}.json"
 traj_data.path = file_path
 traj_data.save_to_json(file_path=file_path)
 
-ColregPlotComplex(env, trajectories=traj_data.trajectories)
+ColregPlotManager(env, trajectories=traj_data.trajectories)

@@ -18,12 +18,14 @@ class PrimeComponent(PlotComponent):
 
             p12_scaled = colreg_s.p12 * 0.95
             p12_vec = self.ax.quiver(o1.p[0], o1.p[1], p12_scaled[0], p12_scaled[1],
-                                     angles='xy', scale_units='xy', scale=1, color='black', zorder=self.zorder)
+                                     angles='xy', scale_units='xy', scale=1, color='black', zorder=self.zorder,
+                                     width=0.006)
             self.p12_vec_graphs[colreg_s.name] = p12_vec
 
             p21_scaled = colreg_s.p21 * 0.95
             p21_vec = self.ax.quiver(o2.p[0], o2.p[1], p21_scaled[0], p21_scaled[1],
-                                     angles='xy', scale_units='xy', scale=1, color='black', zorder=self.zorder)
+                                     angles='xy', scale_units='xy', scale=1, color='black', zorder=self.zorder,
+                                     width=0.006)
             self.p21_vec_graphs[colreg_s.name] = p21_vec
 
             self.graphs += [p12_vec, p21_vec]
