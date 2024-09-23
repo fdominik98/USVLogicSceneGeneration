@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.usv_environment import USVEnvironment
-from visualization.colreg_plot_complex import ColregPlotComplex
+from visualization.colreg_plot_complex import TrajectoryMetricsPlot
 from visualization.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from visualization.plot_component import light_colors
 from visualization.colreg_plot import ColregPlot
@@ -81,9 +81,12 @@ class Checkbox(StandaloneCheckbox):
 class ColregPlotManager():
     def __init__(self, env : USVEnvironment,
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
-        self.colreg_plot = ColregPlotComplex(env, trajectories)  
+        self.colreg_plot = ColregPlot(env, trajectories)  
+        self.metrics_plot = None
         self.env = env
+        self.trajectories = trajectories
         self.root = tk.Tk()
+        self.root.resizable(True, True)
         #self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         
         self.sim_time_update_id = None
@@ -110,11 +113,25 @@ class ColregPlotManager():
         self.real_time_slider = self.create_slider('Real time:', 10, TWO_HOURS * 4, ANIM_REAL_TIME, 10, self.update_anim_real_time)
         self.sim_time_slider = self.create_slider('Sim time:', 10, TWO_MINUTES, ANIM_SIM_TIME, 10, self.update_anim_sim_time)
         ## TOOLBAR
-        toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
-        toolbar.update()
-        toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
+        self.navigation_frame = tk.Frame(self.toolbar_frame)
+        self.navigation_frame.pack(fill=tk.BOTH, side=tk.LEFT)
+        self.navigation_toolbar = NavigationToolbar2Tk(self.canvas, self.navigation_frame)
+        self.navigation_toolbar.update()
+        self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
-        ## BUTTONS
+        ## PLOT SELECTION
+        self.plot_options = ["Scenario", "Metrics"]
+        self.selected_option = tk.StringVar()
+        self.selected_option.set(self.plot_options[0])  # Set the default value
+        # Create the dropdown menu
+        self.plot_dropdown = tk.OptionMenu(self.toolbar_frame, self.selected_option, *self.plot_options, command=self.on_select_plot)
+        self.plot_dropdown.pack(side=tk.LEFT, padx=5)
+        
+        ## HIDE BUTTON
+        self.hide_button = tk.Button(self.toolbar_frame, text="Hide control", command=self.hide_control)
+        self.hide_button.pack(side=tk.LEFT, padx=5)
+        
+        ## EXIT BUTTONS
         exit_button = tk.Button(self.toolbar_frame, text="Exit", command=self.exit_application)
         exit_button.pack(side=tk.RIGHT, padx=5)
         continue_button = tk.Button(self.toolbar_frame, text="Continue", command=self.continue_application)
@@ -286,6 +303,33 @@ class ColregPlotManager():
         
     def continue_application(self):
         self.root.destroy()
+        
+    def on_select_plot(self, value):
+        if value == 'Scenario':
+            plot = self.colreg_plot
+        elif value == 'Metrics':
+            if self.metrics_plot is None:
+                self.metrics_plot = TrajectoryMetricsPlot(self.env, self.trajectories)
+            plot = self.metrics_plot
+        else:
+            raise Exception('Not implemented plot.')
+        self.navigation_toolbar.destroy()
+        self.canvas.get_tk_widget().destroy()
+        
+        self.canvas = FigureCanvasTkAgg(plot.fig, master=self.plot_frame)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.navigation_toolbar = NavigationToolbar2Tk(self.canvas, self.navigation_frame)
+        self.navigation_toolbar.update()
+        self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
+        
+        
+    def hide_control(self):
+        if self.hide_button['text'] == 'Hide control':
+            self.control_frame.pack_forget()  # Hide the frame
+            self.hide_button.config(text="Show control")
+        elif self.hide_button['text'] == 'Show control':
+            self.control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
+            self.hide_button.config(text="Hide control")
         
     def create_actor_info_labels(self) -> List[List[tk.Label]]:
         tk.Label(master=self.actor_info_columns[0], text='Position (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)

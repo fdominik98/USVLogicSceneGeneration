@@ -19,23 +19,25 @@ from visualization.distance_component import DistanceComponent
 from visualization.vo_cone_component import VOConeComponent
 from visualization.additional_vo_cone_component import AdditionalVOConeComponent
 
-class ColregPlot():  
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = ['Times New Roman']
-    plt.rcParams['font.size'] = 12
-    
-    def __init__(self, env : USVEnvironment, 
-                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
+class TrajectoryReceiver():
+    def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
         self.env = env
-        
         self.trajectories = trajectories
         if self.trajectories is None:
             interpolator = PathInterpolator()
             for v in env.vessels:
                 interpolator.add_path(v, [])
             self.trajectories = interpolator.interpolated_paths
+
+class ColregPlot(TrajectoryReceiver):  
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['font.size'] = 12
+    
+    def __init__(self, env : USVEnvironment, 
+                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
+        super().__init__(env, trajectories)
             
-        self.axis_visible = True
         self.create_fig()
         
         self.ship_markings_component = ShipMarkingsComponent(self.ax, self.env)
@@ -71,7 +73,7 @@ class ColregPlot():
         # Connect the click and move events to their handlers
         self.fig.canvas.mpl_connect('button_press_event', self.drawing_component.on_click)
         self.fig.canvas.mpl_connect('motion_notify_event', self.drawing_component.on_move)
-     
+        
         
     def create_fig(self):
         fig, ax = plt.subplots(1, 1, gridspec_kw={'width_ratios': [1]})

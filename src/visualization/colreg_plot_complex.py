@@ -2,28 +2,30 @@ from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 from model.usv_environment import USVEnvironment
 from model.usv_config import *
+from visualization.colreg_plot import TrajectoryReceiver
 from visualization.risk_metric_component import RiskMetricComponent
-from visualization.colreg_plot import ColregPlot
 from trajectory_planning.proximity_evaluator import ProximityEvaluator, RiskEvaluator
 from visualization.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
-class ColregPlotComplex(ColregPlot):  
+class TrajectoryMetricsPlot(TrajectoryReceiver):  
     def __init__(self, env : USVEnvironment, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
-        super().__init__(env, trajectories)  
+        super().__init__(env, trajectories)
+        
+        self.create_fig()
         
         self.proximity_evaluator = ProximityEvaluator(trajectories=self.trajectories, env=self.env)
         self.risk_evaluator = RiskEvaluator(trajectories=self.trajectories, env=self.env)
-        self.components += [
-            DistanceAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics),
-            DCPAAxesComponent(self.axes[2], self.env, self.proximity_evaluator.metrics),
-            TCPAAxesComponent(self.axes[3], self.env, self.proximity_evaluator.metrics),
-            RiskMetricComponent(self.axes[4], self.env, self.risk_evaluator.risk_metrics),
-        ] 
+        
+        DistanceAxesComponent(self.axes[0], self.env, self.proximity_evaluator.metrics).draw()
+        DCPAAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics).draw()
+        TCPAAxesComponent(self.axes[2], self.env, self.proximity_evaluator.metrics).draw()
+        RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.risk_metrics).draw()
+        
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, 5, figsize=(12, 4), gridspec_kw={'width_ratios': [1, 1, 1, 1, 1]})
+        fig, axes = plt.subplots(1, 4, figsize=(12, 4), gridspec_kw={'width_ratios': [1, 1, 1, 1]})
+        plt.subplots_adjust(wspace=0.5)
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
-        self.ax : plt.Axes = self.axes[0]
         
