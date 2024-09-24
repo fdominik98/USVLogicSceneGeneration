@@ -5,6 +5,8 @@ from model.data_parser import EvalDataParser
 from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.environment.usv_environment import USVEnvironment
 
+
+
 while(True):
     dp = EvalDataParser()
     data_models : List[EvaluationData] = dp.load_data_models()

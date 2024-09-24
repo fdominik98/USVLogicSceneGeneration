@@ -90,21 +90,24 @@ class RiskEvaluator():
         dyn_env = copy.deepcopy(env)
         
         for t in range(len(trajectories[0])):
-            
-            for o in dyn_env.vessels:
-                traj = trajectories[o.id]
-                o.update(*(traj[t]))
-            for vessel1 in dyn_env.vessels:
-                # if not vessel1.is_OS():
-                #     continue
-                for i in range(0, 180, 5):
-                    new_vcclkw = copy.deepcopy(vessel1)
-                    new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading + np.radians(i), vessel1.speed)
-                    new_vclkw = copy.deepcopy(vessel1)
-                    new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading - np.radians(i), vessel1.speed)
-                    if not (self.will_collide(dyn_env, new_vcclkw) and self.will_collide(dyn_env, new_vclkw)):
-                        break
-                self.risk_metrics[vessel1.id].append(i / 180)        
+            if t % 30 == 0:
+                for o in dyn_env.vessels:
+                    traj = trajectories[o.id]
+                    o.update(*(traj[t]))
+                for vessel1 in dyn_env.vessels:
+                    # if not vessel1.is_OS():
+                    #     continue
+                    for i in range(0, 180, 2):
+                        new_vcclkw = copy.deepcopy(vessel1)
+                        new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading + np.radians(i), vessel1.speed)
+                        new_vclkw = copy.deepcopy(vessel1)
+                        new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading - np.radians(i), vessel1.speed)
+                        if not (self.will_collide(dyn_env, new_vcclkw) and self.will_collide(dyn_env, new_vclkw)):
+                            break
+                    self.risk_metrics[vessel1.id].append(i / 180)       
+            else:
+                for vessel1 in dyn_env.vessels: 
+                    self.risk_metrics[vessel1.id].append(self.risk_metrics[vessel1.id][-1])       
                     
                     
                     
