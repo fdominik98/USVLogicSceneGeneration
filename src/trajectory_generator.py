@@ -2,17 +2,17 @@ from datetime import datetime
 import os
 import random
 from typing import List, Dict
-from model.usv_config import MAX_COORD
+from model.environment.usv_config import ASSET_FOLDER, MAX_COORD
 from visualization.colreg_plot_manager import ColregPlotManager
-from trajectory_planning.rrt_utils import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
-from trajectory_planning.vessel_order_graph import VesselNode, VesselOrderGraph
-from trajectory_planning.trajectory_data import TrajectoryData
+from trajectory_planning.model.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
+from trajectory_planning.model.vessel_order_graph import VesselNode, VesselOrderGraph
+from trajectory_planning.model.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
-from visualization.data_parser import EvalDataParser
-from model.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.usv_environment import USVEnvironment
+from model.data_parser import EvalDataParser
+from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.usv_environment import USVEnvironment
 import numpy as np
-from trajectory_planning.bidirectionalRRTStarFND import RRTStarFND, DIM
+from trajectory_planning.bidirectional_rrt_star_fnd import BidirectionalRRTStarFND, DIM
 
 SCALER = 1 / MAX_COORD  * DIM
 
@@ -109,7 +109,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     # ====Search Path with RRT====
     print(f"start RRT path planning for {o}")
     # Set Initial parameters
-    rrt = RRTStarFND(
+    rrt = BidirectionalRRTStarFND(
                     v_node=v_node,
                     start=o.p,
                     goal=goal,
@@ -162,9 +162,8 @@ traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_
                         overall_eval_time=overall_eval_time, rrt_evaluation_times=eval_times)
 
 
-current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
-asset_folder = f'{current_file_directory}/../assets/gen_data/{traj_data.algorithm_desc}/{traj_data.config_name}/{measurement_id}'
+asset_folder = f'{ASSET_FOLDER}/gen_data/{traj_data.algorithm_desc}/{traj_data.config_name}/{measurement_id}'
 if not os.path.exists(asset_folder):
     os.makedirs(asset_folder)
 file_path=f"{asset_folder}/{traj_data.timestamp.replace(':','-')}.json"

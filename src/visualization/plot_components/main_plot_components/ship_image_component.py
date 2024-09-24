@@ -1,19 +1,17 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.usv_environment import USVEnvironment
-from visualization.plot_component import PlotComponent, light_colors
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import ASSET_FOLDER
+from visualization.plot_components.plot_component import PlotComponent, light_colors
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 from scipy.ndimage import rotate
-import os
 import matplotlib.image as mpimg
 
 class ShipImageComponent(PlotComponent):
     STATIC_ZOOM = 0.3
     DINAMIC_ZOOM = 0.2
-    script_path = os.path.abspath(__file__)
-    current_dir = os.path.dirname(script_path)
-    img_dir = f'{current_dir}/../../assets/images'
+    img_dir = f'{ASSET_FOLDER}/images'
     
     def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
         super().__init__(ax, env)

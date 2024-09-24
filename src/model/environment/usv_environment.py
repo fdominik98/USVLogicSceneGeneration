@@ -1,16 +1,19 @@
 import math
 from typing import List
 from model.instance_initializer import RandomInstanceInitializer, DeterministicInitializer
-from model.usv_environment_desc import USVEnvironmentDesc
-from model.usv_config import OWN_VESSEL_STATES, VARIABLE_NUM
+from model.environment.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_config import OWN_VESSEL_STATES, VARIABLE_NUM
 
 
 class USVEnvironment():
-    def __init__(self, env_config : USVEnvironmentDesc) -> None:
+    def __init__(self, env_config : USVEnvironmentDesc, random_init=True) -> None:
         self.config = env_config
-        self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
-        self.vessels, self.colreg_situations = self.initializer.get_one_population_as_objects()
-        
+        if random_init: 
+            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
+        else:
+            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.colreg_situation_descs) 
+            
+        self.vessels, self.colreg_situations = self.initializer.get_one_population_as_objects()        
         self.smallest_ship = min(self.vessels, key=lambda v: v.r)
         self.largest_ship = max(self.vessels, key=lambda v: v.r)
         

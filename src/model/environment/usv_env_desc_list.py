@@ -1,7 +1,7 @@
 from typing import Dict
 from model.colreg_situation import CrossingFromPort, HeadOn, NoColreg, Overtaking
 from model.colreg_situation_desc import ColregSituationDesc
-from model.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.vessel import VesselDesc
 
 # Length/beam ratio (LBR) = WL/B

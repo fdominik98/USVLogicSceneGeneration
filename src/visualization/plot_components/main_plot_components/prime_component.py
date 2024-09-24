@@ -1,7 +1,7 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.usv_environment import USVEnvironment
-from visualization.plot_component import PlotComponent
+from model.environment.usv_environment import USVEnvironment
+from visualization.plot_components.plot_component import PlotComponent
 
 
 class PrimeComponent(PlotComponent):

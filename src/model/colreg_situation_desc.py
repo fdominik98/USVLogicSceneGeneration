@@ -1,4 +1,3 @@
-from typing import Optional
 from model.colreg_situation import ColregSituation
 from model.vessel import VesselDesc
 

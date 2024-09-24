@@ -1,7 +1,8 @@
-from genetic_algorithms.pymoo_algorithm import PyMooAlgorithm
 import random
 import time
 import itertools
+from evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
+from evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
 
 RANDOM_SEED = 4321
 
@@ -16,14 +17,15 @@ mutate_etas = [1, 5, 10, 15, 20]
 crossover_etas = [1, 5, 10, 15, 20]
 
 algos = {
-    #1 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='crossing_and_head_on', verbose=False, random_init=True, runtime=15),
-    #2 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='two_way_overtaking_and_crossing', verbose=False, random_init=True, runtime=15),
-    #3 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, random_init=True, runtime=20),
-    #4 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='six_vessel_colreg_scenario', verbose=False, random_init=True, runtime=20),
-    #5 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario', verbose=False, random_init=True, runtime=15),
-    #6 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario2', verbose=False, random_init=True, runtime=25),
-    #7 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_and_crossing', verbose=False, random_init=True, runtime=10),
-    8 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_headon_crossing', verbose=False, random_init=True, runtime=10),
+    #1 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='crossing_and_head_on', verbose=False, runtime=15),
+    #2 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='two_way_overtaking_and_crossing', verbose=False, runtime=15),
+    #3 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, runtime=20),
+    #4 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='six_vessel_colreg_scenario', verbose=False, runtime=20),
+    #5 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario', verbose=False, runtime=15),
+    #6 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario2', verbose=False, runtime=25),
+    #7 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_and_crossing', verbose=False, runtime=10),
+    #8 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_headon_crossing', verbose=False, runtime=10),
+    9 : PyGadGAAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, runtime=30),
 }
 
 all_combinations = itertools.product(population_sizes, numbers_of_generations, numbers_of_parents, mutate_probs, crossover_probs, mutate_etas, crossover_etas)

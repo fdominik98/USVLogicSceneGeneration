@@ -1,6 +1,6 @@
 import random
 from typing import Dict, List, Tuple
-from model.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
+from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
 from model.vessel import Vessel, VesselDesc
 from model.colreg_situation import ColregSituation
 from model.colreg_situation_desc import ColregSituationDesc

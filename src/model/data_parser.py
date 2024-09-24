@@ -2,17 +2,14 @@ from abc import ABC, abstractmethod
 import os
 from typing import List, Tuple
 import pandas as pd
-from model.usv_environment import USVEnvironment
-from genetic_algorithms.evaluation_data import EvaluationData
+from model.environment.usv_environment import USVEnvironment
+from evolutionary_computation.evaluation_data import EvaluationData
 import tkfilebrowser
-
-from trajectory_planning.trajectory_data import TrajectoryData
+from model.environment.usv_config import ASSET_FOLDER
+from trajectory_planning.model.trajectory_data import TrajectoryData
 
 class DataParser(ABC):
-    script_path = os.path.abspath(__file__)
-    current_dir = os.path.dirname(script_path)
-    gen_data_dir = f'{current_dir}/../../assets/gen_data'
-    PYMOO_DIR = f'{gen_data_dir}/pymoo_algorithm'
+    gen_data_dir = f'{ASSET_FOLDER}/gen_data'
     RRT_DIR = f'{gen_data_dir}/RRTStar_algo'
     EVAL_DATA_COLUMN_NAMES = ['best_solution', 'config_name',
                               'measurement_name', 'evaluation_time',
@@ -87,7 +84,7 @@ class DataParser(ABC):
 
 class EvalDataParser(DataParser):    
     def __init__(self) -> None:
-        super().__init__(self.EVAL_DATA_COLUMN_NAMES, self.PYMOO_DIR)
+        super().__init__(self.EVAL_DATA_COLUMN_NAMES, self.gen_data_dir)
 
     
     def get_data_lines(self, files : List[str]) -> List[dict]:

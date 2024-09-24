@@ -1,10 +1,10 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.usv_environment import USVEnvironment
-from model.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from model.vessel import Vessel
-from visualization.plot_component import PlotComponent, light_colors
+from visualization.plot_components.plot_component import PlotComponent, light_colors
 
 
 class AngleCircleComponent(PlotComponent):

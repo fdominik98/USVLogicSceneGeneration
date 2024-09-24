@@ -3,17 +3,17 @@ import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from model.usv_environment import USVEnvironment
+from model.environment.usv_environment import USVEnvironment
 from visualization.colreg_plot_complex import TrajectoryMetricsPlot
 from visualization.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
-from visualization.plot_component import light_colors
+from visualization.plot_components.plot_component import light_colors
 from visualization.colreg_plot import ColregPlot
 
 class StandaloneCheckbox:
-    def __init__(self, master, artists: List[plt.Artist], color, init_checked : bool, canvas : Optional[FigureCanvasTkAgg] = None, text = ''):
+    def __init__(self, master, artists: List[plt.Artist], color, init_checked : bool, fig : Optional[plt.Figure] = None, text = ''):
         self.artists = artists
         self.text = text
-        self.canvas = canvas
+        self.fig = fig
         self.value = tk.BooleanVar(master=master, value=init_checked)  # BooleanVar linked to checkbox
         self.checkbox = tk.Checkbutton(
             master,
@@ -28,17 +28,17 @@ class StandaloneCheckbox:
         self.set_state(init_checked)
 
     def on_click(self):
-        if self.canvas is not None:
+        if self.fig is not None:
             self.set_state(self.value.get())
-            self.canvas.draw_idle()
+            self.fig.canvas.draw()
         
     def set_state(self, state : bool):
         self.value.set(state)
         for a in self.artists:
             a.set_visible(state)
 class CheckboxArray:
-    def __init__(self, master, text: str, canvas: FigureCanvasTkAgg):
-        self.canvas = canvas
+    def __init__(self, master, text: str, fig: plt.Figure):
+        self.fig = fig
         self.managed_checkboxes : List[Checkbox]= []
         self.value = tk.BooleanVar(master=master, value=False)  # BooleanVar linked to checkbox
         self.checkbox = tk.Checkbutton(
@@ -60,12 +60,12 @@ class CheckboxArray:
         state = self.value.get()
         for cb in self.managed_checkboxes:
             cb.set_state(state)
-        self.canvas.draw_idle()
+        self.fig.canvas.draw()
     
     def notify(self):
         all_false = all(cb.value.get() == False for cb in self.managed_checkboxes)
         self.value.set(not all_false)
-        self.canvas.draw_idle()
+        self.fig.canvas.draw()
         
 class Checkbox(StandaloneCheckbox):
     def __init__(self, master, artists: List[plt.Artist], checkbox_array : CheckboxArray, color : str, init_checked : bool):
@@ -174,7 +174,7 @@ class ColregPlotManager():
         self.legend_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
         StandaloneCheckbox(self.legend_frame, 
                            self.colreg_plot.legend_component.graphs, 'white', False,
-                           canvas = self.canvas, text='Legend')
+                           fig = self.colreg_plot.fig, text='Legend')
         
         ### ACTOR CONTROL
         self.actor_control_frame = tk.Frame(self.control_frame)
@@ -226,7 +226,7 @@ class ColregPlotManager():
             if len(self.actor_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
-        cb_array = CheckboxArray(self.actor_control_columns[0], text, self.canvas)
+        cb_array = CheckboxArray(self.actor_control_columns[0], text, self.colreg_plot.fig)
         actor_columns = self.actor_control_columns[1:]
         for o in self.env.vessels:
             Checkbox(actor_columns[o.id], [cp[o.id] for cp in plot_components], cb_array, light_colors[o.id], init_checked)
@@ -237,7 +237,7 @@ class ColregPlotManager():
             if len(self.colreg_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
-        cb_array = CheckboxArray(self.colreg_control_columns[0], text, self.canvas)
+        cb_array = CheckboxArray(self.colreg_control_columns[0], text, self.colreg_plot.fig)
         colreg_columns = self.colreg_control_columns[1:]
         for i, colreg_s in enumerate(self.colregs_sorted):
             Checkbox(colreg_columns[i], [cp[i] for cp in plot_components], cb_array,

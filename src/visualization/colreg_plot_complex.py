@@ -1,11 +1,11 @@
 from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
-from model.usv_environment import USVEnvironment
-from model.usv_config import *
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import *
 from visualization.colreg_plot import TrajectoryReceiver
-from visualization.risk_metric_component import RiskMetricComponent
+from visualization.plot_components.metric_components.risk_metric_component import RiskMetricComponent
 from trajectory_planning.proximity_evaluator import ProximityEvaluator, RiskEvaluator
-from visualization.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
+from visualization.plot_components.metric_components.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
 class TrajectoryMetricsPlot(TrajectoryReceiver):  
     def __init__(self, env : USVEnvironment, 

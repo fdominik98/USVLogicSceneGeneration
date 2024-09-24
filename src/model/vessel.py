@@ -1,5 +1,5 @@
 import numpy as np
-from model.usv_config import KNOT_TO_MS_CONVERSION
+from model.environment.usv_config import KNOT_TO_MS_CONVERSION
 
 class VesselDesc():
     # r : meter

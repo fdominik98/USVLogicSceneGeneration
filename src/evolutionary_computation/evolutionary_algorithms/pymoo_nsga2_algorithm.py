@@ -1,10 +1,10 @@
 
 from typing import List, Tuple
-from genetic_algorithms.evaluation_data import EvaluationData
-from aggregates import Aggregate
-from genetic_algorithms.genetic_algorithm_base import GeneticAlgorithmBase
-from aggregates import VesselAggregate
-from model.usv_config import MAX_HEADING, MIN_COORD, MAX_COORD, MIN_HEADING
+from evolutionary_computation.evaluation_data import EvaluationData
+from evolutionary_computation.aggregates import Aggregate
+from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.aggregates import VesselAggregate
+from model.environment.usv_config import MAX_HEADING, MIN_COORD, MAX_COORD, MIN_HEADING
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -13,10 +13,10 @@ from pymoo.operators.mutation.pm import PM
 import matplotlib.pyplot as plt
 import matplotlib
 
-from model.usv_environment import USVEnvironment
+from model.environment.usv_environment import USVEnvironment
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from pymoo.core.population import Population
-from model.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_environment_desc import USVEnvironmentDesc
 from pymoo.core.callback import Callback
 from pymoo.core.termination import Termination
 import time
@@ -70,11 +70,10 @@ class BestSolutionCallback(Callback):
                     print(f"{int(time.time() - self.start_time)} - New best solution found: {ind.X} with objective: {ind.F}")
         self.number_of_generations += 1
 
-class PyMooAlgorithm(GeneticAlgorithmBase):
+class PyMooNSGA2Algorithm(GeneticAlgorithmBase):
     
     def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = False, runtime : int = 300) -> None:
-        super().__init__(measurement_name, 'pymoo_algorithm', config_name, verbose, random_init)
-        self.runtime = runtime
+        super().__init__(measurement_name, 'pymoo_NSGA2_algorithm', config_name, verbose, random_init, runtime)
     
     def get_aggregate(self, env) -> Aggregate:
         return VesselAggregate(env, minimize=True)   

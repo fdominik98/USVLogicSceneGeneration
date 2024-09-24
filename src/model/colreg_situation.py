@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from model.usv_config import (DIST_DRIFT, EPSILON, BOW_ANGLE, BEAM_ANGLE, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, STERN_ANGLE,
+from model.environment.usv_config import (DIST_DRIFT, EPSILON, BOW_ANGLE, BEAM_ANGLE, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, STERN_ANGLE,
                               angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_distance, vector_angle_diff)
 from model.vessel import Vessel
 import numpy as np

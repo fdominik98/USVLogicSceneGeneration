@@ -1,23 +1,22 @@
 from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
-import matplotlib
-from model.usv_environment import USVEnvironment
-from model.usv_config import *
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import *
 from model.colreg_situation import NoColreg
-from aggregates import VesselAggregate
+from evolutionary_computation.aggregates import VesselAggregate
 from trajectory_planning.path_interpolator import PathInterpolator
-from visualization.drawing_component import DrawingComponent
-from visualization.legend_component import LegendComponent
+from visualization.plot_components.main_plot_components.drawing_component import DrawingComponent
+from visualization.plot_components.main_plot_components.legend_component import LegendComponent
 from visualization.colreg_animation import ColregAnimation
-from visualization.ship_image_component import ShipImageComponent
-from visualization.plot_component import PlotComponent
-from visualization.prime_component import PrimeComponent
-from visualization.centered_angle_circle_component import CenteredAngleCircleComponent
-from visualization.ship_markings_component import ShipMarkingsComponent
-from visualization.angle_circle_component import AngleCircleComponent
-from visualization.distance_component import DistanceComponent
-from visualization.vo_cone_component import VOConeComponent
-from visualization.additional_vo_cone_component import AdditionalVOConeComponent
+from visualization.plot_components.main_plot_components.ship_image_component import ShipImageComponent
+from visualization.plot_components.plot_component import PlotComponent
+from visualization.plot_components.main_plot_components.prime_component import PrimeComponent
+from visualization.plot_components.main_plot_components.centered_angle_circle_component import CenteredAngleCircleComponent
+from visualization.plot_components.main_plot_components.ship_markings_component import ShipMarkingsComponent
+from visualization.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
+from visualization.plot_components.main_plot_components.distance_component import DistanceComponent
+from visualization.plot_components.main_plot_components.vo_cone_component import VOConeComponent
+from visualization.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
 
 class TrajectoryReceiver():
     def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:

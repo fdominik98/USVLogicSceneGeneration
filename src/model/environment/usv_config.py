@@ -1,5 +1,8 @@
 from typing import Tuple
 import numpy as np
+import os
+
+ASSET_FOLDER = f'{os.path.dirname(os.path.abspath(__file__))}/../../../assets'
 
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)

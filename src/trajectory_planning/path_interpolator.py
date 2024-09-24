@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 import numpy as np
 from model.vessel import Vessel
-from trajectory_planning.rrt_utils import Node
+from trajectory_planning.model.rrt_models import Node
 
 class PathInterpolator():
     def __init__(self) -> None:

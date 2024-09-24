@@ -1,4 +1,4 @@
-from visualization.data_parser import EvalDataParser
+from model.data_parser import EvalDataParser
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt

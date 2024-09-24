@@ -1,37 +1,31 @@
-import random
-from typing import List, Optional, Tuple
-import numpy as np
-from aggregates import Aggregate
-from genetic_algorithms.evaluation_data import EvaluationData
-from model.usv_environment import USVEnvironment
-from abc import ABC, abstractmethod
 from datetime import datetime
 import gc
 import traceback
 import os
-from model.usv_env_desc_list import USV_ENV_DESC_LIST
+import sys
+import random
+from typing import List, Optional, Tuple
+import numpy as np
+from evolutionary_computation.aggregates import Aggregate
+from evolutionary_computation.evaluation_data import EvaluationData
+from model.environment.usv_environment import USVEnvironment
+from abc import ABC, abstractmethod
+from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.usv_config import ASSET_FOLDER
+
 
 class GeneticAlgorithmBase(ABC):
-    current_file_directory = os.path.dirname(os.path.abspath(__file__))
-    
-    def __init__(self, measurement_name: str, algorithm_desc : str, config_name : str, verbose : bool, random_init : bool) -> None:
+    def __init__(self, measurement_name: str, algorithm_desc : str, config_name : str, verbose : bool, random_init : bool = True, runtime : int = 300) -> None:
         self.measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
         self.measurement_name = measurement_name
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.env_config = USV_ENV_DESC_LIST[config_name]
-        self.env = USVEnvironment(self.env_config)
+        self.env = USVEnvironment(self.env_config, random_init=random_init)
         self.aggregate = self.get_aggregate(self.env)
         self.verbose = verbose
         self.current_seed = None
-        
-        if not random_init:
-            self.initial_population_array = self.env.get_population(200)
-        self.random_init = random_init
-
-        # for pop in self.initial_population_array:
-        #     ColregPlot(self.env.update(pop))
-            
+        self.runtime = runtime
         
     @abstractmethod
     def get_aggregate(self, env) -> Aggregate:
@@ -54,11 +48,9 @@ class GeneticAlgorithmBase(ABC):
                                     timestamp=timestamp, measurement_name=self.measurement_name)
             
             self.set_seed(random_seed)
+            eval_data.number_of_generations = number_of_generations if number_of_generations is not None else sys.maxsize
             
-            if self.random_init:
-                initial_pop = self.env.get_population(population_size)
-            else:
-                initial_pop = self.initial_population_array[:population_size]
+            initial_pop = self.env.get_population(population_size)
             
             some_input = self.init_problem(initial_pop, eval_data)
             gc.collect()
@@ -95,7 +87,7 @@ class GeneticAlgorithmBase(ABC):
         pass
     
     def save_eval_data(self, eval_data : EvaluationData):
-        asset_folder = f'{self.current_file_directory}/../../assets/gen_data/{self.algorithm_desc}/{self.config_name}/{self.measurement_id}'
+        asset_folder = f'{ASSET_FOLDER}/gen_data/{self.algorithm_desc}/{self.config_name}/{self.measurement_id}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         file_path=f"{asset_folder}/{eval_data.timestamp.replace(':','-')}.json"

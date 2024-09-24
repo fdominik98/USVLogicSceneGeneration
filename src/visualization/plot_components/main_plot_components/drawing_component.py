@@ -1,8 +1,8 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.usv_environment import USVEnvironment
-from visualization.plot_component import PlotComponent, light_colors
-from model.usv_config import N_MILE_TO_M_CONVERSION
+from model.environment.usv_environment import USVEnvironment
+from visualization.plot_components.plot_component import PlotComponent, light_colors
+from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 
 
 class DrawingComponent(PlotComponent):

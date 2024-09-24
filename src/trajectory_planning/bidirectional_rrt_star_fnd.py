@@ -1,14 +1,14 @@
 import random
 from typing import List, Optional, Tuple
 import numpy as np
-from trajectory_planning.vessel_order_graph import VesselNode
-from trajectory_planning.rrt_utils import Node, Obstacle, RandomPoint, TrajectoryState
+from trajectory_planning.model.vessel_order_graph import VesselNode
+from trajectory_planning.model.rrt_models import Node, Obstacle, RandomPoint, TrajectoryState
 from trajectory_planning.path_interpolator import PathInterpolator
 
 DIM = 1000
 
 show_animation = True
-class RRTStarFND():
+class BidirectionalRRTStarFND():
     """
     Class for RRT Planning
     """
@@ -34,7 +34,7 @@ class RRTStarFND():
         self.max_nodes = max_nodes
         
         if show_animation:
-            from trajectory_planning.trajectory_visualizer import TrajectoryVisualizer
+            from visualization.trajectory_visualizer import TrajectoryVisualizer
             self.trajectory_visualizer = TrajectoryVisualizer(DIM, scaler, sample_area)
             self.trajectory_visualizer.set_caption(v_node, interpolator)
             

@@ -1,4 +1,5 @@
-from model.usv_environment import USVEnvironment
+from typing import List
+from model.environment.usv_environment import USVEnvironment
 from abc import ABC, abstractmethod
 import numpy as np
 
@@ -74,4 +75,14 @@ class AggregateAll(Aggregate):
                 if penalty > 0.0:
                     fitness += self.sign * normed_penalty
         return (fitness,)
+    
+class AggregateAllSwarm(AggregateAll):
+    def __init__(self, env : USVEnvironment, minimize=False) -> None:
+        super().__init__(env, minimize)
+        
+    def evaluate(self, individual : np.ndarray):
+        fitnesses : List[float] = []
+        for particle in individual:
+            fitnesses.append(super().evaluate(particle)[0])
+        return np.array(fitnesses)
     

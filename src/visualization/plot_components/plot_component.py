@@ -1,7 +1,7 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.usv_environment import USVEnvironment
+from model.environment.usv_environment import USVEnvironment
 from abc import ABC, abstractmethod
 
 colors = ['blue', 'red', 'green', 'orange', 'purple', 'grey', 'olive']

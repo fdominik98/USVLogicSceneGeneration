@@ -1,8 +1,8 @@
 from visualization.colreg_plot_manager import ColregPlotManager
-from visualization.data_parser import EvalDataParser
+from model.data_parser import EvalDataParser
 import matplotlib.pyplot as plt
-from model.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.usv_environment import USVEnvironment
+from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.usv_environment import USVEnvironment
 
 while(True):
     dp = EvalDataParser()

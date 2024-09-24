@@ -1,8 +1,7 @@
-from abc import ABC, abstractmethod
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.usv_environment import USVEnvironment
-from visualization.plot_component import PlotComponent, colors
+from model.environment.usv_environment import USVEnvironment
+from visualization.plot_components.plot_component import PlotComponent, colors
 
 class RiskMetricComponent(PlotComponent):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : Dict[int, List[float]]) -> None:

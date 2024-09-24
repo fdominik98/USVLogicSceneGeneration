@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 
 import numpy as np
-from model.usv_environment import USVEnvironment
+from model.environment.usv_environment import USVEnvironment
 from model.vessel import Vessel
 import copy
 

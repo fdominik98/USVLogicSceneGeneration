@@ -1,9 +1,9 @@
 from typing import List
 from matplotlib import patches, pyplot as plt
 import numpy as np
-from model.usv_environment import USVEnvironment
-from model.usv_config import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
-from visualization.angle_circle_component import AngleCircleComponent
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
+from visualization.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
 
 
 class CenteredAngleCircleComponent(AngleCircleComponent):
