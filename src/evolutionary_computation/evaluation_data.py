@@ -20,8 +20,11 @@ class EvaluationData:
                  timestamp: Optional[str] = None,
                  measurement_name: Optional[str] = None,
                  path: Optional[str] = None,
-                 timeout: Optional[float] = None,  # Added timeout parameter
-                 random_init: Optional[bool] = None):  # Added random_init parameter
+                 timeout: Optional[float] = None,
+                 random_init: Optional[bool] = None,
+                 c_1: Optional[float] = None,  # cognitive coefficient
+                 c_2: Optional[float] = None,  # social coefficient
+                 w: Optional[float] = None):   # inertia weight
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -39,8 +42,11 @@ class EvaluationData:
         self.timestamp = timestamp
         self.measurement_name = measurement_name
         self.path = path
-        self.timeout = timeout  # Initialize timeout parameter
-        self.random_init = random_init  # Initialize random_init parameter
+        self.timeout = timeout
+        self.random_init = random_init
+        self.c_1 = c_1  # Initialize c_1 parameter
+        self.c_2 = c_2  # Initialize c_2 parameter
+        self.w = w      # Initialize w parameter
 
     def to_dict(self):
         return {
@@ -61,8 +67,11 @@ class EvaluationData:
             "timestamp": self.timestamp,
             "measurement_name": self.measurement_name,
             "path": self.path,
-            "timeout": self.timeout,  # Include timeout in the dictionary
-            "random_init": self.random_init  # Include random_init in the dictionary
+            "timeout": self.timeout,
+            "random_init": self.random_init,
+            "c_1": self.c_1,  # Include c_1 in the dictionary
+            "c_2": self.c_2,  # Include c_2 in the dictionary
+            "w": self.w       # Include w in the dictionary
         }
 
     def save_to_json(self, file_path: str):
@@ -89,8 +98,11 @@ class EvaluationData:
             timestamp=data.get("timestamp"),
             measurement_name=data.get("measurement_name"),
             path=data.get("path"),
-            timeout=data.get("timeout"),  # Extract timeout from the dictionary
-            random_init=data.get("random_init")  # Extract random_init from the dictionary
+            timeout=data.get("timeout"),
+            random_init=data.get("random_init"),
+            c_1=data.get("c_1"),  # Extract c_1 from the dictionary
+            c_2=data.get("c_2"),  # Extract c_2 from the dictionary
+            w=data.get("w")       # Extract w from the dictionary
         )
         
     @classmethod

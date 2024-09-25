@@ -46,6 +46,8 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
             on_generation=on_generation,
             mutation_probability=eval_data.mutate_prob,
             crossover_probability=eval_data.crossover_prob,
+            parent_selection_type='tournament',
+            K_tournament=2           
         )
         return ga_instance
     

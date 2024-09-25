@@ -24,7 +24,7 @@ class GeneticAlgorithmBase(ABC):
         self.env_configs : List[USVEnvironmentDesc] = []
         for config in env_configs:
             if isinstance(config, str):
-                self.env_configs.append(USV_ENV_DESC_LIST[env_configs])
+                self.env_configs.append(USV_ENV_DESC_LIST[config])
             elif isinstance(config, USVEnvironmentDesc):
                 self.env_configs.append(config)
             else:
@@ -98,5 +98,4 @@ class GeneticAlgorithmBase(ABC):
     def set_seed(self, seed):
         random.seed(seed)
         np.random.seed(seed)
-        self.current_seed = seed
     

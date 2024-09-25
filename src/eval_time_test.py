@@ -14,10 +14,10 @@ test_config1 = EvaluationData(population_size = 10, num_parents_mating = 2,
                         mutate_eta = 20, mutate_prob = 1, crossover_eta=15,
                         crossover_prob=1, timeout=TIMEOUT, random_init=RANDOM_INIT, random_seed=RANDOM_SEED)
 
-runs = [
+tests = [
     PyMooNSGA2Algorithm(measurement_name='test3', env_configs=three_vessel_interactions, test_config=test_config1,
                         number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False)
 ]
-for test in runs: 
+for test in tests: 
     test.run()
         

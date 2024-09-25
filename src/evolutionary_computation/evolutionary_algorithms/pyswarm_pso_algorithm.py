@@ -18,7 +18,7 @@ class PySwarmPSOAlgorithm(GeneticAlgorithmBase):
         lb, ub = self.generate_gene_space(env)
         pos = np.array([np.array(ind) for ind in initial_population])
         # Create a PSO instance
-        optimizer = ps.single.GlobalBestPSO(options={'c1': 1.5, 'c2': 1.7, 'w': 0.5},
+        optimizer = ps.single.GlobalBestPSO(options={'c1': eval_data.c_1, 'c2': eval_data.c_2, 'w': eval_data.w},
                                             n_particles=eval_data.population_size, 
                                             dimensions=env.config.all_variable_num,
                                             bounds=(np.array(lb), np.array(ub)),
