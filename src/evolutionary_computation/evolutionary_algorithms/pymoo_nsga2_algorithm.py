@@ -1,5 +1,5 @@
 
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
@@ -8,6 +8,7 @@ from model.environment.usv_config import MAX_HEADING, MIN_COORD, MAX_COORD, MIN_
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
+from pymoo.core.result import Result
 from pymoo.operators.crossover.sbx import SBX
 from pymoo.operators.mutation.pm import PM
 import matplotlib.pyplot as plt
@@ -36,7 +37,7 @@ class OptimumTermination(Termination):
                 print("Stopping due to timeout.")
             return 1.0
         
-        if algorithm.callback.best_objective is None:
+        if len(algorithm.callback.best_objective) == 0:
             return 0.0
         
         f_dist = USVEnvironment.euler_distance(algorithm.callback.best_objective)
@@ -52,8 +53,8 @@ class BestSolutionCallback(Callback):
     def __init__(self, start_time, verbose : bool):
         super().__init__()
         self.verbose = verbose
-        self.best_solution = None
-        self.best_objective = None
+        self.best_solution : List[float] = []
+        self.best_objective : List[float] = []
         self.best_dist = None
         self.number_of_generations = 0
         self.start_time = start_time
@@ -72,24 +73,22 @@ class BestSolutionCallback(Callback):
 
 class PyMooNSGA2Algorithm(GeneticAlgorithmBase):
     
-    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = False, runtime : int = 300) -> None:
-        super().__init__(measurement_name, 'pymoo_NSGA2_algorithm', config_name, verbose, random_init, runtime)
+    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+                 number_of_runs : int, warmups : int, verbose : bool) -> None:
+        super().__init__(measurement_name, 'pymoo_NSGA2_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
+        
     
-    def get_aggregate(self, env) -> Aggregate:
-        return VesselAggregate(env, minimize=True)   
-    
-    
-    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, env : USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
             # Define the custom multi-objective optimization problem
             class MyProblem(ElementwiseProblem):
-                def __init__(self, env_config : USVEnvironmentDesc, aggregate : Aggregate):
+                def __init__(self, aggregate : Aggregate):
                     self.aggregate = aggregate
-                    xl = [env_config.vessel_descs[0].min_speed]
-                    xu = [env_config.vessel_descs[0].max_speed]
-                    for vessel_desc in env_config.vessel_descs[1:]:
+                    xl = [env.config.vessel_descs[0].min_speed]
+                    xu = [env.config.vessel_descs[0].max_speed]
+                    for vessel_desc in env.config.vessel_descs[1:]:
                         xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
                         xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
-                    super().__init__(n_var=env_config.all_variable_num,  # Number of decision variables
+                    super().__init__(n_var=env.config.all_variable_num,  # Number of decision variables
                                     n_obj=aggregate.obj_num,  # Number of objective functions
                                     n_constr=0,  # Number of constraints
                                     xl=xl, # Lower bounds for variables
@@ -99,7 +98,7 @@ class PyMooNSGA2Algorithm(GeneticAlgorithmBase):
                     out["F"] = self.aggregate.evaluate(x)
 
             # Instantiate the problem
-            problem = MyProblem(self.env_config, self.aggregate)
+            problem = MyProblem(VesselAggregate(env, minimize=True))
             initial_population = Population.new("X", initial_population)
             
             # Define the NSGA-II algorithm
@@ -108,24 +107,23 @@ class PyMooNSGA2Algorithm(GeneticAlgorithmBase):
                               mutation=PM(eta=eval_data.mutate_eta, prob=eval_data.mutate_prob), sampling=initial_population,)
 
             callback = BestSolutionCallback(time.time(), self.verbose)
-            #termination=("n_gen", eval_data.number_of_generations),
-            termination = OptimumTermination(time.time(), self.runtime, self.verbose)
+            #termination=("n_gen", np.iinfo(np.int64).max),
+            termination = OptimumTermination(time.time(), eval_data.timeout, self.verbose)
             return problem, algorithm, callback, termination
 
     
     def do_evaluate(self, some_input, eval_data : EvaluationData):
         # Perform the optimization
         problem, algorithm, callback, termination = some_input
-        res = minimize(problem,
+        res : Result = minimize(problem,
                   algorithm,                  
-                  seed=eval_data.random_seed,
                   save_history=self.verbose,
                   verbose=self.verbose,
                   termination=termination,
                   callback=callback)
         return res, callback
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback], eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
         res, callback = some_results
         if self.verbose:
             # Plot the convergence

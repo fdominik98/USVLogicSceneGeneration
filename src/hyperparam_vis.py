@@ -33,7 +33,7 @@ table.auto_set_column_width(col=list(range(len(df_best.columns))))
 ax.set_title(f'All samples: {len(df_sorted)}', fontsize=15, pad=40)
 
 # Columns you want to color
-columns_to_white = ['result', 'evaluation_time', 'actual_number_of_generations']
+columns_to_white = ['result', 'evaluation_time', 'number_of_generations']
 # Get the index of the columns to color
 columns_to_white_indices = [df_best.columns.get_loc(col) for col in columns_to_white]
 

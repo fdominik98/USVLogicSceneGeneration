@@ -3,7 +3,7 @@ from evolutionary_computation.evaluation_data import EvaluationData
 from visualization.colreg_plot_manager import ColregPlotManager
 from trajectory_planning.model.trajectory_data import TrajectoryData
 from model.data_parser import EvalDataParser, TrajDataParser
-from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.environment.usv_environment import USVEnvironment
 
 while(True):

@@ -1,40 +1,37 @@
 import time
 from typing import List, Tuple
-
 import numpy as np
-from evolutionary_computation.aggregates import Aggregate, AggregateAll, AggregateAllSwarm
+from evolutionary_computation.aggregates import AggregateAllSwarm
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 import pyswarms as ps
-
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from model.environment.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_environment import USVEnvironment
 
 class PySwarmPSOAlgorithm(GeneticAlgorithmBase):
+    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+                 number_of_runs : int, warmups : int, verbose : bool) -> None:
+        super().__init__(measurement_name, 'pyswarm_PSO_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
     
-    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = True, runtime : int = 300) -> None:
-        super().__init__(measurement_name, 'pyswarm_PSO_algorithm', config_name, verbose, random_init, runtime)
-    
-    def get_aggregate(self, env) -> Aggregate:
-        return AggregateAllSwarm(env, minimize=True)   
-    
-    
-    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData):
-        lb, ub = self.generate_gene_space()
+    def init_problem(self, env : USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
+        lb, ub = self.generate_gene_space(env)
         pos = np.array([np.array(ind) for ind in initial_population])
         # Create a PSO instance
         optimizer = ps.single.GlobalBestPSO(options={'c1': 1.5, 'c2': 1.7, 'w': 0.5},
                                             n_particles=eval_data.population_size, 
-                                            dimensions=self.env_config.all_variable_num,
+                                            dimensions=env.config.all_variable_num,
                                             bounds=(np.array(lb), np.array(ub)),
                                             init_pos=pos)
-        return optimizer
+        aggregate = AggregateAllSwarm(env, minimize=True)
+        return optimizer, aggregate
     
-    def do_evaluate(self, some_input, eval_data : EvaluationData):
-        optimizer : ps.single.GlobalBestPSO = some_input
+    def do_evaluate(self, some_input : Tuple[ps.single.GlobalBestPSO, AggregateAllSwarm], eval_data : EvaluationData):
+        optimizer, aggregate = some_input
         start_time = time.time()  # Record the start time
-        cost, pos = optimizer.optimize(self.aggregate.evaluate, iters=10000, verbose=self.verbose)
+        cost, pos = optimizer.optimize(aggregate.evaluate, iters=np.iinfo(np.int64).max, verbose=self.verbose)
         
-        return pos.tolist(), (cost,), 100000
+        return pos.tolist(), (cost,), np.iinfo(np.int64).max
         
         # Perform optimization with timeout
         best_cost = float('inf')  # Initialize best cost
@@ -71,10 +68,10 @@ class PySwarmPSOAlgorithm(GeneticAlgorithmBase):
        
 
     # Attribute generator with different boundaries
-    def generate_gene_space(self):
-        xl = [self.env.config.vessel_descs[0].min_speed]
-        xu = [self.env.config.vessel_descs[0].max_speed]
-        for vessel_desc in self.env.config.vessel_descs[1:]:
+    def generate_gene_space(self, env : USVEnvironment):
+        xl = [env.config.vessel_descs[0].min_speed]
+        xu = [env.config.vessel_descs[0].max_speed]
+        for vessel_desc in env.config.vessel_descs[1:]:
             xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
             xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
         return xl, xu

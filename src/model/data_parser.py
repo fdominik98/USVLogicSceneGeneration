@@ -13,7 +13,7 @@ class DataParser(ABC):
     RRT_DIR = f'{gen_data_dir}/RRTStar_algo'
     EVAL_DATA_COLUMN_NAMES = ['best_solution', 'config_name',
                               'measurement_name', 'evaluation_time',
-                              'population_size', 'actual_number_of_generations',
+                              'population_size', 'number_of_generations',
                               'num_parents_mating', 'mutate_prob', 'crossover_prob',
                               'mutate_eta', 'crossover_eta', 'path', 'result']
     

@@ -8,7 +8,6 @@ class EvaluationData:
                  random_seed: Optional[int] = None,
                  evaluation_time: Optional[float] = None,
                  number_of_generations: Optional[int] = None,
-                 actual_number_of_generations: Optional[int] = None,
                  population_size: Optional[int] = None,
                  num_parents_mating: Optional[int] = None,
                  best_solution: Optional[List[float]] = None,
@@ -20,13 +19,14 @@ class EvaluationData:
                  error_message: Optional[str] = None,
                  timestamp: Optional[str] = None,
                  measurement_name: Optional[str] = None,
-                 path: Optional[str] = None):
+                 path: Optional[str] = None,
+                 timeout: Optional[float] = None,  # Added timeout parameter
+                 random_init: Optional[bool] = None):  # Added random_init parameter
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
         self.evaluation_time = evaluation_time
         self.number_of_generations = number_of_generations
-        self.actual_number_of_generations = actual_number_of_generations
         self.population_size = population_size
         self.num_parents_mating = num_parents_mating
         self.best_solution = best_solution
@@ -39,6 +39,8 @@ class EvaluationData:
         self.timestamp = timestamp
         self.measurement_name = measurement_name
         self.path = path
+        self.timeout = timeout  # Initialize timeout parameter
+        self.random_init = random_init  # Initialize random_init parameter
 
     def to_dict(self):
         return {
@@ -47,7 +49,6 @@ class EvaluationData:
             "random_seed": self.random_seed,
             "evaluation_time": self.evaluation_time,
             "number_of_generations": self.number_of_generations,
-            "actual_number_of_generations": self.actual_number_of_generations,
             "population_size": self.population_size,
             "num_parents_mating": self.num_parents_mating,
             "best_solution": self.best_solution,
@@ -59,7 +60,9 @@ class EvaluationData:
             "error_message": self.error_message,
             "timestamp": self.timestamp,
             "measurement_name": self.measurement_name,
-            "path": self.path
+            "path": self.path,
+            "timeout": self.timeout,  # Include timeout in the dictionary
+            "random_init": self.random_init  # Include random_init in the dictionary
         }
 
     def save_to_json(self, file_path: str):
@@ -74,7 +77,6 @@ class EvaluationData:
             random_seed=data.get("random_seed"),
             evaluation_time=data.get("evaluation_time"),
             number_of_generations=data.get("number_of_generations"),
-            actual_number_of_generations=data.get("actual_number_of_generations"),
             population_size=data.get("population_size"),
             num_parents_mating=data.get("num_parents_mating"),
             best_solution=data.get("best_solution"),
@@ -86,7 +88,9 @@ class EvaluationData:
             error_message=data.get("error_message"),
             timestamp=data.get("timestamp"),
             measurement_name=data.get("measurement_name"),
-            path=data.get("path")
+            path=data.get("path"),
+            timeout=data.get("timeout"),  # Extract timeout from the dictionary
+            random_init=data.get("random_init")  # Extract random_init from the dictionary
         )
         
     @classmethod

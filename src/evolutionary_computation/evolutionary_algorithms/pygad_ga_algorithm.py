@@ -1,26 +1,23 @@
 
 import time
 from typing import List, Tuple
+import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
-from model.environment.usv_config import *
-from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 import pygad
 from evolutionary_computation.aggregates import AggregateAll
-from model.environment.usv_config import *
+from model.environment.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 
 class PyGadGAAlgorithm(GeneticAlgorithmBase):
+    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+                 number_of_runs : int, warmups : int, verbose : bool) -> None:
+        super().__init__(measurement_name, 'pygad_GA_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
     
-    def __init__(self, measurement_name : str, config_name: str, verbose : bool, random_init : bool = True, runtime : int = 300) -> None:
-        super().__init__(measurement_name, 'pygad_GA_algorithm', config_name, verbose, random_init, runtime)
-    
-    def get_aggregate(self, env) -> Aggregate:
-        return AggregateAll(env)   
-    
-    
-    def init_problem(self, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
+    def init_problem(self,  env: USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
         def fitness_func(cls, solution, solution_idx):
-            return self.aggregate.evaluate(solution)[0]
+            return AggregateAll(env).evaluate(solution)[0]
         
         start_time = time.time()
         
@@ -33,24 +30,22 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
             if solution_fitness == 0.0:
                 print(f"Terminating due to fitness reaching 0.0.")
                 raise StopIteration
-            if elapsed_time > self.runtime:
-                print(f"Terminating due to timeout of {self.runtime} seconds.")
+            if elapsed_time > eval_data.timeout:
+                print(f"Terminating due to timeout of {eval_data.timeout} seconds.")
                 raise StopIteration
             
         # Setting up the GA
         ga_instance : pygad.GA = pygad.GA(
-            num_generations=eval_data.number_of_generations,
+            num_generations=np.iinfo(np.int64).max,
             num_parents_mating=eval_data.num_parents_mating,
             fitness_func=fitness_func,
             sol_per_pop=eval_data.population_size,
-            num_genes=self.env_config.all_variable_num,
-            gene_space=self.generate_gene_space(),
+            num_genes=env.config.all_variable_num,
+            gene_space=self.generate_gene_space(env),
             initial_population=initial_population,
             on_generation=on_generation,
             mutation_probability=eval_data.mutate_prob,
             crossover_probability=eval_data.crossover_prob,
-            random_seed=eval_data.random_seed,
-            #parallel_processing=('thread', 4)
         )
         return ga_instance
     
@@ -78,10 +73,10 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
         return list(solution.flatten()), [abs(solution_fitness)], ga_instance.generations_completed
 
     # Attribute generator with different boundaries
-    def generate_gene_space(self):
-        xl = [self.env.config.vessel_descs[0].min_speed]
-        xu = [self.env.config.vessel_descs[0].max_speed]
-        for vessel_desc in self.env.config.vessel_descs[1:]:
+    def generate_gene_space(self, env : USVEnvironment):
+        xl = [env.config.vessel_descs[0].min_speed]
+        xu = [env.config.vessel_descs[0].max_speed]
+        for vessel_desc in env.config.vessel_descs[1:]:
             xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
             xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
         return [{'low': low, 'high': high} for low, high in zip(xl, xu)]

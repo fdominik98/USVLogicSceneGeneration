@@ -25,7 +25,7 @@ algos = {
     #6 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='seven_vessel_colreg_scenario2', verbose=False, runtime=25),
     #7 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_and_crossing', verbose=False, runtime=10),
     #8 : PyMooAlgorithm(measurement_name='parameter_optimization_test_random', config_name='overtaking_headon_crossing', verbose=False, runtime=10),
-    9 : PyGadGAAlgorithm(measurement_name='parameter_optimization_test_random', config_name='five_vessel_colreg_scenario', verbose=False, runtime=30),
+    9 : PyGadGAAlgorithm(measurement_name='parameter_optimization_test_random', env_configs='five_vessel_colreg_scenario', verbose=False, runtime=30),
 }
 
 all_combinations = itertools.product(population_sizes, numbers_of_generations, numbers_of_parents, mutate_probs, crossover_probs, mutate_etas, crossover_etas)
@@ -37,7 +37,7 @@ while len(combinations_list) != 0:
     population_size, number_of_generations, number_of_parents, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_list[0]
     for algo in algos.values():
         try:
-            print(f'trying {combinations_list[0]} for {algo.config_name}')
+            print(f'trying {combinations_list[0]} for {algo.env_configs}')
             data = algo.evaluate(population_size=population_size,
                                 mutate_prob=mutate_prob, 
                                 crossover_prob=crossover_prob, 

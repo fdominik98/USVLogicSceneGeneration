@@ -9,7 +9,7 @@ from trajectory_planning.model.vessel_order_graph import VesselNode, VesselOrder
 from trajectory_planning.model.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
 from model.data_parser import EvalDataParser
-from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.environment.usv_environment import USVEnvironment
 import numpy as np
 from trajectory_planning.bidirectional_rrt_star_fnd import BidirectionalRRTStarFND, DIM

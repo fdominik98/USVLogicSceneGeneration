@@ -1,7 +1,7 @@
 from visualization.colreg_plot_manager import ColregPlotManager
 from model.data_parser import EvalDataParser
 import matplotlib.pyplot as plt
-from model.environment.usv_env_desc_list import USV_ENV_DESC_LIST
+from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.environment.usv_environment import USVEnvironment
 
 while(True):
@@ -29,7 +29,7 @@ while(True):
         ax.set_title(f'All samples: {len(df_sorted)}', fontsize=15, pad=40)
 
         # Columns you want to color
-        columns_to_white = ['result', 'evaluation_time', 'actual_number_of_generations']
+        columns_to_white = ['result', 'evaluation_time', 'number_of_generations']
         # Get the index of the columns to color
         columns_to_white_indices = [df_best.columns.get_loc(col) for col in columns_to_white]
 
