@@ -6,8 +6,9 @@ from evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm impo
 from evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
 from evolutionary_computation.evolutionary_algorithms.scipy_de_algorithm import SciPyDEAlgorithm
 from evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
-from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.evaluation_data import EvaluationData
+from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
 NUMBER_OF_RUNS = 1
 WARMUPS = 0
@@ -26,7 +27,7 @@ c2_s = [1.0, 1.5, 2.0, 2.5]
 w_s = [0.4, 0.6, 0.9]
 
 combinations_GA = list(itertools.product(population_sizes, nums_parents_mating, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
-combinations_NSGA2 = list(itertools.product(population_sizes, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
+combinations_NSGA = list(itertools.product(population_sizes, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
 combinations_PSO = list(itertools.product(population_sizes, c1_s, c2_s, w_s))
 combination_DE = list(itertools.product(population_sizes, mutate_probs, crossover_probs))
 
@@ -45,10 +46,10 @@ def create_GA_config() -> EvaluationData:
             mutate_eta = mutate_eta, mutate_prob = mutate_prob, crossover_eta=crossover_eta,
             crossover_prob=crossover_prob, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED)
     
-def create_NSGA2_config() -> EvaluationData:
-    if len(combinations_NSGA2) == 0:
+def create_NSGA_config() -> EvaluationData:
+    if len(combinations_NSGA) == 0:
         return None
-    population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA2[0]
+    population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA[0]
     return EvaluationData(population_size = population_size, mutate_eta = mutate_eta, mutate_prob = mutate_prob,
                           crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
                           init_method=INIT_METHOD, random_seed=RANDOM_SEED)
@@ -75,7 +76,7 @@ def create_DE_config() -> EvaluationData:
 
 random.seed(time.time())
 random.shuffle(combinations_GA)
-random.shuffle(combinations_NSGA2)
+random.shuffle(combinations_NSGA)
 random.shuffle(combinations_PSO)
 random.shuffle(combination_DE)
 
@@ -87,9 +88,13 @@ tests : List[Tuple[Any, GeneticAlgorithmBase]]= [
                                         env_configs=env_configs,
                                         test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    (create_NSGA2_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+    (create_NSGA_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
-                                        test_config=create_NSGA2_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        warmups = WARMUPS, verbose=False)),
+    (create_NSGA_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+                                        env_configs=env_configs,
+                                        test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
     (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
@@ -115,8 +120,8 @@ while True:
         break
     if len(combinations_GA) > 0:   
         del combinations_GA[0]
-    if len(combinations_NSGA2) > 0:
-        del combinations_NSGA2[0]
+    if len(combinations_NSGA) > 0:
+        del combinations_NSGA[0]
     if len(combinations_PSO) > 0:
         del combinations_PSO[0]
     if len(combination_DE) > 0:
