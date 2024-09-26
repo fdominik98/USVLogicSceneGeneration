@@ -12,7 +12,7 @@ while(True):
         exit()
 
     for df in dfs:
-        df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
+        df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[True, True])
         
         df_best = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'measurement_name', 'path'])
         #df_best = df_best.drop(columns=['actual_number_of_generations'])

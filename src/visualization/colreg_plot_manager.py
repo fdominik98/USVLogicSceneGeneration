@@ -87,7 +87,6 @@ class ColregPlotManager():
         self.trajectories = trajectories
         self.root = tk.Tk()
         self.root.resizable(True, True)
-        #self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         
         self.sim_time_update_id = None
         self.root.option_add("*Font", ("Times New Roman", 14))
@@ -128,7 +127,7 @@ class ColregPlotManager():
         self.plot_dropdown.pack(side=tk.LEFT, padx=5)
         
         ## HIDE BUTTON
-        self.hide_button = tk.Button(self.toolbar_frame, text="Hide control", command=self.hide_control)
+        self.hide_button = tk.Button(self.toolbar_frame, text="Show control", command=self.hide_control)
         self.hide_button.pack(side=tk.LEFT, padx=5)
         
         ## EXIT BUTTONS
@@ -138,12 +137,15 @@ class ColregPlotManager():
         continue_button.pack(side=tk.RIGHT, padx=5)
         
         
-        
         ## CONTROL FRAME
         self.control_frame = tk.Frame(master=self.canvas_frame, width=70)
         self.control_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False)
+
+        self.add_control()
+        self.root.wait_window()
         
-        ### TIME CONTROL
+    def add_control(self):
+                ### TIME CONTROL
         self.time_control_frame = tk.Frame(self.control_frame, background='white')
         self.time_control_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.time_label = tk.Label(master=self.time_control_frame,
@@ -159,7 +161,7 @@ class ColregPlotManager():
         col=self.create_actor_info_col('grey')
         actors_label = tk.Label(master=col, text='Attribute', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in env.vessels:
+        for vessel in self.env.vessels:
             col = self.create_actor_info_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -185,7 +187,7 @@ class ColregPlotManager():
         col=self.create_actor_control_col('grey')
         actors_label = tk.Label(master=col, text='Component', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in env.vessels:
+        for vessel in self.env.vessels:
             col = self.create_actor_control_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -218,8 +220,6 @@ class ColregPlotManager():
         self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.add_vo_cone_component.graphs_by_colregs), 'VO calc', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p12_vec_graphs]), 'P12', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p21_vec_graphs]), 'P21', False)
-        
-        self.root.wait_window()
         
     def create_actor_checkbox_row(self, plot_components: List[List[plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
@@ -330,6 +330,7 @@ class ColregPlotManager():
         elif self.hide_button['text'] == 'Show control':
             self.control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
             self.hide_button.config(text="Hide control")
+                
         
     def create_actor_info_labels(self) -> List[List[tk.Label]]:
         tk.Label(master=self.actor_info_columns[0], text='Position (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)

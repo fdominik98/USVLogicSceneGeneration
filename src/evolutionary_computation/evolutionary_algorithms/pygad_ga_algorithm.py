@@ -8,7 +8,6 @@ import pygad
 from evolutionary_computation.aggregates import AggregateAll
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
-from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 
 class PyGadGAAlgorithm(GeneticAlgorithmBase):
     def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
@@ -28,10 +27,12 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
             elapsed_time = time.time() - start_time
             solution, solution_fitness, solution_idx = ga_instance.best_solution()
             if solution_fitness == 0.0:
-                print(f"Terminating due to fitness reaching 0.0.")
+                if self.verbose:
+                    print(f"Terminating due to fitness reaching 0.0.")
                 raise StopIteration
             if elapsed_time > eval_data.timeout:
-                print(f"Terminating due to timeout of {eval_data.timeout} seconds.")
+                if self.verbose:
+                    print(f"Terminating due to timeout of {eval_data.timeout} seconds.")
                 raise StopIteration
             
         # Setting up the GA
@@ -41,7 +42,7 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
             fitness_func=fitness_func,
             sol_per_pop=eval_data.population_size,
             num_genes=env.config.all_variable_num,
-            gene_space=self.generate_gene_space(env),
+            gene_space=[{'low': low, 'high': high} for low, high in zip(env.xl, env.xu)],
             initial_population=initial_population,
             on_generation=on_generation,
             mutation_probability=eval_data.mutate_prob,
@@ -74,14 +75,6 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
         #         ColregPlot(self.env.update(sol))
         return list(solution.flatten()), [abs(solution_fitness)], ga_instance.generations_completed
 
-    # Attribute generator with different boundaries
-    def generate_gene_space(self, env : USVEnvironment):
-        xl = [env.config.vessel_descs[0].min_speed]
-        xu = [env.config.vessel_descs[0].max_speed]
-        for vessel_desc in env.config.vessel_descs[1:]:
-            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
-            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
-        return [{'low': low, 'high': high} for low, high in zip(xl, xu)]
 
 
     

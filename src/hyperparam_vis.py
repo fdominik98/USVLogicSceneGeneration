@@ -15,7 +15,7 @@ if len(dfs) == 0:
 df = dfs[0]
     
 df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
-df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name', 'path'])
+df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name', 'algorithm_desc', 'path'])
 #df_sorted = df_sorted.drop(columns=['actual_number_of_generations'])
 
 df_simple_sorted = df_sorted.drop(columns=['evaluation_time'])

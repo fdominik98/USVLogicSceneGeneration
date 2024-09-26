@@ -12,6 +12,7 @@ from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_L
 from model.environment.usv_config import ASSET_FOLDER
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_environment_desc import USVEnvironmentDesc
+from visualization.colreg_plot_manager import ColregPlotManager
 
 
 class GeneticAlgorithmBase(ABC):
@@ -34,19 +35,25 @@ class GeneticAlgorithmBase(ABC):
         self.warmups = warmups
         self.verbose = verbose
        
-       
-    def run(self):
+    def run(self) -> List[List[EvaluationData]]:
         self.set_seed(self.test_config.random_seed)
+        results : List[List[EvaluationData]] = []
         
         for config in self.env_configs:
+            results.append([])
             for i in range(self.warmups + self.number_of_runs):
                 new_eval_data = deepcopy(self.test_config)
-                env = USVEnvironment(config, random_init=new_eval_data.random_init)
+                env = USVEnvironment(config, init_method=new_eval_data.init_method)
+                
+                #ColregPlotManager(env=env)
+                
                 new_eval_data.measurement_name = self.measurement_name
                 new_eval_data.algorithm_desc = self.algorithm_desc
                 new_eval_data.config_name = config.name
                 new_eval_data.timestamp = datetime.now().isoformat()
-                self.evaluate(env, new_eval_data, i >= self.warmups)
+                res = self.evaluate(env, new_eval_data, i >= self.warmups)
+                results[-1].append(res)
+        return results
          
     def evaluate(self, env: USVEnvironment, eval_data : EvaluationData, save : bool) -> EvaluationData:
         

@@ -4,7 +4,6 @@ from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 from evolutionary_computation.aggregates import VesselAggregate
-from model.environment.usv_config import MAX_HEADING, MIN_COORD, MAX_COORD, MIN_HEADING
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -82,17 +81,12 @@ class PyMooNSGA2Algorithm(GeneticAlgorithmBase):
             # Define the custom multi-objective optimization problem
             class MyProblem(ElementwiseProblem):
                 def __init__(self, aggregate : Aggregate):
-                    self.aggregate = aggregate
-                    xl = [env.config.vessel_descs[0].min_speed]
-                    xu = [env.config.vessel_descs[0].max_speed]
-                    for vessel_desc in env.config.vessel_descs[1:]:
-                        xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
-                        xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
+                    self.aggregate = aggregate                    
                     super().__init__(n_var=env.config.all_variable_num,  # Number of decision variables
                                     n_obj=aggregate.obj_num,  # Number of objective functions
                                     n_constr=0,  # Number of constraints
-                                    xl=xl, # Lower bounds for variables
-                                    xu=xu)  # Upper bounds for variables
+                                    xl=env.xl, # Lower bounds for variables
+                                    xu=env.xu)  # Upper bounds for variables
 
                 def _evaluate(self, x, out, *args, **kwargs):
                     out["F"] = self.aggregate.evaluate(x)

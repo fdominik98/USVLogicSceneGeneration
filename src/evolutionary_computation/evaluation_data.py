@@ -21,7 +21,7 @@ class EvaluationData:
                  measurement_name: Optional[str] = None,
                  path: Optional[str] = None,
                  timeout: Optional[float] = None,
-                 random_init: Optional[bool] = None,
+                 init_method: Optional[str] = None,
                  c_1: Optional[float] = None,  # cognitive coefficient
                  c_2: Optional[float] = None,  # social coefficient
                  w: Optional[float] = None):   # inertia weight
@@ -43,7 +43,7 @@ class EvaluationData:
         self.measurement_name = measurement_name
         self.path = path
         self.timeout = timeout
-        self.random_init = random_init
+        self.init_method = init_method
         self.c_1 = c_1  # Initialize c_1 parameter
         self.c_2 = c_2  # Initialize c_2 parameter
         self.w = w      # Initialize w parameter
@@ -68,7 +68,7 @@ class EvaluationData:
             "measurement_name": self.measurement_name,
             "path": self.path,
             "timeout": self.timeout,
-            "random_init": self.random_init,
+            "init_method": self.init_method,
             "c_1": self.c_1,  # Include c_1 in the dictionary
             "c_2": self.c_2,  # Include c_2 in the dictionary
             "w": self.w       # Include w in the dictionary
@@ -99,7 +99,7 @@ class EvaluationData:
             measurement_name=data.get("measurement_name"),
             path=data.get("path"),
             timeout=data.get("timeout"),
-            random_init=data.get("random_init"),
+            init_method=data.get("init_method"),
             c_1=data.get("c_1"),  # Extract c_1 from the dictionary
             c_2=data.get("c_2"),  # Extract c_2 from the dictionary
             w=data.get("w")       # Extract w from the dictionary
