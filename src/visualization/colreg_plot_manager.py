@@ -1,9 +1,11 @@
+from datetime import datetime
 import os
 import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import ASSET_FOLDER
 from visualization.colreg_plot_complex import TrajectoryMetricsPlot
 from visualization.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from visualization.plot_components.plot_component import light_colors
@@ -87,6 +89,7 @@ class ColregPlotManager():
         self.trajectories = trajectories
         self.root = tk.Tk()
         self.root.resizable(True, True)
+        self.image_folder = f'{ASSET_FOLDER}/images/exported_plots'
         
         self.sim_time_update_id = None
         self.root.option_add("*Font", ("Times New Roman", 14))
@@ -125,6 +128,9 @@ class ColregPlotManager():
         # Create the dropdown menu
         self.plot_dropdown = tk.OptionMenu(self.toolbar_frame, self.selected_option, *self.plot_options, command=self.on_select_plot)
         self.plot_dropdown.pack(side=tk.LEFT, padx=5)
+        
+        self.to_pdf_button = tk.Button(self.toolbar_frame, text="PDF", command=self.to_pdf)
+        self.to_pdf_button.pack(side=tk.LEFT, padx=5)
         
         ## HIDE BUTTON
         self.hide_button = tk.Button(self.toolbar_frame, text="Show control", command=self.hide_control)
@@ -303,6 +309,14 @@ class ColregPlotManager():
         
     def continue_application(self):
         self.root.destroy()
+        
+    def to_pdf(self):
+        file_name = f'{self.env.config.name}_{datetime.now().isoformat().replace(":","-")}'
+        if not os.path.exists(self.image_folder):
+            os.makedirs(self.image_folder)
+        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', dpi=350)
+        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', dpi=350)
+        print('image saved')
         
     def on_select_plot(self, value):
         if value == 'Scenario':
