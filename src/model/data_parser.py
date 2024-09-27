@@ -15,7 +15,7 @@ class DataParser(ABC):
                               'measurement_name', 'evaluation_time',
                               'population_size', 'number_of_generations',
                               'num_parents_mating', 'mutate_prob', 'crossover_prob',
-                              'mutate_eta', 'crossover_eta', 'c_1', 'c_2', 'w', 'path', 'result']
+                              'mutate_eta', 'crossover_eta', 'c_1', 'c_2', 'w', 'path', 'best_fitness_index']
     
     TRAJ_COLUMN_NAMES = ['trajectories', 'config_name', 'measurement_name', 'rrt_evaluation_times',
                          'iter_numbers', 'overall_eval_time', 'path', 'env_path', 'expand_distance',
@@ -69,15 +69,10 @@ class DataParser(ABC):
         
         for data in data_lines:
             measurement_data = []
+            if data['error_message'] != None and data['best_solution'] != None:
+                continue
             for column in self.column_names:
-                if data['error_message'] != None and data['best_solution'] != None:
-                    continue
-                if column != 'result':
-                    measurement_data.append(data[column])
-                else:
-                    fitness = data['best_fitness']
-                    result = USVEnvironment.euler_distance(fitness)
-                    measurement_data.append(result)
+                measurement_data.append(data[column])
             data_lists.append(measurement_data)
             
         return pd.DataFrame(data_lists, columns=self.column_names)
@@ -89,6 +84,7 @@ class DataParser(ABC):
             if len(files) == 0:
                 continue
         return self.load_df_from_files(files)
+    
 
 class EvalDataParser(DataParser):    
     def __init__(self) -> None:
@@ -103,7 +99,16 @@ class EvalDataParser(DataParser):
         return self.load_data_models_from_files(files)
     
     def load_data_models_from_files(self, files : List[str]) -> List[EvaluationData]:
-        return [EvaluationData.load_from_json(file) for file in files]
+        data_models = [EvaluationData.load_from_json(file) for file in files]
+        return [model for model in data_models if model.error_message is None and model.best_solution is not None]
+    
+    def load_dirs_merged_as_models(self) -> List[EvaluationData]:
+        files = []
+        for dir in tkfilebrowser.askopendirnames(initialdir=self.dir):
+            files += self.get_all_file_paths(dir)
+            if len(files) == 0:
+                continue
+        return self.load_data_models_from_files(files)
     
 class TrajDataParser(DataParser):    
     def __init__(self) -> None:
@@ -118,5 +123,6 @@ class TrajDataParser(DataParser):
         return self.load_data_models_from_files(files)
     
     def load_data_models_from_files(self, files : List[str]) -> List[TrajectoryData]:
-        return [TrajectoryData.load_from_json(file) for file in files]
+        data_models = [TrajectoryData.load_from_json(file) for file in files]
+        return [model for model in data_models if model.error_message is None and model.trajectories is not None]
     

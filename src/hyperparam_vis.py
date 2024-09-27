@@ -1,9 +1,30 @@
+from collections import defaultdict
+from pprint import pprint
+from typing import Dict, List
 from model.data_parser import EvalDataParser
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pandas.plotting import parallel_coordinates
 from mpl_toolkits.mplot3d import Axes3D
+
+from evolutionary_computation.evaluation_data import EvaluationData
+
+dp = EvalDataParser()
+eval_datas = dp.load_dirs_merged_as_models()
+# Assuming the objects have these attributes: measurement_name, algorithm_desc, config_name, best_fitness
+organized_dict : Dict[str, Dict[str, Dict[str, List[EvaluationData]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(List[EvaluationData])))
+# Populate the nested dictionary
+for eval_data in eval_datas:
+    organized_dict[eval_data.measurement_name][eval_data.algorithm_desc][eval_data.config_name].append(eval_data)
+
+# Sort each list by best_fitness in ascending order
+for measurement_name, alg_dict in organized_dict.items():
+    for algorithm_desc, config_dict in alg_dict.items():
+        for config_name, obj_list in config_dict.items():
+            config_dict[config_name] = sorted(obj_list, key=lambda o: o.best_fitness_index)[0]
+
+pprint(organized_dict)
 
 
 dp = EvalDataParser()
@@ -14,7 +35,7 @@ if len(dfs) == 0:
 
 df = dfs[0]
     
-df_sorted = df.sort_values(by=['result', 'evaluation_time'], ascending=[False, True])
+df_sorted = df.sort_values(by=['best_fitness_index', 'evaluation_time'], ascending=[False, True])
 df_sorted = df_sorted.drop(columns=['num_parents_mating', 'best_solution', 'config_name', 'measurement_name', 'algorithm_desc', 'path'])
 #df_sorted = df_sorted.drop(columns=['actual_number_of_generations'])
 
@@ -33,7 +54,7 @@ table.auto_set_column_width(col=list(range(len(df_best.columns))))
 ax.set_title(f'All samples: {len(df_sorted)}', fontsize=15, pad=40)
 
 # Columns you want to color
-columns_to_white = ['result', 'evaluation_time', 'number_of_generations']
+columns_to_white = ['best_fitness_index', 'evaluation_time', 'number_of_generations']
 # Get the index of the columns to color
 columns_to_white_indices = [df_best.columns.get_loc(col) for col in columns_to_white]
 
