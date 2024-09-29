@@ -45,14 +45,11 @@ def interval_distance(value : float, boundaries: Tuple[float, float], is_angle=T
         return 0.0, 0.0
     return distance, normed_distance(distance, boundaries, is_angle)
     
-def strict_distance(value : float, goal : float, is_angle=True) -> Tuple[float, float]:
+def strict_interval_distance(value : float, goal : float, is_angle=True) -> Tuple[float, float]:
     distance = abs(goal - value)
     return distance, normed_distance(distance, (goal, goal), is_angle)
 
 def normed_distance(distance, boundaries, is_angle) -> float:
-    norm = distance / (boundaries[0] + (np.pi if is_angle else MAX_DISTANCE) - boundaries[1])
-    if norm < 0:
-        print()
     return distance / (boundaries[0] + (np.pi if is_angle else MAX_DISTANCE) - boundaries[1])
     
     

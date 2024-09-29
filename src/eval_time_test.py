@@ -11,11 +11,10 @@ from model.environment.functional_models.five_vessel_interactions import five_ve
 from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
-NUMBER_OF_RUNS = 10
-WARMUPS = 2
+NUMBER_OF_RUNS = 2
+WARMUPS = 0
 RANDOM_SEED = 1234
-TIMEOUT = 10
-RANDOM_INIT = True
+TIMEOUT = 60
 INIT_METHOD = 'uniform'
 
 ga_config = EvaluationData(population_size = 4, num_parents_mating = 2,

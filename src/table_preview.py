@@ -1,4 +1,4 @@
-from visualization.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from model.data_parser import EvalDataParser
 import matplotlib.pyplot as plt
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST

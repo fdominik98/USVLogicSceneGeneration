@@ -1,11 +1,11 @@
 from typing import List, Tuple
 from model.environment.usv_config import (DIST_DRIFT, EPSILON, BOW_ANGLE, BEAM_ANGLE, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, STERN_ANGLE,
-                              angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_distance, vector_angle_diff)
+                              angle_angle_diff, heading, interval_distance, o2VisibilityByo1, N_MILE_TO_M_CONVERSION, strict_interval_distance, vector_angle_diff)
 from model.vessel import Vessel
 import numpy as np
 from abc import ABC, abstractmethod
 
-class ColregSituation(ABC):
+class Relation(ABC):
     def __init__(self, name, vessel1 : Vessel, vessel2 : Vessel) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
@@ -34,7 +34,12 @@ class ColregSituation(ABC):
         
         self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.l),
                            o2VisibilityByo1(self.angle_p21_v2, self.vessel2.l)) *  N_MILE_TO_M_CONVERSION
-        self.vo_computes()
+        # angle between the relative velocity and the relative position vector
+        self.angle_v12_p12 = vector_angle_diff(self.v12, self.p12_heading)      
+        
+        stable_norm_p12 = max(self.o_distance, EPSILON)
+        sin_theta = np.clip(self.safety_dist / stable_norm_p12, -1, 1)
+        self.angle_half_cone = abs(np.arcsin(sin_theta)) # [0, pi/2]
         
     @abstractmethod
     def penalties(self) -> List[Tuple[float, float]]:
@@ -52,32 +57,24 @@ class ColregSituation(ABC):
         penalties = self.strict_penalties()
         return [penalties[0], penalties[1], penalties[2], penalties[3]]
     
-    def vo_computes(self):
-        # angle between the relative velocity and the relative position vector
-        self.angle_v12_p12 = vector_angle_diff(self.v12, self.p12_heading)      
-        
-        stable_norm_p12 = max(self.o_distance, EPSILON)
-        sin_theta = np.clip(self.safety_dist / stable_norm_p12, -1, 1)
-        self.angle_half_cone = abs(np.arcsin(sin_theta)) # [0, pi/2]
-        
         
     def visibility_dist(self) -> Tuple[float, float]:
         return interval_distance(self.o_distance, (self.vis_distance - DIST_DRIFT, self.vis_distance + DIST_DRIFT), is_angle=False) 
     
     def strict_visibility_dist(self) -> Tuple[float, float]:
-        return strict_distance(self.o_distance, self.vis_distance, is_angle=False)        
+        return strict_interval_distance(self.o_distance, self.vis_distance, is_angle=False)        
         
     def v2_in_front_v1_dist(self, vision_boundary) -> Tuple[float, float]:
         return interval_distance(self.angle_p12_v1, vision_boundary)
     
     def strict_v2_in_front_v1_dist(self, goal_angle) -> Tuple[float, float]:
-        return strict_distance(self.angle_p12_v1, goal_angle)
+        return strict_interval_distance(self.angle_p12_v1, goal_angle)
 
     def vo_collision_dist(self) -> Tuple[float, float]:
         return interval_distance(self.angle_v12_p12, (0, self.angle_half_cone))
     
     def strict_vo_collision_dist(self) -> Tuple[float, float]:
-        return strict_distance(self.angle_v12_p12, 0)
+        return strict_interval_distance(self.angle_v12_p12, 0)
         
     def info(self):
         penalties = self.penalties()
@@ -128,7 +125,7 @@ class ColregSituation(ABC):
         return collision_points
 
     
-class Overtaking(ColregSituation):
+class Overtaking(Relation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is overtaking {vessel2.name}', vessel1, vessel2)
         
@@ -144,7 +141,7 @@ class Overtaking(ColregSituation):
         return [
             self.strict_visibility_dist(),
             self.strict_vo_collision_dist(),
-            strict_distance(self.angle_p21_v2, np.pi),
+            strict_interval_distance(self.angle_p21_v2, np.pi),
             self.strict_v2_in_front_v1_dist(0)
         ]
         
@@ -154,7 +151,7 @@ class Overtaking(ColregSituation):
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
     
         
-class HeadOn(ColregSituation):
+class HeadOn(Relation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} and {vessel2.name} are head on', vessel1, vessel2)
         
@@ -170,7 +167,7 @@ class HeadOn(ColregSituation):
         return [
             self.strict_visibility_dist(),
             self.strict_vo_collision_dist(),
-            strict_distance(self.angle_p21_v2, 0),
+            strict_interval_distance(self.angle_p21_v2, 0),
             self.strict_v2_in_front_v1_dist(0)
         ]   
         
@@ -178,7 +175,7 @@ class HeadOn(ColregSituation):
         print(f'Angular penalty of v1 in front v2: {np.degrees(penalties[2][0])} degs, penalty norm: {penalties[2][1]}, strict penalty: {np.degrees(strict_penalties[2][0])}, strict penalty norm: {strict_penalties[2][1]}')
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
         
-class CrossingFromPort(ColregSituation):
+class CrossingFromPort(Relation):
     rotation_angle = (BOW_ANGLE + BEAM_ANGLE) / 2
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is crossing {vessel2.name} from port', vessel1, vessel2)
@@ -197,7 +194,7 @@ class CrossingFromPort(ColregSituation):
         return [
             self.strict_visibility_dist(),
             self.strict_vo_collision_dist(),
-            strict_distance(angle_p21_v2_rot, 0),
+            strict_interval_distance(angle_p21_v2_rot, 0),
             self.strict_v2_in_front_v1_dist(0)
         ]
         
@@ -213,7 +210,7 @@ class CrossingFromPort(ColregSituation):
         print(f'Angular penalty of v1 left of v2: {np.degrees(penalties[2][0])} degs, penalty norm: {penalties[2][1]}, strict penalty: {np.degrees(strict_penalties[2][0])}, strict penalty norm: {strict_penalties[2][1]}')
         print(f'Angular penalty of v2 in front of v1: {np.degrees(penalties[3][0])} degs, penalty norm: {penalties[3][1]}, strict penalty: {np.degrees(strict_penalties[3][0])}, strict penalty norm: {strict_penalties[3][1]}')
 
-class NoColreg(ColregSituation):
+class NoColreg(Relation):
     def __init__(self, vessel1 : Vessel, vessel2 : Vessel):
         super().__init__(f'{vessel1.name} is not colliding with {vessel2.name}', vessel1, vessel2)
         

@@ -5,10 +5,10 @@ from model.environment.usv_environment import USVEnvironment
 from model.vessel import Vessel
 import copy
 
-from model.colreg_situation import ColregSituation, NoColreg
+from model.colreg_situation import Relation, NoColreg
 
 class ProximityMetrics():
-    def __init__(self, colreg_s : ColregSituation, closest_index : int, closest_dist : np.ndarray) -> None:
+    def __init__(self, colreg_s : Relation, closest_index : int, closest_dist : np.ndarray) -> None:
         self.distances : List[float] = []
         self.dcpas : List[float] = [] # Distance at the Closest Point of Approach
         self.tcpas : List[float] = [] # Time to the Closest Point of Approach
@@ -42,7 +42,7 @@ class ProximityEvaluator():
             if colreg_s.vessel1.is_OS() or colreg_s.vessel2.is_OS():
                 self.metrics.append(self.calculate_pair(colreg_s))
         
-    def calculate_pair(self, colreg_s : ColregSituation) -> ProximityMetrics:
+    def calculate_pair(self, colreg_s : Relation) -> ProximityMetrics:
         dyn_colreg_s = copy.deepcopy(colreg_s)
         v1 = dyn_colreg_s.vessel1
         v2 = dyn_colreg_s.vessel2

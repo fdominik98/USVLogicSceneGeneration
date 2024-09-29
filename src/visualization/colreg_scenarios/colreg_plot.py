@@ -4,19 +4,20 @@ from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import *
 from model.colreg_situation import NoColreg
 from evolutionary_computation.aggregates import VesselAggregate
+from visualization.my_plot import MyPlot
 from trajectory_planning.path_interpolator import PathInterpolator
-from visualization.plot_components.main_plot_components.drawing_component import DrawingComponent
-from visualization.plot_components.main_plot_components.legend_component import LegendComponent
-from visualization.colreg_animation import ColregAnimation
-from visualization.plot_components.main_plot_components.ship_image_component import ShipImageComponent
-from visualization.plot_components.plot_component import PlotComponent
-from visualization.plot_components.main_plot_components.prime_component import PrimeComponent
-from visualization.plot_components.main_plot_components.centered_angle_circle_component import CenteredAngleCircleComponent
-from visualization.plot_components.main_plot_components.ship_markings_component import ShipMarkingsComponent
-from visualization.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
-from visualization.plot_components.main_plot_components.distance_component import DistanceComponent
-from visualization.plot_components.main_plot_components.vo_cone_component import VOConeComponent
-from visualization.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.legend_component import LegendComponent
+from visualization.colreg_scenarios.colreg_animation import ColregAnimation
+from visualization.colreg_scenarios.plot_components.main_plot_components.ship_image_component import ShipImageComponent
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.prime_component import PrimeComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.centered_angle_circle_component import CenteredAngleCircleComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.ship_markings_component import ShipMarkingsComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.distance_component import DistanceComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone_component import VOConeComponent
+from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
 
 class TrajectoryReceiver():
     def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
@@ -28,16 +29,11 @@ class TrajectoryReceiver():
                 interpolator.add_path(v, [])
             self.trajectories = interpolator.interpolated_paths
 
-class ColregPlot(TrajectoryReceiver):  
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = ['Times New Roman']
-    plt.rcParams['font.size'] = 12
-    
+class ColregPlot(TrajectoryReceiver, MyPlot):  
     def __init__(self, env : USVEnvironment, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
-        super().__init__(env, trajectories)
-            
-        self.create_fig()
+        MyPlot.__init__(self)
+        TrajectoryReceiver.__init__(self, env, trajectories)
         
         self.ship_markings_component = ShipMarkingsComponent(self.ax, self.env)
         self.drawing_component = DrawingComponent(self.fig, self.ax, self.env)

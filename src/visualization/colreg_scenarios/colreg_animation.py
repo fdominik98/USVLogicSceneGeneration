@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from model.environment.usv_environment import USVEnvironment
 from model.vessel import Vessel
-from visualization.plot_components.plot_component import PlotComponent
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 TWO_HOURS = 2 * 60 * 60
 TWO_MINUTES = 2 * 60

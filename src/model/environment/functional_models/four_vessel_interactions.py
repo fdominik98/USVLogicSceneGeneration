@@ -7,26 +7,18 @@ from model.environment.usv_environment_desc import USVEnvironmentDesc
 OS = VesselDesc(id=0, l=30, b=10, min_speed= 5.0, max_speed=30)
 TS1 = VesselDesc(id=1, l=50, b=18, min_speed= 5.0, max_speed=25)
 TS2 = VesselDesc(id=2, l=20, b=10, min_speed= 5.0, max_speed=30)
+TS3 = VesselDesc(id=3, l=20, b=10, min_speed= 5.0, max_speed=30)
 
 four_vessel_interactions = [
-        USVEnvironmentDesc('overtaking_and_crossing',
-                        [OS, TS1, TS2],
-                        [ColregSituationDesc(OS, CrossingFromPort, TS1),
-                        ColregSituationDesc(TS2, Overtaking, OS)]),
-        USVEnvironmentDesc('two_way_crossing',
-                        [OS, TS1, TS2],
-                        [ColregSituationDesc(OS, CrossingFromPort, TS1),
-                        ColregSituationDesc(TS2, CrossingFromPort, OS)]),
-        USVEnvironmentDesc('crossing_and_head_on',
-                        [OS, TS1, TS2],
-                        [ColregSituationDesc(OS, HeadOn, TS1),
-                        ColregSituationDesc(TS2, CrossingFromPort, OS)]),
-        USVEnvironmentDesc('overtaking_and_head_on',
-                        [OS, TS1, TS2],
-                        [ColregSituationDesc(OS, HeadOn, TS1),
-                        ColregSituationDesc(TS2, Overtaking, OS)]),
-        USVEnvironmentDesc('two_way_overtaking',
-                        [OS, TS1, TS2],
-                        [ColregSituationDesc(OS, Overtaking, TS1),
-                        ColregSituationDesc(TS2, Overtaking, OS)])
+        USVEnvironmentDesc('four_vessel_1',
+                        [OS, TS1, TS2, TS3],
+                        [ColregSituationDesc(OS, Overtaking, TS3),
+                        ColregSituationDesc(TS1, Overtaking, OS),
+                        ColregSituationDesc(OS, Overtaking, TS2)]),
+        USVEnvironmentDesc('four_vessel_2',
+                        [OS, TS1, TS2, TS3],
+                        [ColregSituationDesc(OS, Overtaking, TS3),
+                        ColregSituationDesc(TS1, CrossingFromPort, OS),
+                        ColregSituationDesc(OS, HeadOn, TS2)]),
+       
 ]   

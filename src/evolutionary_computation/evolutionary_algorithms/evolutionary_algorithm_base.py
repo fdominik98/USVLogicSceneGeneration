@@ -12,7 +12,7 @@ from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_L
 from model.environment.usv_config import ASSET_FOLDER
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_environment_desc import USVEnvironmentDesc
-from visualization.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 
 
 class GeneticAlgorithmBase(ABC):

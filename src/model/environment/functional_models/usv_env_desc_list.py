@@ -3,6 +3,10 @@ from model.colreg_situation import CrossingFromPort, HeadOn, NoColreg, Overtakin
 from model.colreg_situation_desc import ColregSituationDesc
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.vessel import VesselDesc
+from model.environment.functional_models.three_vessel_interactions import three_vessel_interactions
+from model.environment.functional_models.four_vessel_interactions import four_vessel_interactions
+from model.environment.functional_models.five_vessel_interactions import five_vessel_interactions
+from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
 
 # Length/beam ratio (LBR) = WL/B
 # (WL = waterline length; B = maximum beam at the waterline)
@@ -187,3 +191,6 @@ USV_ENV_DESC_LIST : Dict[str, USVEnvironmentDesc] = {
                                                               ColregSituationDesc(TS1, HeadOn, OS),
                                                               ColregSituationDesc(TS6, Overtaking, OS)]),
 }
+
+for config in three_vessel_interactions + four_vessel_interactions + five_vessel_interactions + six_vessel_interactions:
+    USV_ENV_DESC_LIST[config.name] = config

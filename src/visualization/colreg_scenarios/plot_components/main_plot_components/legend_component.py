@@ -4,7 +4,7 @@ from matplotlib.legend import Legend
 import numpy as np
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import KNOT_TO_MS_CONVERSION
-from visualization.plot_components.plot_component import PlotComponent
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):
     

@@ -2,7 +2,7 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from model.environment.usv_environment import USVEnvironment
-from visualization.plot_components.plot_component import PlotComponent
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class AdditionalVOConeComponent(PlotComponent):

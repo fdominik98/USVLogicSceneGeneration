@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
 from model.vessel import Vessel, VesselDesc
-from model.colreg_situation import ColregSituation
+from model.colreg_situation import Relation
 from model.colreg_situation_desc import ColregSituationDesc
 from abc import ABC, abstractmethod
 
@@ -18,7 +18,7 @@ class InstanceInitializer(ABC):
     def get_population(self, pop_size) -> List[List[float]]:
         pass
 
-    def convert_population_to_objects(self, states: List[float]) -> Tuple[List[Vessel], set[ColregSituation]]:
+    def convert_population_to_objects(self, states: List[float]) -> Tuple[List[Vessel], set[Relation]]:
         states = OWN_VESSEL_STATES + states
         vessels: Dict[int, Vessel] = {}
         for vessel_desc in self.vessel_descs:
@@ -29,7 +29,7 @@ class InstanceInitializer(ABC):
                             states[vessel.id * VARIABLE_NUM + 3])
             vessels[vessel.id] = vessel
             
-        colreg_situations : set[ColregSituation] = set()        
+        colreg_situations : set[Relation] = set()        
         for colreg_situation_desc in self.colreg_situation_descs:
             vd1 = colreg_situation_desc.vd1
             vd2 = colreg_situation_desc.vd2
@@ -38,7 +38,7 @@ class InstanceInitializer(ABC):
         return list(vessels.values()), colreg_situations
     
     
-    def get_one_population_as_objects(self) -> Tuple[List[Vessel], set[ColregSituation]]:
+    def get_one_population_as_objects(self) -> Tuple[List[Vessel], set[Relation]]:
         return self.convert_population_to_objects(self.get_population(1)[0])
     
 class RandomInstanceInitializer(InstanceInitializer):

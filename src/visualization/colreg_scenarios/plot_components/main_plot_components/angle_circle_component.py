@@ -4,7 +4,7 @@ import numpy as np
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from model.vessel import Vessel
-from visualization.plot_components.plot_component import PlotComponent, light_colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 
 
 class AngleCircleComponent(PlotComponent):

@@ -3,7 +3,7 @@ import os
 import random
 from typing import List, Dict
 from model.environment.usv_config import ASSET_FOLDER, MAX_COORD
-from visualization.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from trajectory_planning.model.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from trajectory_planning.model.vessel_order_graph import VesselNode, VesselOrderGraph
 from trajectory_planning.model.trajectory_data import TrajectoryData

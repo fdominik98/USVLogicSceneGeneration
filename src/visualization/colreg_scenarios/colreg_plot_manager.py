@@ -6,10 +6,10 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import ASSET_FOLDER
-from visualization.colreg_plot_complex import TrajectoryMetricsPlot
-from visualization.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
-from visualization.plot_components.plot_component import light_colors
-from visualization.colreg_plot import ColregPlot
+from visualization.colreg_scenarios.trajectory_metrics_plot import TrajectoryMetricsPlot
+from visualization.colreg_scenarios.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
+from visualization.colreg_scenarios.plot_components.plot_component import light_colors
+from visualization.colreg_scenarios.colreg_plot import ColregPlot
 
 class StandaloneCheckbox:
     def __init__(self, master, artists: List[plt.Artist], color, init_checked : bool, fig : Optional[plt.Figure] = None, text = ''):
@@ -123,10 +123,10 @@ class ColregPlotManager():
         
         ## PLOT SELECTION
         self.plot_options = ["Scenario", "Metrics"]
-        self.selected_option = tk.StringVar()
-        self.selected_option.set(self.plot_options[0])  # Set the default value
+        self.selected_plot = tk.StringVar()
+        self.selected_plot.set(self.plot_options[0])  # Set the default value
         # Create the dropdown menu
-        self.plot_dropdown = tk.OptionMenu(self.toolbar_frame, self.selected_option, *self.plot_options, command=self.on_select_plot)
+        self.plot_dropdown = tk.OptionMenu(self.toolbar_frame, self.selected_plot, *self.plot_options, command=self.on_select_plot)
         self.plot_dropdown.pack(side=tk.LEFT, padx=5)
         
         self.to_pdf_button = tk.Button(self.toolbar_frame, text="PDF", command=self.to_pdf)

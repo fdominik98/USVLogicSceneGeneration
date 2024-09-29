@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 from model.environment.usv_environment import USVEnvironment
 from trajectory_planning.proximity_evaluator import ProximityMetrics
-from visualization.plot_components.plot_component import PlotComponent, colors, light_colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 
 class ProximityMetricComponent(PlotComponent, ABC):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
