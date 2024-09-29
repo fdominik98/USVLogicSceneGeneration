@@ -7,7 +7,7 @@ import numpy as np
 from model.relation_types import RelationType
 
 class Relation():
-    def __init__(self, name, vessel1 : Vessel, relations : List[RelationType | List[RelationType]], vessel2 : Vessel) -> None:
+    def __init__(self, vessel1 : Vessel, relations : List[RelationType | List[RelationType]], vessel2 : Vessel) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id}->{self.vessel2.id}'
