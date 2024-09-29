@@ -5,11 +5,11 @@ class FunctionalModel {
 abstract class Vessel {
     Vessel[0..*] overtaking
     Vessel[0..*] crossingFromPort
-    Vessel[0..*] headOn
-    Vessel[0..*] colliding
-    Vessel[0..*] inVis
-    Vessel[0..*] atVis
-    Vessel[0..*] outVis
+    Vessel[0..*] headOn opposite headOn
+    Vessel[0..*] colliding opposite colliding
+    Vessel[0..*] inVis opposite inVis
+    Vessel[0..*] atVis opposite atVis
+    Vessel[0..*] outVis opposite outVis
 }
 
 class OS extends Vessel.
@@ -40,14 +40,6 @@ error pred visibilityConstraintExclusion(Vessel v1, Vessel v2) <->
 error pred collisionWithoutColreg(Vessel v1, Vessel v2) <->
     !isInSituationWith(v1, v2) , colliding(v1, v2).
 
-error pred bidirectionalRelations(Vessel v1, Vessel v2) <->
-    colliding(v1, v2), !colliding(v2, v1);
-    headOn(v1, v2), !headOn(v2, v1);
-    inVis(v1, v2), !inVis(v2, v1);
-    atVis(v1, v2), !atVis(v2, v1);
-    outVis(v1, v2), !outVis(v2, v1).
-
-
 error pred unidirectionalRelations(Vessel v1, Vessel v2) <->
     crossingFromPort(v1, v2), crossingFromPort(v2, v1);
     overtaking(v1, v2), overtaking(v2, v1).  
@@ -65,12 +57,6 @@ error pred doubleRelation(Vessel v1, Vessel v2) <->
     headOn(v1, v2), overtaking(v2, v1);
     overtaking(v1, v2), crossingFromPort(v2, v1).
 
-
-error pred notInSituationWithOS (Vessel v1) <->
-    TS(v1), OS(v2), !isInSituationWith(v1, v2);
-    TS(v1), OS(v2), !atVis(v1, v2);
-    TS(v1), OS(v2), !colliding(v1, v2).
-
 error pred twoTSCollideInVis(Vessel v1, Vessel v2) <->
     TS(v1), TS(v2), colliding(v1, v2), inVis(v1, v2).
 
@@ -83,19 +69,32 @@ error pred noOS() <->
 error pred notOSnotTS(Vessel v) <->
     !OS(v), !TS(v); OS(v), TS(v). 
 
-    
-default !ambiguous(*).
-
-OS(OS).
-ambiguous(OS).
 
 atom COLREGSScenario.
 FunctionalModel(COLREGSScenario).
 
+OS(OS).
 TS(TS1).
 TS(TS2).
-//TS(TS3).
+TS(TS3).
+TS(TS4).
+TS(TS5).
+
+colliding(TS1, OS).
+colliding(TS2, OS).
+colliding(TS3, OS).
+colliding(TS4, OS).
+colliding(TS5, OS).
+
+atVis(TS1, OS).
+atVis(TS2, OS).
+atVis(TS3, OS).
+atVis(TS4, OS).
+atVis(TS5, OS).
+
+default !ambiguous(*).
+ambiguous(OS).
 
 
 
-scope Vessel = 3, FunctionalModel = 1.
+scope Vessel = 6, FunctionalModel = 1.
