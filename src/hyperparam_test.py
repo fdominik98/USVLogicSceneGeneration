@@ -13,7 +13,7 @@ from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm impo
 NUMBER_OF_RUNS = 1
 WARMUPS = 0
 RANDOM_SEED = 1234
-TIMEOUT = 30
+TIMEOUT = 60
 INIT_METHOD = 'uniform'
 
 population_sizes = [2, 4, 5, 8, 10, 15, 20, 30, 50, 100]
@@ -84,26 +84,26 @@ env_configs = ['overtaking_and_crossing', 'overtaking_headon_crossing', 'five_ve
 
 
 tests : List[Tuple[Any, GeneticAlgorithmBase]]= [
-    # (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
-    #                                     env_configs=env_configs,
-    #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
-    #                                     warmups = WARMUPS, verbose=False)),
-    # (create_NSGA_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
-    #                                     env_configs=env_configs,
-    #                                     test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
-    #                                     warmups = WARMUPS, verbose=False)),
+    (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
+                                        env_configs=env_configs,
+                                        test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        warmups = WARMUPS, verbose=False)),
+    (create_NSGA_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+                                        env_configs=env_configs,
+                                        test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        warmups = WARMUPS, verbose=False)),
     (create_NSGA_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
                                         test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    # (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
-    #                                     env_configs=env_configs,
-    #                                     test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
-    #                                     warmups = WARMUPS, verbose=False)),
-    # (create_DE_config, SciPyDEAlgorithm(measurement_name='parameter_optimization_2',
-    #                                     env_configs=env_configs,
-    #                                     test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
-    #                                     warmups = WARMUPS, verbose=False)),
+    (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
+                                        env_configs=env_configs,
+                                        test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        warmups = WARMUPS, verbose=False)),
+    (create_DE_config, SciPyDEAlgorithm(measurement_name='parameter_optimization_2',
+                                        env_configs=env_configs,
+                                        test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        warmups = WARMUPS, verbose=False)),
 ]
 
 

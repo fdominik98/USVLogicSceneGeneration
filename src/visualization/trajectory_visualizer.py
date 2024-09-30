@@ -16,15 +16,15 @@ class TrajectoryVisualizer():
         
     
     def set_caption(self, v_node : VesselNode, interpolator : PathInterpolator):
-        conf_colregs = ""
-        for colreg_s in v_node.colreg_situations:           
-            conf_colregs = colreg_s.name if not conf_colregs else f'{conf_colregs}, {colreg_s.name}'
+        conf_rels = ""
+        for rel in v_node.relations:           
+            conf_rels = rel.name if not conf_rels else f'{conf_rels}, {rel.name}'
         
         conf_trajs = ""
         for obs_vessel in interpolator.vessels.values():
              conf_trajs = obs_vessel.name if not conf_trajs else f'{conf_trajs}, {obs_vessel.name}'
             
-        pygame.display.set_caption(f'{conf_colregs}, Conflicting trajectories: {conf_trajs}')
+        pygame.display.set_caption(f'{conf_rels}, Conflicting trajectories: {conf_trajs}')
         
     
     def draw_obstacles(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray]):

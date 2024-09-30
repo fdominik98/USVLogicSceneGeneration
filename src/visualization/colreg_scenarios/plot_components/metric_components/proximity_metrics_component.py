@@ -40,14 +40,14 @@ class ProximityMetricComponent(PlotComponent, ABC):
     
     def do_draw(self):
         for metric in self.metrics:
-            ts_vessel = metric.colreg_s.vessel1 if metric.colreg_s.vessel1.id != 0 else metric.colreg_s.vessel2
+            ts_vessel = metric.relation.vessel1 if metric.relation.vessel1.id != 0 else metric.relation.vessel2
             threshold_y = self.get_threshold_y(metric)
             y = self.get_y_metric(metric)
             x = range(0, metric.len)
-            line, = self.ax.plot(x, y, color=colors[ts_vessel.id], linewidth=1.5, label=metric.colreg_s.name, linestyle='-')
+            line, = self.ax.plot(x, y, color=colors[ts_vessel.id], linewidth=1.5, label=metric.relation.name, linestyle='-')
             threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
-            self.line_graphs[metric.colreg_s.name] = line
-            self.threshold_graphs[metric.colreg_s.name] = threshold
+            self.line_graphs[metric.relation.name] = line
+            self.threshold_graphs[metric.relation.name] = threshold
             self.graphs += [line, threshold]
            
         self.ax.margins(x=0.2, y=0.2) 
@@ -76,7 +76,7 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return 0, dist*2
     
     def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
-        return [metric.colreg_s.safety_dist] * metric.len
+        return [metric.relation.safety_dist] * metric.len
     
 class DCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:
@@ -96,7 +96,7 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return 0, dcpa * 2
     
     def get_threshold_y(self, metric : ProximityMetrics) -> list[float]:
-        return [metric.colreg_s.safety_dist] * metric.len
+        return [metric.relation.safety_dist] * metric.len
     
 class TCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetrics]) -> None:

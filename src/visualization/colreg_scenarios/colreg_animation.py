@@ -54,8 +54,8 @@ class ColregAnimation():
             if not self.is_anim_paused:
                 for o in self.dyn_env.vessels:
                    o.update(*self.select_next_state(o))
-                for colreg_s in self.dyn_env.colreg_situations:
-                    colreg_s.update()
+                for rel in self.dyn_env.relations:
+                    rel.update()
                 self.anim_frame_counter += 1
             yield self.dyn_env
             

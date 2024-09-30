@@ -1,21 +1,20 @@
 from typing import Dict, List, Tuple
-
 import numpy as np
 from model.environment.usv_environment import USVEnvironment
 from model.vessel import Vessel
 import copy
-
-from model.colreg_situation import Relation, NoColreg
+from model.relation import Relation
+from model.relation_types import MayCollide
 
 class ProximityMetrics():
-    def __init__(self, colreg_s : Relation, closest_index : int, closest_dist : np.ndarray) -> None:
+    def __init__(self, relation : Relation, closest_index : int, closest_dist : np.ndarray) -> None:
         self.distances : List[float] = []
         self.dcpas : List[float] = [] # Distance at the Closest Point of Approach
         self.tcpas : List[float] = [] # Time to the Closest Point of Approach
         self.len = 0
         self.closest_index = closest_index
         self.closest_dist = closest_dist
-        self.colreg_s = colreg_s
+        self.relation = relation
         
     def append(self, dist, dcpa, tcpa):
         self.distances.append(dist)
@@ -38,28 +37,28 @@ class ProximityEvaluator():
         self.trajectories = trajectories
         self.metrics : List[ProximityMetrics] = []
         
-        for colreg_s in env.colreg_situations:
-            if colreg_s.vessel1.is_OS() or colreg_s.vessel2.is_OS():
-                self.metrics.append(self.calculate_pair(colreg_s))
+        for relation in env.relations:
+            if relation.vessel1.is_OS() or relation.vessel2.is_OS():
+                self.metrics.append(self.calculate_pair(relation))
         
-    def calculate_pair(self, colreg_s : Relation) -> ProximityMetrics:
-        dyn_colreg_s = copy.deepcopy(colreg_s)
-        v1 = dyn_colreg_s.vessel1
-        v2 = dyn_colreg_s.vessel2
+    def calculate_pair(self, relation : Relation) -> ProximityMetrics:
+        dyn_rel = copy.deepcopy(relation)
+        v1 = dyn_rel.vessel1
+        v2 = dyn_rel.vessel2
         
         traj1 = self.trajectories[v1.id]
         traj2 = self.trajectories[v2.id]
         closest_index, closest_pos1, closest_pos2 = self.find_closest_positions(traj1, traj2)
         
-        metrics = ProximityMetrics(colreg_s, closest_index, closest_pos1)
+        metrics = ProximityMetrics(relation, closest_index, closest_pos1)
         for s, (pos1, pos2) in enumerate(zip(traj1, traj2)):
             v1.update(*pos1)
             v2.update(*pos2)
-            dyn_colreg_s.update()
-            dist = dyn_colreg_s.o_distance
-            theta = np.pi - colreg_s.angle_v12_p12
+            dyn_rel.update()
+            dist = dyn_rel.o_distance
+            theta = np.pi - relation.angle_v12_p12
             dcpa = dist * abs(np.sin(theta))
-            tcpa = -dist * np.cos(theta) / np.linalg.norm(colreg_s.v12)
+            tcpa = -dist * np.cos(theta) / np.linalg.norm(relation.v12)
             metrics.append(dist, dcpa, tcpa)
             
         return metrics
@@ -115,8 +114,8 @@ class RiskEvaluator():
         for vessel2 in env.vessels:
             if vessel2.id == vessel1.id:
                 continue
-            colreg = NoColreg(vessel1, vessel2)
-            if colreg.get_penalties()[1][0] > 0.0:
+            rel = Relation(vessel1, [MayCollide(True)], vessel2)
+            if rel.collision_relations[0].get_penalty_norm() > 0.0:
                 return True
         return False
                         

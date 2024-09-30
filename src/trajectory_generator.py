@@ -52,15 +52,15 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     print(f'Calculation {o}:')
     expand_distance = o.speed * 60 # 1 minute precision
     
-    if len(v_node.colreg_situations) == 0:
+    if len(v_node.relations) == 0:
         return [], 0, expand_distance
     
     obstacle_list : List[Obstacle] = []
     collision_points : List[np.ndarray] = []    
     
-    for colreg_s in v_node.colreg_situations:
-        print(f'Collision points for static colreg {colreg_s}')
-        colreg_collision_points = colreg_s.get_collision_points()
+    for rel in v_node.relations:
+        print(f'Collision points for static colreg {rel}')
+        colreg_collision_points = rel.get_collision_points()
         collision_points += colreg_collision_points
     #colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
    
@@ -129,7 +129,7 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
 
 interpolator = PathInterpolator()
 
-ordered_vessels = VesselOrderGraph(env.colreg_situations).sort()
+ordered_vessels = VesselOrderGraph(env.relations).sort()
         
 # give_way_vessels_precedence = sorted(
 #     list(give_way_vessels.values()),

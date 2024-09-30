@@ -4,7 +4,7 @@ class FunctionalModel {
 
 abstract class Vessel {
     Vessel[0..*] overtaking
-    Vessel[0..*] crossingFromPort
+    Vessel[0..*] crossing
     Vessel[0..*] headOn opposite headOn
     Vessel[0..*] colliding opposite colliding
     Vessel[0..*] inVis opposite inVis
@@ -18,17 +18,17 @@ class TS extends Vessel.
                       
 
 pred giveWay(Vessel v1) <-> overtaking(v1, v2), colliding(v1, v2);
-                            crossingFromPort(v1, v2), colliding(v1, v2);
+                            crossing(v1, v2), colliding(v1, v2);
                             headOn(v2, v1), colliding(v1, v2).
 
 pred standOn(Vessel v1) <->
-    overtaking(v2, v1), colliding(v1, v2); crossingFromPort(v2, v1), colliding(v1, v2).
+    overtaking(v2, v1), colliding(v1, v2); crossing(v2, v1), colliding(v1, v2).
 
 pred ambiguous(Vessel v) <->
     giveWay(v), standOn(v).
 
 pred isInSituationWith(Vessel v1, Vessel v2) <->
-    headOn(v2, v1) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
+    headOn(v2, v1) ; crossing(v1, v2) ; crossing(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
 
 error pred noVisibility(Vessel v1, Vessel v2) <->
     !inVis(v1,v2), !atVis(v1,v2), !outVis(v1,v2), v1 != v2.
@@ -41,21 +41,21 @@ error pred collisionWithoutColreg(Vessel v1, Vessel v2) <->
     !isInSituationWith(v1, v2) , colliding(v1, v2).
 
 error pred unidirectionalRelations(Vessel v1, Vessel v2) <->
-    crossingFromPort(v1, v2), crossingFromPort(v2, v1);
+    crossing(v1, v2), crossing(v2, v1);
     overtaking(v1, v2), overtaking(v2, v1).  
 
 error pred selfRelation(Vessel v) <->
-    overtaking(v, v); crossingFromPort(v, v); headOn(v, v); colliding(v, v); inVis(v, v); atVis(v, v); outVis(v, v).
+    overtaking(v, v); crossing(v, v); headOn(v, v); colliding(v, v); inVis(v, v); atVis(v, v); outVis(v, v).
 
 
 error pred doubleRelation(Vessel v1, Vessel v2) <->
-    headOn(v1, v2), crossingFromPort(v1, v2);
+    headOn(v1, v2), crossing(v1, v2);
     headOn(v1, v2), overtaking(v1, v2);
-    overtaking(v1, v2), crossingFromPort(v1, v2);
+    overtaking(v1, v2), crossing(v1, v2);
 
-    headOn(v1, v2), crossingFromPort(v2, v1);
+    headOn(v1, v2), crossing(v2, v1);
     headOn(v1, v2), overtaking(v2, v1);
-    overtaking(v1, v2), crossingFromPort(v2, v1).
+    overtaking(v1, v2), crossing(v2, v1).
 
 error pred twoTSCollideInVis(Vessel v1, Vessel v2) <->
     TS(v1), TS(v2), colliding(v1, v2), inVis(v1, v2).
@@ -78,23 +78,21 @@ TS(TS1).
 TS(TS2).
 TS(TS3).
 TS(TS4).
-TS(TS5).
 
 colliding(TS1, OS).
 colliding(TS2, OS).
 colliding(TS3, OS).
 colliding(TS4, OS).
-colliding(TS5, OS).
 
 atVis(TS1, OS).
 atVis(TS2, OS).
 atVis(TS3, OS).
 atVis(TS4, OS).
-atVis(TS5, OS).
 
 default !ambiguous(*).
+default !outVis(_, *).
 ambiguous(OS).
 
 
 
-scope Vessel = 6, FunctionalModel = 1.
+scope Vessel = 5, FunctionalModel = 1.

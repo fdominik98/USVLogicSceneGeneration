@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 import os
 
@@ -34,25 +33,6 @@ VARIABLE_NUM = 4
 
 OWN_VESSEL_STATES = [MAX_COORD / 2, MAX_COORD / 2, np.pi/2]
 
-    
-def interval_distance(value : float, boundaries: Tuple[float, float], is_angle=True) -> Tuple[float, float]:
-    minimum, maximum = boundaries[0], boundaries[1] 
-    if value < minimum:
-        distance =  minimum - value
-    elif value > maximum:
-        distance = value - maximum
-    else:
-        return 0.0, 0.0
-    return distance, normed_distance(distance, boundaries, is_angle)
-    
-def strict_interval_distance(value : float, goal : float, is_angle=True) -> Tuple[float, float]:
-    distance = abs(goal - value)
-    return distance, normed_distance(distance, (goal, goal), is_angle)
-
-def normed_distance(distance, boundaries, is_angle) -> float:
-    return distance / (boundaries[0] + (np.pi if is_angle else MAX_DISTANCE) - boundaries[1])
-    
-    
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
         if o2_length < 12:
@@ -73,22 +53,6 @@ def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
         else:
             return 6
         
-def heading(v):
-    # Calculate the angle in radians
-    return np.arctan2(v[1], v[0])
-
-def vector_angle_diff(v, angle):
-    return angle_angle_diff(heading(v), angle)
-
-def angle_angle_diff(angle1, angle2):
-    delta_theta = angle2 - angle1
-    
-    # Normalize the difference to the range [-pi, pi]
-    delta_theta = (delta_theta + np.pi) % (2 * np.pi) - np.pi
-    
-    # Return the absolute value of the difference
-    return abs(delta_theta)
-
 
 # FOR FUTURE WORK
 # Table 1: Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.

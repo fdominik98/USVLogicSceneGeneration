@@ -1,12 +1,12 @@
 from typing import Dict
-from model.colreg_situation import CrossingFromPort, HeadOn, NoColreg, Overtaking
-from model.colreg_situation_desc import ColregSituationDesc
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.vessel import VesselDesc
 from model.environment.functional_models.three_vessel_interactions import three_vessel_interactions
 from model.environment.functional_models.four_vessel_interactions import four_vessel_interactions
 from model.environment.functional_models.five_vessel_interactions import five_vessel_interactions
 from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
+from model.relation import RelationDesc
+from model.relation_types import crossing_init, head_on_init, overtaking_init
 
 # Length/beam ratio (LBR) = WL/B
 # (WL = waterline length; B = maximum beam at the waterline)
@@ -69,127 +69,124 @@ TS1_BIG = VesselDesc(id=1, l=1000, b=30, min_speed= 3000, max_speed=5000)
 TS2_BIG = VesselDesc(id=2, l=1000, b=30, min_speed= 3000, max_speed=5000)
 
 USV_ENV_DESC_LIST : Dict[str, USVEnvironmentDesc] = {
-    'single' : USVEnvironmentDesc('single',
-                                       [OS],
-                                       []),
+    'single' : USVEnvironmentDesc('single', [OS], []),    
     
     'crossing' : USVEnvironmentDesc('crossing',
                                        [OS, TS1],
-                                       [ColregSituationDesc(OS, CrossingFromPort, TS1)]),
+                                       [RelationDesc(OS, [crossing_init()], TS1)]),
     
     'crossing_big' : USVEnvironmentDesc('crossing_big',
                                        [OS_BIG, TS1_BIG],
-                                       [ColregSituationDesc(OS_BIG, CrossingFromPort, TS1_BIG)]),
+                                       [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG)]),
     
     'nocolreg' : USVEnvironmentDesc('nocolreg',
-                                       [OS_BIG, TS1_BIG],
-                                       [ColregSituationDesc(OS_BIG, NoColreg, TS1_BIG)]),
+                                       [OS_BIG, TS1_BIG], []),
     
-    'headon' : USVEnvironmentDesc('headon',
+    '[HEAD_ON_INIT]' : USVEnvironmentDesc('[HEAD_ON_INIT]',
                                        [OS, TS1],
-                                       [ColregSituationDesc(OS, HeadOn, TS1)]),
+                                       [RelationDesc(OS, [head_on_init()], TS1)]),
     
-    'headon_big' : USVEnvironmentDesc('headon_big',
+    '[HEAD_ON_INIT]_big' : USVEnvironmentDesc('[HEAD_ON_INIT]_big',
                                        [OS_BIG, TS1_BIG],
-                                       [ColregSituationDesc(OS_BIG, HeadOn, TS1_BIG)]),
+                                       [RelationDesc(OS_BIG, [head_on_init()], TS1_BIG)]),
     
     'overtaking' : USVEnvironmentDesc('overtaking',
                                        [OS, TS1],
-                                       [ColregSituationDesc(OS, Overtaking, TS1)]),
+                                       [RelationDesc(OS, [overtaking_init()], TS1)]),
     
     'overtaking_big' : USVEnvironmentDesc('overtaking_big',
                                        [OS_BIG, TS1_BIG],
-                                       [ColregSituationDesc(OS_BIG, Overtaking, TS1_BIG)]),
+                                       [RelationDesc(OS_BIG, [overtaking_init()], TS1_BIG)]),
     
     'overtaking_and_crossing' : USVEnvironmentDesc('overtaking_and_crossing',
                                                      [OS, TS1, TS2],
-                                                     [ColregSituationDesc(OS, CrossingFromPort, TS1),
-                                                      ColregSituationDesc(TS2, Overtaking, OS)]),
+                                                     [RelationDesc(OS, [crossing_init()], TS1),
+                                                      RelationDesc(TS2, [overtaking_init()], OS)]),
     
     'two_way_crossing' : USVEnvironmentDesc('two_way_crossing',
                                               [OS, TS1, TS2],
-                                              [ColregSituationDesc(OS, CrossingFromPort, TS1),
-                                               ColregSituationDesc(TS2, CrossingFromPort, OS)]),
+                                              [RelationDesc(OS, [crossing_init()], TS1),
+                                               RelationDesc(TS2, [crossing_init()], OS)]),
     
     'crossing_and_head_on' : USVEnvironmentDesc('crossing_and_head_on',
                                                   [OS, TS1, TS2],
-                                                  [ColregSituationDesc(OS, HeadOn, TS1),
-                                                   ColregSituationDesc(TS2, CrossingFromPort, OS)]),
+                                                  [RelationDesc(OS, [head_on_init()], TS1),
+                                                   RelationDesc(TS2, [crossing_init()], OS)]),
 
     'overtaking_and_head_on' : USVEnvironmentDesc('overtaking_and_head_on',
                                                     [OS, TS1, TS2],
-                                                    [ColregSituationDesc(OS, HeadOn, TS1),
-                                                     ColregSituationDesc(TS2, Overtaking, OS)]),
+                                                    [RelationDesc(OS, [head_on_init()], TS1),
+                                                     RelationDesc(TS2, [overtaking_init()], OS)]),
     
     'two_way_overtaking' : USVEnvironmentDesc('two_way_overtaking',
                                                 [OS, TS1, TS2],
-                                                [ColregSituationDesc(OS, Overtaking, TS1),
-                                                 ColregSituationDesc(TS2, Overtaking, OS)]),
+                                                [RelationDesc(OS, [overtaking_init()], TS1),
+                                                 RelationDesc(TS2, [overtaking_init()], OS)]),
     
     'ego_crossing_and_overtaking' : USVEnvironmentDesc('ego_crossing_and_overtaking',
                                                 [OS_BIG, TS1_BIG, TS2_BIG],
-                                                [ColregSituationDesc(OS_BIG, CrossingFromPort, TS1_BIG),
-                                                 ColregSituationDesc(OS_BIG, Overtaking, TS2_BIG)]),
+                                                [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG),
+                                                 RelationDesc(OS_BIG, [overtaking_init()], TS2_BIG)]),
     
     'two_way_overtaking_and_crossing' : USVEnvironmentDesc('two_way_overtaking_and_crossing',
                                                              [OS,TS1, TS2, TS3],
-                                                             [ColregSituationDesc(OS, Overtaking, TS1),
-                                                              ColregSituationDesc(TS2, Overtaking, OS),
-                                                              ColregSituationDesc(TS3, CrossingFromPort, OS)]),
+                                                             [RelationDesc(OS, [overtaking_init()], TS1),
+                                                              RelationDesc(TS2, [overtaking_init()], OS),
+                                                              RelationDesc(TS3, [crossing_init()], OS)]),
     
-    'overtaking_headon_crossing' : USVEnvironmentDesc('overtaking_headon_crossing',
+    'overtaking_headon_crossing' : USVEnvironmentDesc('overtaking_[HEAD_ON_INIT]_crossing',
                                                              [OS, TS1, TS2, TS3],
-                                                             [ColregSituationDesc(TS3, HeadOn, OS),
-                                                              ColregSituationDesc(OS, CrossingFromPort, TS2),
-                                                              ColregSituationDesc(TS1, Overtaking, OS)]),
+                                                             [RelationDesc(TS3, [head_on_init()], OS),
+                                                              RelationDesc(OS, [crossing_init()], TS2),
+                                                              RelationDesc(TS1, [overtaking_init()], OS)]),
     
     'five_vessel_colreg_scenario' : USVEnvironmentDesc('five_vessel_colreg_scenario',
                                                             [OS, TS1, TS2, TS3, TS4],
-                                                            [ColregSituationDesc(OS, Overtaking, TS3),
-                                                            ColregSituationDesc(TS1, CrossingFromPort, OS),
-                                                            ColregSituationDesc(TS4, HeadOn, OS),
-                                                            ColregSituationDesc(TS2, CrossingFromPort, OS)]),
+                                                            [RelationDesc(OS, [overtaking_init()], TS3),
+                                                            RelationDesc(TS1, [crossing_init()], OS),
+                                                            RelationDesc(TS4, [head_on_init()], OS),
+                                                            RelationDesc(TS2, [crossing_init()], OS)]),
     
     'five_vessel_colreg_scenario_non_ambigious' : USVEnvironmentDesc('five_vessel_colreg_scenario_non_ambigious',
                                                             [OS, TS1, TS2, TS3, TS4],
-                                                            [ColregSituationDesc(OS, HeadOn, TS4),
-                                                            ColregSituationDesc(OS, CrossingFromPort, TS2),
-                                                            ColregSituationDesc(TS1, HeadOn, OS),
-                                                            ColregSituationDesc(TS3, HeadOn, OS)]),
+                                                            [RelationDesc(OS, [head_on_init()], TS4),
+                                                            RelationDesc(OS, [crossing_init()], TS2),
+                                                            RelationDesc(TS1, [head_on_init()], OS),
+                                                            RelationDesc(TS3, [head_on_init()], OS)]),
     
     'six_vessel_colreg_scenario' : USVEnvironmentDesc('six_vessel_colreg_scenario',
                                                              [OS, TS1, TS2, TS3, TS4, TS5],
-                                                              [ColregSituationDesc(TS1, CrossingFromPort, OS),
-                                                              ColregSituationDesc(OS, HeadOn, TS2),
-                                                              ColregSituationDesc(TS3, HeadOn, OS),
-                                                              ColregSituationDesc(OS, HeadOn, TS5),
-                                                              ColregSituationDesc(OS, Overtaking, TS4)]),
+                                                              [RelationDesc(TS1, [crossing_init()], OS),
+                                                              RelationDesc(OS, [head_on_init()], TS2),
+                                                              RelationDesc(TS3, [head_on_init()], OS),
+                                                              RelationDesc(OS, [head_on_init()], TS5),
+                                                              RelationDesc(OS, [overtaking_init()], TS4)]),
     
     'six_vessel_colreg_scenario2' : USVEnvironmentDesc('six_vessel_colreg_scenario',
                                                              [OS, TS1, TS2, TS3, TS4, TS5],
-                                                              [ColregSituationDesc(OS, Overtaking, TS1),
-                                                              ColregSituationDesc(OS, HeadOn, TS2),
-                                                              ColregSituationDesc(TS3, CrossingFromPort, OS),
-                                                              ColregSituationDesc(OS, CrossingFromPort, TS5),
-                                                              ColregSituationDesc(TS4, HeadOn, OS)]),
+                                                              [RelationDesc(OS, [overtaking_init()], TS1),
+                                                              RelationDesc(OS, [head_on_init()], TS2),
+                                                              RelationDesc(TS3, [crossing_init()], OS),
+                                                              RelationDesc(OS, [crossing_init()], TS5),
+                                                              RelationDesc(TS4, [head_on_init()], OS)]),
     
     'seven_vessel_colreg_scenario' : USVEnvironmentDesc('seven_vessel_colreg_scenario',
                                                              [OS, TS1, TS2, TS3, TS4, TS5, TS6],
-                                                              [ColregSituationDesc(TS1, CrossingFromPort, OS),
-                                                              ColregSituationDesc(OS, HeadOn, TS2),
-                                                              ColregSituationDesc(TS3, Overtaking, OS),
-                                                              ColregSituationDesc(OS, Overtaking, TS6),
-                                                              ColregSituationDesc(TS4, Overtaking, OS),
-                                                              ColregSituationDesc(OS, HeadOn, TS5)]),
+                                                              [RelationDesc(TS1, [crossing_init()], OS),
+                                                              RelationDesc(OS, [head_on_init()], TS2),
+                                                              RelationDesc(TS3, [overtaking_init()], OS),
+                                                              RelationDesc(OS, [overtaking_init()], TS6),
+                                                              RelationDesc(TS4, [overtaking_init()], OS),
+                                                              RelationDesc(OS, [head_on_init()], TS5)]),
     
     'seven_vessel_colreg_scenario2' : USVEnvironmentDesc('seven_vessel_colreg_scenario2',
                                                              [OS, TS1, TS2, TS3, TS4, TS5, TS6],
-                                                              [ColregSituationDesc(TS3, Overtaking, OS),
-                                                              ColregSituationDesc(TS5, HeadOn, OS),
-                                                              ColregSituationDesc(TS2, CrossingFromPort, OS),
-                                                              ColregSituationDesc(TS4, CrossingFromPort, OS),
-                                                              ColregSituationDesc(TS1, HeadOn, OS),
-                                                              ColregSituationDesc(TS6, Overtaking, OS)]),
+                                                              [RelationDesc(TS3, [overtaking_init()], OS),
+                                                              RelationDesc(TS5, [head_on_init()], OS),
+                                                              RelationDesc(TS2, [crossing_init()], OS),
+                                                              RelationDesc(TS4, [crossing_init()], OS),
+                                                              RelationDesc(TS1, [head_on_init()], OS),
+                                                              RelationDesc(TS6, [overtaking_init()], OS)]),
 }
 
 for config in three_vessel_interactions + four_vessel_interactions + five_vessel_interactions + six_vessel_interactions:

@@ -41,6 +41,8 @@ class EvalTimePlot(MyPlot):
             
             for element in ['whiskers', 'caps', 'medians']:
                 for comp in boxplot[element]:
+                    if element == 'medians':
+                        comp.set_color('red')
                     comp.set_linewidth(1.5)
             
             axi.set_ylim(0, 60)

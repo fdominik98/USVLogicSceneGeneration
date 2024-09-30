@@ -2,8 +2,7 @@ from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import *
-from model.colreg_situation import NoColreg
-from evolutionary_computation.aggregates import VesselAggregate
+from evolutionary_computation.aggregates import AggregateAll
 from visualization.my_plot import MyPlot
 from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
@@ -80,17 +79,12 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         for component in self.components:
             component.draw()
         
-        self.title = ''
-        columns = 0
-        for colreg_s in self.env.colreg_situations:
-            if not isinstance(colreg_s, NoColreg): 
-                line_break = '\n' if (columns + 1) % 3 == 0 else ' '
-                self.title = colreg_s.name if not self.title else f'{self.title},{line_break}{colreg_s.name}'
-                columns += 1
-            colreg_s.info() 
+        self.title = '\n'.join([rel.name for rel in self.env.relations if rel.has_os()])
+        for rel in self.env.relations:
+            rel.info() 
             
-        vessel_aggr = VesselAggregate(env=self.env, minimize=True)
-        print(f'Loose penalty: {vessel_aggr.loose_evaluate()}, strict penalty: {vessel_aggr.strict_evaluate()}')                      
+        aggregate = AggregateAll(env=self.env, minimize=True)
+        print(f'Penalty: {aggregate.loose_evaluate()}')                      
                         
         self.set_layout()    
         
@@ -99,13 +93,15 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         #self.fig.tight_layout(pad=10)
         self.ax.grid(False)
        
-        self.ax.set_title(f'USV situation ({self.title})')
+        self.ax.set_title(f'USV situation\n{self.title}')
         self.ax.set_xlabel('X Position (m)')
         self.ax.set_ylabel('Y Position (m)')
         self.ax.set_aspect('equal', adjustable='box')      
         
         # Recalculate the limits based on the current data     
         self.ax.relim()
+        
+        self.fig.tight_layout()
         # Automatically adjust xlim and ylim
         #self.ax.autoscale_view()
         # # Get current x and y limits

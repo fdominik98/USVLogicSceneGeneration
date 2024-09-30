@@ -133,7 +133,7 @@ class ColregPlotManager():
         self.to_pdf_button.pack(side=tk.LEFT, padx=5)
         
         ## HIDE BUTTON
-        self.hide_button = tk.Button(self.toolbar_frame, text="Show control", command=self.hide_control)
+        self.hide_button = tk.Button(self.toolbar_frame, text="Hide control", command=self.hide_control)
         self.hide_button.pack(side=tk.LEFT, padx=5)
         
         ## EXIT BUTTONS
@@ -151,7 +151,7 @@ class ColregPlotManager():
         self.root.wait_window()
         
     def add_control(self):
-                ### TIME CONTROL
+        ### TIME CONTROL
         self.time_control_frame = tk.Frame(self.control_frame, background='white')
         self.time_control_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.time_label = tk.Label(master=self.time_control_frame,
@@ -207,23 +207,23 @@ class ColregPlotManager():
         self.create_actor_checkbox_row(self.colreg_plot.centered_angle_circle_component.graphs_by_vessel, 'C', False)
         
         ### COLREG CONTROL
-        self.colreg_control_frame = tk.Frame(self.control_frame)
-        self.colreg_control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
+        self.rel_control_frame = tk.Frame(self.control_frame)
+        self.rel_control_frame.pack(side=tk.TOP, fill=tk.NONE, pady=(10, 0), expand=True)
         
         #### CORLEG CHECKBOXES
-        self.colreg_control_columns : List[tk.Frame] = []
+        self.rel_control_columns : List[tk.Frame] = []
         col=self.create_colreg_control_col('grey')
-        colregs_label = tk.Label(master=col, text='Component', background='grey')
-        colregs_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        self.colregs_sorted = sorted(self.env.colreg_situations, key=lambda colreg_s: colreg_s.name)
-        for colreg_s in self.colregs_sorted:
-            col = self.create_colreg_control_col(light_colors[colreg_s.vessel2.id])
-            colregs_label = tk.Label(master=col, text=colreg_s.short_name, background=light_colors[colreg_s.vessel2.id])
-            colregs_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
+        rel_label = tk.Label(master=col, text='Component', background='grey')
+        rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
+        self.rels_sorted = sorted(self.env.relations, key=lambda rel: rel.name)
+        for rel in self.rels_sorted:
+            col = self.create_colreg_control_col(light_colors[rel.vessel2.id])
+            rel_label = tk.Label(master=col, text=rel.short_name, background=light_colors[rel.vessel2.id])
+            rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
-        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.distance_component.graphs_by_colregs), 'Dist', True)
-        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.vo_cone_component.graphs_by_colregs), 'VO cone', False)
-        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.add_vo_cone_component.graphs_by_colregs), 'VO calc', False)
+        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.distance_component.graphs_by_rels), 'Dist', True)
+        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.vo_cone_component.graphs_by_rels), 'VO cone', False)
+        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.add_vo_cone_component.graphs_by_rels), 'VO calc', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p12_vec_graphs]), 'P12', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p21_vec_graphs]), 'P21', False)
         
@@ -240,14 +240,14 @@ class ColregPlotManager():
             
     def create_colreg_checkbox_row(self, plot_components: List[List[plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
-            if len(self.colreg_control_columns) != len(pc) + 1:
+            if len(self.rel_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
-        cb_array = CheckboxArray(self.colreg_control_columns[0], text, self.colreg_plot.fig)
-        colreg_columns = self.colreg_control_columns[1:]
-        for i, colreg_s in enumerate(self.colregs_sorted):
+        cb_array = CheckboxArray(self.rel_control_columns[0], text, self.colreg_plot.fig)
+        colreg_columns = self.rel_control_columns[1:]
+        for i, rel in enumerate(self.rels_sorted):
             Checkbox(colreg_columns[i], [cp[i] for cp in plot_components], cb_array,
-                     light_colors[colreg_s.vessel1.id], init_checked)
+                     light_colors[rel.vessel1.id], init_checked)
         
     def create_actor_control_col(self, color):
         col = tk.Frame(self.actor_control_frame, background=color)
@@ -262,9 +262,9 @@ class ColregPlotManager():
         return col
     
     def create_colreg_control_col(self, color):
-        col = tk.Frame(self.colreg_control_frame, background=color)
+        col = tk.Frame(self.rel_control_frame, background=color)
         col.pack(side=tk.LEFT, fill=tk.NONE, expand=True)
-        self.colreg_control_columns.append(col)
+        self.rel_control_columns.append(col)
         return col
     
     def create_slider(self, label, min_val, max_val, init_val, step_value, command):

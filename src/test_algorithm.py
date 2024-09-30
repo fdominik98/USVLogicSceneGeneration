@@ -14,12 +14,12 @@ de_config = EvaluationData(population_size = 10, mutate_prob = 0.8, crossover_pr
 test_config_PSO = EvaluationData(population_size = 10, c_1=1.5, c_2=1.7, w=0.5,
                           timeout=10, init_method='uniform', random_seed=1234)
 
-# alg = SciPyDEAlgorithm(measurement_name='test_de', env_configs=['two_way_overtaking_and_crossing'], test_config=test_config_DE, number_of_runs=1, warmups=0, verbose=True)
+alg = SciPyDEAlgorithm(measurement_name='test_de', env_configs=['two_way_overtaking_and_crossing'], test_config=de_config, number_of_runs=1, warmups=0, verbose=True)
 
 #alg = PySwarmPSOAlgorithm(measurement_name='test_pso', env_configs=['two_way_overtaking'], test_config=test_config_PSO, number_of_runs=1, warmups=0, verbose=True)
 
-alg = SciPyDEAlgorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=de_config,
-                        number_of_runs=1, warmups=0, verbose=True)
+#alg = SciPyDEAlgorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=de_config,
+#                        number_of_runs=1, warmups=0, verbose=True)
 
 results = alg.run()
 

@@ -25,7 +25,8 @@ class EvaluationData:
                  c_1: Optional[float] = None,  # cognitive coefficient
                  c_2: Optional[float] = None,  # social coefficient
                  w: Optional[float] = None,    # inertia weight
-                 best_fitness_index: Optional[float] = None):  # Add best_fitness_index
+                 best_fitness_index: Optional[float] = None,  # Add best_fitness_index
+                 aggregate_strat: Optional[str] = None):  # New attribute for aggregation strategy
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -49,6 +50,7 @@ class EvaluationData:
         self.c_2 = c_2  # Initialize c_2 parameter
         self.w = w      # Initialize w parameter
         self.best_fitness_index = best_fitness_index  # Initialize best_fitness_index
+        self.aggregate_strat = aggregate_strat  # Initialize new aggregate_strat parameter
 
     def to_dict(self):
         return {
@@ -74,7 +76,8 @@ class EvaluationData:
             "c_1": self.c_1,  # Include c_1 in the dictionary
             "c_2": self.c_2,  # Include c_2 in the dictionary
             "w": self.w,      # Include w in the dictionary
-            "best_fitness_index": self.best_fitness_index  # Include best_fitness_index in the dictionary
+            "best_fitness_index": self.best_fitness_index,  # Include best_fitness_index in the dictionary
+            "aggregate_strat": self.aggregate_strat  # Include aggregate_strat in the dictionary
         }
 
     def save_to_json(self, file_path: str):
@@ -106,7 +109,8 @@ class EvaluationData:
             c_1=data.get("c_1"),  # Extract c_1 from the dictionary
             c_2=data.get("c_2"),  # Extract c_2 from the dictionary
             w=data.get("w"),      # Extract w from the dictionary
-            best_fitness_index=data.get("best_fitness_index")  # Extract best_fitness_index from the dictionary
+            best_fitness_index=data.get("best_fitness_index"),  # Extract best_fitness_index from the dictionary
+            aggregate_strat=data.get("aggregate_strat")  # Extract aggregate_strat from the dictionary
         )
         
     @classmethod
