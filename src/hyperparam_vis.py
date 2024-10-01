@@ -13,7 +13,7 @@ from evolutionary_computation.evaluation_data import EvaluationData
 dp = EvalDataParser()
 eval_datas = dp.load_dirs_merged_as_models()
 # Assuming the objects have these attributes: measurement_name, algorithm_desc, config_name, best_fitness
-organized_dict : Dict[str, Dict[str, Dict[str, List[EvaluationData]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(List[EvaluationData])))
+organized_dict : Dict[str, Dict[str, Dict[str, List[EvaluationData]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 # Populate the nested dictionary
 for eval_data in eval_datas:
     organized_dict[eval_data.measurement_name][eval_data.algorithm_desc][eval_data.config_name].append(eval_data)
@@ -22,7 +22,7 @@ for eval_data in eval_datas:
 for measurement_name, alg_dict in organized_dict.items():
     for algorithm_desc, config_dict in alg_dict.items():
         for config_name, obj_list in config_dict.items():
-            config_dict[config_name] = sorted(obj_list, key=lambda o: o.best_fitness_index)[0]
+            config_dict[config_name] = sorted(obj_list, key=lambda o: o.best_fitness_index)[:1]
 
 pprint(organized_dict)
 

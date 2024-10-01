@@ -19,18 +19,29 @@ def vessel_number_mapper(names : List[str]):
 def algo_mapper(names : List[str]):
     labels : List[str] = []
     for name in names:
+        label = ''
         if 'nsga2' in name.lower():
-            labels.append('NSGA2') 
+            label = 'NSGA2'
         elif 'nsga3' in name.lower():
-            labels.append('NSGA3')
+            label = 'NSGA3'
         elif 'ga' in name.lower():
-            labels.append('GA')
+            label = 'GA'
         elif 'de' in name.lower():
-            labels.append('DE')
+            label = 'DE'
         elif 'pso' in name.lower():
-            labels.append('PSO')
+            label = 'PSO'
         else:
             raise Exception('Unknown measurement name')
+        aggregate = ''
+        if 'all' in name.lower():
+            aggregate = 'A'
+        elif 'vessel' in name.lower():
+            aggregate = 'V'
+        elif 'category' in name.lower():
+            aggregate = 'C'
+        else:
+            raise Exception('Unknown measurement name')
+        labels.append(label + '_' + aggregate)
     return labels
 
 full_blue_spectrum_shades = [(i / 4, 0.5, 1 - i / 4) for i in range(5)]

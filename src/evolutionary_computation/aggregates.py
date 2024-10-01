@@ -26,11 +26,24 @@ class Aggregate(ABC):
          if penalty <= 0:
             return 0
          return self.sign * penalty
+     
+    @staticmethod
+    def factory(env : USVEnvironment, name : str, minimize = False):
+        if name == 'vessel':
+            return VesselAggregate(env, minimize=minimize, name='vessel')      
+        elif name == 'all':
+            return AggregateAll(env, minimize=minimize, name='all')     
+        elif name == 'all_swarm':
+            return AggregateAllSwarm(env, minimize=minimize, name='all_swarm')      
+        elif name == 'category':
+            return CategoryAggregate(env, minimize=minimize, name='category')         
+        else:
+            raise Exception('Unknown aggregate')
 
         
 class VesselAggregate(Aggregate):
-    def __init__(self, env : USVEnvironment, minimize=False) -> None:
-        super().__init__(env, 'vessel', minimize)
+    def __init__(self, env : USVEnvironment, minimize=False, name = 'vessel') -> None:
+        super().__init__(env, name, minimize)
         
     def _get_object_num(self):
         return int(self.env.config.actor_num)
@@ -52,8 +65,8 @@ class VesselAggregate(Aggregate):
     
     
 class AggregateAll(Aggregate):
-    def __init__(self, env : USVEnvironment, minimize=False) -> None:
-        super().__init__(env, 'all', minimize)
+    def __init__(self, env : USVEnvironment, minimize=False, name = 'all') -> None:
+        super().__init__(env, name, minimize)
         
     def _get_object_num(self) -> int:
         return 1
@@ -72,8 +85,8 @@ class AggregateAll(Aggregate):
         
     
 class AggregateAllSwarm(AggregateAll):
-    def __init__(self, env : USVEnvironment, minimize=False) -> None:
-        super().__init__(env, minimize)
+    def __init__(self, env : USVEnvironment, minimize=False, name = 'all_swarm') -> None:
+        super().__init__(env, minimize, name)
         
     def evaluate(self, individual : np.ndarray):
         fitnesses : List[float] = []
@@ -84,8 +97,8 @@ class AggregateAllSwarm(AggregateAll):
     
     
 class CategoryAggregate(Aggregate):
-    def __init__(self, env : USVEnvironment, minimize=False) -> None:
-        super().__init__(env, 'category', minimize)
+    def __init__(self, env : USVEnvironment, minimize=False, name = 'category') -> None:
+        super().__init__(env, name, minimize)
         
     def _get_object_num(self):
         return 3

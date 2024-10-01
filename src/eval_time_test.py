@@ -11,80 +11,64 @@ from model.environment.functional_models.five_vessel_interactions import five_ve
 from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
-NUMBER_OF_RUNS = 2
-WARMUPS = 0
+NUMBER_OF_RUNS = 1
+WARMUPS = 1
 RANDOM_SEED = 1234
-TIMEOUT = 20
+TIMEOUT = 1
 INIT_METHOD = 'uniform'
+VERBOSE = False
+measurement_names = ['test_3_vessel_scenarios_lhs', 'test_4_vessel_scenarios_lhs', 'test_5_vessel_scenarios_lhs', 'test_6_vessel_scenarios_lhs']
+measurement_names = ['test_3_vessel_scenarios_nsga', 'test_4_vessel_scenarios_nsga', 'test_5_vessel_scenarios_nsga', 'test_6_vessel_scenarios_nsga']
+measurement_names = ['test_3_vessel_scenarios', 'test_4_vessel_scenarios', 'test_5_vessel_scenarios', 'test_6_vessel_scenarios']
 
-ga_config = EvaluationData(population_size = 4, num_parents_mating = 2,
-                        mutate_eta = 15, mutate_prob = 0.2, crossover_eta=10,
-                        crossover_prob=1.0, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED)
-
-nsga2_config = EvaluationData(population_size = 10, mutate_eta = 10, mutate_prob = 0.5,
-                            crossover_eta=20, crossover_prob=0.5, timeout=TIMEOUT,
-                            init_method=INIT_METHOD, random_seed=RANDOM_SEED)
-
-nsga3_config = EvaluationData(population_size = 30, mutate_eta = 15, mutate_prob = 0.8,
-                            crossover_eta=15, crossover_prob=1, timeout=TIMEOUT,
-                            init_method=INIT_METHOD, random_seed=RANDOM_SEED)
-
-pso_config = EvaluationData(population_size = 50, c_1=2.0, c_2=2.0, w=0.4, timeout=TIMEOUT,
-                          init_method=INIT_METHOD, random_seed=RANDOM_SEED)
-
-de_config = EvaluationData(population_size = 10, mutate_prob = 0.8, crossover_prob=0.5,
-                          timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED)
+interactions = [three_vessel_interactions, four_vessel_interactions, five_vessel_interactions, six_vessel_interactions]
 
 
-tests : List[GeneticAlgorithmBase] = [
-    # PyGadGAAlgorithm(measurement_name='test_3_vessel_scenarios', env_configs=three_vessel_interactions, test_config=ga_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA2Algorithm(measurement_name='test_3_vessel_scenarios', env_configs=three_vessel_interactions, test_config=nsga2_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA3Algorithm(measurement_name='test_3_vessel_scenarios', env_configs=three_vessel_interactions, test_config=nsga3_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PySwarmPSOAlgorithm(measurement_name='test_3_vessel_scenarios', env_configs=three_vessel_interactions, test_config=pso_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # SciPyDEAlgorithm(measurement_name='test_3_vessel_scenarios', env_configs=three_vessel_interactions, test_config=de_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    
-    
-    # PyGadGAAlgorithm(measurement_name='test_4_vessel_scenarios', env_configs=four_vessel_interactions, test_config=ga_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA2Algorithm(measurement_name='test_4_vessel_scenarios', env_configs=four_vessel_interactions, test_config=nsga2_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA3Algorithm(measurement_name='test_4_vessel_scenarios', env_configs=four_vessel_interactions, test_config=nsga3_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PySwarmPSOAlgorithm(measurement_name='test_4_vessel_scenarios', env_configs=four_vessel_interactions, test_config=pso_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # SciPyDEAlgorithm(measurement_name='test_4_vessel_scenarios', env_configs=four_vessel_interactions, test_config=de_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    
-    
-    PyGadGAAlgorithm(measurement_name='test_5_vessel_scenarios', env_configs=five_vessel_interactions, test_config=ga_config,
-                        number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    PyMooNSGA2Algorithm(measurement_name='test_5_vessel_scenarios', env_configs=five_vessel_interactions, test_config=nsga2_config,
-                        number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    PyMooNSGA3Algorithm(measurement_name='test_5_vessel_scenarios', env_configs=five_vessel_interactions, test_config=nsga3_config,
-                        number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    PySwarmPSOAlgorithm(measurement_name='test_5_vessel_scenarios', env_configs=five_vessel_interactions, test_config=pso_config,
-                        number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    SciPyDEAlgorithm(measurement_name='test_5_vessel_scenarios', env_configs=five_vessel_interactions, test_config=de_config,
-                        number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    
-    
-    # PyGadGAAlgorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=ga_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA2Algorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=nsga2_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PyMooNSGA3Algorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=nsga3_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # PySwarmPSOAlgorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=pso_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    # SciPyDEAlgorithm(measurement_name='test_6_vessel_scenarios', env_configs=six_vessel_interactions, test_config=de_config,
-    #                     number_of_runs=NUMBER_OF_RUNS, warmups=WARMUPS, verbose=False),
-    
-]
+ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
+                        mutate_eta=20, mutate_prob=0.2, crossover_eta=10,
+                        crossover_prob=0.2, timeout=TIMEOUT, init_method=INIT_METHOD,
+                        random_seed=RANDOM_SEED, aggregate_strat='all')
+
+
+nsga2_vessel_config = EvaluationData(population_size=20, mutate_eta=15, mutate_prob=0.8,
+                            crossover_eta=15, crossover_prob=0.8, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='vessel')
+nsga2_all_config = EvaluationData(population_size=50, mutate_eta=10, mutate_prob=1.0,
+                            crossover_eta=20, crossover_prob=0.8, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
+nsga2_category_config = EvaluationData(population_size=4, mutate_eta=5, mutate_prob=0.8,
+                            crossover_eta=15, crossover_prob=1.0, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='category')
+
+
+nsga3_vessel_config = EvaluationData(population_size=6, mutate_eta=10, mutate_prob=1.0,
+                            crossover_eta=5, crossover_prob=1.0, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='vessel')
+nsga3_all_config = EvaluationData(population_size=20, mutate_eta=1, mutate_prob=0.8,
+                            crossover_eta=1, crossover_prob=1.0, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
+nsga3_category_config = EvaluationData(population_size=4, mutate_eta=5, mutate_prob=0.8,
+                            crossover_eta=15, crossover_prob=1.0, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='category')
+
+
+pso_config = EvaluationData(population_size=30, c_1=2.5, c_2=1.0, w=0.4, timeout=TIMEOUT,
+                          init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all_swarm')
+
+de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0.5,
+                          timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
+
+
+algos = [PyGadGAAlgorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PySwarmPSOAlgorithm, SciPyDEAlgorithm]
+configs = [ga_config, nsga2_vessel_config, nsga2_all_config, nsga2_category_config, nsga3_vessel_config, nsga3_all_config, nsga3_category_config, pso_config, de_config]
+
+warmup_tests = [algo(measurement_name=measurement_names[0], env_configs=three_vessel_interactions[:1], test_config=config, number_of_runs=0, warmups=WARMUPS, verbose=VERBOSE) for algo, config in zip(algos, configs)]
+
+tests : List[GeneticAlgorithmBase] = warmup_tests
+for measurement_name, interaction in zip(measurement_names, interactions):
+    one_interaction = [algo(measurement_name=measurement_name, env_configs=interaction, test_config=config, number_of_runs=NUMBER_OF_RUNS, warmups=0, verbose=VERBOSE) for algo, config in zip(algos, configs)]
+    tests += one_interaction
+
 for test in tests: 
     test.run()
         

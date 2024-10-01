@@ -1,7 +1,7 @@
 import time
 from typing import List, Tuple
 import numpy as np
-from evolutionary_computation.aggregates import AggregateAllSwarm
+from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 import pyswarms as ps
@@ -9,14 +9,14 @@ from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
 
 class ObjectiveMonitor():
-    def __init__(self, env: USVEnvironment, start_time, max_time, verbose) -> None:
+    def __init__(self, env: USVEnvironment, eval_data : EvaluationData, start_time, max_time, verbose) -> None:
         self.verbose = verbose
         self.max_time = max_time
         self.start_time = start_time
         self.best_solution : np.ndarray = np.array([])
         self.best_fitness : float = np.inf
         self.iter_count = 0
-        self.aggregate = AggregateAllSwarm(env, minimize=True)
+        self.aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)
         
     def objective(self, x):
         self.iter_count+=1
@@ -58,7 +58,7 @@ class PySwarmPSOAlgorithm(GeneticAlgorithmBase):
                                             dimensions=env.config.all_variable_num,
                                             bounds=(np.array(env.xl), np.array(env.xu)),
                                             init_pos=pos)
-        monitor = ObjectiveMonitor(env, time.time(), eval_data.timeout, self.verbose)
+        monitor = ObjectiveMonitor(env, eval_data, time.time(), eval_data.timeout, self.verbose)
         
         return optimizer, monitor
     

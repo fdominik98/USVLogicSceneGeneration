@@ -1,4 +1,5 @@
 import json
+import pprint
 from typing import Optional, List
 
 class EvaluationData:
@@ -125,4 +126,7 @@ class EvaluationData:
             return json.load(json_file)
 
     def __str__(self) -> str:
-        return str(self.to_dict())
+        return pprint.pformat(dict(sorted(self.to_dict().items())))
+    
+    def __repr__(self) -> str:
+        return pprint.pformat(dict(sorted(self.to_dict().items())))

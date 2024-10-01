@@ -112,8 +112,8 @@ class ColregPlotManager():
         self.toolbar_frame.pack(side=tk.BOTTOM, fill=tk.X)
         self.toolbar_frame.pack_propagate(False)
         ## SLIDERS
-        self.real_time_slider = self.create_slider('Real time:', 10, TWO_HOURS * 4, ANIM_REAL_TIME, 10, self.update_anim_real_time)
-        self.sim_time_slider = self.create_slider('Sim time:', 10, TWO_MINUTES, ANIM_SIM_TIME, 10, self.update_anim_sim_time)
+        self.real_time_slider = self.create_slider('Real time:', 10, TWO_HOURS * 4, ANIM_REAL_TIME, 10, self.get_anim_real_time)
+        self.sim_time_slider = self.create_slider('Sim time:', 10, TWO_MINUTES, ANIM_SIM_TIME, 10, self.get_anim_sim_time)
         ## TOOLBAR
         self.navigation_frame = tk.Frame(self.toolbar_frame)
         self.navigation_frame.pack(fill=tk.BOTH, side=tk.LEFT)
@@ -277,13 +277,15 @@ class ColregPlotManager():
         slider.pack(fill=tk.BOTH, side=tk.LEFT)
         return slider
     
-    def update_anim_real_time(self, event):
+    def get_anim_real_time(self, event):
         self.colreg_plot.animation.real_time_value = self.real_time_slider.get()
         
-    def update_anim_sim_time(self, event):
+    def get_anim_sim_time(self, event):
         self.colreg_plot.animation.sim_time_value = self.sim_time_slider.get()
         
     def update_sim_time(self):
+        if not self.root.winfo_exists():
+            return
         # Fetch new data
         self.colreg_plot.animation.get_sim_time_count()
         self.time_label.config(text=self.colreg_plot.animation.get_sim_time_count())
@@ -291,6 +293,8 @@ class ColregPlotManager():
         self.root.after(1000, self.update_sim_time) 
         
     def update_actor_info_labels(self):
+        if not self.root.winfo_exists():
+            return
         actor_infos = self.get_actor_infos()
         for o in self.env.vessels:
             for i, info in enumerate(actor_infos[o.id]):
@@ -304,10 +308,12 @@ class ColregPlotManager():
         return artists
     
     def exit_application(self):
+        self.root.quit()
         self.root.destroy()
         os._exit(0)
         
     def continue_application(self):
+        self.root.quit()
         self.root.destroy()
         
     def to_pdf(self):

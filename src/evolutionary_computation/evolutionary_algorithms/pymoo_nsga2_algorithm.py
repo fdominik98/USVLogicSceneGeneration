@@ -19,7 +19,7 @@ class PyMooNSGA2Algorithm(PyMooNSGAAlgorithm):
     
     def init_problem(self, env : USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
                         # Instantiate the problem
-            problem = NSGAProblem(env)
+            problem = NSGAProblem(env, eval_data)
             initial_population = Population.new("X", initial_population)
             
             # Define the NSGA-II algorithm

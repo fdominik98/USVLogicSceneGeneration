@@ -134,7 +134,7 @@ USV_ENV_DESC_LIST : Dict[str, USVEnvironmentDesc] = {
                                                               RelationDesc(TS2, [overtaking_init()], OS),
                                                               RelationDesc(TS3, [crossing_init()], OS)]),
     
-    'overtaking_headon_crossing' : USVEnvironmentDesc('overtaking_[HEAD_ON_INIT]_crossing',
+    'overtaking_headon_crossing' : USVEnvironmentDesc('overtaking_headon_crossing',
                                                              [OS, TS1, TS2, TS3],
                                                              [RelationDesc(TS3, [head_on_init()], OS),
                                                               RelationDesc(OS, [crossing_init()], TS2),

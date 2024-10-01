@@ -47,11 +47,12 @@ class DataParser(ABC):
             if len(files) == 0:
                 continue
             df = self.load_df_from_files(files)
-            df_name = f'{df["measurement_name"][0]}\n{df["config_name"][0]}'
+            df_name = f'{df["measurement_name"][0]}/{df["algorithm_desc"][0]}'
             dfs.append(df)
             df_names.append(df_name)
         return dfs, df_names
     
+        
     
     def load_df(self) -> Tuple[pd.DataFrame, str]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
@@ -59,7 +60,7 @@ class DataParser(ABC):
         if len(files) == 0:
             df_name = ''
         else:
-            df_name = f'{df["measurement_name"][0]}\n{df["config_name"][0]}'
+            df_name = f'{df["measurement_name"][0]}/{df["algorithm_desc"][0]}'
         return df, df_name
         
             

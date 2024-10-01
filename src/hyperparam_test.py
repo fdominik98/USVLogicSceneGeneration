@@ -44,22 +44,38 @@ def create_GA_config() -> EvaluationData:
         
     return EvaluationData(population_size = population_size, num_parents_mating = num_parents_mating,
             mutate_eta = mutate_eta, mutate_prob = mutate_prob, crossover_eta=crossover_eta,
-            crossover_prob=crossover_prob, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED)
+            crossover_prob=crossover_prob, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
     
-def create_NSGA_config() -> EvaluationData:
+def create_NSGA_vessel_config() -> EvaluationData:
     if len(combinations_NSGA) == 0:
         return None
     population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA[0]
     return EvaluationData(population_size = population_size, mutate_eta = mutate_eta, mutate_prob = mutate_prob,
                           crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
-                          init_method=INIT_METHOD, random_seed=RANDOM_SEED)
+                          init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='vessel')
+    
+def create_NSGA_all_config() -> EvaluationData:
+    if len(combinations_NSGA) == 0:
+        return None
+    population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA[0]
+    return EvaluationData(population_size = population_size, mutate_eta = mutate_eta, mutate_prob = mutate_prob,
+                          crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
+                          init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
+    
+def create_NSGA_category_config() -> EvaluationData:
+    if len(combinations_NSGA) == 0:
+        return None
+    population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA[0]
+    return EvaluationData(population_size = population_size, mutate_eta = mutate_eta, mutate_prob = mutate_prob,
+                          crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
+                          init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='category')
     
 def create_PSO_config() -> EvaluationData:
     if len(combinations_PSO) == 0:
         return None
     population_size, c_1, c_2, w = combinations_PSO[0]
     return EvaluationData(population_size = population_size, c_1=c_1, c_2=c_2, w=w, timeout=TIMEOUT,
-                          init_method=INIT_METHOD, random_seed=RANDOM_SEED)
+                          init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all_swarm')
     
 def create_DE_config() -> EvaluationData:
     if len(combination_DE) == 0:
@@ -72,7 +88,7 @@ def create_DE_config() -> EvaluationData:
         population_size, mutate_prob, crossover_prob = combination_DE[0]
         
     return EvaluationData(population_size = population_size, mutate_prob = mutate_prob, crossover_prob=crossover_prob,
-                          timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED)
+                          timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
 
 random.seed(time.time())
 random.shuffle(combinations_GA)
@@ -84,26 +100,43 @@ env_configs = ['overtaking_and_crossing', 'overtaking_headon_crossing', 'five_ve
 
 
 tests : List[Tuple[Any, GeneticAlgorithmBase]]= [
-    (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
+    # (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
+    #                                     env_configs=env_configs,
+    #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
+    #                                     warmups = WARMUPS, verbose=False)),
+    # (create_NSGA_vessel_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+    #                                     env_configs=env_configs,
+    #                                     test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
+    #                                     warmups = WARMUPS, verbose=False)),
+    # (create_NSGA_vessel_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+    #                                     env_configs=env_configs,
+    #                                     test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
+    #                                     warmups = WARMUPS, verbose=False)),
+    
+    (create_NSGA_category_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
-                                        test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    (create_NSGA_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+    (create_NSGA_category_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
-                                        test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    (create_NSGA_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+    (create_NSGA_all_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
-                                        test_config=create_NSGA_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
+    (create_NSGA_all_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
                                         env_configs=env_configs,
-                                        test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
+                                        test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
                                         warmups = WARMUPS, verbose=False)),
-    (create_DE_config, SciPyDEAlgorithm(measurement_name='parameter_optimization_2',
-                                        env_configs=env_configs,
-                                        test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
-                                        warmups = WARMUPS, verbose=False)),
+    # (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
+    #                                     env_configs=env_configs,
+    #                                     test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
+    #                                     warmups = WARMUPS, verbose=False)),
+    # (create_DE_config, SciPyDEAlgorithm(measurement_name='parameter_optimization_2',
+    #                                     env_configs=env_configs,
+    #                                     test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
+    #                                     warmups = WARMUPS, verbose=False)),
 ]
 
 

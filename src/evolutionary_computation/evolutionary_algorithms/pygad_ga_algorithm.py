@@ -5,7 +5,7 @@ import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 import pygad
-from evolutionary_computation.aggregates import AggregateAll
+from evolutionary_computation.aggregates import Aggregate
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
 
@@ -16,7 +16,7 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
     
     def init_problem(self,  env: USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
         def fitness_func(cls, solution, solution_idx):
-            return AggregateAll(env).evaluate(solution)[0]
+            return Aggregate.factory(env, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         
         start_time = time.time()
         

@@ -1,7 +1,7 @@
 import time
 from typing import Any, List, Tuple
 import numpy as np
-from evolutionary_computation.aggregates import AggregateAll
+from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 from scipy.optimize import differential_evolution, OptimizeResult
@@ -27,8 +27,9 @@ class SciPyDEAlgorithm(GeneticAlgorithmBase):
         super().__init__(measurement_name, 'scipy_DE_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
     
     def init_problem(self, env: USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
+        aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)
         def objective(solution):
-            return AggregateAll(env, minimize=True).evaluate(solution)[0]
+            return aggregate.evaluate(solution)[0]
         return list(zip(env.xl, env.xu)), objective, initial_population
     
     def do_evaluate(self, some_input : Tuple[List[Tuple[int, int]], Any, List[List[float]]], eval_data : EvaluationData):
