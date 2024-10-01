@@ -11,10 +11,10 @@ from model.environment.functional_models.five_vessel_interactions import five_ve
 from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
-NUMBER_OF_RUNS = 1
+NUMBER_OF_RUNS = 10
 WARMUPS = 1
 RANDOM_SEED = 1234
-TIMEOUT = 1
+TIMEOUT = 60
 INIT_METHOD = 'uniform'
 VERBOSE = False
 measurement_names = ['test_3_vessel_scenarios_lhs', 'test_4_vessel_scenarios_lhs', 'test_5_vessel_scenarios_lhs', 'test_6_vessel_scenarios_lhs']
