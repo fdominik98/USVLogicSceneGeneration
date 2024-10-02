@@ -7,6 +7,7 @@ from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_bas
 import pyswarms as ps
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import EPSILON
 
 class ObjectiveMonitor():
     def __init__(self, env: USVEnvironment, eval_data : EvaluationData, start_time, max_time, verbose) -> None:
@@ -30,7 +31,7 @@ class ObjectiveMonitor():
             if f < self.best_fitness:
                 self.best_fitness = f
                 self.best_solution = x[i]
-        if self.best_fitness <= 0.0:
+        if self.best_fitness < EPSILON:
             if self.verbose:
                 print('Optimal fitness reached.')
             raise StopIteration()

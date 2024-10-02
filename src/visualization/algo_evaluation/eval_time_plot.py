@@ -1,7 +1,8 @@
 from typing import Dict, List
 import matplotlib.pyplot as plt
-from model.environment.usv_config import *
+import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
+from model.environment.usv_config import EPSILON
 from visualization.algo_evaluation.algo_eval_utils import algo_mapper, vessel_number_mapper, algo_colors
 from visualization.my_plot import MyPlot
 
@@ -9,7 +10,7 @@ class EvalTimePlot(MyPlot):
     def __init__(self, measurements : Dict[str, Dict[str, List[EvaluationData]]]): 
         self.measurements = measurements
         self.eval_times = {
-            key: {subkey: [data.evaluation_time for data in sublist if data.best_fitness_index == 0.0] for subkey, sublist in subdict.items()}
+            key: {subkey: [data.evaluation_time for data in sublist if data.best_fitness_index < EPSILON] for subkey, sublist in subdict.items()}
             for key, subdict in measurements.items()
         }  
         self.measurement_labels = vessel_number_mapper(list(measurements.keys()))

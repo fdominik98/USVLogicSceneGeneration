@@ -10,6 +10,7 @@ from pymoo.core.result import Result
 import matplotlib.pyplot as plt
 import matplotlib
 from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import EPSILON
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from pymoo.core.callback import Callback
@@ -49,7 +50,7 @@ class OptimumTermination(Termination):
             return 0.0
         
         f_dist = USVEnvironment.euler_distance(algorithm.callback.best_objective)
-        if f_dist == 0.0:
+        if f_dist < EPSILON:
             if self.verbose:
                 print("Stopping as a solution with the desired fitness value is found.")
             return 1.0

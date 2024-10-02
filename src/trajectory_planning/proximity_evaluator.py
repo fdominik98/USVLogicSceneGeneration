@@ -5,80 +5,65 @@ from model.vessel import Vessel
 import copy
 from model.relation import Relation
 from model.relation_types import MayCollide
+from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 
-class ProximityMetrics():
-    def __init__(self, relation : Relation, closest_index : int, closest_dist : np.ndarray) -> None:
-        self.distances : List[float] = []
-        self.dcpas : List[float] = [] # Distance at the Closest Point of Approach
-        self.tcpas : List[float] = [] # Time to the Closest Point of Approach
+class ProximityVector():
+    def __init__(self, relation : Relation) -> None:
+        theta = np.pi - relation.angle_v12_p12
+        self.dist = relation.o_distance
+        self.dcpa = self.dist * abs(np.sin(theta))
+        self.tcpa = relation.dot_p12_v12 / relation.v12_norm_stable**2
+        
+        dr = 6 * N_MILE_TO_M_CONVERSION
+        ts = 60 * 60 * 60 # 1 hour
+        self.dcpa_norm = 0 if self.tcpa < 0 or self.tcpa > ts else (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
+        self.tcpa_norm = 0 if self.tcpa < 0 or self.tcpa > ts else (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
+
+class ProximityMetric():
+    def __init__(self, relation : Relation) -> None:
+        self.vectors : List[ProximityVector] = []
         self.len = 0
-        self.closest_index = closest_index
-        self.closest_dist = closest_dist
         self.relation = relation
         
-    def append(self, dist, dcpa, tcpa):
-        self.distances.append(dist)
-        self.dcpas.append(dcpa)
-        self.tcpas.append(tcpa)
+    def append(self, pv : ProximityVector):
+        self.vectors.append(pv)
         self.len += 1
         
     def get_first_dcpa(self) -> float:
-        return self.dcpas[0]
+        return self.vectors[0].dcpa
     
     def get_first_distance(self) -> float:
-        return self.distances[0]
+        return self.vectors[0].dist
     
     def get_first_tcpa(self) -> float:
-        return self.tcpas[0]
+        return self.vectors[0].tcpa
 
 class ProximityEvaluator():
     def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
         self.env = env
         self.trajectories = trajectories
-        self.metrics : List[ProximityMetrics] = []
+        self.metrics : List[ProximityMetric] = []
         
         for relation in env.relations:
             if relation.vessel1.is_OS() or relation.vessel2.is_OS():
                 self.metrics.append(self.calculate_pair(relation))
         
-    def calculate_pair(self, relation : Relation) -> ProximityMetrics:
+    def calculate_pair(self, relation : Relation) -> ProximityMetric:
         dyn_rel = copy.deepcopy(relation)
         v1 = dyn_rel.vessel1
         v2 = dyn_rel.vessel2
         
         traj1 = self.trajectories[v1.id]
         traj2 = self.trajectories[v2.id]
-        closest_index, closest_pos1, closest_pos2 = self.find_closest_positions(traj1, traj2)
         
-        metrics = ProximityMetrics(relation, closest_index, closest_pos1)
+        metrics = ProximityMetric(relation)
         for s, (pos1, pos2) in enumerate(zip(traj1, traj2)):
             v1.update(*pos1)
             v2.update(*pos2)
             dyn_rel.update()
-            dist = dyn_rel.o_distance
-            theta = np.pi - relation.angle_v12_p12
-            dcpa = dist * abs(np.sin(theta))
-            tcpa = -dist * np.cos(theta) / np.linalg.norm(relation.v12)
-            metrics.append(dist, dcpa, tcpa)
+            metrics.append(ProximityVector(relation))
             
         return metrics
-    
-    def find_closest_positions(self, traj1 : List[Tuple[float,float,float,float]], traj2 : List[Tuple[float,float,float,float]]) -> Tuple[int, np.ndarray, np.ndarray]:
-        min_diff = float('inf')  # Initialize with a large number
-        closest_index = -1  # Index of the closest positions
-        closest_position1 = np.array([0,0])
-        closest_position2 = np.array([0,0])
-
-        for i in range(len(traj1)):
-            dist = np.sqrt((traj1[i][0] - traj2[i][0])**2 + (traj1[i][1] - traj2[i][1])**2)
-            if dist < min_diff:
-                min_diff = dist
-                closest_index = i
-                closest_position1 = np.array([traj1[i][0], traj1[i]][1])
-                closest_position2 = np.array([traj2[i][0], traj2[i]][1])
-
-        return closest_index, closest_position1, closest_position2
-    
     
 class RiskEvaluator():
     def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
@@ -96,7 +81,7 @@ class RiskEvaluator():
                 for vessel1 in dyn_env.vessels:
                     # if not vessel1.is_OS():
                     #     continue
-                    for i in range(0, 180, 2):
+                    for i in range(0, 180):
                         new_vcclkw = copy.deepcopy(vessel1)
                         new_vcclkw.update(vessel1.p[0], vessel1.p[1], vessel1.heading + np.radians(i), vessel1.speed)
                         new_vclkw = copy.deepcopy(vessel1)

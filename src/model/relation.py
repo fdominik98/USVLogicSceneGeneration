@@ -61,19 +61,24 @@ class Relation():
         self.v12 = self.vessel1.v - self.vessel2.v
         
         # Define the norm of the relative position (distance(p1 p2))
-        self.o_distance = np.linalg.norm(self.p12)   
+        self.o_distance = max(np.linalg.norm(self.p12), EPSILON)   
         
-        self.angle_p21_v2 = np.arccos(np.dot(self.p21, self.vessel2.v) / self.o_distance / self.vessel2.speed)        
-        self.angle_p12_v1 = np.arccos(np.dot(self.p12, self.vessel1.v) / self.o_distance / self.vessel1.speed)
+        self.cos_p21_v2_theta = np.clip(np.dot(self.p21, self.vessel2.v) / self.o_distance / self.vessel2.speed, -1, 1)
+        self.angle_p21_v2 = np.arccos(self.cos_p21_v2_theta)        
+        self.cos_p12_v1_theta = np.clip(np.dot(self.p12, self.vessel1.v) / self.o_distance / self.vessel1.speed, -1, 1)
+        self.angle_p12_v1 = np.arccos(self.cos_p12_v1_theta)
         
         self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.l),
                            o2VisibilityByo1(self.angle_p21_v2, self.vessel2.l)) *  N_MILE_TO_M_CONVERSION
         # angle between the relative velocity and the relative position vector
-        self.angle_v12_p12 = np.arccos(np.dot(self.p12, self.v12) / self.o_distance / np.linalg.norm(self.v12))
         
-        stable_norm_p12 = max(self.o_distance, EPSILON)
-        sin_theta = np.clip(self.safety_dist / stable_norm_p12, -1, 1)
-        self.angle_half_cone = abs(np.arcsin(sin_theta)) # [0, pi/2]  
+        self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
+        self.dot_p12_v12 = np.dot(self.p12, self.v12)
+        self.cos_p12_v12_theta = np.clip(self.dot_p12_v12 / self.o_distance / self.v12_norm_stable, -1, 1)
+        self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
+        
+        self.sin_half_cone_theta = np.clip(self.safety_dist / self.o_distance, -1, 1)
+        self.angle_half_cone = abs(np.arcsin(self.sin_half_cone_theta)) # [0, pi/2]  
         
         
     def info(self):

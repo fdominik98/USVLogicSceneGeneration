@@ -8,6 +8,7 @@ import pygad
 from evolutionary_computation.aggregates import Aggregate
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import EPSILON
 
 class PyGadGAAlgorithm(GeneticAlgorithmBase):
     def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
@@ -26,7 +27,7 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
                 print(f"Best solution = {ga_instance.best_solution()}")
             elapsed_time = time.time() - start_time
             solution, solution_fitness, solution_idx = ga_instance.best_solution()
-            if solution_fitness == 0.0:
+            if abs(solution_fitness) < EPSILON:
                 if self.verbose:
                     print(f"Terminating due to fitness reaching 0.0.")
                 raise StopIteration

@@ -19,8 +19,10 @@ INIT_METHOD = 'uniform'
 VERBOSE = False
 measurement_names = ['test_3_vessel_scenarios_lhs', 'test_4_vessel_scenarios_lhs', 'test_5_vessel_scenarios_lhs', 'test_6_vessel_scenarios_lhs']
 measurement_names = ['test_3_vessel_scenarios_nsga', 'test_4_vessel_scenarios_nsga', 'test_5_vessel_scenarios_nsga', 'test_6_vessel_scenarios_nsga']
+measurement_names = ['test_4_vessel_scenarios_concept']
 measurement_names = ['test_3_vessel_scenarios', 'test_4_vessel_scenarios', 'test_5_vessel_scenarios', 'test_6_vessel_scenarios']
 
+interactions = [four_vessel_interactions]
 interactions = [three_vessel_interactions, four_vessel_interactions, five_vessel_interactions, six_vessel_interactions]
 
 
@@ -59,6 +61,8 @@ de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0
                           timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
 
 
+algos = [SciPyDEAlgorithm]
+configs = [de_config]
 algos = [PyGadGAAlgorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PySwarmPSOAlgorithm, SciPyDEAlgorithm]
 configs = [ga_config, nsga2_vessel_config, nsga2_all_config, nsga2_category_config, nsga3_vessel_config, nsga3_all_config, nsga3_category_config, pso_config, de_config]
 

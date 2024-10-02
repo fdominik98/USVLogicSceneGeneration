@@ -17,10 +17,16 @@ class VOConeComponent(PlotComponent):
             
     def do_draw(self):
         for rel in self.env.relations:
-            o1 = rel.vessel1
-            o2 = rel.vessel2
+            if rel.vessel2.id == 0:
+                o1 = rel.vessel2
+                o2 = rel.vessel1
+                p12 = rel.p21
+            else:
+                o1 = rel.vessel1
+                o2 = rel.vessel2
+                p12 = rel.p12
             # Calculate the angles of the cone
-            angle_rel = np.arctan2(rel.p12[1], rel.p12[0])
+            angle_rel = np.arctan2(p12[1], p12[0])
             angle1 = angle_rel + rel.angle_half_cone
             angle2 = angle_rel - rel.angle_half_cone
             
@@ -48,10 +54,16 @@ class VOConeComponent(PlotComponent):
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for rel in new_env.relations:
-            o1 = rel.vessel1
-            o2 = rel.vessel2
+            if rel.vessel2.id == 0:
+                o1 = rel.vessel2
+                o2 = rel.vessel1
+                p12 = rel.p21
+            else:
+                o1 = rel.vessel1
+                o2 = rel.vessel2
+                p12 = rel.p12
             # Calculate the angles of the cone
-            angle_rel = np.arctan2(rel.p12[1], rel.p12[0])
+            angle_rel = np.arctan2(p12[1], p12[0])
             angle1 = angle_rel + rel.angle_half_cone
             angle2 = angle_rel - rel.angle_half_cone
             

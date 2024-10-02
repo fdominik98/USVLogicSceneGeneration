@@ -17,9 +17,11 @@ class RelationType(ABC):
     def penalty(self, val, lb, ub) -> float:
         if not self.negated:
             dist = self._penalty(val, lb, ub)
+            return self._normalize(dist, lb, ub)
         else:
-            dist = min(self._penalty(val, -np.inf, lb), self._penalty(val, ub, np.inf))
-        return self._normalize(dist, lb, ub)
+            dist1 = self._penalty(val, 0, lb)
+            dist2 = self._penalty(val, ub, self.max_value)
+            return min(self._normalize(dist1, 0, lb), self._normalize(dist2, ub, self.max_value))
     
     def _penalty(self, val, lb, ub):
         if val < lb:
@@ -71,7 +73,8 @@ class OutVis(RelationType):
         RelationType.__init__(self, 'outVis', negated, MAX_DISTANCE)
     
     def get_penalty_norm(self) -> float:
-        return self.penalty(self.relation.o_distance, self.relation.vis_distance, np.inf)
+        lb = min(self.relation.vis_distance, self.relation.safety_dist)
+        return self.penalty(self.relation.o_distance, lb, MAX_DISTANCE)
     
 class OutVisOrNoCollide(OutVis, MayCollide):
     def __init__(self, negated : bool = False) -> None:
@@ -90,6 +93,7 @@ class OutVisOrNoCollide(OutVis, MayCollide):
         self.relation : Relation = relation
         self.outVis.set_relation(relation)
         self.may_collide.set_relation(relation)
+        
     
     
 ############ COLREG RELATIVE BEARING ##################
@@ -127,6 +131,26 @@ class OvertakingBear(RelationType):
         return (self.penalty(self.relation.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
                 + self.penalty(self.relation.angle_p12_v1, 0, MASTHEAD_LIGHT_ANGLE /2))
         
+        
+class AnyColregBear(HeadOnBear, OvertakingBear, CrossingBear):
+    def __init__(self, negated : bool = False) -> None:
+        self.head_on_bear = HeadOnBear(negated)
+        self.overtaking_bear = OvertakingBear(negated)
+        self.crossing_bear = CrossingBear(negated)
+        RelationType.__init__(self, f'({self.head_on_bear.name} V {self.overtaking_bear.name} V {self.crossing_bear.name})', negated, 0)
+        
+    def get_penalty_norm(self) -> float:
+        if self.negated:
+            return self.head_on_bear.get_penalty_norm() + self.overtaking_bear.get_penalty_norm() + self.crossing_bear.get_penalty_norm()
+        else:
+            return min(self.head_on_bear.get_penalty_norm(), self.overtaking_bear.get_penalty_norm(), self.crossing_bear.get_penalty_norm())
+        
+    def set_relation(self, relation):
+        from model.relation import Relation
+        self.relation : Relation = relation
+        self.head_on_bear.set_relation(relation)
+        self.overtaking_bear.set_relation(relation)
+        self.crossing_bear.set_relation(relation)
         
         
 def init_rel() -> List[RelationType]:

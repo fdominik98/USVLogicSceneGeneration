@@ -16,13 +16,19 @@ class AdditionalVOConeComponent(PlotComponent):
             
     def do_draw(self):
         for rel in self.env.relations:
-            o1 = rel.vessel1
-            o2 = rel.vessel2
+            if rel.vessel2.id == 0:
+                o1 = rel.vessel2
+                o2 = rel.vessel1
+                p12 = rel.p21
+            else:
+                o1 = rel.vessel1
+                o2 = rel.vessel2
+                p12 = rel.p12
             vo_circle = plt.Circle(o2.p, rel.safety_dist, color='black', fill=False, linestyle='--', linewidth=0.7, zorder=self.zorder)
             self.ax.add_artist(vo_circle)
             self.circle_graphs[rel.name] = vo_circle
             # Calculate the angles of the cone
-            angle_rel = np.arctan2(rel.p12[1], rel.p12[0])
+            angle_rel = np.arctan2(p12[1], p12[0])
             angle1 = angle_rel + rel.angle_half_cone
             angle2 = angle_rel - rel.angle_half_cone
             
@@ -40,14 +46,20 @@ class AdditionalVOConeComponent(PlotComponent):
             
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for rel in new_env.relations:
-            o1 = rel.vessel1
-            o2 = rel.vessel2
+            if rel.vessel2.id == 0:
+                o1 = rel.vessel2
+                o2 = rel.vessel1
+                p12 = rel.p21
+            else:
+                o1 = rel.vessel1
+                o2 = rel.vessel2
+                p12 = rel.p12
             
             self.circle_graphs[rel.name].set_center(o2.p)
             self.circle_graphs[rel.name].set_radius(rel.safety_dist)
             # Calculate the angles of the cone
             # Calculate the angles of the cone
-            angle_rel = np.arctan2(rel.p12[1], rel.p12[0])
+            angle_rel = np.arctan2(p12[1], p12[0])
             angle1 = angle_rel + rel.angle_half_cone
             angle2 = angle_rel - rel.angle_half_cone
             
