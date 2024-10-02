@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 from model.environment.usv_environment import USVEnvironment
-from trajectory_planning.proximity_evaluator import ProximityMetric
+from trajectory_planning.proximity_evaluator import TrajProximityMetric
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 
 class ProximityMetricComponent(PlotComponent, ABC):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetric]) -> None:
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
         super().__init__(ax, env)
         self.metrics = metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
@@ -19,7 +19,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
         self.ax.set_aspect('auto', adjustable='box')      
     
     @abstractmethod
-    def get_y_metric(self, metric : ProximityMetric) -> list[float]:
+    def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         pass
     
     @abstractmethod
@@ -27,7 +27,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
         pass
     
     @abstractmethod
-    def get_threshold_y(self, metric : ProximityMetric) -> list[float]:
+    def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         pass
     
     @abstractmethod
@@ -59,10 +59,10 @@ class ProximityMetricComponent(PlotComponent, ABC):
         return self.graphs 
 
 class DistanceAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetric]) -> None:
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
         super().__init__(ax, env, metrics)  
           
-    def get_y_metric(self, metric : ProximityMetric) -> list[float]:
+    def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.dist for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
@@ -75,14 +75,14 @@ class DistanceAxesComponent(ProximityMetricComponent):
         dist = max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
         return 0, dist*2
     
-    def get_threshold_y(self, metric : ProximityMetric) -> list[float]:
+    def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [metric.relation.safety_dist] * metric.len
     
 class DCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetric]) -> None:
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
         super().__init__(ax, env, metrics)  
           
-    def get_y_metric(self, metric : ProximityMetric) -> list[float]:
+    def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.dcpa for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
@@ -96,14 +96,14 @@ class DCPAAxesComponent(ProximityMetricComponent):
         threshold = max(self.metrics, key=lambda metric: metric.relation.safety_dist).relation.safety_dist
         return 0, max(dcpa * 2, threshold*1.1)
     
-    def get_threshold_y(self, metric : ProximityMetric) -> list[float]:
+    def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [metric.relation.safety_dist] * metric.len
     
 class TCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[ProximityMetric]) -> None:
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
         super().__init__(ax, env, metrics)  
           
-    def get_y_metric(self, metric : ProximityMetric) -> list[float]:
+    def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.tcpa for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
@@ -116,6 +116,6 @@ class TCPAAxesComponent(ProximityMetricComponent):
         tcpa0 = max(self.metrics, key=lambda metric: metric.get_first_tcpa()).get_first_tcpa()
         return 0, tcpa0 * 2
     
-    def get_threshold_y(self, metric : ProximityMetric) -> list[float]:
+    def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [0] * metric.len
     

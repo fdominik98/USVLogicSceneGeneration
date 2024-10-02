@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_config import ASSET_FOLDER
 from evolutionary_computation.evaluation_data import EvaluationData
+from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
 
@@ -14,6 +15,7 @@ class EvalPlotManager():
         self.measurements = measurements
         self.success_rate_plot = SuccessRatePlot(self.measurements)
         self.eval_time_plot = None
+        self.risk_vector_plot = None
         self.metrics_plot = None
         self.root = tk.Tk()
         self.root.resizable(True, True)
@@ -47,7 +49,7 @@ class EvalPlotManager():
         self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
         ## PLOT SELECTION
-        self.plot_options = ["Success Rate", "Eval Time"]
+        self.plot_options = ["Success Rate", "Eval Time", "Risk Vector"]
         self.selected_plot = tk.StringVar()
         self.selected_plot.set(self.plot_options[0])  # Set the default value
         # Create the dropdown menu
@@ -101,6 +103,10 @@ class EvalPlotManager():
             if self.eval_time_plot is None:
                 self.eval_time_plot = EvalTimePlot(self.measurements)
             plot = self.eval_time_plot
+        elif value == 'Risk Vector':
+            if self.risk_vector_plot is None:
+                self.risk_vector_plot = RiskVectorPlot(self.measurements)
+            plot = self.risk_vector_plot
         else:
             raise Exception('Not implemented plot.')
         self.navigation_toolbar.destroy()

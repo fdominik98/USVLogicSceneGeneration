@@ -31,7 +31,7 @@ def algo_mapper(names : List[str]):
         elif 'pso' in name.lower():
             label = 'PSO'
         else:
-            raise Exception('Unknown measurement name')
+            raise Exception('Unknown algorithm name')
         aggregate = ''
         if 'all' in name.lower():
             aggregate = 'A'
@@ -40,7 +40,7 @@ def algo_mapper(names : List[str]):
         elif 'category' in name.lower():
             aggregate = 'C'
         else:
-            raise Exception('Unknown measurement name')
+            aggregate = ''
         labels.append(label + '_' + aggregate)
     return labels
 

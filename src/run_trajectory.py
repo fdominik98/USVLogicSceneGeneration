@@ -17,7 +17,8 @@ while(True):
     
     eval_data_models : List[EvaluationData] = edp.load_data_models_from_files([traj_data_models[0].env_path])
     
-    config = USV_ENV_DESC_LIST[eval_data_models[0].config_name]
+    data = eval_data_models[0]
+    config = USV_ENV_DESC_LIST[data.config_name]
     env = USVEnvironment(config).update(eval_data_models[0].best_solution)
     ColregPlotManager(env, trajectories=traj_data_models[0].trajectories)
         

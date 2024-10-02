@@ -5,7 +5,7 @@ from model.environment.usv_config import *
 from visualization.my_plot import MyPlot
 from visualization.colreg_scenarios.colreg_plot import TrajectoryReceiver
 from visualization.colreg_scenarios.plot_components.metric_components.risk_metric_component import RiskMetricComponent
-from trajectory_planning.proximity_evaluator import ProximityEvaluator, RiskEvaluator
+from trajectory_planning.proximity_evaluator import TrajProximityEvaluator, TrajNavigationRiskEvaluator
 from visualization.colreg_scenarios.plot_components.metric_components.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
 class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):  
@@ -14,8 +14,8 @@ class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):
         MyPlot.__init__(self)
         TrajectoryReceiver.__init__(self, env, trajectories)
         
-        self.proximity_evaluator = ProximityEvaluator(trajectories=self.trajectories, env=self.env)
-        self.risk_evaluator = RiskEvaluator(trajectories=self.trajectories, env=self.env)
+        self.proximity_evaluator = TrajProximityEvaluator(trajectories=self.trajectories, env=self.env)
+        self.risk_evaluator = TrajNavigationRiskEvaluator(trajectories=self.trajectories, env=self.env)
         
         DistanceAxesComponent(self.axes[0], self.env, self.proximity_evaluator.metrics).draw()
         DCPAAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics).draw()

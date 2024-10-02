@@ -1,5 +1,6 @@
 from typing import List
 from evolutionary_computation.evaluation_data import EvaluationData
+from evaluation.risk_evaluation import RiskVector
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from model.data_parser import EvalDataParser
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
@@ -14,8 +15,12 @@ while(True):
     if len(data_models) == 0:
         exit(0)
 
-    config = USV_ENV_DESC_LIST[data_models[0].config_name]
+    data = data_models[0]
+    config = USV_ENV_DESC_LIST[data.config_name]
     env = USVEnvironment(config).update(data_models[0].best_solution)
+    
+    risk_vector = RiskVector(env)
+    print(risk_vector.risk_vector)
     ColregPlotManager(env)
         
         

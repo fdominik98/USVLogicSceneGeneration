@@ -23,6 +23,7 @@ class Vessel():
         self.l = desc.l
         self.r = desc.l * 2.0
         self.name = desc.name
+        self.max_speed = desc.max_speed
         
     def update(self, p_x, p_y, heading, speed) -> None:
         self.p = np.array([p_x, p_y])
