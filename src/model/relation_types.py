@@ -161,3 +161,6 @@ def crossing_init() -> List[RelationType]:
     return init_rel() + [CrossingBear()]
 def overtaking_init() -> List[RelationType]:
     return init_rel() + [OvertakingBear()]
+
+def any_colreg_init() -> List[RelationType]:
+    return init_rel() + [AnyColregBear()]

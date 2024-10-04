@@ -11,9 +11,9 @@ from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
 
 class EvalPlotManager():
-    def __init__(self, measurements: Dict[str, Dict[str, List[EvaluationData]]]): 
-        self.measurements = measurements
-        self.success_rate_plot = SuccessRatePlot(self.measurements)
+    def __init__(self, eval_datas : List[EvaluationData]): 
+        self.eval_datas = eval_datas
+        self.success_rate_plot = SuccessRatePlot(self.eval_datas)
         self.eval_time_plot = None
         self.risk_vector_plot = None
         self.metrics_plot = None
@@ -101,11 +101,11 @@ class EvalPlotManager():
             plot = self.success_rate_plot
         elif value == 'Eval Time':
             if self.eval_time_plot is None:
-                self.eval_time_plot = EvalTimePlot(self.measurements)
+                self.eval_time_plot = EvalTimePlot(self.eval_datas)
             plot = self.eval_time_plot
         elif value == 'Risk Vector':
             if self.risk_vector_plot is None:
-                self.risk_vector_plot = RiskVectorPlot(self.measurements)
+                self.risk_vector_plot = RiskVectorPlot(self.eval_datas)
             plot = self.risk_vector_plot
         else:
             raise Exception('Not implemented plot.')

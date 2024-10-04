@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,13 +8,13 @@ from visualization.algo_evaluation.algo_eval_utils import algo_mapper, vessel_nu
 from visualization.my_plot import MyPlot
 
 class SuccessRatePlot(MyPlot):  
-    def __init__(self, measurements : Dict[str, Dict[str, List[EvaluationData]]]): 
-        self.measurements = measurements
-        self.success_rates = {
-            key: {subkey: [0 if data.best_fitness_index >= EPSILON else 1 for data in sublist] for subkey, sublist in subdict.items()}
-            for key, subdict in measurements.items()
-        } 
-        self.measurement_labels = vessel_number_mapper(list(measurements.keys()))
+    def __init__(self, eval_datas : List[EvaluationData]): 
+        self.eval_datas = eval_datas
+        self.success_rates : Dict[int, Dict[str, List[int]]] = defaultdict(lambda : defaultdict(lambda : []))
+        for eval_data in eval_datas:
+            self.success_rates[eval_data.vessel_number][eval_data.algorithm_desc].append(0 if eval_data.best_fitness_index >= EPSILON else 1)
+            
+        self.vessel_num_labels = vessel_number_mapper(list(self.success_rates.keys()))
         MyPlot.__init__(self)
         
     def create_fig(self):
@@ -22,20 +23,24 @@ class SuccessRatePlot(MyPlot):
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
-        for i, (measurement_name, algo_measurements) in enumerate(self.success_rates.items()):
-            labels = algo_mapper(list(algo_measurements.keys()))
+        for i, (vessel_num, algo_measurements) in enumerate(self.success_rates.items()):
+            algo_labels = algo_mapper(list(algo_measurements.keys()))
             percentages = [np.mean(data) * 100 for data in algo_measurements.values()]
             
             if isinstance(axes, np.ndarray):
                 axi : plt.Axes = axes[i]
             else:
                 axi : plt.Axes = axes  
-            axi.bar(labels, percentages, color=algo_colors, edgecolor='black', linewidth=2)
-            axi.set_title(self.measurement_labels[i])
+            bars : plt.BarContainer = axi.bar(algo_labels, percentages, color=algo_colors, edgecolor='black', linewidth=2)
+            axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Success rate (%)')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticks(range(len(labels))) 
-            axi.set_xticklabels(labels, rotation=45, ha='right')
-            axi.set_ylim(0, 100)
+            axi.set_xticks(range(len(algo_labels))) 
+            axi.set_xticklabels(algo_labels, rotation=45, ha='right')
+            axi.set_ylim(0, 105)
+            
+            for i, bar in enumerate(bars):
+                axi.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, 
+                f'{len(list(algo_measurements.values())[i])}', ha='center', va='bottom', fontsize=12)
 
         fig.tight_layout()

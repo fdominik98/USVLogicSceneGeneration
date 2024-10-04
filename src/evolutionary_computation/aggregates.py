@@ -46,7 +46,7 @@ class VesselAggregate(Aggregate):
         super().__init__(env, name, minimize)
         
     def _get_object_num(self):
-        return int(self.env.config.actor_num)
+        return int(self.env.config.vessel_num)
 
     def evaluate(self, individual : np.ndarray):
         self.env.update(individual.tolist())

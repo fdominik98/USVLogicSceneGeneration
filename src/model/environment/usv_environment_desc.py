@@ -11,12 +11,12 @@ class USVEnvironmentDesc():
         self.name = name
         self.vessel_descs = sorted(vessel_descs, key=lambda v: v.id)
         self.relation_descs = relation_descs
-        self.actor_num = len(vessel_descs)
-        self.all_variable_num = VARIABLE_NUM * self.actor_num - 3
+        self.vessel_num = len(vessel_descs)
+        self.all_variable_num = VARIABLE_NUM * self.vessel_num - 3
         self.col_sit_num = len(self.relation_descs)   
         
 
-        all_pairs = [(i, j) for i, j in combinations(range(self.actor_num), 2)]
+        all_pairs = [(i, j) for i, j in combinations(range(self.vessel_num), 2)]
         existing_pairs = [(rel_desc.vd1, rel_desc.vd2) for rel_desc in relation_descs]
         
         for i, j in all_pairs:

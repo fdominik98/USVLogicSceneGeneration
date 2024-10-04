@@ -11,11 +11,7 @@ from trajectory_planning.model.trajectory_data import TrajectoryData
 class DataParser(ABC):
     gen_data_dir = f'{ASSET_FOLDER}/gen_data'
     RRT_DIR = f'{gen_data_dir}/RRTStar_algo'
-    EVAL_DATA_COLUMN_NAMES = ['best_solution', 'config_name', 'algorithm_desc',
-                              'measurement_name', 'evaluation_time',
-                              'population_size', 'number_of_generations',
-                              'num_parents_mating', 'mutate_prob', 'crossover_prob',
-                              'mutate_eta', 'crossover_eta', 'c_1', 'c_2', 'w', 'path', 'best_fitness_index']
+    EVAL_DATA_COLUMN_NAMES = list(sorted(EvaluationData().to_dict().keys()))
     
     TRAJ_COLUMN_NAMES = ['trajectories', 'config_name', 'measurement_name', 'rrt_evaluation_times',
                          'iter_numbers', 'overall_eval_time', 'path', 'env_path', 'expand_distance',

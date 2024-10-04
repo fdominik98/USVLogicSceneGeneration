@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,13 +8,16 @@ from visualization.algo_evaluation.algo_eval_utils import algo_mapper, vessel_nu
 from visualization.my_plot import MyPlot
 
 class EvalTimePlot(MyPlot):  
-    def __init__(self, measurements : Dict[str, Dict[str, List[EvaluationData]]]): 
-        self.measurements = measurements
-        self.eval_times = {
-            key: {subkey: [data.evaluation_time for data in sublist if data.best_fitness_index < EPSILON] for subkey, sublist in subdict.items()}
-            for key, subdict in measurements.items()
-        }  
-        self.measurement_labels = vessel_number_mapper(list(measurements.keys()))
+    def __init__(self, eval_datas : List[EvaluationData]): 
+        self.eval_datas = eval_datas
+        self.eval_times : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
+        for eval_data in eval_datas:
+            if eval_data.best_fitness_index < EPSILON:                
+                self.eval_times[eval_data.vessel_number][eval_data.algorithm_desc].append(eval_data.evaluation_time)
+            else: 
+                self.eval_times[eval_data.vessel_number][eval_data.algorithm_desc] = self.eval_times[eval_data.vessel_number][eval_data.algorithm_desc]
+            
+        self.vessel_num_labels = vessel_number_mapper(list(self.eval_times.keys()))
         MyPlot.__init__(self)
         
     def create_fig(self):
@@ -22,31 +26,37 @@ class EvalTimePlot(MyPlot):
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
-        for i, (measurement_name, algo_measurements) in enumerate(self.eval_times.items()):
-            labels = algo_mapper(list(algo_measurements.keys()))
+        for i, (vessel_num, algo_measurements) in enumerate(self.eval_times.items()):
+            algo_labels = algo_mapper(list(algo_measurements.keys()))
             data = list(algo_measurements.values())
             
             if isinstance(axes, np.ndarray):
                 axi : plt.Axes = axes[i]
             else:
                 axi : plt.Axes = axes     
-            boxplot = axi.boxplot(data, tick_labels=labels, patch_artist=True)
-            axi.set_title(self.measurement_labels[i])
+            boxplot = axi.boxplot(data, tick_labels=algo_labels, patch_artist=True)
+            axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Evaluation Time (s)')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticklabels(labels, rotation=45, ha='right')
+            axi.set_xticklabels(algo_labels, rotation=45, ha='right')            
+            
             # Set colors and border widths for each box
             for patch, color in zip(boxplot['boxes'], algo_colors):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)               # Set border width
-            
+                 
             for element in ['whiskers', 'caps', 'medians']:
                 for comp in boxplot[element]:
                     if element == 'medians':
                         comp.set_color('red')
                     comp.set_linewidth(1.5)
+                    
+            # Annotate each box with the number of samples
+            for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
+                sample_size = len(group)
+                axi.text(i, 62, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
+                    
+            axi.set_ylim(0, 65)
             
-            axi.set_ylim(0, 60)
-
 
         fig.tight_layout()

@@ -52,6 +52,7 @@ class GeneticAlgorithmBase(ABC):
                 new_eval_data.config_name = config.name
                 new_eval_data.timestamp = datetime.now().isoformat()
                 new_eval_data.config_group = config.group
+                new_eval_data.vessel_number = config.vessel_num
                 res = self.evaluate(env, new_eval_data, i >= self.warmups)
                 results[-1].append(res)
         return results

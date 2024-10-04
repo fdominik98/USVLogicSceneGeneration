@@ -290,7 +290,7 @@ class ColregPlotManager():
         self.colreg_plot.animation.get_sim_time_count()
         self.time_label.config(text=self.colreg_plot.animation.get_sim_time_count())
         # Schedule the next update
-        self.root.after(1000, self.update_sim_time) 
+        self.control_frame.after(1000, self.update_sim_time) 
         
     def update_actor_info_labels(self):
         if not self.root.winfo_exists():
@@ -299,7 +299,7 @@ class ColregPlotManager():
         for o in self.env.vessels:
             for i, info in enumerate(actor_infos[o.id]):
                 self.actor_info_labels[o.id][i].config(text=info)
-        self.root.after(50, self.update_actor_info_labels) 
+        self.control_frame.after(50, self.update_actor_info_labels) 
         
     def sort_dict(self, dicts : List[Dict[str, plt.Artist]]) -> List[List[plt.Artist]]:
         artists = []
@@ -308,13 +308,16 @@ class ColregPlotManager():
         return artists
     
     def exit_application(self):
-        self.root.quit()
-        self.root.destroy()
+        if self.root and self.root.winfo_exists():
+            self.root.destroy()
+            self.root.quit()
         os._exit(0)
         
     def continue_application(self):
-        self.root.quit()
-        self.root.destroy()
+        if self.root and self.root.winfo_exists():
+            self.root.destroy()
+            self.root.quit()
+        
         
     def to_pdf(self):
         file_name = f'{self.env.config.name}_{datetime.now().isoformat().replace(":","-")}'

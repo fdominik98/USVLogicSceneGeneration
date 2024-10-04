@@ -26,10 +26,12 @@ class EvaluationData:
                  c_1: Optional[float] = None,  # cognitive coefficient
                  c_2: Optional[float] = None,  # social coefficient
                  w: Optional[float] = None,    # inertia weight
-                 best_fitness_index: Optional[float] = None,  # Add best_fitness_index
-                 aggregate_strat: Optional[str] = None,  # New attribute for aggregation strategy
-                 risk_vector: Optional[List[float]] = None,  # New attribute for risk vector
-                 config_group: str = 'F4'):  # New attribute for config group
+                 best_fitness_index: Optional[float] = None,  # best_fitness_index
+                 aggregate_strat: Optional[str] = None,  # aggregation strategy
+                 risk_vector: Optional[List[float]] = None,  # risk vector
+                 config_group: str = 'F4',  # config group
+                 vessel_number: Optional[int] = None,  # New attribute for vessel number
+                 risk_distance: Optional[float] = None):  # New attribute risk_distance
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -49,13 +51,15 @@ class EvaluationData:
         self.path = path
         self.timeout = timeout
         self.init_method = init_method
-        self.c_1 = c_1  # Initialize c_1 parameter
-        self.c_2 = c_2  # Initialize c_2 parameter
-        self.w = w      # Initialize w parameter
-        self.best_fitness_index = best_fitness_index  # Initialize best_fitness_index
-        self.aggregate_strat = aggregate_strat  # Initialize aggregate_strat parameter
-        self.risk_vector = risk_vector  # Initialize risk_vector parameter
-        self.config_group = config_group  # Initialize config_group parameter
+        self.c_1 = c_1
+        self.c_2 = c_2
+        self.w = w
+        self.best_fitness_index = best_fitness_index
+        self.aggregate_strat = aggregate_strat
+        self.risk_vector = risk_vector
+        self.config_group = config_group
+        self.vessel_number = vessel_number  # Initialize vessel_number
+        self.risk_distance = risk_distance  # Initialize risk_distance
 
     def to_dict(self):
         return {
@@ -78,13 +82,15 @@ class EvaluationData:
             "path": self.path,
             "timeout": self.timeout,
             "init_method": self.init_method,
-            "c_1": self.c_1,  # Include c_1 in the dictionary
-            "c_2": self.c_2,  # Include c_2 in the dictionary
-            "w": self.w,      # Include w in the dictionary
-            "best_fitness_index": self.best_fitness_index,  # Include best_fitness_index in the dictionary
-            "aggregate_strat": self.aggregate_strat,  # Include aggregate_strat in the dictionary
-            "risk_vector": self.risk_vector,  # Include risk_vector in the dictionary
-            "config_group": self.config_group  # Include config_group in the dictionary
+            "c_1": self.c_1,
+            "c_2": self.c_2,
+            "w": self.w,
+            "best_fitness_index": self.best_fitness_index,
+            "aggregate_strat": self.aggregate_strat,
+            "risk_vector": self.risk_vector,
+            "config_group": self.config_group,
+            "vessel_number": self.vessel_number,
+            "risk_distance": self.risk_distance  # Include risk_distance in the dictionary
         }
 
     def save_to_json(self, file_path: str):
@@ -113,13 +119,15 @@ class EvaluationData:
             path=data.get("path"),
             timeout=data.get("timeout"),
             init_method=data.get("init_method"),
-            c_1=data.get("c_1"),  # Extract c_1 from the dictionary
-            c_2=data.get("c_2"),  # Extract c_2 from the dictionary
-            w=data.get("w"),      # Extract w from the dictionary
-            best_fitness_index=data.get("best_fitness_index"),  # Extract best_fitness_index from the dictionary
-            aggregate_strat=data.get("aggregate_strat"),  # Extract aggregate_strat from the dictionary
-            risk_vector=data.get("risk_vector"),  # Extract risk_vector from the dictionary
-            config_group=data.get("config_group", 'F4')  # Extract config_group from the dictionary
+            c_1=data.get("c_1"),
+            c_2=data.get("c_2"),
+            w=data.get("w"),
+            best_fitness_index=data.get("best_fitness_index"),
+            aggregate_strat=data.get("aggregate_strat"),
+            risk_vector=data.get("risk_vector"),
+            config_group=data.get("config_group", 'F4'),
+            vessel_number=data.get("vessel_number"),
+            risk_distance=data.get("risk_distance")  # Extract risk_distance from the dictionary
         )
         
     @classmethod

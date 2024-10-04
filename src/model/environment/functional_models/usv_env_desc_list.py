@@ -1,10 +1,10 @@
 from typing import Dict
 from model.environment.usv_environment_desc import F4EnvironmentDesc
 from model.vessel import VesselDesc
-from model.environment.functional_models.three_vessel_interactions import three_vessel_interactions
-from model.environment.functional_models.four_vessel_interactions import four_vessel_interactions
-from model.environment.functional_models.five_vessel_interactions import five_vessel_interactions
-from model.environment.functional_models.six_vessel_interactions import six_vessel_interactions
+from model.environment.functional_models.f4.three_vessel_interactions import three_vessel_interactions
+from model.environment.functional_models.f4.four_vessel_interactions import four_vessel_interactions
+from model.environment.functional_models.f4.five_vessel_interactions import five_vessel_interactions
+from model.environment.functional_models.f4.six_vessel_interactions import six_vessel_interactions
 from model.relation import RelationDesc
 from model.relation_types import crossing_init, head_on_init, overtaking_init
 
