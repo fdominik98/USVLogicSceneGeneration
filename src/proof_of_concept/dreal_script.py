@@ -1,6 +1,6 @@
 import re
 from dreal import (Variable, sqrt, asin, acos, CheckSatisfiability, And)
-from constraints import Constraints
+from src.proof_of_concept.constraints import Constraints
 
 def norm(x, y):
     return sqrt(x*x + y*y)
