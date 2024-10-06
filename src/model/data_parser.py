@@ -74,13 +74,15 @@ class DataParser(ABC):
             
         return pd.DataFrame(data_lists, columns=self.column_names)
     
-    def load_dirs_merged(self) -> pd.DataFrame:
+    def load_dirs_merged(self, dirs=[]) -> Tuple[pd.DataFrame, List[str]]:
         files = []
-        for dir in tkfilebrowser.askopendirnames(initialdir=self.dir):
+        if len(dirs) == 0:
+            dirs = tkfilebrowser.askopendirnames(initialdir=self.dir)
+        for dir in dirs:
             files += self.get_all_file_paths(dir)
             if len(files) == 0:
                 continue
-        return self.load_df_from_files(files)
+        return self.load_df_from_files(files), dirs
     
 
 class EvalDataParser(DataParser):    

@@ -19,8 +19,7 @@ class GeneticAlgorithmBase(ABC):
     def __init__(self, measurement_name: str, algorithm_desc : str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         self.measurement_name = measurement_name
-        self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'
-        self.asset_folder = f'{ASSET_FOLDER}/gen_data/{self.measurement_name}/{self.algorithm_desc}'
+        self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'        
         
         self.env_configs : List[USVEnvironmentDesc] = []
         for config in env_configs:
@@ -99,9 +98,10 @@ class GeneticAlgorithmBase(ABC):
         pass
     
     def save_eval_data(self, eval_data : EvaluationData):
-        if not os.path.exists(self.asset_folder):
-            os.makedirs(self.asset_folder)
-        file_path=f"{self.asset_folder}/{eval_data.config_name}_{eval_data.timestamp.replace(':','-')}.json"
+        asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
+        if not os.path.exists(asset_folder):
+            os.makedirs(asset_folder)
+        file_path=f"{asset_folder}/{eval_data.config_name}_{eval_data.timestamp.replace(':','-')}.json"
         eval_data.path = file_path
         eval_data.save_to_json(file_path=file_path)
         

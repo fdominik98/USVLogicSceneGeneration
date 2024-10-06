@@ -1,10 +1,11 @@
 from typing import Dict
 from model.environment.usv_environment_desc import F4EnvironmentDesc
 from model.vessel import VesselDesc
-from model.environment.functional_models.f4.three_vessel_interactions import three_vessel_interactions
-from model.environment.functional_models.f4.four_vessel_interactions import four_vessel_interactions
-from model.environment.functional_models.f4.five_vessel_interactions import five_vessel_interactions
-from model.environment.functional_models.f4.six_vessel_interactions import six_vessel_interactions
+from model.environment.functional_models import f4_abstract
+from model.environment.functional_models import f4
+from model.environment.functional_models import f3
+from model.environment.functional_models import f2
+from model.environment.functional_models import f1
 from model.relation import RelationDesc
 from model.relation_types import crossing_init, head_on_init, overtaking_init
 
@@ -189,5 +190,17 @@ USV_ENV_DESC_LIST : Dict[str, F4EnvironmentDesc] = {
                                                               RelationDesc(TS6, [overtaking_init()], OS)]),
 }
 
-for config in three_vessel_interactions + four_vessel_interactions + five_vessel_interactions + six_vessel_interactions:
+for config in f1.three_vessel_interactions + f1.four_vessel_interactions + f1.five_vessel_interactions + f1.six_vessel_interactions:
+    USV_ENV_DESC_LIST[config.name] = config
+    
+for config in f2.three_vessel_interactions + f2.four_vessel_interactions + f2.five_vessel_interactions + f2.six_vessel_interactions:
+    USV_ENV_DESC_LIST[config.name] = config
+    
+for config in f3.three_vessel_interactions + f3.four_vessel_interactions + f3.five_vessel_interactions + f3.six_vessel_interactions:
+    USV_ENV_DESC_LIST[config.name] = config
+    
+for config in f4.three_vessel_interactions + f4.four_vessel_interactions + f4.five_vessel_interactions + f4.six_vessel_interactions:
+    USV_ENV_DESC_LIST[config.name] = config
+    
+for config in f4_abstract.three_vessel_interactions:
     USV_ENV_DESC_LIST[config.name] = config

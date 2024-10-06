@@ -11,15 +11,18 @@ class USVEnvironment():
     def __init__(self, env_config : USVEnvironmentDesc, init_method='uniform') -> None:
         self.config = env_config
         if init_method == 'uniform': 
-            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.relation_descs) 
+            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
         elif init_method == 'deterministic':
-            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.relation_descs) 
+            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
         elif init_method == 'lhs':
-            self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_descs) 
+            self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
         else:
             raise Exception('unknown parameter')
             
-        self.vessels, self.relations = self.initializer.get_one_population_as_objects()        
+        self.vessels, self.relation_clauses = self.initializer.get_one_population_as_objects()    
+        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalty_sum)
+        self.relations = self.clause.relations
+          
         self.smallest_ship = min(self.vessels, key=lambda v: v.r)
         self.largest_ship = max(self.vessels, key=lambda v: v.r)
         self.xl, self.xu = self.generate_gene_space()
@@ -34,10 +37,12 @@ class USVEnvironment():
                                 states[vessel.id * VARIABLE_NUM + 1],
                                 states[vessel.id * VARIABLE_NUM + 2],
                                 states[vessel.id * VARIABLE_NUM + 3])
-            
-        for rel in self.relations:
-            rel.update()
-            
+        
+        for clause in self.relation_clauses:
+            clause.update()
+        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalty_sum)
+        self.relations = self.clause.relations  
+        
         return self
          
     @staticmethod  

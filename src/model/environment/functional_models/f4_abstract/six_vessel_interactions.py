@@ -3,7 +3,6 @@ from model.relation_types import crossing_init, head_on_init, overtaking_init
 from model.relation import RelationDesc
 from model.environment.functional_models.model_utils import OS, TS1, TS2, TS3, TS4, TS5
 
-
 six_vessel_interactions = [
         F4EnvironmentDesc('six_vessel_1',
                 [OS, TS1, TS2, TS3, TS4, TS5],

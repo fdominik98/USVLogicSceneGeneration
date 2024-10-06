@@ -9,8 +9,7 @@ from scipy.ndimage import rotate
 import matplotlib.image as mpimg
 
 class ShipImageComponent(PlotComponent):
-    STATIC_ZOOM = 0.3
-    DINAMIC_ZOOM = 0.2
+    ZOOM = 0.3
     img_dir = f'{ASSET_FOLDER}/images'
     
     def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
@@ -30,7 +29,7 @@ class ShipImageComponent(PlotComponent):
             
             # Rotate and plot image
             rotated_image = np.clip(rotate(self.image, np.degrees(o.heading)-90, reshape=True), 0, 1)
-            image_box = OffsetImage(rotated_image, zoom = self.DINAMIC_ZOOM, alpha=0.9)
+            image_box = OffsetImage(rotated_image, zoom = self.ZOOM, alpha=0.9)
             ab = AnnotationBbox(image_box, o.p, xybox= o.p, xycoords='data', frameon = False, zorder=self.zorder)
             self.ax.add_artist(ab)
             self.ship_image_graphs.append(ab)

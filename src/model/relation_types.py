@@ -33,7 +33,7 @@ class RelationType(ABC):
         return distance
     
     def _normalize(self, dist, lb, ub) -> float:
-        return dist / (lb + self.max_value - ub)
+        return dist / (max(lb, self.max_value - ub))
     
    
     def set_relation(self, relation):
@@ -43,14 +43,31 @@ class RelationType(ABC):
     def __repr__(self) -> str:
         return self.name
         
+class RelationTypeDisj(RelationType, ABC):
+    def __init__(self, relations : List[RelationType], negated = False) -> None:
+        self.relations : List[RelationType] = relations
+        RelationType.__init__(self, f'({" V ".join([r.name for r in self.relations])})', negated, 0)
+        
+    def get_penalty_norm(self) -> float:
+        penalty_norms = [r.get_penalty_norm() for r in self.relations]
+        if self.negated:
+            return sum(penalty_norms)
+        else:
+            return min(penalty_norms)
+    
+    def set_relation(self, relation):
+        from model.relation import Relation
+        self.relation : Relation = relation
+        for rel in self.relations:
+            rel.set_relation(relation)
  
 ############ COLLISION ##################
 class MayCollide(RelationType):
     def __init__(self, negated : bool= False) -> None:
-        RelationType.__init__(self, 'mayCollide', negated, np.pi)
+        RelationType.__init__(self, 'mayCollide', negated, MAX_DISTANCE)
     
     def get_penalty_norm(self) -> float:
-        return self.penalty(self.relation.angle_v12_p12, 0, self.relation.angle_half_cone)
+        return self.penalty(self.relation.dcpa, 0, self.relation.safety_dist)
     
     
 ############ VISIBILITY DISTANCE ##################
@@ -76,11 +93,11 @@ class OutVis(RelationType):
         lb = min(self.relation.vis_distance, self.relation.safety_dist)
         return self.penalty(self.relation.o_distance, lb, MAX_DISTANCE)
     
-class OutVisOrNoCollide(OutVis, MayCollide):
+class OutVisOrNoCollide(RelationTypeDisj, OutVis, MayCollide):
     def __init__(self, negated : bool = False) -> None:
         self.outVis = OutVis(negated)
         self.may_collide = MayCollide(not negated)
-        RelationType.__init__(self, f'({self.outVis.name} ∨ {self.may_collide.name})', negated, 0)
+        RelationTypeDisj.__init__(self, [OutVis(negated), MayCollide(not negated)], negated)
         
     def get_penalty_norm(self) -> float:
         if self.negated:
@@ -131,36 +148,26 @@ class OvertakingBear(RelationType):
         return (self.penalty(self.relation.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
                 + self.penalty(self.relation.angle_p12_v1, 0, MASTHEAD_LIGHT_ANGLE /2))
         
-        
-class AnyColregBear(HeadOnBear, OvertakingBear, CrossingBear):
+class AnyColregBear(RelationTypeDisj, HeadOnBear, OvertakingBear, CrossingBear):
     def __init__(self, negated : bool = False) -> None:
-        self.head_on_bear = HeadOnBear(negated)
-        self.overtaking_bear = OvertakingBear(negated)
-        self.crossing_bear = CrossingBear(negated)
-        RelationType.__init__(self, f'({self.head_on_bear.name} V {self.overtaking_bear.name} V {self.crossing_bear.name})', negated, 0)
+        RelationTypeDisj.__init__(self, [HeadOnBear(negated), OvertakingBear(negated), CrossingBear(negated)], negated)
         
-    def get_penalty_norm(self) -> float:
-        if self.negated:
-            return self.head_on_bear.get_penalty_norm() + self.overtaking_bear.get_penalty_norm() + self.crossing_bear.get_penalty_norm()
-        else:
-            return min(self.head_on_bear.get_penalty_norm(), self.overtaking_bear.get_penalty_norm(), self.crossing_bear.get_penalty_norm())
-        
-    def set_relation(self, relation):
-        from model.relation import Relation
-        self.relation : Relation = relation
-        self.head_on_bear.set_relation(relation)
-        self.overtaking_bear.set_relation(relation)
-        self.crossing_bear.set_relation(relation)
+class OvertakingOrCrossingBear(RelationTypeDisj, OvertakingBear, CrossingBear):
+    def __init__(self, negated : bool = False) -> None:
+        RelationTypeDisj.__init__(self, [OvertakingBear(negated), CrossingBear(negated)], negated)
         
         
-def init_rel() -> List[RelationType]:
+def may_collide_at_vis() -> List[RelationType]:
     return [MayCollide(), AtVis()]
 def head_on_init() -> List[RelationType]:
-    return init_rel() + [HeadOnBear()]
+    return may_collide_at_vis() + [HeadOnBear()]
 def crossing_init() -> List[RelationType]:
-    return init_rel() + [CrossingBear()]
+    return may_collide_at_vis() + [CrossingBear()]
 def overtaking_init() -> List[RelationType]:
-    return init_rel() + [OvertakingBear()]
+    return may_collide_at_vis() + [OvertakingBear()]
 
 def any_colreg_init() -> List[RelationType]:
-    return init_rel() + [AnyColregBear()]
+    return may_collide_at_vis() + [AnyColregBear()]
+
+def overtaking_or_crossing_init() -> List[RelationType]:
+    return may_collide_at_vis() + [OvertakingOrCrossingBear()]

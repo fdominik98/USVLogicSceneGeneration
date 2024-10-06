@@ -3,20 +3,20 @@ from typing import Dict, List, Tuple
 import numpy as np
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
 from model.vessel import Vessel, VesselDesc
-from model.relation import Relation, RelationDesc
+from model.relation import Relation, RelationClause, RelationDescClause
 from abc import ABC, abstractmethod
 
 class InstanceInitializer(ABC):    
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDesc]) -> None:
+    def __init__(self, vessel_descs : List[VesselDesc], relation_desc_clauses : List[RelationDescClause]) -> None:
         self.vessel_descs = vessel_descs
         self.actor_num = len(vessel_descs)
-        self.relation_descs = relation_descs
+        self.relation_desc_clauses = relation_desc_clauses
        
     @abstractmethod     
     def get_population(self, pop_size) -> List[List[float]]:
         pass
 
-    def convert_population_to_objects(self, states: List[float]) -> Tuple[List[Vessel], set[Relation]]:
+    def convert_population_to_objects(self, states: List[float]) -> Tuple[List[Vessel], List[RelationClause]]:
         states = OWN_VESSEL_STATES + states
         vessels: Dict[int, Vessel] = {}
         for vessel_desc in self.vessel_descs:
@@ -27,19 +27,22 @@ class InstanceInitializer(ABC):
                             states[vessel.id * VARIABLE_NUM + 3])
             vessels[vessel.id] = vessel
             
-        relations : set[Relation] = set()        
-        for rel_desc in self.relation_descs:
-            vd1 = rel_desc.vd1
-            vd2 = rel_desc.vd2
-            relations.add(Relation(vessels[vd1.id], rel_desc.relations, vessels[vd2.id]))
-        return list(vessels.values()), relations
+        relation_clauses : List[RelationClause] = []     
+        for relation_desc_clause in self.relation_desc_clauses:
+            clause = RelationClause()
+            for relation_desc in relation_desc_clause.relation_descs:
+                vd1 = relation_desc.vd1
+                vd2 = relation_desc.vd2
+                clause.append(Relation(vessels[vd1.id], relation_desc.relation_types, vessels[vd2.id]))
+            relation_clauses.append(clause)
+        return list(vessels.values()), relation_clauses
     
     
-    def get_one_population_as_objects(self) -> Tuple[List[Vessel], set[Relation]]:
+    def get_one_population_as_objects(self) -> Tuple[List[Vessel], List[RelationClause]]:
         return self.convert_population_to_objects(self.get_population(1)[0])
     
 class RandomInstanceInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDesc]) -> None:
+    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
         super().__init__(vessel_descs, relation_descs)
         
     def get_population(self, pop_size) -> List[List[float]]:
@@ -58,7 +61,7 @@ class RandomInstanceInitializer(InstanceInitializer):
     
     
 class DeterministicInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDesc]) -> None:
+    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
         super().__init__(vessel_descs, relation_descs)
         
     def get_population(self, pop_size) -> List[List[float]]:
@@ -73,7 +76,7 @@ class DeterministicInitializer(InstanceInitializer):
     
 
 class LatinHypercubeInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDesc]) -> None:
+    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
         super().__init__(vessel_descs, relation_descs)
         
     def lhs_sampling(self, n_samples: int, lower_bounds: List[float], upper_bounds: List[float]) -> np.ndarray:

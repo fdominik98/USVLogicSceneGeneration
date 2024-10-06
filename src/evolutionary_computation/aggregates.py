@@ -56,10 +56,8 @@ class VesselAggregate(Aggregate):
     def loose_evaluate(self):
         objectives = [0] * self._get_object_num()      
         for rel in self.env.relations:
-            for rel_type in rel.relations:
-                penalty = rel_type.get_penalty_norm() 
-                objectives[rel.vessel1.id] += self._get_penalty(penalty)
-                objectives[rel.vessel2.id] += self._get_penalty(penalty)
+            objectives[rel.vessel1.id] += self._get_penalty(rel.penalties_sum)
+            objectives[rel.vessel2.id] += self._get_penalty(rel.penalties_sum)
         
         return tuple(objectives)
     
@@ -76,11 +74,7 @@ class AggregateAll(Aggregate):
         return (self.loose_evaluate(), )
     
     def loose_evaluate(self):
-        fitness = 0.0
-        for rel in self.env.relations:
-            for rel_type in rel.relations:
-                penalty = rel_type.get_penalty_norm()
-                fitness += self._get_penalty(penalty)
+        fitness = self._get_penalty(self.env.clause.penalty_sum)
         return fitness
         
     
@@ -110,15 +104,8 @@ class CategoryAggregate(Aggregate):
     
     def loose_evaluate(self):
         objectives = [0] * self._get_object_num()      
-        for rel in self.env.relations:
-            for rel_type in rel.collision_relations:
-                penalty = rel_type.get_penalty_norm() 
-                objectives[0] += self._get_penalty(penalty)
-            for rel_type in rel.visibility_relations:
-                penalty = rel_type.get_penalty_norm() 
-                objectives[1] += self._get_penalty(penalty)
-            for rel_type in rel.bearing_relations:
-                penalty = rel_type.get_penalty_norm() 
-                objectives[2] += self._get_penalty(penalty)
+        objectives[0] += self._get_penalty(self.env.clause.penalties[0])
+        objectives[1] += self._get_penalty(self.env.clause.penalties[1])
+        objectives[2] += self._get_penalty(self.env.clause.penalties[2])
         
         return tuple(objectives)

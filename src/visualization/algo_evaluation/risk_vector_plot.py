@@ -7,7 +7,7 @@ from model.environment.usv_config import EPSILON
 from model.environment.usv_environment import USVEnvironment
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from evaluation.risk_evaluation import RiskVector
-from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, algo_colors
+from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 
 class RiskVectorPlot(MyPlot):  
@@ -33,6 +33,7 @@ class RiskVectorPlot(MyPlot):
         fig.subplots_adjust(wspace=0.5)
 
         for i, (vessel_num, group_measurements) in enumerate(self.risk_vectors.items()):
+            group_measurements = dict(sorted(group_measurements.items()))
             group_labels = config_group_mapper(list(group_measurements.keys()))
             data = list(group_measurements.values())
             
@@ -46,7 +47,7 @@ class RiskVectorPlot(MyPlot):
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticklabels(group_labels, rotation=45, ha='right')
             # Set colors and border widths for each box
-            for patch, color in zip(boxplot['boxes'], algo_colors):
+            for patch, color in zip(boxplot['boxes'], group_colors):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)               # Set border width
             

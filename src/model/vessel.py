@@ -16,6 +16,9 @@ class VesselDesc():
         return (isinstance(value, VesselDesc) and
             self.id == value.id and self.l == value.l and
             self.max_speed == value.max_speed)
+        
+    def __repr__(self) -> str:
+        return self.name + ' desc'
 
 class Vessel():
     def __init__(self, desc: VesselDesc):

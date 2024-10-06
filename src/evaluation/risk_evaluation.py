@@ -29,22 +29,23 @@ class RiskVector():
 class ProximityRiskVector():
     def __init__(self, relation : Relation) -> None:
         self.dist = relation.o_distance
-        self.tcpa = relation.dot_p12_v12 / relation.v12_norm_stable**2
-        self.dcpa = np.linalg.norm(relation.p21 + relation.v12 * self.tcpa)
+        self.tcpa = relation.tcpa
+        self.dcpa = relation.dcpa
         
-        dr = 6 * N_MILE_TO_M_CONVERSION
+        dr = 3 * N_MILE_TO_M_CONVERSION
         ts = 3000
         
-        if self.tcpa < 0 or self.tcpa > ts:
+        if self.tcpa < 0 or self.tcpa > ts or self.dcpa > dr:
             self.dcpa_norm = 0
             self.tcpa_norm = 0
         else:       
             if self.dcpa < relation.safety_dist:
                 self.dcpa_norm = 1
             else:
-                self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
-            self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
-        
+                #self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
+                self.dcpa_norm = 1 - (self.dcpa / dr)
+            #self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
+            self.tcpa_norm = 1 - (self.tcpa / ts)
         self.encounter_dist = np.sqrt(self.dcpa_norm * self.tcpa_norm)
         
 class NavigationRiskVector():

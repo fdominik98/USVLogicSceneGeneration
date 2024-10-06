@@ -61,4 +61,4 @@ def config_group_mapper(config_groups : List[str]):
     return labels
 
 full_blue_spectrum_shades = [(i / 8, 0.5, 1 - i / 8) for i in range(9)]
-algo_colors = full_blue_spectrum_shades
+group_colors = full_blue_spectrum_shades

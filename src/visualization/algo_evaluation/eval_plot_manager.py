@@ -13,8 +13,10 @@ from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
         self.eval_datas = eval_datas
-        self.success_rate_plot = SuccessRatePlot(self.eval_datas)
-        self.eval_time_plot = None
+        self.algo_success_rate_plot = SuccessRatePlot(self.eval_datas, 'algo')
+        self.config_success_rate_plot = None
+        self.algo_eval_time_plot = None
+        self.config_eval_time_plot = None
         self.risk_vector_plot = None
         self.metrics_plot = None
         self.root = tk.Tk()
@@ -33,7 +35,7 @@ class EvalPlotManager():
         self.plot_frame = tk.Frame(master=self.canvas_frame)
         self.plot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        self.canvas = FigureCanvasTkAgg(self.success_rate_plot.fig, master=self.plot_frame)
+        self.canvas = FigureCanvasTkAgg(self.algo_success_rate_plot.fig, master=self.plot_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # TOOLBAR FRAME
@@ -49,7 +51,7 @@ class EvalPlotManager():
         self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
         ## PLOT SELECTION
-        self.plot_options = ["Success Rate", "Eval Time", "Risk Vector"]
+        self.plot_options = ["Algo Success Rate", "Config Success Rate", "Config Eval Time", "Algo Eval Time", "Risk Vector"]
         self.selected_plot = tk.StringVar()
         self.selected_plot.set(self.plot_options[0])  # Set the default value
         # Create the dropdown menu
@@ -97,12 +99,20 @@ class EvalPlotManager():
         print('image saved')
         
     def on_select_plot(self, value):
-        if value == 'Success Rate':
-            plot = self.success_rate_plot
-        elif value == 'Eval Time':
-            if self.eval_time_plot is None:
-                self.eval_time_plot = EvalTimePlot(self.eval_datas)
-            plot = self.eval_time_plot
+        if value == 'Algo Success Rate':
+            plot = self.algo_success_rate_plot
+        elif value == 'Config Success Rate':
+            if self.config_success_rate_plot is None:
+                self.config_success_rate_plot = SuccessRatePlot(self.eval_datas, mode='config')
+            plot = self.config_success_rate_plot
+        elif value == 'Config Eval Time':
+            if self.config_eval_time_plot is None:
+                self.config_eval_time_plot = EvalTimePlot(self.eval_datas, mode='config')
+            plot = self.config_eval_time_plot
+        elif value == 'Algo Eval Time':
+            if self.algo_eval_time_plot is None:
+                self.algo_eval_time_plot = EvalTimePlot(self.eval_datas, mode='algo')
+            plot = self.algo_eval_time_plot
         elif value == 'Risk Vector':
             if self.risk_vector_plot is None:
                 self.risk_vector_plot = RiskVectorPlot(self.eval_datas)

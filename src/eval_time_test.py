@@ -1,33 +1,36 @@
 from typing import List
+
+import numpy as np
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
 from evolutionary_computation.evolutionary_algorithms.scipy_de_algorithm import SciPyDEAlgorithm
 from evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 from evolutionary_computation.evaluation_data import EvaluationData
-from model.environment.functional_models.f4.three_vessel_interactions import three_vessel_interactions
-from model.environment.functional_models.f4.four_vessel_interactions import four_vessel_interactions
-from model.environment.functional_models.f4.five_vessel_interactions import five_vessel_interactions
-from model.environment.functional_models.f4.six_vessel_interactions import six_vessel_interactions
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
+from model.environment.functional_models import f4_abstract
+from model.environment.functional_models import f4
+from model.environment.functional_models import f3
+from model.environment.functional_models import f2
+from model.environment.functional_models import f1
 
-NUMBER_OF_RUNS = 10
+NUMBER_OF_RUNS = 100
 WARMUPS = 1
 RANDOM_SEED = 1234
 TIMEOUT = 60
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
-START_FROM = [0,0,0]
 START_FROM = [2, 6, 0]
+START_FROM = [0,0,0]
 
-measurement_names = ['test_3_vessel_scenarios_lhs', 'test_4_vessel_scenarios_lhs', 'test_5_vessel_scenarios_lhs', 'test_6_vessel_scenarios_lhs']
-measurement_names = ['test_3_vessel_scenarios_nsga', 'test_4_vessel_scenarios_nsga', 'test_5_vessel_scenarios_nsga', 'test_6_vessel_scenarios_nsga']
+measurement_names= ['test_4_vessel_scenarios_f1', 'test_4_vessel_scenarios_f2', 'test_4_vessel_scenarios_f3', 'test_4_vessel_scenarios_f4']
+measurement_names= ['test_3_vessel_scenarios_f1', 'test_3_vessel_scenarios_f2', 'test_3_vessel_scenarios_f3', 'test_3_vessel_scenarios_f4']
+measurement_names = ['test_3_vessel_f4_abstract']
 
-measurement_names = ['test_3_vessel_scenarios', 'test_4_vessel_scenarios', 'test_5_vessel_scenarios', 'test_6_vessel_scenarios']
-
-interactions = [four_vessel_interactions]
-interactions = [three_vessel_interactions, four_vessel_interactions, five_vessel_interactions, six_vessel_interactions]
+interactions = [f1.four_vessel_interactions, f2.four_vessel_interactions, f3.four_vessel_interactions, f4.four_vessel_interactions]
+interactions = [f1.three_vessel_interactions, f2.three_vessel_interactions, f3.three_vessel_interactions, f4.three_vessel_interactions]
+interactions = [f4_abstract.three_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,
@@ -69,11 +72,11 @@ configs = [de_config]
 algos = [PyGadGAAlgorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PyMooNSGA3Algorithm, PySwarmPSOAlgorithm, SciPyDEAlgorithm]
 configs = [ga_config, nsga2_vessel_config, nsga2_all_config, nsga2_category_config, nsga3_vessel_config, nsga3_all_config, nsga3_category_config, pso_config, de_config]
 
-warmup_tests = [algo(measurement_name=measurement_names[0], env_configs=three_vessel_interactions[:1], test_config=config, number_of_runs=0, warmups=WARMUPS, verbose=VERBOSE) for algo, config in zip(algos, configs)]
+warmup_tests = [algo(measurement_name=measurement_names[0], env_configs=interactions[0][:1], test_config=config, number_of_runs=0, warmups=WARMUPS, verbose=VERBOSE) for algo, config in zip(algos, configs)]
 
 meas_start = START_FROM[0]
 algo_start = START_FROM[1]
-interac_start = START_FROM[2]
+interac_group_start = START_FROM[2]
 
 tests : List[GeneticAlgorithmBase] = warmup_tests
 for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_start:], interactions[meas_start:])):
@@ -86,10 +89,12 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         
     for j, (algo, config) in enumerate(zip(algos_to_run, configs_to_run)):   
         if j == 0:
-            interactions_to_tun = interaction[interac_start:]
+            interactions_to_tun = interaction[interac_group_start:]
         else:
-            interactions_to_tun = interaction               
-        one_interaction = [algo(measurement_name=measurement_name, env_configs=interactions_to_tun, test_config=config, number_of_runs=NUMBER_OF_RUNS, warmups=0, verbose=VERBOSE)]
+            interactions_to_tun = interaction 
+        number_of_runs_per_interaction = round(np.ceil(NUMBER_OF_RUNS / len(interaction)))             
+        one_interaction = [algo(measurement_name=measurement_name, env_configs=interactions_to_tun, test_config=config,
+                                number_of_runs=number_of_runs_per_interaction, warmups=0, verbose=VERBOSE)]
         tests += one_interaction
 
 for test in tests: 
