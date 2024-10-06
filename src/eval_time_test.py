@@ -26,11 +26,11 @@ START_FROM = [0,0,0]
 
 measurement_names= ['test_4_vessel_scenarios_f1', 'test_4_vessel_scenarios_f2', 'test_4_vessel_scenarios_f3', 'test_4_vessel_scenarios_f4']
 measurement_names= ['test_3_vessel_scenarios_f1', 'test_3_vessel_scenarios_f2', 'test_3_vessel_scenarios_f3', 'test_3_vessel_scenarios_f4']
-measurement_names = ['test_3_vessel_f4_abstract']
+measurement_names = ['test_3_vessel_f4']
 
 interactions = [f1.four_vessel_interactions, f2.four_vessel_interactions, f3.four_vessel_interactions, f4.four_vessel_interactions]
 interactions = [f1.three_vessel_interactions, f2.three_vessel_interactions, f3.three_vessel_interactions, f4.three_vessel_interactions]
-interactions = [f4_abstract.three_vessel_interactions]
+interactions = [f4.three_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,

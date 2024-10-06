@@ -9,8 +9,8 @@ class FisherExactOddsRatio():
         
         pairs = list(itertools.combinations(samples.items(), 2))
         
-        self.odds_ratios : Dict[Tuple[str, str], float]
-        self.p_values : Dict[Tuple[str, str], float]
+        self.odds_ratios : Dict[Tuple[str, str], float] = {}
+        self.p_values : Dict[Tuple[str, str], float] = {}
         
         for algo1, algo2 in pairs:     
             contingency_table_pair = [
@@ -19,6 +19,4 @@ class FisherExactOddsRatio():
             ]
             odds_ratio, p_value = fisher_exact(contingency_table_pair)
             self.odds_ratios[(algo1[0], algo2[0])] = odds_ratio
-            self.odds_ratios[(algo2[0], algo1[0])] = odds_ratio
             self.p_values[(algo1[0], algo2[0])] = p_value
-            self.p_values[(algo2[0], algo1[0])] = p_value

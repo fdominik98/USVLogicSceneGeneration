@@ -1,9 +1,11 @@
 from collections import defaultdict
+import pprint
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
 from model.environment.usv_config import EPSILON
+from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
 from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 
@@ -51,6 +53,9 @@ class SuccessRatePlot(MyPlot):
             axi.set_xticks(range(len(group_labels))) 
             axi.set_xticklabels(group_labels, rotation=45, ha='right')
             axi.set_ylim(0, 105)
+            stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
+            pprint.pprint(stat_signif.p_values)
+            pprint.pprint(stat_signif.odds_ratios)
             
             for i, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, 

@@ -6,6 +6,8 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_config import ASSET_FOLDER
 from evolutionary_computation.evaluation_data import EvaluationData
+from visualization.algo_evaluation.success_rate_odds_ratio_plot import SuccessRateOddsRatioPlot
+from visualization.algo_evaluation.success_rate_p_value_plot import SuccessRatePValuePlot
 from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
@@ -13,10 +15,16 @@ from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
         self.eval_datas = eval_datas
+        
         self.algo_success_rate_plot = SuccessRatePlot(self.eval_datas, 'algo')
         self.config_success_rate_plot = None
         self.algo_eval_time_plot = None
         self.config_eval_time_plot = None
+        self.algo_success_rate_odds_plot = None
+        self.config_success_rate_odds_plot = None
+        self.algo_success_rate_p_value_plot = None
+        self.config_success_rate_p_value_plot = None
+        
         self.risk_vector_plot = None
         self.metrics_plot = None
         self.root = tk.Tk()
@@ -51,7 +59,10 @@ class EvalPlotManager():
         self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
         ## PLOT SELECTION
-        self.plot_options = ["Algo Success Rate", "Config Success Rate", "Config Eval Time", "Algo Eval Time", "Risk Vector"]
+        self.plot_options = ["Algo Success Rate", "Config Success Rate",
+                             "Config Eval Time", "Algo Eval Time", 
+                             "Risk Vector", "Algo Success Odds Ratio", 
+                             "Algo Success P Value"]
         self.selected_plot = tk.StringVar()
         self.selected_plot.set(self.plot_options[0])  # Set the default value
         # Create the dropdown menu
@@ -117,6 +128,14 @@ class EvalPlotManager():
             if self.risk_vector_plot is None:
                 self.risk_vector_plot = RiskVectorPlot(self.eval_datas)
             plot = self.risk_vector_plot
+        elif value == 'Algo Success Odds Ratio':
+            if self.algo_success_rate_odds_plot is None:
+                self.algo_success_rate_odds_plot = SuccessRateOddsRatioPlot(self.eval_datas, mode='algo')
+            plot = self.algo_success_rate_odds_plot
+        elif value == 'Algo Success P Value':
+            if self.algo_success_rate_p_value_plot is None:
+                self.algo_success_rate_p_value_plot = SuccessRatePValuePlot(self.eval_datas, mode='algo')
+            plot = self.algo_success_rate_p_value_plot
         else:
             raise Exception('Not implemented plot.')
         self.navigation_toolbar.destroy()

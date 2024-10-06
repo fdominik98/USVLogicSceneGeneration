@@ -1,4 +1,5 @@
 from collections import defaultdict
+import pprint
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +8,7 @@ from model.environment.usv_config import EPSILON
 from model.environment.usv_environment import USVEnvironment
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from evaluation.risk_evaluation import RiskVector
+from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 
@@ -36,6 +38,10 @@ class RiskVectorPlot(MyPlot):
             group_measurements = dict(sorted(group_measurements.items()))
             group_labels = config_group_mapper(list(group_measurements.keys()))
             data = list(group_measurements.values())
+            
+            stat_signif = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, group_measurements.values())})
+            pprint.pprint(stat_signif.p_values)
+            pprint.pprint(stat_signif.effect_size)
             
             if isinstance(axes, np.ndarray):
                 axi : plt.Axes = axes[i]

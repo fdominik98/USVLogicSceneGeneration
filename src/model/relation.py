@@ -11,12 +11,18 @@ class RelationDesc():
         self.relation_types = relation_types
         self.vd2 = vd2
         
+    def __repr__(self) -> str:
+        return f'{self.vd1.name} - ({", ".join([r.name for r in self.relation_types])}) -> {self.vd2.name}'
+        
 class RelationDescClause():
     def __init__(self, relation_descs : List[RelationDesc] = []) -> None:
         self.relation_descs = relation_descs
         
     def append(self, rel_desc : RelationDesc):
         self.relation_descs.append(rel_desc)
+        
+    def __repr__(self) -> str:
+        return ' V '.join([relation_desc.__repr__() for relation_desc in self.relation_descs])
         
         
 
@@ -164,6 +170,9 @@ class RelationClause():
             self.penalties = [p + sum(pens) for p, pens in zip(self.penalties, rel.penalties)]
         
         self.penalty_sum = self.penalties[0] + self.penalties[1] + self.penalties[2]
+        
+    def __repr__(self) -> str:
+        return ' V '.join([relation.__repr__() for relation in self.relations])
         
 class RelationDisj(Relation):
     def __init__(self, relations : List[Relation]) -> None:

@@ -1,9 +1,11 @@
 from collections import defaultdict
+import pprint
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
 from model.environment.usv_config import EPSILON
+from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 
@@ -40,6 +42,10 @@ class EvalTimePlot(MyPlot):
                 group_labels = config_group_mapper(list(group_measurements.keys()))
             else:
                 raise Exception('Unknown grouping mode')
+            
+            stat_signif = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, group_measurements.values())})
+            pprint.pprint(stat_signif.p_values)
+            pprint.pprint(stat_signif.effect_size)
             
             data = list(group_measurements.values())
             
