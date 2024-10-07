@@ -15,7 +15,8 @@ class VesselDesc():
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, VesselDesc) and
             self.id == value.id and self.l == value.l and
-            self.max_speed == value.max_speed)
+            self.max_speed == value.max_speed and self.min_speed == value.min_speed and
+            self.b == value.b)
         
     def __repr__(self) -> str:
         return self.name + ' desc'

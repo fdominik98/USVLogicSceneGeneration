@@ -222,7 +222,8 @@ class ColregPlotManager():
             rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.distance_component.graphs_by_rels), 'Dist', True)
-        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.vo_cone_component.graphs_by_rels), 'VO cone', False)
+        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.vo_cone_component.graphs_by_rels[:1]), 'VO vec', False)
+        self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.vo_cone_component.graphs_by_rels[1:]), 'VO cone', False)
         self.create_colreg_checkbox_row(self.sort_dict(self.colreg_plot.add_vo_cone_component.graphs_by_rels), 'VO calc', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p12_vec_graphs]), 'P12', False)
         self.create_colreg_checkbox_row(self.sort_dict([self.colreg_plot.prime_component.p21_vec_graphs]), 'P21', False)
@@ -323,8 +324,8 @@ class ColregPlotManager():
         file_name = f'{self.env.config.name}_{datetime.now().isoformat().replace(":","-")}'
         if not os.path.exists(self.image_folder):
             os.makedirs(self.image_folder)
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', dpi=350)
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', dpi=350)
+        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
+        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')
         
     def on_select_plot(self, value):

@@ -69,126 +69,131 @@ OS_BIG = VesselDesc(id=0, l=1000, b=18, min_speed= 3000, max_speed=5000)
 TS1_BIG = VesselDesc(id=1, l=1000, b=30, min_speed= 3000, max_speed=5000)
 TS2_BIG = VesselDesc(id=2, l=1000, b=30, min_speed= 3000, max_speed=5000)
 
-USV_ENV_DESC_LIST : Dict[str, F4EnvironmentDesc] = {
-    'single' : F4EnvironmentDesc('single', [OS], []),    
-    
-    'crossing' : F4EnvironmentDesc('crossing',
-                                       [OS, TS1],
-                                       [RelationDesc(OS, [crossing_init()], TS1)]),
-    
-    'crossing_big' : F4EnvironmentDesc('crossing_big',
-                                       [OS_BIG, TS1_BIG],
-                                       [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG)]),
-    
-    'nocolreg' : F4EnvironmentDesc('nocolreg',
-                                       [OS_BIG, TS1_BIG], []),
-    
-    '[HEAD_ON_INIT]' : F4EnvironmentDesc('[HEAD_ON_INIT]',
-                                       [OS, TS1],
-                                       [RelationDesc(OS, [head_on_init()], TS1)]),
-    
-    '[HEAD_ON_INIT]_big' : F4EnvironmentDesc('[HEAD_ON_INIT]_big',
-                                       [OS_BIG, TS1_BIG],
-                                       [RelationDesc(OS_BIG, [head_on_init()], TS1_BIG)]),
-    
-    'overtaking' : F4EnvironmentDesc('overtaking',
-                                       [OS, TS1],
-                                       [RelationDesc(OS, [overtaking_init()], TS1)]),
-    
-    'overtaking_big' : F4EnvironmentDesc('overtaking_big',
-                                       [OS_BIG, TS1_BIG],
-                                       [RelationDesc(OS_BIG, [overtaking_init()], TS1_BIG)]),
-    
-    'overtaking_and_crossing' : F4EnvironmentDesc('overtaking_and_crossing',
-                                                     [OS, TS1, TS2],
-                                                     [RelationDesc(OS, [crossing_init()], TS1),
-                                                      RelationDesc(TS2, [overtaking_init()], OS)]),
-    
-    'two_way_crossing' : F4EnvironmentDesc('two_way_crossing',
-                                              [OS, TS1, TS2],
-                                              [RelationDesc(OS, [crossing_init()], TS1),
-                                               RelationDesc(TS2, [crossing_init()], OS)]),
-    
-    'crossing_and_head_on' : F4EnvironmentDesc('crossing_and_head_on',
-                                                  [OS, TS1, TS2],
-                                                  [RelationDesc(OS, [head_on_init()], TS1),
-                                                   RelationDesc(TS2, [crossing_init()], OS)]),
+USV_ENV_DESC_LIST : Dict[str, F4EnvironmentDesc] = {}
 
-    'overtaking_and_head_on' : F4EnvironmentDesc('overtaking_and_head_on',
-                                                    [OS, TS1, TS2],
-                                                    [RelationDesc(OS, [head_on_init()], TS1),
-                                                     RelationDesc(TS2, [overtaking_init()], OS)]),
+random_configs = [
+    F4EnvironmentDesc('single', [OS], []),    
     
-    'two_way_overtaking' : F4EnvironmentDesc('two_way_overtaking',
-                                                [OS, TS1, TS2],
-                                                [RelationDesc(OS, [overtaking_init()], TS1),
-                                                 RelationDesc(TS2, [overtaking_init()], OS)]),
+    F4EnvironmentDesc('crossing', [OS, TS1], [RelationDesc(OS, [crossing_init()], TS1)]),
     
-    'ego_crossing_and_overtaking' : F4EnvironmentDesc('ego_crossing_and_overtaking',
-                                                [OS_BIG, TS1_BIG, TS2_BIG],
-                                                [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG),
-                                                 RelationDesc(OS_BIG, [overtaking_init()], TS2_BIG)]),
+    F4EnvironmentDesc('crossing_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG)]),
     
-    'two_way_overtaking_and_crossing' : F4EnvironmentDesc('two_way_overtaking_and_crossing',
-                                                             [OS,TS1, TS2, TS3],
-                                                             [RelationDesc(OS, [overtaking_init()], TS1),
-                                                              RelationDesc(TS2, [overtaking_init()], OS),
-                                                              RelationDesc(TS3, [crossing_init()], OS)]),
+    F4EnvironmentDesc('nocolreg', [OS_BIG, TS1_BIG], []),
     
-    'overtaking_headon_crossing' : F4EnvironmentDesc('overtaking_headon_crossing',
-                                                             [OS, TS1, TS2, TS3],
-                                                             [RelationDesc(TS3, [head_on_init()], OS),
-                                                              RelationDesc(OS, [crossing_init()], TS2),
-                                                              RelationDesc(TS1, [overtaking_init()], OS)]),
+    F4EnvironmentDesc('head_on', [OS, TS1], [RelationDesc(OS, [head_on_init()], TS1)]),
     
-    'five_vessel_colreg_scenario' : F4EnvironmentDesc('five_vessel_colreg_scenario',
-                                                            [OS, TS1, TS2, TS3, TS4],
-                                                            [RelationDesc(OS, [overtaking_init()], TS3),
-                                                            RelationDesc(TS1, [crossing_init()], OS),
-                                                            RelationDesc(TS4, [head_on_init()], OS),
-                                                            RelationDesc(TS2, [crossing_init()], OS)]),
+    F4EnvironmentDesc('head_on_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, [head_on_init()], TS1_BIG)]),
     
-    'five_vessel_colreg_scenario_non_ambigious' : F4EnvironmentDesc('five_vessel_colreg_scenario_non_ambigious',
-                                                            [OS, TS1, TS2, TS3, TS4],
-                                                            [RelationDesc(OS, [head_on_init()], TS4),
-                                                            RelationDesc(OS, [crossing_init()], TS2),
-                                                            RelationDesc(TS1, [head_on_init()], OS),
-                                                            RelationDesc(TS3, [head_on_init()], OS)]),
+    F4EnvironmentDesc('overtaking', [OS, TS1], [RelationDesc(OS, [overtaking_init()], TS1)]),
     
-    'six_vessel_colreg_scenario' : F4EnvironmentDesc('six_vessel_colreg_scenario',
-                                                             [OS, TS1, TS2, TS3, TS4, TS5],
-                                                              [RelationDesc(TS1, [crossing_init()], OS),
-                                                              RelationDesc(OS, [head_on_init()], TS2),
-                                                              RelationDesc(TS3, [head_on_init()], OS),
-                                                              RelationDesc(OS, [head_on_init()], TS5),
-                                                              RelationDesc(OS, [overtaking_init()], TS4)]),
+    F4EnvironmentDesc('overtaking_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, [overtaking_init()], TS1_BIG)]),
     
-    'six_vessel_colreg_scenario2' : F4EnvironmentDesc('six_vessel_colreg_scenario',
-                                                             [OS, TS1, TS2, TS3, TS4, TS5],
-                                                              [RelationDesc(OS, [overtaking_init()], TS1),
-                                                              RelationDesc(OS, [head_on_init()], TS2),
-                                                              RelationDesc(TS3, [crossing_init()], OS),
-                                                              RelationDesc(OS, [crossing_init()], TS5),
-                                                              RelationDesc(TS4, [head_on_init()], OS)]),
     
-    'seven_vessel_colreg_scenario' : F4EnvironmentDesc('seven_vessel_colreg_scenario',
-                                                             [OS, TS1, TS2, TS3, TS4, TS5, TS6],
-                                                              [RelationDesc(TS1, [crossing_init()], OS),
-                                                              RelationDesc(OS, [head_on_init()], TS2),
-                                                              RelationDesc(TS3, [overtaking_init()], OS),
-                                                              RelationDesc(OS, [overtaking_init()], TS6),
-                                                              RelationDesc(TS4, [overtaking_init()], OS),
-                                                              RelationDesc(OS, [head_on_init()], TS5)]),
     
-    'seven_vessel_colreg_scenario2' : F4EnvironmentDesc('seven_vessel_colreg_scenario2',
-                                                             [OS, TS1, TS2, TS3, TS4, TS5, TS6],
-                                                              [RelationDesc(TS3, [overtaking_init()], OS),
-                                                              RelationDesc(TS5, [head_on_init()], OS),
-                                                              RelationDesc(TS2, [crossing_init()], OS),
-                                                              RelationDesc(TS4, [crossing_init()], OS),
-                                                              RelationDesc(TS1, [head_on_init()], OS),
-                                                              RelationDesc(TS6, [overtaking_init()], OS)]),
-}
+    
+    F4EnvironmentDesc('overtaking_and_crossing', [OS, TS1, TS2],
+                    [RelationDesc(OS, [crossing_init()], TS1),
+                    RelationDesc(TS2, [overtaking_init()], OS)]),
+
+    F4EnvironmentDesc('two_way_crossing', [OS, TS1, TS2],
+                    [RelationDesc(OS, [crossing_init()], TS1),
+                    RelationDesc(TS2, [crossing_init()], OS)]),
+    
+    F4EnvironmentDesc('crossing_and_head_on', [OS, TS1, TS2],
+                    [RelationDesc(OS, [head_on_init()], TS1),
+                    RelationDesc(TS2, [crossing_init()], OS)]),
+
+    F4EnvironmentDesc('overtaking_and_head_on', [OS, TS1, TS2],
+                    [RelationDesc(OS, [head_on_init()], TS1),
+                    RelationDesc(TS2, [overtaking_init()], OS)]),
+    
+    F4EnvironmentDesc('two_way_overtaking', [OS, TS1, TS2],
+                    [RelationDesc(OS, [overtaking_init()], TS1),
+                    RelationDesc(TS2, [overtaking_init()], OS)]),
+    
+    
+    
+    
+    F4EnvironmentDesc('overtaking_and_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+                    [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG),
+                    RelationDesc(TS2_BIG, [overtaking_init()], OS_BIG)]),
+    
+    F4EnvironmentDesc('two_way_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+                    [RelationDesc(OS_BIG, [crossing_init()], TS1_BIG),
+                    RelationDesc(TS2_BIG, [crossing_init()], OS_BIG)]),
+    
+    F4EnvironmentDesc('crossing_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+                    [RelationDesc(OS_BIG, [head_on_init()], TS1_BIG),
+                    RelationDesc(TS2_BIG, [crossing_init()], OS_BIG)]),
+
+    F4EnvironmentDesc('overtaking_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+                    [RelationDesc(OS_BIG, [head_on_init()], TS1_BIG),
+                    RelationDesc(TS2_BIG, [overtaking_init()], OS_BIG)]),
+    
+    F4EnvironmentDesc('two_way_overtaking_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+                    [RelationDesc(OS_BIG, [overtaking_init()], TS1_BIG),
+                    RelationDesc(TS2_BIG, [overtaking_init()], OS_BIG)]),
+    
+    
+    
+
+    
+    F4EnvironmentDesc('two_way_overtaking_and_crossing',[OS,TS1, TS2, TS3],
+                    [RelationDesc(OS, [overtaking_init()], TS1),
+                    RelationDesc(TS2, [overtaking_init()], OS),
+                    RelationDesc(TS3, [crossing_init()], OS)]),
+    
+    F4EnvironmentDesc('overtaking_headon_crossing', [OS, TS1, TS2, TS3],
+                    [RelationDesc(TS3, [head_on_init()], OS),
+                    RelationDesc(OS, [crossing_init()], TS2),
+                    RelationDesc(TS1, [overtaking_init()], OS)]),
+    
+    F4EnvironmentDesc('five_vessel_colreg_scenario', [OS, TS1, TS2, TS3, TS4],
+                    [RelationDesc(OS, [overtaking_init()], TS3),
+                    RelationDesc(TS1, [crossing_init()], OS),
+                    RelationDesc(TS4, [head_on_init()], OS),
+                    RelationDesc(TS2, [crossing_init()], OS)]),
+    
+    F4EnvironmentDesc('five_vessel_colreg_scenario_non_ambigious', [OS, TS1, TS2, TS3, TS4],
+                    [RelationDesc(OS, [head_on_init()], TS4),
+                    RelationDesc(OS, [crossing_init()], TS2),
+                    RelationDesc(TS1, [head_on_init()], OS),
+                    RelationDesc(TS3, [head_on_init()], OS)]),
+    
+    F4EnvironmentDesc('six_vessel_colreg_scenario', [OS, TS1, TS2, TS3, TS4, TS5],
+                    [RelationDesc(TS1, [crossing_init()], OS),
+                    RelationDesc(OS, [head_on_init()], TS2),
+                    RelationDesc(TS3, [head_on_init()], OS),
+                    RelationDesc(OS, [head_on_init()], TS5),
+                    RelationDesc(OS, [overtaking_init()], TS4)]),
+    
+    F4EnvironmentDesc('six_vessel_colreg_scenario', [OS, TS1, TS2, TS3, TS4, TS5],
+                    [RelationDesc(OS, [overtaking_init()], TS1),
+                    RelationDesc(OS, [head_on_init()], TS2),
+                    RelationDesc(TS3, [crossing_init()], OS),
+                    RelationDesc(OS, [crossing_init()], TS5),
+                    RelationDesc(TS4, [head_on_init()], OS)]),
+    
+    F4EnvironmentDesc('seven_vessel_colreg_scenario', [OS, TS1, TS2, TS3, TS4, TS5, TS6],
+                    [RelationDesc(TS1, [crossing_init()], OS),
+                    RelationDesc(OS, [head_on_init()], TS2),
+                    RelationDesc(TS3, [overtaking_init()], OS),
+                    RelationDesc(OS, [overtaking_init()], TS6),
+                    RelationDesc(TS4, [overtaking_init()], OS),
+                    RelationDesc(OS, [head_on_init()], TS5)]),
+    
+    F4EnvironmentDesc('seven_vessel_colreg_scenario2', [OS, TS1, TS2, TS3, TS4, TS5, TS6],
+                    [RelationDesc(TS3, [overtaking_init()], OS),
+                    RelationDesc(TS5, [head_on_init()], OS),
+                    RelationDesc(TS2, [crossing_init()], OS),
+                    RelationDesc(TS4, [crossing_init()], OS),
+                    RelationDesc(TS1, [head_on_init()], OS),
+                    RelationDesc(TS6, [overtaking_init()], OS)]),
+]
+
+for config in random_configs:
+    USV_ENV_DESC_LIST[config.id] = config
+    USV_ENV_DESC_LIST[config.name] = config
 
 for config in f1.three_vessel_interactions + f1.four_vessel_interactions + f1.five_vessel_interactions + f1.six_vessel_interactions:
     USV_ENV_DESC_LIST[config.name] = config

@@ -30,7 +30,7 @@ def generate_rel_descs(objects : List[VesselDesc], relation_type) -> List[USVEnv
 
 def generate_models(config_class : USVEnvironmentDesc.__class__, objects : List[VesselDesc], relation_type) -> List[USVEnvironmentDesc]:
     rel_descs_list = generate_rel_descs(objects, relation_type)
-    return [config_class(f'{len(objects) + 1}_vessel_{i+1}_{config_class.group}', [OS] + objects, rel_descs) for i, rel_descs in enumerate(rel_descs_list)]
+    return [config_class(i + 1, [OS] + objects, rel_descs) for i, rel_descs in enumerate(rel_descs_list)]
 
 def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentDesc]:
     permutations = list(itertools.permutations(objects, 2))
@@ -44,4 +44,4 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
                             [RelationDesc(perm[0], [overtaking_or_crossing_init()], OS)] +
                             [RelationDesc(OS, [any_colreg_init()], perm[1])]))
                     
-    return [F4AbstractEnvironmentDesc(f'{len(objects) + 1}_vessel_{F4AbstractEnvironmentDesc.group}', [OS] + objects, clauses)]
+    return [F4AbstractEnvironmentDesc(1, [OS] + objects, clauses)]

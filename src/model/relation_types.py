@@ -90,27 +90,12 @@ class OutVis(RelationType):
         RelationType.__init__(self, 'outVis', negated, MAX_DISTANCE)
     
     def get_penalty_norm(self) -> float:
-        lb = min(self.relation.vis_distance, self.relation.safety_dist)
+        lb = max(self.relation.vis_distance, self.relation.safety_dist)
         return self.penalty(self.relation.o_distance, lb, MAX_DISTANCE)
     
 class OutVisOrNoCollide(RelationTypeDisj, OutVis, MayCollide):
     def __init__(self, negated : bool = False) -> None:
-        self.outVis = OutVis(negated)
-        self.may_collide = MayCollide(not negated)
-        RelationTypeDisj.__init__(self, [OutVis(negated), MayCollide(not negated)], negated)
-        
-    def get_penalty_norm(self) -> float:
-        if self.negated:
-            return self.outVis.get_penalty_norm() + self.may_collide.get_penalty_norm()
-        else:
-            return min(self.outVis.get_penalty_norm(), self.may_collide.get_penalty_norm())
-        
-    def set_relation(self, relation):
-        from model.relation import Relation
-        self.relation : Relation = relation
-        self.outVis.set_relation(relation)
-        self.may_collide.set_relation(relation)
-        
+        RelationTypeDisj.__init__(self, [OutVis(negated), MayCollide(not negated)], negated)       
     
     
 ############ COLREG RELATIVE BEARING ##################

@@ -7,9 +7,10 @@ from model.relation_types import OutVisOrNoCollide
 import copy
 
 class USVEnvironmentDesc():
-    def __init__(self, group : str, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+    def __init__(self, group : str, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
         self.group = group
-        self.name = name
+        self.id = id
+        self.name = f'{str(len(vessel_descs))}vessel_{group}_{id}'
         self.vessel_descs = sorted(vessel_descs, key=lambda v: v.id) 
         if len(relation_desc_clauses) == 0:
             self.relation_dec_clauses = [RelationDescClause()]
@@ -34,29 +35,29 @@ class USVEnvironmentDesc():
     
 class F4AbstractEnvironmentDesc(USVEnvironmentDesc):
     group = 'F4_Abstract'
-    def __init__(self, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, name, vessel_descs, relation_desc_clauses)
+    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
                     
 class F4EnvironmentDesc(USVEnvironmentDesc):
     group = 'F4'
-    def __init__(self, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, name, vessel_descs, relation_desc_clauses)
+    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
         
 class F3EnvironmentDesc(USVEnvironmentDesc):
     group = 'F3'
-    def __init__(self, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, name, vessel_descs, relation_desc_clauses)
+    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
         
         
 class F2EnvironmentDesc(USVEnvironmentDesc):
     group = 'F2'
-    def __init__(self, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, name, vessel_descs, relation_desc_clauses)
+    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
         
         
 class F1EnvironmentDesc(USVEnvironmentDesc):
     group = 'F1'
-    def __init__(self, name : str, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, name, vessel_descs, relation_desc_clauses)
+    def __init__(self, id,vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
                 
                 

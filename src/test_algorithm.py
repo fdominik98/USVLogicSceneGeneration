@@ -9,12 +9,14 @@ from model.environment.functional_models.f4.six_vessel_interactions import six_v
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 
 de_config = EvaluationData(population_size = 10, mutate_prob = 0.8, crossover_prob=0.5,
-                          timeout=60, init_method='uniform', random_seed=22, aggregate_strat='all')
+                          timeout=10, init_method='uniform', random_seed=22, aggregate_strat='all')
 
 test_config_PSO = EvaluationData(population_size = 10, c_1=1.5, c_2=1.7, w=0.5,
                           timeout=10, init_method='uniform', random_seed=1234, aggregate_strat='all_swarm')
 
-alg = SciPyDEAlgorithm(measurement_name='test_de', env_configs=[three_vessel_interactions[0]], test_config=de_config, number_of_runs=1, warmups=0, verbose=True)
+big_configs = ['two_way_overtaking_BIG', 'overtaking_and_head_on_BIG', 'crossing_and_head_on_BIG', 'two_way_crossing_BIG', 'overtaking_and_crossing_BIG']
+
+alg = SciPyDEAlgorithm(measurement_name='test_de', env_configs=big_configs, test_config=de_config, number_of_runs=10, warmups=0, verbose=True)
 
 #alg = PySwarmPSOAlgorithm(measurement_name='test_pso', env_configs=['two_way_overtaking'], test_config=test_config_PSO, number_of_runs=1, warmups=0, verbose=True)
 
@@ -23,4 +25,4 @@ alg = SciPyDEAlgorithm(measurement_name='test_de', env_configs=[three_vessel_int
 
 results = alg.run()
 
-ColregPlotManager(USVEnvironment(alg.env_configs[0]).update(results[0][0].best_solution))
+#ColregPlotManager(USVEnvironment(alg.env_configs[0]).update(results[0][0].best_solution))
