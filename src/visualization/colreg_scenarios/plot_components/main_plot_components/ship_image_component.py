@@ -9,7 +9,7 @@ from scipy.ndimage import rotate
 import matplotlib.image as mpimg
 
 class ShipImageComponent(PlotComponent):
-    ZOOM = 0.3
+    ZOOM = 0.32
     img_dir = f'{ASSET_FOLDER}/images'
     
     def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:

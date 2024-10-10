@@ -22,7 +22,7 @@ INIT_METHOD = 'uniform'
 VERBOSE = False
 
 START_FROM = [2, 6, 0]
-START_FROM = [0,0,0]
+START_FROM = [3,0,0]
 
 measurement_names= ['test_4_vessel_scenarios_f1', 'test_4_vessel_scenarios_f2', 'test_4_vessel_scenarios_f3', 'test_4_vessel_scenarios_f4']
 measurement_names = ['test_3_vessel_f4']
@@ -88,8 +88,8 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         algos_to_run = algos
         configs_to_run = configs
         
-    for j, (algo, config) in enumerate(zip(algos_to_run, configs_to_run)):   
-        if j == 0:
+    for algo, config in zip(algos_to_run, configs_to_run):   
+        if i == 0:
             interactions_to_tun = interaction[interac_group_start:]
         else:
             interactions_to_tun = interaction 
