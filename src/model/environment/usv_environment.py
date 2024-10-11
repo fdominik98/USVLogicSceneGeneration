@@ -11,11 +11,11 @@ class USVEnvironment():
     def __init__(self, env_config : USVEnvironmentDesc, init_method='uniform') -> None:
         self.config = env_config
         if init_method == 'uniform': 
-            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
+            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
         elif init_method == 'deterministic':
-            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
+            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
         elif init_method == 'lhs':
-            self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_dec_clauses) 
+            self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
         else:
             raise Exception('unknown parameter')
             

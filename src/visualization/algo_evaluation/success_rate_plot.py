@@ -27,7 +27,7 @@ class SuccessRatePlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.success_rates), figsize=(12, 4), gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
+        fig, axes = plt.subplots(1, len(self.success_rates), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
@@ -52,13 +52,13 @@ class SuccessRatePlot(MyPlot):
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticks(range(len(group_labels))) 
             axi.set_xticklabels(group_labels, rotation=45, ha='right')
-            axi.set_ylim(0, 105)
+            axi.set_ylim(0, 115)
             stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
             pprint.pprint(stat_signif.p_values)
             pprint.pprint(stat_signif.odds_ratios)
             
             for i, bar in enumerate(bars):
-                axi.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, 
+                axi.text(bar.get_x() + bar.get_width() / 2, 105, 
                 f'{len(list(group_measurements.values())[i])}', ha='center', va='bottom', fontsize=12)
 
         fig.tight_layout()

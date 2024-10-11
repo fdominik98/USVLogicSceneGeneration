@@ -30,7 +30,7 @@ class EvalTimePlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.eval_times), figsize=(12, 4), gridspec_kw={'width_ratios': [1]*len(self.eval_times)})
+        fig, axes = plt.subplots(1, len(self.eval_times), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.eval_times)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
@@ -73,9 +73,9 @@ class EvalTimePlot(MyPlot):
             # Annotate each box with the number of samples
             for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(i, 62, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
+                axi.text(i, 125, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
                     
-            axi.set_ylim(0, 65)
+            axi.set_ylim(0, 135)
             
 
         fig.tight_layout()

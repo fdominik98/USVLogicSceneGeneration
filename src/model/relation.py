@@ -7,27 +7,77 @@ from model.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayColl
 
 class RelationDesc():
     def __init__(self, vd1 : VesselDesc, relation_types : List[RelationType], vd2 : VesselDesc) -> None:
-        self.vd1 = vd1
-        self.relation_types = relation_types
-        self.vd2 = vd2
+        self.relation_types = sorted(relation_types, key=lambda x: (str(type(x)), x.negated) )
+        if self.all_bidir():
+            self.vd1 = min([vd1, vd2], key=lambda x: x.id)
+            self.vd2 = max([vd1, vd2], key=lambda x: x.id)
+        else:
+            self.vd1 = vd1
+            self.vd2 = vd2
         
     def __repr__(self) -> str:
-        return f'{self.vd1.name} - ({", ".join([r.name for r in self.relation_types])}) -> {self.vd2.name}'
+        return f'{self.vd1.id}-({", ".join([r.name for r in self.relation_types])})->{self.vd2.id}'
+    
+    def all_bidir(self):
+        return all(rel.is_bidir() for rel in self.relation_types)
+    
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, RelationDesc):
+            return False
+
+        if not self.all_bidir():
+            if not (self.vd1 == value.vd1 and self.vd2 == value.vd2):
+                return False
+        else:
+            if not ((self.vd1 == value.vd1 and self.vd2 == value.vd2) or (self.vd1 == value.vd2 and self.vd2 == value.vd1)):
+                return False
+
+        if len(self.relation_types) != len(value.relation_types):
+            return False
+        for rel1, rel2 in zip(self.relation_types, value.relation_types):
+            if type(rel1) != type(rel2) or rel1.negated != rel2.negated:
+                return False
+
+        return True
+    
+    def __hash__(self):
+        # Combine attributes into a tuple for a unique hash
+        return hash((self.vd1, self.vd2) + tuple([(type(rel), rel.negated) for rel in self.relation_types]) + ('desc',))
+        
         
 class RelationDescClause():
-    def __init__(self, relation_descs : List[RelationDesc] = []) -> None:
-        self.relation_descs = relation_descs
+    def __init__(self, relation_descs : List[RelationDesc]) -> None:
+        self.relation_descs = sorted(set(relation_descs), key=lambda x: hash(x))
         
     def append(self, rel_desc : RelationDesc):
+        if rel_desc in self.relation_descs:
+            return
         self.relation_descs.append(rel_desc)
+        self.relation_descs = sorted(self.relation_descs, key=lambda x: hash(x))
         
     def __repr__(self) -> str:
-        return ' V '.join([relation_desc.__repr__() for relation_desc in self.relation_descs])
+        return ', '.join([relation_desc.__repr__() for relation_desc in self.relation_descs])
+    
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, RelationDescClause):
+            return False
+
+        if len(self.relation_descs) != len(value.relation_descs):
+            return False
+        for desc1, desc2 in zip(self.relation_descs, value.relation_descs):
+            if desc1 != desc2:
+                return False
+
+        return True
+    
+    def __hash__(self):
+        # Combine attributes into a tuple for a unique hash
+        return hash(tuple([desc for desc in self.relation_descs]) + ('desc',))
         
         
 
 class Relation():
-    def __init__(self, vessel1 : Vessel, relation_types : List[RelationType | List[RelationType]], vessel2 : Vessel) -> None:
+    def __init__(self, vessel1 : Vessel, relation_types : List[RelationType], vessel2 : Vessel) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
@@ -37,18 +87,15 @@ class Relation():
         self.visibility_relations : List[RelationType] = []
         self.bearing_relations : List[RelationType] = []
         
-        for relation in relation_types:
-            if not isinstance(relation, list):
-                relation = [relation]  # Wrap in list if not already
-            for r in relation:
-                r.set_relation(self)
-                if isinstance(r, MayCollide):
-                    self.collision_relations.append(r)
-                if isinstance(r, AtVis) or isinstance(r, InVis) or isinstance(r, OutVis):
-                    self.visibility_relations.append(r)
-                if isinstance(r, HeadOnBear) or isinstance(r, CrossingBear) or isinstance(r, OvertakingBear):
-                    self.bearing_relations.append(r)
-                self.relation_types.append(r)
+        for r in relation_types:
+            r.set_relation(self)
+            if isinstance(r, MayCollide):
+                self.collision_relations.append(r)
+            if isinstance(r, AtVis) or isinstance(r, InVis) or isinstance(r, OutVis):
+                self.visibility_relations.append(r)
+            if isinstance(r, HeadOnBear) or isinstance(r, CrossingBear) or isinstance(r, OvertakingBear):
+                self.bearing_relations.append(r)
+            self.relation_types.append(r)
             
         self.name = rf'{self.vessel1} - ({", ".join([r.name for r in self.relation_types])}) -> {self.vessel2}'
         self.do_update()

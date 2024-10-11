@@ -20,6 +20,9 @@ class VesselDesc():
         
     def __repr__(self) -> str:
         return self.name + ' desc'
+    
+    def __hash__(self):
+        return hash((self.id, self.l, self.max_speed, self.b, self.min_speed, 'description'))
 
 class Vessel():
     def __init__(self, desc: VesselDesc):
@@ -28,6 +31,7 @@ class Vessel():
         self.r = desc.l * 2.0
         self.name = desc.name
         self.max_speed = desc.max_speed
+        self.desc = desc
         
     def update(self, p_x, p_y, heading, speed) -> None:
         self.p = np.array([p_x, p_y])

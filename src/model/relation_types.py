@@ -35,6 +35,9 @@ class RelationType(ABC):
     def _normalize(self, dist, lb, ub) -> float:
         return dist / (max(lb, self.max_value - ub))
     
+    @abstractmethod
+    def is_bidir(self) -> bool:
+        pass    
    
     def set_relation(self, relation):
         from model.relation import Relation
@@ -60,6 +63,9 @@ class RelationTypeDisj(RelationType, ABC):
         self.relation : Relation = relation
         for rel in self.relations:
             rel.set_relation(relation)
+            
+    def is_bidir(self) -> bool:
+        return all(rel.is_bidir() for rel in self.relations)
  
 ############ COLLISION ##################
 class MayCollide(RelationType):
@@ -68,6 +74,9 @@ class MayCollide(RelationType):
     
     def get_penalty_norm(self) -> float:
         return self.penalty(self.relation.dcpa, 0, self.relation.safety_dist)
+    
+    def is_bidir(self) -> bool:
+        return True
     
     
 ############ VISIBILITY DISTANCE ##################
@@ -78,12 +87,18 @@ class AtVis(RelationType):
     def get_penalty_norm(self) -> float:
         return self.penalty(self.relation.o_distance, self.relation.vis_distance - DIST_DRIFT, self.relation.vis_distance + DIST_DRIFT)
     
+    def is_bidir(self) -> bool:
+        return True
+    
 class InVis(RelationType):
     def __init__(self, negated : bool= False) -> None:
         RelationType.__init__(self, 'inVis', negated, MAX_DISTANCE)
     
     def get_penalty_norm(self) -> float:
         return self.penalty(self.relation.o_distance, self.relation.safety_dist, self.relation.vis_distance)
+    
+    def is_bidir(self) -> bool:
+        return True
     
 class OutVis(RelationType):
     def __init__(self, negated : bool= False) -> None:
@@ -92,6 +107,9 @@ class OutVis(RelationType):
     def get_penalty_norm(self) -> float:
         lb = max(self.relation.vis_distance, self.relation.safety_dist)
         return self.penalty(self.relation.o_distance, lb, MAX_DISTANCE)
+    
+    def is_bidir(self) -> bool:
+        return True
     
 class OutVisOrNoCollide(RelationTypeDisj, OutVis, MayCollide):
     def __init__(self, negated : bool = False) -> None:
@@ -117,6 +135,9 @@ class CrossingBear(RelationType):
         # Rotate vector
         return np.dot(rotation_matrix, self.relation.vessel2.v)
     
+    def is_bidir(self) -> bool:
+        return False
+    
 class HeadOnBear(RelationType):
     def __init__(self, negated : bool= False) -> None:
         RelationType.__init__(self, 'headOn', negated, np.pi)
@@ -124,6 +145,9 @@ class HeadOnBear(RelationType):
     def get_penalty_norm(self) -> float:
         return (self.penalty(self.relation.angle_p21_v2, 0.0, BOW_ANGLE / 2.0)
                 + self.penalty(self.relation.angle_p12_v1, 0.0, BOW_ANGLE / 2.0))
+        
+    def is_bidir(self) -> bool:
+        return True
     
 class OvertakingBear(RelationType):
     def __init__(self, negated : bool= False) -> None:
@@ -132,6 +156,9 @@ class OvertakingBear(RelationType):
     def get_penalty_norm(self) -> float:
         return (self.penalty(self.relation.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
                 + self.penalty(self.relation.angle_p12_v1, 0, MASTHEAD_LIGHT_ANGLE /2))
+        
+    def is_bidir(self) -> bool:
+        return False
         
 class AnyColregBear(RelationTypeDisj, HeadOnBear, OvertakingBear, CrossingBear):
     def __init__(self, negated : bool = False) -> None:

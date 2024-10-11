@@ -41,7 +41,7 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
             rem_rel_desc_list = generate_rel_descs(rem, any_colreg_init)
             for rem_rel_descs in rem_rel_desc_list:
                     clauses.append(RelationDescClause(rem_rel_descs +
-                            [RelationDesc(perm[0], [overtaking_or_crossing_init()], OS)] +
-                            [RelationDesc(OS, [any_colreg_init()], perm[1])]))
+                            [RelationDesc(perm[0], overtaking_or_crossing_init(), OS)] +
+                            [RelationDesc(OS, any_colreg_init(), perm[1])]))
                     
     return [F4AbstractEnvironmentDesc(1, [OS] + objects, clauses)]

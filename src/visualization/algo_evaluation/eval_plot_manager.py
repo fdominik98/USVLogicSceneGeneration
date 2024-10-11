@@ -79,11 +79,6 @@ class EvalPlotManager():
         continue_button = tk.Button(self.toolbar_frame, text="Continue", command=self.continue_application)
         continue_button.pack(side=tk.RIGHT, padx=5)
         
-        
-        ## CONTROL FRAME
-        self.control_frame = tk.Frame(master=self.canvas_frame, width=70)
-        self.control_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False)
-
         self.root.wait_window()
         
        

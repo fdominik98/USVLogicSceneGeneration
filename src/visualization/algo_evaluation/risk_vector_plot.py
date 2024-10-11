@@ -29,7 +29,7 @@ class RiskVectorPlot(MyPlot):
         
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.risk_vectors), figsize=(12, 4), gridspec_kw={'width_ratios': [1]*len(self.risk_vectors)})
+        fig, axes = plt.subplots(1, len(self.risk_vectors), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.risk_vectors)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)

@@ -11,7 +11,7 @@ class SuccessRatePValuePlot(SuccessRatePlot):
         SuccessRatePlot.__init__(self, eval_datas, mode)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.success_rates), figsize=(12, 4), gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
+        fig, axes = plt.subplots(1, len(self.success_rates), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
