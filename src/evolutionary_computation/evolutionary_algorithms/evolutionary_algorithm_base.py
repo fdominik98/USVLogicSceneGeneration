@@ -71,7 +71,7 @@ class GeneticAlgorithmBase(ABC):
             eval_data.best_solution = best_solution
             eval_data.best_fitness = best_fitness
             eval_data.number_of_generations = number_of_generations
-            eval_data.best_fitness_index = USVEnvironment.euler_distance(best_fitness)
+            eval_data.best_fitness_index = sum(best_fitness)
             
             if self.verbose:
                 print("Best individual is:", best_solution)

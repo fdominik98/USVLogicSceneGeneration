@@ -49,8 +49,8 @@ class OptimumTermination(Termination):
         if len(algorithm.callback.best_objective) == 0:
             return 0.0
         
-        f_dist = USVEnvironment.euler_distance(algorithm.callback.best_objective)
-        if f_dist < EPSILON:
+        f_dist = sum(algorithm.callback.best_objective)
+        if f_dist == 0.0:
             if self.verbose:
                 print("Stopping as a solution with the desired fitness value is found.")
             return 1.0
@@ -71,7 +71,7 @@ class BestSolutionCallback(Callback):
     def notify(self, algorithm : GeneticAlgorithm):
         current_pop = algorithm.pop
         for ind in current_pop:
-            f_dist = USVEnvironment.euler_distance(ind.F)
+            f_dist = sum(ind.F)
             if self.best_dist == None or (f_dist < self.best_dist):
                 self.best_solution = ind.X
                 self.best_objective = ind.F

@@ -11,7 +11,6 @@ class Aggregate(ABC):
         self.obj_num = self._get_object_num()
         self.minimize = minimize
         self.sign = 1.0 if minimize else -1.0
-        self.weights= (-self.sign,) * self.obj_num 
         self.name = name
         
     @abstractmethod    
@@ -22,10 +21,8 @@ class Aggregate(ABC):
     def _get_object_num(self) -> int:
         pass
     
-    def _get_penalty(self, penalty) -> float:
-         if penalty <= 0:
-            return 0
-         return self.sign * penalty
+    def _signed_penalty(self, penalty) -> float:
+        return self.sign * abs(penalty)
      
     @staticmethod
     def factory(env : USVEnvironment, name : str, minimize = False):
@@ -56,8 +53,8 @@ class VesselAggregate(Aggregate):
     def loose_evaluate(self):
         objectives = [0] * self._get_object_num()      
         for rel in self.env.relations:
-            objectives[rel.vessel1.id] += self._get_penalty(rel.penalties_sum)
-            objectives[rel.vessel2.id] += self._get_penalty(rel.penalties_sum)
+            objectives[rel.vessel1.id] += self._signed_penalty(rel.penalties_sum)
+            objectives[rel.vessel2.id] += self._signed_penalty(rel.penalties_sum)
         
         return tuple(objectives)
     
@@ -74,7 +71,7 @@ class AggregateAll(Aggregate):
         return (self.loose_evaluate(), )
     
     def loose_evaluate(self):
-        fitness = self._get_penalty(self.env.clause.penalty_sum)
+        fitness = self._signed_penalty(self.env.clause.penalties_sum)
         return fitness
         
     
@@ -103,9 +100,5 @@ class CategoryAggregate(Aggregate):
    
     
     def loose_evaluate(self):
-        objectives = [0] * self._get_object_num()      
-        objectives[0] += self._get_penalty(self.env.clause.penalties[0])
-        objectives[1] += self._get_penalty(self.env.clause.penalties[1])
-        objectives[2] += self._get_penalty(self.env.clause.penalties[2])
-        
+        objectives = self.env.clause.category_penalties
         return tuple(objectives)

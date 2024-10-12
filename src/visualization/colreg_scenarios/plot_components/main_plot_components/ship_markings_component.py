@@ -20,7 +20,7 @@ class ShipMarkingsComponent(PlotComponent):
     def do_draw(self):
         for o in self.env.vessels:
             #Plot the positions and radius as circles
-            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o} Radius: {o.r}m', zorder=self.zorder)
+            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o} Radius: {o.r:.2f}m', zorder=self.zorder)
             self.ax.add_artist(radius_circle)
             self.radius_graphs.append(radius_circle)
 

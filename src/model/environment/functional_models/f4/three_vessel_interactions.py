@@ -1,26 +1,13 @@
-from model.environment.usv_environment_desc import F4EnvironmentDesc
-from model.relation import RelationDesc
-from model.relation_types import crossing_init, head_on_init, overtaking_init
-from model.environment.functional_models.model_utils import OS, TS1, TS2
+from model.environment.functional_models.model_utils import TS1, TS10, TS2, TS3, TS4, TS5, TS6, TS7, TS8, TS9, generate_abstract_models
 
-three_vessel_interactions = [
-        F4EnvironmentDesc(1, [OS, TS1, TS2],
-                        [RelationDesc(OS, crossing_init(), TS1),
-                        RelationDesc(TS2, overtaking_init(), OS)]),
-        
-        F4EnvironmentDesc(2, [OS, TS1, TS2],
-                        [RelationDesc(OS, crossing_init(), TS1),
-                        RelationDesc(TS2, crossing_init(), OS)]),
-        
-        F4EnvironmentDesc(3, [OS, TS1, TS2],
-                        [RelationDesc(OS, head_on_init(), TS1),
-                        RelationDesc(TS2, crossing_init(), OS)]),
-        
-        F4EnvironmentDesc(4, [OS, TS1, TS2],
-                        [RelationDesc(OS, head_on_init(), TS1),
-                        RelationDesc(TS2, overtaking_init(), OS)]),
-        
-        F4EnvironmentDesc(5, [OS, TS1, TS2],
-                        [RelationDesc(OS, overtaking_init(), TS1),
-                        RelationDesc(TS2, overtaking_init(), OS)])    
-]   
+three_vessel_interactions = generate_abstract_models([TS1, TS2])
+
+# print(len(generate_abstract_models([TS1, TS2])))
+# print(len(generate_abstract_models([TS1, TS2, TS3])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5, TS6])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5, TS6, TS7])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5, TS6, TS7, TS8])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5, TS6, TS7, TS8, TS9])))
+# print(len(generate_abstract_models([TS1, TS2, TS3, TS4, TS5, TS6, TS7, TS8, TS9, TS10])))

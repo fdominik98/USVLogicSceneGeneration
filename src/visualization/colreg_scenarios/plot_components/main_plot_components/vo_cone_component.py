@@ -17,7 +17,7 @@ class VOConeComponent(PlotComponent):
             
     def do_draw(self):
         for rel in self.env.relations:
-            if rel.vessel2.id == 0:
+            if rel.vessel2.is_OS():
                 o1 = rel.vessel2
                 o2 = rel.vessel1
                 p12 = rel.p21
@@ -54,7 +54,7 @@ class VOConeComponent(PlotComponent):
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for rel in new_env.relations:
-            if rel.vessel2.id == 0:
+            if rel.vessel2.is_OS():
                 o1 = rel.vessel2
                 o2 = rel.vessel1
                 p12 = rel.p21

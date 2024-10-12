@@ -20,7 +20,7 @@ class USVEnvironment():
             raise Exception('unknown parameter')
             
         self.vessels, self.relation_clauses = self.initializer.get_one_population_as_objects()    
-        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalty_sum)
+        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalties_sum)
         self.relations = self.clause.relations
           
         self.smallest_ship = min(self.vessels, key=lambda v: v.r)
@@ -36,20 +36,16 @@ class USVEnvironment():
             vessel.update(states[vessel.id * VARIABLE_NUM],
                                 states[vessel.id * VARIABLE_NUM + 1],
                                 states[vessel.id * VARIABLE_NUM + 2],
-                                states[vessel.id * VARIABLE_NUM + 3])
+                                states[vessel.id * VARIABLE_NUM + 3],
+                                states[vessel.id * VARIABLE_NUM + 4])
         
         for clause in self.relation_clauses:
             clause.update()
-        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalty_sum)
+        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalties_sum)
         self.relations = self.clause.relations  
         
         return self
          
-    @staticmethod  
-    def euler_distance(fitness : List[float]):
-        return math.sqrt(sum([x**2 for x in fitness]))
-          
-          
     def get_population(self, pop_size) -> List[List[float]]:
         population = self.initializer.get_population(pop_size=pop_size)
         return population
@@ -71,6 +67,6 @@ class USVEnvironment():
         xl = [self.config.vessel_descs[0].min_speed]
         xu = [self.config.vessel_descs[0].max_speed]
         for vessel_desc in self.config.vessel_descs[1:]:
-            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_speed]
-            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_speed]
+            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_length, vessel_desc.min_speed]
+            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_length, vessel_desc.max_speed]
         return xl, xu

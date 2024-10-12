@@ -30,7 +30,7 @@ class ColregAnimation():
     
     def __init__(self, fig : plt.Figure,
                  env : USVEnvironment, components : List[PlotComponent],
-                 trajectories : Dict[int, List[Tuple[float, float, float, float]]]) -> None:
+                 trajectories : Dict[int, List[Tuple[float, float, float, float, float]]]) -> None:
         self.fig = fig
         self.env = env
         self.components = components
@@ -68,7 +68,7 @@ class ColregAnimation():
             return traj[frame_index]
             
         vec = o.v * REAL_TIME * speed_up
-        return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.speed)
+        return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.l, o.speed)
         
     def update_graphs(self, data):
         #self.auto_scale()

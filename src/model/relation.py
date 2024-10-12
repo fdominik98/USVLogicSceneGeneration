@@ -1,7 +1,8 @@
+import copy
 import numpy as np
 from typing import List
 from model.environment.usv_config import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
-from model.vessel import Vessel, VesselDesc
+from model.vessel import OS, Vessel, VesselDesc
 from model.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OvertakingBear, RelationType
 
 
@@ -53,6 +54,9 @@ class RelationDescClause():
         if rel_desc in self.relation_descs:
             return
         self.relation_descs.append(rel_desc)
+        self.sort()
+        
+    def sort(self):
         self.relation_descs = sorted(self.relation_descs, key=lambda x: hash(x))
         
     def __repr__(self) -> str:
@@ -70,6 +74,14 @@ class RelationDescClause():
 
         return True
     
+    def get_asymmetric_clause(self):
+        self_copy = copy.deepcopy(self)
+        for rel_desc in self_copy.relation_descs:
+            rel_desc.vd1.id = 0 if isinstance(rel_desc.vd1, OS) else 1
+            rel_desc.vd2.id = 0 if isinstance(rel_desc.vd2, OS) else 1
+        self_copy.sort()
+        return self_copy
+    
     def __hash__(self):
         # Combine attributes into a tuple for a unique hash
         return hash(tuple([desc for desc in self.relation_descs]) + ('desc',))
@@ -81,7 +93,6 @@ class Relation():
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
-        self.safety_dist = vessel1.r + vessel2.r  
         self.relation_types : List[RelationType] = []
         self.collision_relations : List[RelationType] = []
         self.visibility_relations : List[RelationType] = []
@@ -101,7 +112,7 @@ class Relation():
         self.do_update()
         
     def has_os(self)-> bool:
-        return self.vessel1.id == 0 or self.vessel2.id == 0
+        return self.vessel1.is_OS() or self.vessel2.is_OS()
     
     def has_collision(self) -> bool:
         for rel in self.collision_relations:
@@ -125,6 +136,7 @@ class Relation():
         self.do_update()
         
     def do_update(self):
+        self.safety_dist = self.vessel1.r + self.vessel2.r  
         self.p12 = self.vessel2.p - self.vessel1.p
         self.p21 = self.vessel1.p - self.vessel2.p
         self.v12 = self.vessel1.v - self.vessel2.v
@@ -146,14 +158,16 @@ class Relation():
         #self.cos_p12_v12_theta = np.clip(self.dot_p12_v12 / self.o_distance / self.v12_norm_stable, -1, 1)
         #self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
         
+        self.cos_p12_v12_theta = np.clip(self.dot_p12_v12 / self.o_distance / self.v12_norm_stable, -1, 1)
+        self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
+        
         self.sin_half_cone_theta = np.clip(self.safety_dist / self.o_distance, -1, 1)
         self.angle_half_cone = abs(np.arcsin(self.sin_half_cone_theta)) # [0, pi/2] 
         
-        self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
-        self.dcpa = np.linalg.norm(self.p21 + self.v12 * max(0,self.tcpa)) 
-        
-        self.penalties = self.get_penalty_norms()
-        self.penalties_sum = sum(penalty for penalty in self.penalties[0] + self.penalties[1] + self.penalties[2])
+        self.cat_penalties = self.get_penalty_norms()
+        self.penalties_sum = sum(penalty for penalty in self.cat_penalties[0] +
+                                 self.cat_penalties[1] +
+                                 self.cat_penalties[2])
               
         
     def info(self):
@@ -202,7 +216,7 @@ class Relation():
 class RelationClause():
     def __init__(self) -> None:
         self.relations :  List[Relation] = []
-        self.calc_penalties()
+        self.update()
         
     def append(self, rel : Relation):
         self.relations.append(rel)
@@ -212,14 +226,15 @@ class RelationClause():
         self.calc_penalties()
         
     def calc_penalties(self):
-        self.penalties = (0.0, 0.0, 0.0)
+        self.category_penalties = [0.0, 0.0, 0.0]
         for rel in self.relations:
-            self.penalties = [p + sum(pens) for p, pens in zip(self.penalties, rel.penalties)]
-        
-        self.penalty_sum = self.penalties[0] + self.penalties[1] + self.penalties[2]
+            self.category_penalties[0] += sum(rel.cat_penalties[0])
+            self.category_penalties[1] += sum(rel.cat_penalties[1])
+            self.category_penalties[2] += sum(rel.cat_penalties[2])
+        self.penalties_sum = self.category_penalties[0] + self.category_penalties[1] + self.category_penalties[2]
         
     def __repr__(self) -> str:
-        return ' V '.join([relation.__repr__() for relation in self.relations])
+        return ', '.join([relation.__repr__() for relation in self.relations])
         
 class RelationDisj(Relation):
     def __init__(self, relations : List[Relation]) -> None:

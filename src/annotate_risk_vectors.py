@@ -41,7 +41,7 @@ for i, eval_data in enumerate(eval_datas):
     
     config = USV_ENV_DESC_LIST[eval_data.config_name]
     env = USVEnvironment(config).update(eval_data.best_solution)
-    if eval_data.best_fitness_index >= EPSILON:
+    if eval_data.best_fitness_index > 0.0:
         eval_data.risk_vector = None
         eval_data.risk_distance = None
         skipped += 1

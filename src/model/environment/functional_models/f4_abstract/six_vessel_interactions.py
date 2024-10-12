@@ -1,3 +1,56 @@
-from model.environment.functional_models.model_utils import TS1, TS2, TS3, TS4, TS5, generate_abstract_models
+from model.environment.functional_models.model_utils import _OS, TS1, TS2, TS3, TS4, TS5
+from model.environment.usv_environment_desc import F4AbstractEnvironmentDesc
+from model.relation import RelationDesc, RelationDescClause
+from model.relation_types import any_colreg_init, overtaking_or_crossing_init
 
-six_vessel_interactions = generate_abstract_models([TS1, TS2, TS3, TS4, TS5])
+six_vessel_interactions = [
+        F4AbstractEnvironmentDesc(1, [_OS, TS1, TS2, TS3, TS4, TS5],
+                        [RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS3),
+                            RelationDesc(_OS, any_colreg_init(), TS4),
+                            RelationDesc(_OS, any_colreg_init(), TS5)]),                         
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(TS3, any_colreg_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS4),
+                            RelationDesc(_OS, any_colreg_init(), TS5)]),
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS3),
+                            RelationDesc(TS4, any_colreg_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS5)]),
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(TS3, any_colreg_init(), _OS),
+                            RelationDesc(TS4, any_colreg_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS5)]),                        
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS3),
+                            RelationDesc(_OS, any_colreg_init(), TS4),
+                            RelationDesc(TS5, any_colreg_init(), _OS)]),                         
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(TS3, any_colreg_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS4),
+                            RelationDesc(TS5, any_colreg_init(), _OS)]),
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(_OS, any_colreg_init(), TS3),
+                            RelationDesc(TS4, any_colreg_init(), _OS),
+                            RelationDesc(TS5, any_colreg_init(), _OS)]),
+                        RelationDescClause(
+                            [RelationDesc(_OS, any_colreg_init(), TS1),
+                            RelationDesc(TS2, overtaking_or_crossing_init(), _OS),
+                            RelationDesc(TS3, any_colreg_init(), _OS),
+                            RelationDesc(TS4, any_colreg_init(), _OS),
+                            RelationDesc(TS5, any_colreg_init(), _OS)])])    
+]  

@@ -5,7 +5,7 @@ from trajectory_planning.model.rrt_models import Node
 
 class PathInterpolator():
     def __init__(self) -> None:
-        self.interpolated_paths : Dict[int, List[Tuple[float,float,float,float]]] = {}
+        self.interpolated_paths : Dict[int, List[Tuple[float, float, float, float,float]]] = {}
         self.vessels : Dict[int, Vessel] = {}
         self.path_length = 45 * 60
 
@@ -13,7 +13,7 @@ class PathInterpolator():
         if vessel.id in self.interpolated_paths:
             raise Exception("Cannot add two path for one vessel")
         if len(path) == 0:
-            self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.speed)]
+            self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.l, vessel.speed)]
         else:
             self.interpolated_paths[vessel.id] = self.interpolate_path(vessel, path)
         self.vessels[vessel.id] = vessel
@@ -30,6 +30,7 @@ class PathInterpolator():
                     last_state[0] + vessel.v[0],
                     last_state[1] + vessel.v[1],
                     vessel.heading,
+                    vessel.l,
                     vessel.speed
                 ))
                 
@@ -40,7 +41,7 @@ class PathInterpolator():
         return [(self.vessels[id], path[second][:2]) for id, path in self.interpolated_paths.items()]
                 
 
-    def interpolate_path(self, vessel: Vessel, path : List[Node]) -> List[Tuple[float,float,float,float]]:
+    def interpolate_path(self, vessel: Vessel, path : List[Node]) -> List[Tuple[float, float, float, float, float]]:
         """
         Interpolates the given path to have positions at one-second intervals
         and calculates the heading based on the direction of movement.
@@ -80,17 +81,17 @@ class PathInterpolator():
         interpolated_headings.append(vessel.heading)
         interpolated_speeds.append(vessel.speed)
         
-        result : List[Tuple[float,float,float,float]] = []
+        result : List[Tuple[float,float,float,float,float]] = []
         
         for i, heading in enumerate(interpolated_headings):
             pos = interpolated_positions[i]
             speed = interpolated_speeds[i]
-            result.append((pos[0], pos[1], heading, speed))
+            result.append((pos[0], pos[1], heading, vessel.l, speed))
         
         return result
     
     @staticmethod
-    def interpolate_headings(trajectory : List[Tuple[float,float,float,float]])  -> List[Tuple[float,float,float,float]]:
+    def interpolate_headings(trajectory : List[Tuple[float,float,float,float,float]])  -> List[Tuple[float, float, float, float,float]]:
         headings = [t[2] for t in trajectory]
         def interpolate_chunk(start, end, num_steps):
             """Linearly interpolate between start and end in num_steps steps."""
@@ -130,4 +131,4 @@ class PathInterpolator():
             for j in range(len(end_block)):
                 headings[end_block[j]] = interpolated_values[len(start_block) + j]
         
-        return [(trajectory[i][0], trajectory[i][1], headings[i], trajectory[i][3]) for i in range(len(headings))]
+        return [(trajectory[i][0], trajectory[i][1], headings[i], trajectory[i][3], trajectory[i][4]) for i in range(len(headings))]

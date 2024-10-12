@@ -21,7 +21,7 @@ class SuccessRatePlot(MyPlot):
                 group_key = eval_data.config_group
             else:
                 raise Exception('Unknown grouping mode')
-            self.success_rates[eval_data.vessel_number][group_key].append(0 if eval_data.best_fitness_index >= EPSILON else 1)
+            self.success_rates[eval_data.vessel_number][group_key].append(0 if eval_data.best_fitness_index > 0.0 else 1)
             
         self.vessel_num_labels = vessel_number_mapper(list(self.success_rates.keys()))
         MyPlot.__init__(self)

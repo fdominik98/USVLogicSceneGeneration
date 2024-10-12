@@ -29,8 +29,8 @@ class RiskVector():
 class ProximityRiskVector():
     def __init__(self, relation : Relation) -> None:
         self.dist = relation.o_distance
-        self.tcpa = relation.tcpa
-        self.dcpa = relation.dcpa
+        self.tcpa = relation.dot_p12_v12 / relation.v12_norm_stable**2
+        self.dcpa = np.linalg.norm(relation.p21 + relation.v12 * max(0, self.tcpa)) 
         
         dr = 3 * N_MILE_TO_M_CONVERSION
         ts = 3000
@@ -55,7 +55,7 @@ class NavigationRiskVector():
     
     def will_collide(self, heading, speed) -> bool:
         new_vessel = copy.deepcopy(self.vessel)
-        new_vessel.update(self.vessel.p[0], self.vessel.p[1], heading, speed)
+        new_vessel.update(self.vessel.p[0], self.vessel.p[1], heading, self.vessel.l, speed)
         for vessel2 in self.env.vessels:
             if vessel2.id == new_vessel:
                 continue

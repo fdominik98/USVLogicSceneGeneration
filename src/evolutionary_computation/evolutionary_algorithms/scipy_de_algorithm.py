@@ -25,7 +25,7 @@ class ObjectiveMonitorCallback:
                 print("Termination stopped due to timeout")
             return True  # Stop optimization
         
-        if self.current_best_objective < EPSILON:
+        if self.current_best_objective == 0.0:
             if self.verbose:
                 print("Optimal solution reached")
             return True  # Stop optimization

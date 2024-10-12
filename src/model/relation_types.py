@@ -70,10 +70,10 @@ class RelationTypeDisj(RelationType, ABC):
 ############ COLLISION ##################
 class MayCollide(RelationType):
     def __init__(self, negated : bool= False) -> None:
-        RelationType.__init__(self, 'mayCollide', negated, MAX_DISTANCE)
+        RelationType.__init__(self, 'mayCollide', negated, np.pi)
     
     def get_penalty_norm(self) -> float:
-        return self.penalty(self.relation.dcpa, 0, self.relation.safety_dist)
+        return self.penalty(self.relation.angle_v12_p12, 0, self.relation.angle_half_cone)
     
     def is_bidir(self) -> bool:
         return True
@@ -125,7 +125,7 @@ class CrossingBear(RelationType):
     def get_penalty_norm(self) -> float:
         angle_p21_v2_rot = np.arccos(np.dot(self.relation.p21, self.rotated_v2()) / self.relation.o_distance / self.relation.vessel2.speed)
         return (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0)
-                + self.penalty(self.relation.angle_p12_v1, 0, MASTHEAD_LIGHT_ANGLE /2))
+                + self.penalty(self.relation.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))
         
     def rotated_v2(self):
         rotation_matrix = np.array([
@@ -155,7 +155,7 @@ class OvertakingBear(RelationType):
     
     def get_penalty_norm(self) -> float:
         return (self.penalty(self.relation.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
-                + self.penalty(self.relation.angle_p12_v1, 0, MASTHEAD_LIGHT_ANGLE /2))
+                + self.penalty(self.relation.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))
         
     def is_bidir(self) -> bool:
         return False

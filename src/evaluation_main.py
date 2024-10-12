@@ -14,25 +14,30 @@ from model.environment.functional_models import f3
 from model.environment.functional_models import f2
 from model.environment.functional_models import f1
 
-NUMBER_OF_RUNS = 100
-WARMUPS = 1
+NUMBER_OF_RUNS = 200
+WARMUPS = 0
 RANDOM_SEED = 1234
-TIMEOUT = 120
+TIMEOUT = 20
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
 START_FROM = [2, 6, 0]
-START_FROM = [3,0,0]
+START_FROM = [0,0,0]
 
 measurement_names= ['test_4_vessel_scenarios_f1', 'test_4_vessel_scenarios_f2', 'test_4_vessel_scenarios_f3', 'test_4_vessel_scenarios_f4']
-measurement_names = ['test_3_vessel_f4']
 measurement_names= ['test_3_vessel_scenarios_f4', 'test_3_vessel_scenarios_f4_abstract', 'test_4_vessel_scenarios_f4', 'test_4_vessel_scenarios_f4_abstract',
                     'test_5_vessel_scenarios_f4', 'test_5_vessel_scenarios_f4_abstract', 'test_6_vessel_scenarios_f4', 'test_6_vessel_scenarios_f4_abstract']
+measurement_names = ['test_3_vessel_f4_abstract', 'test_3_vessel_f4']
+measurement_names = ['test_4_vessel_f4_abstract', 'test_4_vessel_f4']
+measurement_names = ['test_5_vessel_f4_abstract', 'test_5_vessel_f4']
 
 interactions = [f1.four_vessel_interactions, f2.four_vessel_interactions, f3.four_vessel_interactions, f4.four_vessel_interactions]
 interactions = [f1.three_vessel_interactions, f2.three_vessel_interactions, f3.three_vessel_interactions, f4.three_vessel_interactions]
 interactions = [f4.three_vessel_interactions, f4_abstract.three_vessel_interactions, f4.four_vessel_interactions, f4_abstract.four_vessel_interactions, 
                 f4.five_vessel_interactions, f4_abstract.five_vessel_interactions, f4.six_vessel_interactions, f4_abstract.six_vessel_interactions]
+interactions = [f4_abstract.three_vessel_interactions, f4.three_vessel_interactions]
+interactions = [f4_abstract.four_vessel_interactions, f4.four_vessel_interactions]
+interactions = [f4_abstract.five_vessel_interactions, f4.five_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,
@@ -69,10 +74,12 @@ de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0
                           timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
 
 
-algos = [SciPyDEAlgorithm]
-configs = [de_config]
 algos = [PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PySwarmPSOAlgorithm, SciPyDEAlgorithm]
 configs = [nsga2_category_config, nsga3_all_config, nsga2_vessel_config, nsga3_vessel_config, pso_config, de_config]
+algos = [SciPyDEAlgorithm]
+configs = [de_config]
+algos = [PyMooNSGA2Algorithm]
+configs = [nsga2_vessel_config]
 
 
 meas_start = START_FROM[0]

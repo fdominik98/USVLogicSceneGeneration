@@ -21,7 +21,7 @@ class EvalTimePlot(MyPlot):
                 group_key = eval_data.config_group
             else:
                 raise Exception('Unknown grouping mode')
-            if eval_data.best_fitness_index < EPSILON:                
+            if eval_data.best_fitness_index == 0.0:                
                 self.eval_times[eval_data.vessel_number][group_key].append(eval_data.evaluation_time)
             else: 
                 self.eval_times[eval_data.vessel_number][group_key] = self.eval_times[eval_data.vessel_number][group_key]

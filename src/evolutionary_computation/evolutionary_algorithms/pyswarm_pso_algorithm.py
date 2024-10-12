@@ -31,7 +31,7 @@ class ObjectiveMonitor():
             if f < self.best_fitness:
                 self.best_fitness = f
                 self.best_solution = x[i]
-        if self.best_fitness < EPSILON:
+        if self.best_fitness == 0.0:
             if self.verbose:
                 print('Optimal fitness reached.')
             raise StopIteration()

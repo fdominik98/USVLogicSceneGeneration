@@ -1,43 +1,76 @@
+from abc import ABC
+import copy
 import numpy as np
 from model.environment.usv_config import KNOT_TO_MS_CONVERSION
 
-class VesselDesc():
-    # r : meter
-    # max_speed: knot
-    def __init__(self, id: int, l: float, b: float, max_speed: float, min_speed : float = 1.0) -> None:
+class VesselDesc(ABC):
+    max_speed = 30 * KNOT_TO_MS_CONVERSION # kn
+    min_speed = 5 * KNOT_TO_MS_CONVERSION
+    max_length = 60 # m
+    min_length = 10
+        
+    def __init__(self, id : int):
+        super().__init__()
         self.id = id
-        self.l = l
-        self.b = b
-        self.max_speed = max_speed * KNOT_TO_MS_CONVERSION
-        self.min_speed = min_speed * KNOT_TO_MS_CONVERSION
-        self.name = r'OS' if self.id == 0 else fr'$TS_{self.id}$'
         
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, VesselDesc) and
-            self.id == value.id and self.l == value.l and
-            self.max_speed == value.max_speed and self.min_speed == value.min_speed and
-            self.b == value.b)
+            self.id == value.id and            
+            self.max_speed == value.max_speed and
+            self.min_speed == value.min_speed and
+            self.max_length == value.max_length and
+            self.min_length == value.min_length)
         
     def __repr__(self) -> str:
-        return self.name + ' desc'
+        return 'desc'
     
     def __hash__(self):
-        return hash((self.id, self.l, self.max_speed, self.b, self.min_speed, 'description'))
+        return hash((self.id, self.max_speed, self.min_speed, self.max_length, self.min_length, 'vessel description'))
+    
 
+class OS(VesselDesc):
+    def __init__(self, id):
+        super().__init__(id)
+        
+    def __eq__(self, value: object) -> bool:
+        return (isinstance(value, OS) and super().__eq__(value))
+        
+    def __repr__(self) -> str:
+        return f'OS{self.id}'
+    
+    def __hash__(self):
+        return hash((super().__hash__(), 'OS'))
+    
+class TS(VesselDesc):
+    def __init__(self, id):
+        super().__init__(id)
+        
+    def __eq__(self, value: object) -> bool:
+        return (isinstance(value, TS) and super().__eq__(value))
+        
+    def __repr__(self) -> str:
+        return f'TS{self.id}'
+    
+    def __hash__(self):
+        return hash((super().__hash__(), 'TS'))
+    
 class Vessel():
     def __init__(self, desc: VesselDesc):
-        self.id = desc.id
-        self.l = desc.l
-        self.r = desc.l * 2.0
-        self.name = desc.name
-        self.max_speed = desc.max_speed
         self.desc = desc
+        self.id = desc.id
+        self.name = r'OS' if self.is_OS() else fr'$TS_{self.id}$'
+        self.max_speed = desc.max_speed
+        self.min_speed = desc.min_speed
+        self.max_length = desc.max_length
+        self.min_length = desc.min_length
         
-    def update(self, p_x, p_y, heading, speed) -> None:
+    def update(self, p_x, p_y, heading, l, speed) -> None:
         self.p = np.array([p_x, p_y])
         self.v = np.array([np.cos(heading), np.sin(heading)]) * speed
         self.speed = speed    
         self.heading = heading
+        self.l = l
+        self.r = l * 2.0
         
     def v_norm(self) -> np.ndarray:
         return self.v / self.speed
@@ -56,6 +89,6 @@ class Vessel():
         return self.name
     
     def is_OS(self):
-        return self.id == 0
+        return isinstance(self.desc, OS)
     
  

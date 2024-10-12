@@ -27,7 +27,7 @@ class PyGadGAAlgorithm(GeneticAlgorithmBase):
                 print(f"Best solution = {ga_instance.best_solution()}")
             elapsed_time = time.time() - start_time
             solution, solution_fitness, solution_idx = ga_instance.best_solution()
-            if abs(solution_fitness) < EPSILON:
+            if abs(solution_fitness) == 0.0:
                 if self.verbose:
                     print(f"Terminating due to fitness reaching 0.0.")
                 raise StopIteration

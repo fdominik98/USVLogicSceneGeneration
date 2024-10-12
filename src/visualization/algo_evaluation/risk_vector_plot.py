@@ -17,7 +17,7 @@ class RiskVectorPlot(MyPlot):
         self.eval_datas = eval_datas
         self.risk_vectors : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
         for eval_data in eval_datas:
-            if eval_data.best_fitness_index < EPSILON:                
+            if eval_data.best_fitness_index == 0.0:                
                 if eval_data.risk_distance == None:
                     raise Exception('None vector found among optimal solutions')
                 self.risk_vectors[eval_data.vessel_number][eval_data.config_group].append(eval_data.risk_distance)
