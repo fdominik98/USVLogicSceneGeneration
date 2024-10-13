@@ -5,7 +5,7 @@ from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.scipy_de_algorithm import SciPyDEAlgorithm
 from model.environment.usv_environment import USVEnvironment
 from model.environment.functional_models.f3 import three_vessel_interactions
-from model.environment.functional_models.f4.six_vessel_interactions import six_vessel_interactions
+from model.environment.functional_models.FUNC.six_vessel_interactions import six_vessel_interactions
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 
 de_config = EvaluationData(population_size = 10, mutate_prob = 0.8, crossover_prob=0.5,

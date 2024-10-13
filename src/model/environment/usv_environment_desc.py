@@ -31,12 +31,12 @@ class USVEnvironmentDesc():
                     clause.append(RelationDesc(vdi, [OutVisOrNoCollide()] , vdj))
         self.relation_desc_clauses
     
-class F4AbstractEnvironmentDesc(USVEnvironmentDesc):
+class LOGICEnvironmentDesc(USVEnvironmentDesc):
     group = 'F4_Abstract'
     def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
         super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
                     
-class F4EnvironmentDesc(USVEnvironmentDesc):
+class FUNCEnvironmentDesc(USVEnvironmentDesc):
     group = 'F4'
     def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
         super().__init__(self.group, id, vessel_descs, relation_desc_clauses)

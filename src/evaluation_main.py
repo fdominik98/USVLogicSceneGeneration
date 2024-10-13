@@ -8,36 +8,33 @@ from evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm impo
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
-from model.environment.functional_models import f4_abstract
-from model.environment.functional_models import f4
-from model.environment.functional_models import f3
-from model.environment.functional_models import f2
-from model.environment.functional_models import f1
+from model.environment.functional_models import LOGIC
+from model.environment.functional_models import FUNC
 
 NUMBER_OF_RUNS = 200
-WARMUPS = 0
+WARMUPS = 2
 RANDOM_SEED = 1234
-TIMEOUT = 20
+TIMEOUT = 120
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
-START_FROM = [2, 6, 0]
 START_FROM = [0,0,0]
 
-measurement_names= ['test_4_vessel_scenarios_f1', 'test_4_vessel_scenarios_f2', 'test_4_vessel_scenarios_f3', 'test_4_vessel_scenarios_f4']
-measurement_names= ['test_3_vessel_scenarios_f4', 'test_3_vessel_scenarios_f4_abstract', 'test_4_vessel_scenarios_f4', 'test_4_vessel_scenarios_f4_abstract',
-                    'test_5_vessel_scenarios_f4', 'test_5_vessel_scenarios_f4_abstract', 'test_6_vessel_scenarios_f4', 'test_6_vessel_scenarios_f4_abstract']
-measurement_names = ['test_3_vessel_f4_abstract', 'test_3_vessel_f4']
-measurement_names = ['test_4_vessel_f4_abstract', 'test_4_vessel_f4']
-measurement_names = ['test_5_vessel_f4_abstract', 'test_5_vessel_f4']
+measurement_names = ['test_3_vessel_LOGIC', 'test_3_vessel_FUNC']
+measurement_names = ['test_4_vessel_LOGIC', 'test_4_vessel_FUNC']
+measurement_names = ['test_5_vessel_LOGIC', 'test_5_vessel_FUNC']
+measurement_names = ['test_6_vessel_FUNC', 'test_6_vessel_LOGIC']
 
-interactions = [f1.four_vessel_interactions, f2.four_vessel_interactions, f3.four_vessel_interactions, f4.four_vessel_interactions]
-interactions = [f1.three_vessel_interactions, f2.three_vessel_interactions, f3.three_vessel_interactions, f4.three_vessel_interactions]
-interactions = [f4.three_vessel_interactions, f4_abstract.three_vessel_interactions, f4.four_vessel_interactions, f4_abstract.four_vessel_interactions, 
-                f4.five_vessel_interactions, f4_abstract.five_vessel_interactions, f4.six_vessel_interactions, f4_abstract.six_vessel_interactions]
-interactions = [f4_abstract.three_vessel_interactions, f4.three_vessel_interactions]
-interactions = [f4_abstract.four_vessel_interactions, f4.four_vessel_interactions]
-interactions = [f4_abstract.five_vessel_interactions, f4.five_vessel_interactions]
+measurement_names= ['test_3_vessel_scenarios_FUNC', 'test_3_vessel_scenarios_LOGIC', 'test_4_vessel_scenarios_FUNC', 'test_4_vessel_scenarios_LOGIC',
+                    'test_5_vessel_scenarios_FUNC', 'test_5_vessel_scenarios_LOGIC', 'test_6_vessel_scenarios_FUNC', 'test_6_vessel_scenarios_LOGIC']
+
+interactions = [LOGIC.three_vessel_interactions, FUNC.three_vessel_interactions]
+interactions = [LOGIC.four_vessel_interactions, FUNC.four_vessel_interactions]
+interactions = [LOGIC.five_vessel_interactions, FUNC.five_vessel_interactions]
+interactions = [FUNC.six_vessel_interactions, LOGIC.six_vessel_interactions]
+
+interactions = [FUNC.three_vessel_interactions, LOGIC.three_vessel_interactions, FUNC.four_vessel_interactions, LOGIC.four_vessel_interactions, 
+                FUNC.five_vessel_interactions, LOGIC.five_vessel_interactions, FUNC.six_vessel_interactions, LOGIC.six_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,

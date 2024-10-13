@@ -1,0 +1,4 @@
+from model.environment.functional_models.LOGIC.six_vessel_interactions import six_vessel_interactions
+from model.environment.functional_models.LOGIC.five_vessel_interactions import five_vessel_interactions
+from model.environment.functional_models.LOGIC.four_vessel_interactions import four_vessel_interactions
+from model.environment.functional_models.LOGIC.three_vessel_interactions import three_vessel_interactions
