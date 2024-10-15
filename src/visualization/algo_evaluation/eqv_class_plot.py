@@ -38,11 +38,16 @@ class EqvClassPlot(MyPlot):
                 axi : plt.Axes = axes[i]
             else:
                 axi : plt.Axes = axes  
-            bars : plt.BarContainer = axi.bar(labels, values, color=group_colors, edgecolor='black', linewidth=2)
+            bars : plt.BarContainer = axi.bar(labels, values, color=group_colors, edgecolor='black', linewidth=0.5)
             axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Samples')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticks(range(1, len(labels) + 1)) 
+            yticks = np.linspace(0, max(values), 6)
+            yticks = [int(t) for t in yticks] 
+            axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False) 
+            xticks = np.linspace(labels[0], labels[-1], 6)
+            xticks = [int(t) for t in xticks] 
+            axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
             stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
             pprint.pprint(stat_signif.p_values)
             pprint.pprint(stat_signif.odds_ratios)

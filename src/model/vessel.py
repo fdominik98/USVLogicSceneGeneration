@@ -3,6 +3,7 @@ import copy
 import numpy as np
 from model.environment.usv_config import KNOT_TO_MS_CONVERSION
 
+
 class VesselDesc(ABC):
     max_speed = 30 * KNOT_TO_MS_CONVERSION # kn
     min_speed = 5 * KNOT_TO_MS_CONVERSION
@@ -29,9 +30,8 @@ class VesselDesc(ABC):
     
 
 class OS(VesselDesc):
-    def __init__(self, id):
-        super().__init__(id)
-        
+    max_length = 30 # m
+    min_length = 30
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, OS) and super().__eq__(value))
         
@@ -42,9 +42,6 @@ class OS(VesselDesc):
         return hash((super().__hash__(), 'OS'))
     
 class TS(VesselDesc):
-    def __init__(self, id):
-        super().__init__(id)
-        
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, TS) and super().__eq__(value))
         
@@ -53,6 +50,19 @@ class TS(VesselDesc):
     
     def __hash__(self):
         return hash((super().__hash__(), 'TS'))
+
+
+class VesselDescBig(VesselDesc, ABC):
+    max_speed = 3000 * KNOT_TO_MS_CONVERSION # kn
+    min_speed = 2500 * KNOT_TO_MS_CONVERSION
+    max_length = 600 # m
+    min_length = 600
+    
+class OSBig(OS, VesselDescBig):
+    max_length = 400 # m
+    min_length = 400
+class TSBig(TS, VesselDescBig):
+    pass
     
 class Vessel():
     def __init__(self, desc: VesselDesc):

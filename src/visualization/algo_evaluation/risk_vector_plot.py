@@ -51,7 +51,7 @@ class RiskVectorPlot(MyPlot):
             axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Risk distance')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticklabels(group_labels, rotation=45, ha='right')
+            axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')
             # Set colors and border widths for each box
             for patch, color in zip(boxplot['boxes'], group_colors):
                 patch.set_facecolor(color)           # Set fill color

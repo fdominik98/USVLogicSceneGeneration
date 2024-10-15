@@ -49,7 +49,8 @@ class RandomInstanceInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
         for i in range(int(pop_size)):
-            population : List[float] = [random.uniform(self.vessel_descs[0].min_speed, self.vessel_descs[0].max_speed)]
+            population : List[float] = [random.uniform(self.vessel_descs[0].min_length, self.vessel_descs[0].max_length), 
+                                        random.uniform(self.vessel_descs[0].min_speed, self.vessel_descs[0].max_speed)]
             for vessel_desc in self.vessel_descs[1:]:
                 group = [random.uniform(MIN_COORD, MAX_COORD),
                         random.uniform(MIN_COORD, MAX_COORD),
@@ -69,7 +70,8 @@ class DeterministicInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
         for i in range(int(pop_size)):
-            population : List[float] = [(self.vessel_descs[0].min_speed + self.vessel_descs[0].max_speed) / 2.0]
+            population : List[float] = [(self.vessel_descs[0].min_length + self.vessel_descs[0].max_length) / 2.0,
+                                        (self.vessel_descs[0].min_speed + self.vessel_descs[0].max_speed) / 2.0]
             for vessel_desc in self.vessel_descs[1:]:
                 group = [MAX_COORD / 2, MAX_COORD / 2, 0, 
                          (vessel_desc.min_length + vessel_desc.max_length) / 2,
@@ -113,6 +115,8 @@ class LatinHypercubeInitializer(InstanceInitializer):
             population: List[float] = []
             
             # First vessel (speed only)
+            first_length = self.lhs_sampling(1, [self.vessel_descs[0].min_length], [self.vessel_descs[0].max_length])[0]
+            population.extend(first_length)
             first_speed = self.lhs_sampling(1, [self.vessel_descs[0].min_speed], [self.vessel_descs[0].max_speed])[0]
             population.extend(first_speed)
 

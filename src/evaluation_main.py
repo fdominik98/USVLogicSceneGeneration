@@ -8,8 +8,8 @@ from evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm impo
 from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
-from model.environment.functional_models import LOGIC
-from model.environment.functional_models import FUNC
+from model.environment.functional_models import SBO
+from model.environment.functional_models import MSR
 
 NUMBER_OF_RUNS = 200
 WARMUPS = 2
@@ -20,21 +20,21 @@ VERBOSE = False
 
 START_FROM = [0,0,0]
 
-measurement_names = ['test_3_vessel_LOGIC', 'test_3_vessel_FUNC']
-measurement_names = ['test_4_vessel_LOGIC', 'test_4_vessel_FUNC']
-measurement_names = ['test_5_vessel_LOGIC', 'test_5_vessel_FUNC']
-measurement_names = ['test_6_vessel_FUNC', 'test_6_vessel_LOGIC']
+measurement_names = ['test_3_vessel_SBO', 'test_3_vessel_MSR']
+measurement_names = ['test_4_vessel_SBO', 'test_4_vessel_MSR']
+measurement_names = ['test_5_vessel_SBO', 'test_5_vessel_MSR']
+measurement_names = ['test_6_vessel_MSR', 'test_6_vessel_SBO']
 
-measurement_names= ['test_3_vessel_scenarios_FUNC', 'test_3_vessel_scenarios_LOGIC', 'test_4_vessel_scenarios_FUNC', 'test_4_vessel_scenarios_LOGIC',
-                    'test_5_vessel_scenarios_FUNC', 'test_5_vessel_scenarios_LOGIC', 'test_6_vessel_scenarios_FUNC', 'test_6_vessel_scenarios_LOGIC']
+measurement_names= ['test_3_vessel_scenarios_MSR', 'test_3_vessel_scenarios_SBO', 'test_4_vessel_scenarios_MSR', 'test_4_vessel_scenarios_SBO',
+                    'test_5_vessel_scenarios_MSR', 'test_5_vessel_scenarios_SBO', 'test_6_vessel_scenarios_MSR', 'test_6_vessel_scenarios_SBO']
 
-interactions = [LOGIC.three_vessel_interactions, FUNC.three_vessel_interactions]
-interactions = [LOGIC.four_vessel_interactions, FUNC.four_vessel_interactions]
-interactions = [LOGIC.five_vessel_interactions, FUNC.five_vessel_interactions]
-interactions = [FUNC.six_vessel_interactions, LOGIC.six_vessel_interactions]
+interactions = [SBO.three_vessel_interactions, MSR.three_vessel_interactions]
+interactions = [SBO.four_vessel_interactions, MSR.four_vessel_interactions]
+interactions = [SBO.five_vessel_interactions, MSR.five_vessel_interactions]
+interactions = [MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 
-interactions = [FUNC.three_vessel_interactions, LOGIC.three_vessel_interactions, FUNC.four_vessel_interactions, LOGIC.four_vessel_interactions, 
-                FUNC.five_vessel_interactions, LOGIC.five_vessel_interactions, FUNC.six_vessel_interactions, LOGIC.six_vessel_interactions]
+interactions = [MSR.three_vessel_interactions, SBO.three_vessel_interactions, MSR.four_vessel_interactions, SBO.four_vessel_interactions, 
+                MSR.five_vessel_interactions, SBO.five_vessel_interactions, MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,
@@ -73,10 +73,12 @@ de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0
 
 algos = [PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PyMooNSGA2Algorithm, PyMooNSGA3Algorithm, PySwarmPSOAlgorithm, SciPyDEAlgorithm]
 configs = [nsga2_category_config, nsga3_all_config, nsga2_vessel_config, nsga3_vessel_config, pso_config, de_config]
-algos = [SciPyDEAlgorithm]
-configs = [de_config]
 algos = [PyMooNSGA2Algorithm]
 configs = [nsga2_vessel_config]
+algos = [SciPyDEAlgorithm]
+configs = [de_config]
+algos = [PySwarmPSOAlgorithm]
+configs = [pso_config]
 
 
 meas_start = START_FROM[0]

@@ -39,6 +39,7 @@ class SuccessRateOddsRatioPlot(SuccessRatePlot):
                 axi : plt.Axes = axes  
             axi.errorbar(odds_ratios, comparisons,
                         fmt='o', capsize=5, label='Odds Ratio', color='blue')
+            axi.set_xticklabels(axi.get_xticks(), fontweight='bold')
             axi.axvline(x=1, color='gray', linestyle='--', label='No Association (Odds Ratio = 1)')
             axi.set_xlabel('Odds Ratio')
             axi.legend()

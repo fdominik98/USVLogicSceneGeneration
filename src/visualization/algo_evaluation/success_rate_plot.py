@@ -51,7 +51,7 @@ class SuccessRatePlot(MyPlot):
             axi.set_ylabel('Success rate (%)')
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticks(range(len(group_labels))) 
-            axi.set_xticklabels(group_labels, rotation=45, ha='right')
+            axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')
             axi.set_ylim(0, 115)
             stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
             pprint.pprint(stat_signif.p_values)

@@ -57,7 +57,7 @@ class EvalTimePlot(MyPlot):
             axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Evaluation Time (s)')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticklabels(group_labels, rotation=45, ha='right')            
+            axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')            
             
             # Set colors and border widths for each box
             for patch, color in zip(boxplot['boxes'], group_colors):

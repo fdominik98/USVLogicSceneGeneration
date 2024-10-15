@@ -20,7 +20,7 @@ class USVEnvironmentDesc():
             self.relation_desc_clauses = copy.deepcopy(relation_desc_clauses)
             
         self.vessel_num = len(vessel_descs)
-        self.all_variable_num = VARIABLE_NUM * self.vessel_num - (VARIABLE_NUM - 1)
+        self.all_variable_num = VARIABLE_NUM * self.vessel_num - (VARIABLE_NUM - 2)
 
         all_pairs = [(vdi, vdj) for vdi, vdj in combinations(vessel_descs, 2)]
         for clause in self.relation_desc_clauses:
@@ -31,15 +31,23 @@ class USVEnvironmentDesc():
                     clause.append(RelationDesc(vdi, [OutVisOrNoCollide()] , vdj))
         self.relation_desc_clauses
     
-class LOGICEnvironmentDesc(USVEnvironmentDesc):
-    group = 'F4_Abstract'
-    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
-        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
                     
-class FUNCEnvironmentDesc(USVEnvironmentDesc):
-    group = 'F4'
+class MSREnvironmentDesc(USVEnvironmentDesc):
+    group = 'MSR'
     def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
         super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
+        
+class SBOEnvironmentDesc(USVEnvironmentDesc):
+    group = 'SBO'
+    def __init__(self, id, vessel_descs : List[VesselDesc], relation_desc_clauses : Union[List[RelationDescClause], List[RelationDesc]]) -> None:
+        super().__init__(self.group, id, vessel_descs, relation_desc_clauses)
+       
+       
+       
+       
+       
+       
+       
         
 class F3EnvironmentDesc(USVEnvironmentDesc):
     group = 'F3'

@@ -9,7 +9,7 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.angle_c
 class CenteredAngleCircleComponent(AngleCircleComponent):
     radius_ratio = 1.7
     def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
-        super().__init__(ax, env, linewidth=1.8, radius_ratio = self.radius_ratio)
+        super().__init__(ax, env, linewidth=2.0, radius_ratio = self.radius_ratio)
         self.wedge_sterns : List[patches.Wedge]  = []
         self.wedge_bows : List[patches.Wedge]  = []
         self.wedge_mastheads : List[patches.Wedge]  = []

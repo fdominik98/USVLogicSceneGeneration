@@ -64,8 +64,8 @@ class USVEnvironment():
     
     # Attribute generator with different boundaries
     def generate_gene_space(self):
-        xl = [self.config.vessel_descs[0].min_speed]
-        xu = [self.config.vessel_descs[0].max_speed]
+        xl = [self.config.vessel_descs[0].min_length, self.config.vessel_descs[0].min_speed]
+        xu = [self.config.vessel_descs[0].max_length, self.config.vessel_descs[0].max_speed]
         for vessel_desc in self.config.vessel_descs[1:]:
             xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_length, vessel_desc.min_speed]
             xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_length, vessel_desc.max_speed]

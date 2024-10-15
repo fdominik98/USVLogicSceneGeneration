@@ -1,7 +1,7 @@
 import itertools
 from typing import List, Set
 
-from model.environment.usv_environment_desc import LOGICEnvironmentDesc, FUNCEnvironmentDesc, USVEnvironmentDesc
+from model.environment.usv_environment_desc import SBOEnvironmentDesc, MSREnvironmentDesc, USVEnvironmentDesc
 from model.vessel import VesselDesc, OS, TS
 from model.relation import RelationDesc, RelationDescClause
 from model.relation_types import any_colreg_init, crossing_init, head_on_init, overtaking_init, overtaking_or_crossing_init
@@ -57,7 +57,7 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
                                              for o, (pos, rel) in zip(objects[2:], perm)])
                 clauses.add(clause.get_asymmetric_clause())
     
-    models : List[FUNCEnvironmentDesc] = []
+    models : List[MSREnvironmentDesc] = []
     for i, clause in enumerate(clauses):
         rel_descs : List[RelationDesc] = []
         for id, rd in enumerate(clause.relation_descs):
@@ -65,7 +65,7 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
                                           rd.relation_types,
                                           _OS if isinstance(rd.vd2, OS) else objects[id]))
         
-        models.append(FUNCEnvironmentDesc(i+1, [_OS] + objects, [RelationDescClause(rel_descs)]))
+        models.append(MSREnvironmentDesc(i+1, [_OS] + objects, [RelationDescClause(rel_descs)]))
                 
                     
     return models

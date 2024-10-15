@@ -21,9 +21,9 @@ def algo_mapper(names : List[str]):
     for name in names:
         label = ''
         if 'nsga2' in name.lower():
-            label = 'NSGA2'
+            label = 'N2'
         elif 'nsga3' in name.lower():
-            label = 'NSGA3'
+            label = 'N3'
         elif 'ga' in name.lower():
             label = 'GA'
         elif 'de' in name.lower():
@@ -41,7 +41,7 @@ def algo_mapper(names : List[str]):
             aggregate = 'C'
         else:
             aggregate = ''
-        labels.append(label + '_' + aggregate)
+        labels.append(label + '-' + aggregate)
     return labels
 
 
@@ -49,9 +49,9 @@ def config_group_mapper(config_groups : List[str]):
     labels : List[str] = []
     for name in config_groups:
         if 'f4_abstract' in name.lower():
-            labels.append(r'$F_4$ abstract')
+            labels.append('LOGIC')
         elif 'f4' in name.lower():
-            labels.append(r'$F_4$')
+            labels.append('FUNC')
         elif 'f3' in name.lower():
            labels.append(r'$F_3$')
         elif 'f2' in name.lower():

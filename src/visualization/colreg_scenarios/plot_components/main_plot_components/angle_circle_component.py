@@ -31,9 +31,6 @@ class AngleCircleComponent(PlotComponent):
             
     
     def one_draw(self, o : Vessel,  zorder : int, circle_color):
-        circle = plt.Circle(o.p, self.angle_circle_radius, fill=False, color=circle_color, linewidth=self.linewidth, zorder=zorder)
-        self.ax.add_artist(circle)
-        self.circle_graphs.append(circle)
         
         # Draw two lines centered on the vector
         circle_line1 = self.draw_line(o.p, o.v_norm(), -self.angle_circle_slice_1 / 2, circle_color, self.angle_circle_radius, zorder)  # Left line
@@ -53,6 +50,11 @@ class AngleCircleComponent(PlotComponent):
         #                             color=light_colors[o.id], zorder=zorder)
         
         #self.graphs += [circle, circle_line1, circle_line2, circle_line3, circle_line4, big_quiver]
+        
+        circle = plt.Circle(o.p, self.angle_circle_radius, fill=False, color=circle_color, linewidth=self.linewidth, zorder=zorder)
+        self.ax.add_artist(circle)
+        self.circle_graphs.append(circle)
+        
         self.graphs += [circle, circle_line1, circle_line2, circle_line3, circle_line4]
         
       

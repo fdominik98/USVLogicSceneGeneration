@@ -1,8 +1,8 @@
 from typing import Dict
-from model.environment.usv_environment_desc import FUNCEnvironmentDesc
-from model.vessel import OS, TS, VesselDesc
-from model.environment.functional_models import LOGIC
-from model.environment.functional_models import FUNC
+from model.environment.usv_environment_desc import MSREnvironmentDesc
+from model.vessel import OS, TS, OSBig, TSBig, VesselDesc
+from model.environment.functional_models import SBO
+from model.environment.functional_models import MSR
 from model.environment.functional_models import f3
 from model.environment.functional_models import f2
 from model.environment.functional_models import f1
@@ -70,72 +70,72 @@ TS4 = TS(id=4)
 TS5 = TS(id=5)
 TS6 = TS(id=6)
 
-OS_BIG = TS(id=0)
-TS1_BIG = TS(id=1)
-TS2_BIG = TS(id=2)
+OS_BIG = OSBig(id=0)
+TS1_BIG = TSBig(id=1)
+TS2_BIG = TSBig(id=2)
 
-USV_ENV_DESC_LIST : Dict[str, FUNCEnvironmentDesc] = {}
+USV_ENV_DESC_LIST : Dict[str, MSREnvironmentDesc] = {}
 
 random_configs = [
-    FUNCEnvironmentDesc('single', [_OS], []),    
+    MSREnvironmentDesc('single', [_OS], []),    
     
-    FUNCEnvironmentDesc('crossing', [_OS, TS1], [RelationDesc(_OS, crossing_init(), TS1)]),
+    MSREnvironmentDesc('crossing', [_OS, TS1], [RelationDesc(_OS, crossing_init(), TS1)]),
     
-    FUNCEnvironmentDesc('crossing_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, crossing_init(), TS1_BIG)]),
+    MSREnvironmentDesc('crossing_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, crossing_init(), TS1_BIG)]),
     
-    FUNCEnvironmentDesc('nocolreg', [OS_BIG, TS1_BIG], []),
+    MSREnvironmentDesc('nocolreg', [OS_BIG, TS1_BIG], []),
     
-    FUNCEnvironmentDesc('head_on', [_OS, TS1], [RelationDesc(_OS, head_on_init(), TS1)]),
+    MSREnvironmentDesc('head_on', [_OS, TS1], [RelationDesc(_OS, head_on_init(), TS1)]),
     
-    FUNCEnvironmentDesc('head_on_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, head_on_init(), TS1_BIG)]),
+    MSREnvironmentDesc('head_on_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, head_on_init(), TS1_BIG)]),
     
-    FUNCEnvironmentDesc('overtaking', [_OS, TS1], [RelationDesc(_OS, overtaking_init(), TS1)]),
+    MSREnvironmentDesc('overtaking', [_OS, TS1], [RelationDesc(_OS, overtaking_init(), TS1)]),
     
-    FUNCEnvironmentDesc('overtaking_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, overtaking_init(), TS1_BIG)]),
-    
-    
+    MSREnvironmentDesc('overtaking_big', [OS_BIG, TS1_BIG], [RelationDesc(OS_BIG, overtaking_init(), TS1_BIG)]),
     
     
-    FUNCEnvironmentDesc('overtaking_and_crossing', [_OS, TS1, TS2],
+    
+    
+    MSREnvironmentDesc('overtaking_and_crossing', [_OS, TS1, TS2],
                     [RelationDesc(_OS, crossing_init(), TS1),
                     RelationDesc(TS2, overtaking_init(), _OS)]),
 
-    FUNCEnvironmentDesc('two_way_crossing', [_OS, TS1, TS2],
+    MSREnvironmentDesc('two_way_crossing', [_OS, TS1, TS2],
                     [RelationDesc(_OS, crossing_init(), TS1),
                     RelationDesc(TS2, crossing_init(), _OS)]),
     
-    FUNCEnvironmentDesc('crossing_and_head_on', [_OS, TS1, TS2],
+    MSREnvironmentDesc('crossing_and_head_on', [_OS, TS1, TS2],
                     [RelationDesc(_OS, head_on_init(), TS1),
                     RelationDesc(TS2, crossing_init(), _OS)]),
 
-    FUNCEnvironmentDesc('overtaking_and_head_on', [_OS, TS1, TS2],
+    MSREnvironmentDesc('overtaking_and_head_on', [_OS, TS1, TS2],
                     [RelationDesc(_OS, head_on_init(), TS1),
                     RelationDesc(TS2, overtaking_init(), _OS)]),
     
-    FUNCEnvironmentDesc('two_way_overtaking', [_OS, TS1, TS2],
+    MSREnvironmentDesc('two_way_overtaking', [_OS, TS1, TS2],
                     [RelationDesc(_OS, overtaking_init(), TS1),
                     RelationDesc(TS2, overtaking_init(), _OS)]),
     
     
     
     
-    FUNCEnvironmentDesc('overtaking_and_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+    MSREnvironmentDesc('overtaking_and_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
                     [RelationDesc(OS_BIG, crossing_init(), TS1_BIG),
                     RelationDesc(TS2_BIG, overtaking_init(), OS_BIG)]),
     
-    FUNCEnvironmentDesc('two_way_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+    MSREnvironmentDesc('two_way_crossing_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
                     [RelationDesc(OS_BIG, crossing_init(), TS1_BIG),
                     RelationDesc(TS2_BIG, crossing_init(), OS_BIG)]),
     
-    FUNCEnvironmentDesc('crossing_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+    MSREnvironmentDesc('crossing_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
                     [RelationDesc(OS_BIG, head_on_init(), TS1_BIG),
                     RelationDesc(TS2_BIG, crossing_init(), OS_BIG)]),
 
-    FUNCEnvironmentDesc('overtaking_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+    MSREnvironmentDesc('overtaking_and_head_on_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
                     [RelationDesc(OS_BIG, head_on_init(), TS1_BIG),
                     RelationDesc(TS2_BIG, overtaking_init(), OS_BIG)]),
     
-    FUNCEnvironmentDesc('two_way_overtaking_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
+    MSREnvironmentDesc('two_way_overtaking_BIG', [OS_BIG, TS1_BIG, TS2_BIG],
                     [RelationDesc(OS_BIG, overtaking_init(), TS1_BIG),
                     RelationDesc(TS2_BIG, overtaking_init(), OS_BIG)]),
     
@@ -143,43 +143,43 @@ random_configs = [
     
 
     
-    FUNCEnvironmentDesc('two_way_overtaking_and_crossing',[_OS,TS1, TS2, TS3],
+    MSREnvironmentDesc('two_way_overtaking_and_crossing',[_OS,TS1, TS2, TS3],
                     [RelationDesc(_OS, overtaking_init(), TS1),
                     RelationDesc(TS2, overtaking_init(), _OS),
                     RelationDesc(TS3, crossing_init(), _OS)]),
     
-    FUNCEnvironmentDesc('overtaking_headon_crossing', [_OS, TS1, TS2, TS3],
+    MSREnvironmentDesc('overtaking_headon_crossing', [_OS, TS1, TS2, TS3],
                     [RelationDesc(TS3, head_on_init(), _OS),
                     RelationDesc(_OS, crossing_init(), TS2),
                     RelationDesc(TS1, overtaking_init(), _OS)]),
     
-    FUNCEnvironmentDesc('five_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4],
+    MSREnvironmentDesc('five_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4],
                     [RelationDesc(_OS, overtaking_init(), TS3),
                     RelationDesc(TS1, crossing_init(), _OS),
                     RelationDesc(TS4, head_on_init(), _OS),
                     RelationDesc(TS2, crossing_init(), _OS)]),
     
-    FUNCEnvironmentDesc('five_vessel_colreg_scenario_non_ambigious', [_OS, TS1, TS2, TS3, TS4],
+    MSREnvironmentDesc('five_vessel_colreg_scenario_non_ambigious', [_OS, TS1, TS2, TS3, TS4],
                     [RelationDesc(_OS, head_on_init(), TS4),
                     RelationDesc(_OS, crossing_init(), TS2),
                     RelationDesc(TS1, head_on_init(), _OS),
                     RelationDesc(TS3, head_on_init(), _OS)]),
     
-    FUNCEnvironmentDesc('six_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5],
+    MSREnvironmentDesc('six_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5],
                     [RelationDesc(TS1, crossing_init(), _OS),
                     RelationDesc(_OS, head_on_init(), TS2),
                     RelationDesc(TS3, head_on_init(), _OS),
                     RelationDesc(_OS, head_on_init(), TS5),
                     RelationDesc(_OS, overtaking_init(), TS4)]),
     
-    FUNCEnvironmentDesc('six_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5],
+    MSREnvironmentDesc('six_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5],
                     [RelationDesc(_OS, overtaking_init(), TS1),
                     RelationDesc(_OS, head_on_init(), TS2),
                     RelationDesc(TS3, crossing_init(), _OS),
                     RelationDesc(_OS, crossing_init(), TS5),
                     RelationDesc(TS4, head_on_init(), _OS)]),
     
-    FUNCEnvironmentDesc('seven_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5, TS6],
+    MSREnvironmentDesc('seven_vessel_colreg_scenario', [_OS, TS1, TS2, TS3, TS4, TS5, TS6],
                     [RelationDesc(TS1, crossing_init(), _OS),
                     RelationDesc(_OS, head_on_init(), TS2),
                     RelationDesc(TS3, overtaking_init(), _OS),
@@ -187,7 +187,7 @@ random_configs = [
                     RelationDesc(TS4, overtaking_init(), _OS),
                     RelationDesc(_OS, head_on_init(), TS5)]),
     
-    FUNCEnvironmentDesc('seven_vessel_colreg_scenario2', [_OS, TS1, TS2, TS3, TS4, TS5, TS6],
+    MSREnvironmentDesc('seven_vessel_colreg_scenario2', [_OS, TS1, TS2, TS3, TS4, TS5, TS6],
                     [RelationDesc(TS3, overtaking_init(), _OS),
                     RelationDesc(TS5, head_on_init(), _OS),
                     RelationDesc(TS2, crossing_init(), _OS),
@@ -200,17 +200,9 @@ for config in random_configs:
     USV_ENV_DESC_LIST[config.id] = config
     USV_ENV_DESC_LIST[config.name] = config
 
-for config in f1.three_vessel_interactions + f1.four_vessel_interactions + f1.five_vessel_interactions + f1.six_vessel_interactions:
+    
+for config in MSR.three_vessel_interactions + MSR.four_vessel_interactions + MSR.five_vessel_interactions + MSR.six_vessel_interactions:
     USV_ENV_DESC_LIST[config.name] = config
     
-for config in f2.three_vessel_interactions + f2.four_vessel_interactions + f2.five_vessel_interactions + f2.six_vessel_interactions:
-    USV_ENV_DESC_LIST[config.name] = config
-    
-for config in f3.three_vessel_interactions + f3.four_vessel_interactions + f3.five_vessel_interactions + f3.six_vessel_interactions:
-    USV_ENV_DESC_LIST[config.name] = config
-    
-for config in FUNC.three_vessel_interactions + FUNC.four_vessel_interactions + FUNC.five_vessel_interactions + FUNC.six_vessel_interactions:
-    USV_ENV_DESC_LIST[config.name] = config
-    
-for config in LOGIC.three_vessel_interactions:
+for config in SBO.three_vessel_interactions + SBO.four_vessel_interactions + SBO.five_vessel_interactions + SBO.six_vessel_interactions:
     USV_ENV_DESC_LIST[config.name] = config
