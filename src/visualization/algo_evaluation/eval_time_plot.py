@@ -10,8 +10,9 @@ from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_gr
 from visualization.my_plot import MyPlot
 
 class EvalTimePlot(MyPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], mode='algo'): 
+    def __init__(self, eval_datas : List[EvaluationData], all=False, mode='algo'): 
         self.mode = mode
+        self.all = all
         self.eval_datas = eval_datas
         self.eval_times : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
         for eval_data in eval_datas:
@@ -21,7 +22,7 @@ class EvalTimePlot(MyPlot):
                 group_key = eval_data.config_group
             else:
                 raise Exception('Unknown grouping mode')
-            if eval_data.best_fitness_index == 0.0:                
+            if eval_data.best_fitness_index == 0.0 or all:                
                 self.eval_times[eval_data.vessel_number][group_key].append(eval_data.evaluation_time)
             else: 
                 self.eval_times[eval_data.vessel_number][group_key] = self.eval_times[eval_data.vessel_number][group_key]
@@ -30,7 +31,8 @@ class EvalTimePlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.eval_times), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.eval_times)})
+        figsize = (10, 4) if self.mode == 'algo' else (6, 4)
+        fig, axes = plt.subplots(1, len(self.eval_times), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.eval_times)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
@@ -43,17 +45,18 @@ class EvalTimePlot(MyPlot):
             else:
                 raise Exception('Unknown grouping mode')
             
-            stat_signif = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, group_measurements.values())})
-            pprint.pprint(stat_signif.p_values)
-            pprint.pprint(stat_signif.effect_size)
-            
             data = list(group_measurements.values())
+            
+            if len(data) != 0:
+                stat_signif = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, group_measurements.values())})
+                pprint.pprint(stat_signif.p_values)
+                pprint.pprint(stat_signif.effect_size)
             
             if isinstance(axes, np.ndarray):
                 axi : plt.Axes = axes[i]
             else:
                 axi : plt.Axes = axes     
-            boxplot = axi.boxplot(data, tick_labels=group_labels, patch_artist=True)
+            boxplot = axi.boxplot(data, tick_labels=group_labels, widths=0.7, patch_artist=True, showmeans=True, meanline=True)
             axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Evaluation Time (s)')
             axi.set_aspect('auto', adjustable='box')
@@ -64,10 +67,12 @@ class EvalTimePlot(MyPlot):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)               # Set border width
                  
-            for element in ['whiskers', 'caps', 'medians']:
+            for element in ['whiskers', 'caps', 'medians', 'means']:
                 for comp in boxplot[element]:
                     if element == 'medians':
                         comp.set_color('red')
+                    if element == 'means':
+                        comp.set_color('brown')
                     comp.set_linewidth(1.5)
                     
             # Annotate each box with the number of samples

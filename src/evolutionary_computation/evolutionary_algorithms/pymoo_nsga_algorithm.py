@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 from evolutionary_computation.evaluation_data import EvaluationData
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 from evolutionary_computation.aggregates import Aggregate
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -80,7 +80,7 @@ class BestSolutionCallback(Callback):
                     print(f"{int(time.time() - self.start_time)} - New best solution found: {ind.X} with objective: {ind.F}")
         self.number_of_generations += 1
 
-class PyMooNSGAAlgorithm(GeneticAlgorithmBase, ABC):
+class PyMooNSGAAlgorithm(EvolutionaryAlgorithmBase, ABC):
     
     def __init__(self, measurement_name: str,  algorithm_desc: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:

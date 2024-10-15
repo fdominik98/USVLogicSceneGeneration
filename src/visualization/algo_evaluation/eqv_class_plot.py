@@ -23,34 +23,34 @@ class EqvClassPlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.config_data), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.config_data)})
+        vessel_num_count = len(self.config_data)
+        fig, axes = plt.subplots(2, vessel_num_count, figsize=(vessel_num_count * 3, 4))
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
         for i, (vessel_num, group_measurements) in enumerate(self.config_data.items()):
             group_labels = config_group_mapper(list(group_measurements.keys()))
-            data = EqvClassCalculator(list(group_measurements.values())[0]).clause_desc_set
-            labels = range(1, len(data.keys()) + 1)
-            values = [int(v) for v in data.values()]
+            for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
             
-            if isinstance(axes, np.ndarray):
-                axi : plt.Axes = axes[i]
-            else:
-                axi : plt.Axes = axes  
-            bars : plt.BarContainer = axi.bar(labels, values, color=group_colors, edgecolor='black', linewidth=0.5)
-            axi.set_title(self.vessel_num_labels[i])
-            axi.set_ylabel('Samples')
-            axi.set_aspect('auto', adjustable='box')
-            yticks = np.linspace(0, max(values), 6)
-            yticks = [int(t) for t in yticks] 
-            axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False) 
-            xticks = np.linspace(labels[0], labels[-1], 6)
-            xticks = [int(t) for t in xticks] 
-            axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
-            stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
-            pprint.pprint(stat_signif.p_values)
-            pprint.pprint(stat_signif.odds_ratios)
+                data = EqvClassCalculator(eval_datas).clause_desc_set
+                labels = range(1, len(data.keys()) + 1)
+                values = [int(v) for v in data.values()]
+                
+                if isinstance(axes, np.ndarray):
+                    axi : plt.Axes = axes[j][i]
+                else:
+                    axi : plt.Axes = axes  
+                bars : plt.BarContainer = axi.bar(labels, values, color=group_colors, edgecolor='black', linewidth=0.5)
+                axi.set_title(self.vessel_num_labels[i])
+                axi.set_ylabel('Samples')
+                axi.set_aspect('auto', adjustable='box')
+                yticks = np.linspace(0, max(values), 6)
+                yticks = [int(t) for t in yticks] 
+                axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False) 
+                xticks = np.linspace(labels[0], labels[-1], 6)
+                xticks = [int(t) for t in xticks] 
+                axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False)             
             
             # for i, bar in enumerate(bars):
             #     axi.text(bar.get_x() + bar.get_width() / 2, max(data.values()) + 5, 

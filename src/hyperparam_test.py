@@ -6,7 +6,7 @@ from evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm impo
 from evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
 from evolutionary_computation.evolutionary_algorithms.scipy_de_algorithm import SciPyDEAlgorithm
 from evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
@@ -99,7 +99,7 @@ random.shuffle(combination_DE)
 env_configs = ['overtaking_and_crossing', 'overtaking_headon_crossing', 'five_vessel_colreg_scenario', 'six_vessel_colreg_scenario']
 
 
-tests : List[Tuple[Any, GeneticAlgorithmBase]]= [
+tests : List[Tuple[Any, EvolutionaryAlgorithmBase]]= [
     # (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
     #                                     env_configs=env_configs,
     #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,

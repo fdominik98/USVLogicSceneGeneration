@@ -1,7 +1,7 @@
 from abc import ABC
 import copy
 import numpy as np
-from model.environment.usv_config import KNOT_TO_MS_CONVERSION
+from model.environment.usv_config import EPSILON, KNOT_TO_MS_CONVERSION
 
 
 class VesselDesc(ABC):
@@ -30,8 +30,8 @@ class VesselDesc(ABC):
     
 
 class OS(VesselDesc):
-    max_length = 30 # m
-    min_length = 30
+    max_length = 30 + EPSILON # m
+    min_length = 30 - EPSILON
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, OS) and super().__eq__(value))
         

@@ -14,7 +14,7 @@ from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 
 
-class GeneticAlgorithmBase(ABC):
+class EvolutionaryAlgorithmBase(ABC):
     def __init__(self, measurement_name: str, algorithm_desc : str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         self.measurement_name = measurement_name

@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evaluation_data import EvaluationData
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 from scipy.optimize import differential_evolution, OptimizeResult
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
@@ -38,7 +38,7 @@ class ObjectiveMonitorCallback:
         return objective
 
 
-class SciPyDEAlgorithm(GeneticAlgorithmBase):
+class SciPyDEAlgorithm(EvolutionaryAlgorithmBase):
     def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         super().__init__(measurement_name, 'scipy_DE_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)

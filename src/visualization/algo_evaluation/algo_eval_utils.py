@@ -48,10 +48,10 @@ def algo_mapper(names : List[str]):
 def config_group_mapper(config_groups : List[str]):
     labels : List[str] = []
     for name in config_groups:
-        if 'f4_abstract' in name.lower():
-            labels.append('LOGIC')
-        elif 'f4' in name.lower():
-            labels.append('FUNC')
+        if 'sbo' in name.lower():
+            labels.append('SBO')
+        elif 'msr' in name.lower():
+            labels.append('MSR')
         elif 'f3' in name.lower():
            labels.append(r'$F_3$')
         elif 'f2' in name.lower():

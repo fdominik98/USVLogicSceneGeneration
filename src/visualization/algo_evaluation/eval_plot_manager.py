@@ -6,36 +6,46 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_config import ASSET_FOLDER
 from evolutionary_computation.evaluation_data import EvaluationData
+from visualization.my_plot import MyPlot
 from visualization.algo_evaluation.eqv_class_plot import EqvClassPlot
 from visualization.algo_evaluation.success_rate_odds_ratio_plot import SuccessRateOddsRatioPlot
 from visualization.algo_evaluation.success_rate_p_value_plot import SuccessRatePValuePlot
 from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
-
+class PlotWrapper():
+    def __init__(self, plot_class, args):
+        self.plot_class = plot_class
+        self.args = args
+        self.plot = None
+    def get(self) -> MyPlot:
+        if self.plot is None:
+            self.plot = self.plot_class(**self.args)
+        return self.plot
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
-        self.eval_datas = eval_datas
+        self.eval_datas = sorted(eval_datas, key=lambda x: (x.config_group, x.algorithm_desc, x.aggregate_strat, x.vessel_number))
         
-        self.algo_success_rate_plot = SuccessRatePlot(self.eval_datas, 'algo')
-        self.config_success_rate_plot = None
-        self.algo_eval_time_plot = None
-        self.config_eval_time_plot = None
-        self.algo_success_rate_odds_plot = None
-        self.config_success_rate_odds_plot = None
-        self.algo_success_rate_p_value_plot = None
-        self.config_success_rate_p_value_plot = None
-        self.eqv_class_plot = None
+        self.plots : Dict[str, PlotWrapper] = {
+            "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'config'}),
+            "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'config'}),
+            "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'config'}),
+            "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
+            "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),
+            "Risk Vector" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            "Algo. Success Odds Ratio": PlotWrapper(SuccessRateOddsRatioPlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            "Algo. Success P Value" : PlotWrapper(SuccessRatePValuePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            "Approach Diversity" : PlotWrapper(EqvClassPlot, {'eval_datas': self.eval_datas}),
+        }
         
-        self.risk_vector_plot = None
-        self.metrics_plot = None
         self.root = tk.Tk()
         self.root.resizable(True, True)
         self.image_folder = f'{ASSET_FOLDER}/images/exported_plots'
         
         self.root.option_add("*Font", ("Times New Roman", 14))
         
-        self.root.title("Evaluation")
+        self.root.title(f"Evaluation - {list(self.plots.keys())[0]}")
 
         # CANVAS FRAME
         self.canvas_frame = tk.Frame(master=self.root)
@@ -45,7 +55,7 @@ class EvalPlotManager():
         self.plot_frame = tk.Frame(master=self.canvas_frame)
         self.plot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        self.canvas = FigureCanvasTkAgg(self.algo_success_rate_plot.fig, master=self.plot_frame)
+        self.canvas = FigureCanvasTkAgg(list(self.plots.values())[0].get().fig, master=self.plot_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # TOOLBAR FRAME
@@ -61,10 +71,7 @@ class EvalPlotManager():
         self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
         ## PLOT SELECTION
-        self.plot_options = ["Algo Success Rate", "Config Success Rate",
-                             "Config Eval Time", "Algo Eval Time", 
-                             "Risk Vector", "Algo Success Odds Ratio", 
-                             "Algo Success P Value", "Eqv Classes"]
+        self.plot_options = list(self.plots.keys())
         self.selected_plot = tk.StringVar()
         self.selected_plot.set(self.plot_options[0])  # Set the default value
         # Create the dropdown menu
@@ -106,39 +113,9 @@ class EvalPlotManager():
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')
         
+        
     def on_select_plot(self, value):
-        if value == 'Algo Success Rate':
-            plot = self.algo_success_rate_plot
-        elif value == 'Config Success Rate':
-            if self.config_success_rate_plot is None:
-                self.config_success_rate_plot = SuccessRatePlot(self.eval_datas, mode='config')
-            plot = self.config_success_rate_plot
-        elif value == 'Config Eval Time':
-            if self.config_eval_time_plot is None:
-                self.config_eval_time_plot = EvalTimePlot(self.eval_datas, mode='config')
-            plot = self.config_eval_time_plot
-        elif value == 'Algo Eval Time':
-            if self.algo_eval_time_plot is None:
-                self.algo_eval_time_plot = EvalTimePlot(self.eval_datas, mode='algo')
-            plot = self.algo_eval_time_plot
-        elif value == 'Risk Vector':
-            if self.risk_vector_plot is None:
-                self.risk_vector_plot = RiskVectorPlot(self.eval_datas)
-            plot = self.risk_vector_plot
-        elif value == 'Algo Success Odds Ratio':
-            if self.algo_success_rate_odds_plot is None:
-                self.algo_success_rate_odds_plot = SuccessRateOddsRatioPlot(self.eval_datas, mode='algo')
-            plot = self.algo_success_rate_odds_plot
-        elif value == 'Algo Success P Value':
-            if self.algo_success_rate_p_value_plot is None:
-                self.algo_success_rate_p_value_plot = SuccessRatePValuePlot(self.eval_datas, mode='algo')
-            plot = self.algo_success_rate_p_value_plot
-        elif value == 'Eqv Classes':
-            if self.eqv_class_plot is None:
-                self.eqv_class_plot = EqvClassPlot(self.eval_datas)
-            plot = self.eqv_class_plot    
-        else:
-            raise Exception('Not implemented plot.')
+        plot = self.plots[value].get()        
         self.navigation_toolbar.destroy()
         self.canvas.get_tk_widget().destroy()
         
@@ -148,4 +125,7 @@ class EvalPlotManager():
         self.navigation_toolbar.update()
         self.navigation_toolbar.pack(fill=tk.BOTH, side=tk.LEFT)
         
+        self.root.title(f"Evaluation - {value}")
+        
+  
   

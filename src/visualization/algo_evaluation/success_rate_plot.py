@@ -27,7 +27,8 @@ class SuccessRatePlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, len(self.success_rates), figsize=(10, 4), gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
+        figsize = (10, 4) if self.mode == 'algo' else (6, 4)
+        fig, axes = plt.subplots(1, len(self.success_rates), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)

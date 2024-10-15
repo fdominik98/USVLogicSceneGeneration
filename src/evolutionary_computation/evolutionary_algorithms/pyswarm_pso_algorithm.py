@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from evolutionary_computation.aggregates import Aggregate
 from evolutionary_computation.evaluation_data import EvaluationData
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import GeneticAlgorithmBase
+from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 import pyswarms as ps
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 from model.environment.usv_environment import USVEnvironment
@@ -43,7 +43,7 @@ class ObjectiveMonitor():
             print(f'Best Cost: {self.best_fitness}')
             print(f'Iter count: {self.iter_count}')
     
-class PySwarmPSOAlgorithm(GeneticAlgorithmBase):
+class PySwarmPSOAlgorithm(EvolutionaryAlgorithmBase):
     
         
     
