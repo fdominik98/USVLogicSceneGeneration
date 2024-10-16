@@ -12,10 +12,10 @@ from model.environment.functional_models import SBO
 from model.environment.functional_models import MSR
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 
-NUMBER_OF_RUNS = {3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
-WARMUPS = 0
+NUMBER_OF_RUNS = {3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
+WARMUPS = 2
 RANDOM_SEED = 1234
-TIMEOUT = 20
+TIMEOUT = 120
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
@@ -26,6 +26,7 @@ measurement_names = ['test_4_vessel_SBO', 'test_4_vessel_MSR']
 measurement_names = ['test_5_vessel_SBO', 'test_5_vessel_MSR']
 measurement_names = ['test_6_vessel_MSR', 'test_6_vessel_SBO']
 
+measurement_names= ['test_3_vessel_scenarios_SBO', 'test_4_vessel_scenarios_SBO', 'test_5_vessel_scenarios_SBO', 'test_6_vessel_scenarios_SBO']
 measurement_names= ['test_3_vessel_scenarios_MSR', 'test_3_vessel_scenarios_SBO', 'test_4_vessel_scenarios_MSR', 'test_4_vessel_scenarios_SBO',
                     'test_5_vessel_scenarios_MSR', 'test_5_vessel_scenarios_SBO', 'test_6_vessel_scenarios_MSR', 'test_6_vessel_scenarios_SBO']
 
@@ -34,6 +35,9 @@ interactions = [SBO.four_vessel_interactions, MSR.four_vessel_interactions]
 interactions = [SBO.five_vessel_interactions, MSR.five_vessel_interactions]
 interactions = [MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 
+interactions = [SBO.three_vessel_interactions, SBO.four_vessel_interactions, SBO.five_vessel_interactions, SBO.six_vessel_interactions]
+
+interactions = [MSR.three_vessel_interactions, MSR.four_vessel_interactions, MSR.five_vessel_interactions, MSR.six_vessel_interactions]
 interactions = [MSR.three_vessel_interactions, SBO.three_vessel_interactions, MSR.four_vessel_interactions, SBO.four_vessel_interactions, 
                 MSR.five_vessel_interactions, SBO.five_vessel_interactions, MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 
@@ -73,8 +77,6 @@ de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0
                           timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat='all')
 
 
-algos = [PyMooNSGA2Algorithm]
-configs = [nsga2_vessel_config]
 algos = [SciPyDEAlgorithm]
 configs = [de_config]
 
@@ -83,6 +85,9 @@ configs = [nsga2_category_config, nsga3_all_config, nsga2_vessel_config, nsga3_v
 
 algos = [PySwarmPSOAlgorithm]
 configs = [pso_config]
+
+algos = [PyMooNSGA2Algorithm]
+configs = [nsga2_vessel_config]
 
 meas_start = START_FROM[0]
 algo_start = START_FROM[1]
