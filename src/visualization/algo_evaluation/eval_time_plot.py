@@ -53,8 +53,9 @@ class EvalTimePlot(MyPlot):
                 axi : plt.Axes = axes     
             violinplot = axi.violinplot(data, widths=0.7, showmeans=True, showmedians=True)
             axi.set_title(self.vessel_num_labels[i])
-            axi.set_ylabel('Evaluation Time (s)')
+            axi.set_ylabel('Runtime (s)')
             axi.set_aspect('auto', adjustable='box')
+            #axi.set_yticks(range(max([max(d) for d in data])))
             axi.set_xticks(range(1, len(group_labels)+1), group_labels)
             axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')            
             
@@ -66,13 +67,15 @@ class EvalTimePlot(MyPlot):
             violinplot['cmeans'].set_linewidth(1.5)
             violinplot['cmedians'].set_color('red')
             violinplot['cmedians'].set_linewidth(1.5)
+            
+            maxy = max([max(d) for d in data])
                     
             # Annotate each box with the number of samples
             for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(i, 125, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
+                axi.text(i, maxy + 5, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
                     
-            axi.set_ylim(0, 135)
+            axi.set_ylim(0, maxy)
             
 
         fig.tight_layout()
