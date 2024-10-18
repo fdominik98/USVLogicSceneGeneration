@@ -82,6 +82,10 @@ class RelationDescClause():
         self_copy.sort()
         return self_copy
     
+    def remove_non_ego_ralations(self):
+        self.relation_descs = [x for x in self.relation_descs if x.vd1.is_OS() or x.vd2.is_OS()]
+        self.sort()
+    
     def __hash__(self):
         # Combine attributes into a tuple for a unique hash
         return hash(tuple([desc for desc in self.relation_descs]) + ('desc',))

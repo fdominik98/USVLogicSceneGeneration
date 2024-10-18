@@ -41,7 +41,7 @@ class RiskVectorPlot(MyPlot):
             
             stat_signif = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, group_measurements.values())})
             pprint.pprint(stat_signif.p_values)
-            pprint.pprint(stat_signif.effect_size)
+            pprint.pprint(stat_signif.effect_sizes)
             
             if isinstance(axes, np.ndarray):
                 axi : plt.Axes = axes[i]
@@ -53,7 +53,7 @@ class RiskVectorPlot(MyPlot):
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')
             # Set colors and border widths for each box
-            for patch, color in zip(boxplot['boxes'], group_colors):
+            for patch, color in zip(boxplot['boxes'], group_colors(len(group_labels))):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)               # Set border width
             

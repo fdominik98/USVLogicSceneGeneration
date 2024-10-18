@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 from model.environment.usv_environment import USVEnvironment
 import copy
 from model.relation import Relation
-from evaluation.risk_evaluation import NavigationRiskVector, ProximityRiskVector
+from evaluation.risk_evaluation import RiskVector, ProximityRiskVector
 
 class TrajProximityMetric():
     def __init__(self, relation : Relation) -> None:
@@ -64,11 +64,15 @@ class TrajNavigationRiskEvaluator():
                     traj = trajectories[o.id]
                     o.update(*(traj[t]))
                     
-                for o in dyn_env.vessels:    
-                    risk_vector = NavigationRiskVector(dyn_env, o)               
-                    self.risk_metrics[o.id].append(risk_vector.find_minimum_turning_metric())       
+                for o in dyn_env.vessels: 
+                    if not o.is_OS():
+                        continue   
+                    risk_vector = RiskVector(dyn_env)               
+                    self.risk_metrics[o.id].append(risk_vector.distance)       
             else:
                 for o in dyn_env.vessels: 
+                    if not o.is_OS():
+                        continue 
                     self.risk_metrics[o.id].append(self.risk_metrics[o.id][-1])       
                     
                     

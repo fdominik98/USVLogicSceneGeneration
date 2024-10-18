@@ -27,7 +27,7 @@ class SuccessRatePlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        figsize = (10, 4) if self.mode == 'algo' else (6, 4)
+        figsize = (10, 4) if self.mode == 'algo' else (6, 3)
         fig, axes = plt.subplots(1, len(self.success_rates), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
@@ -47,19 +47,16 @@ class SuccessRatePlot(MyPlot):
                 axi : plt.Axes = axes[i]
             else:
                 axi : plt.Axes = axes  
-            bars : plt.BarContainer = axi.bar(group_labels, percentages, color=group_colors, edgecolor='black', linewidth=2)
+            bars : plt.BarContainer = axi.bar(group_labels, percentages, color=group_colors(len(group_labels)), edgecolor='black', linewidth=2)
             axi.set_title(self.vessel_num_labels[i])
             axi.set_ylabel('Success rate (%)')
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticks(range(len(group_labels))) 
             axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')
             axi.set_ylim(0, 115)
-            stat_signif = FisherExactOddsRatio({group : value for group, value in zip(group_labels, group_measurements.values())})
-            pprint.pprint(stat_signif.p_values)
-            pprint.pprint(stat_signif.odds_ratios)
             
             for i, bar in enumerate(bars):
-                axi.text(bar.get_x() + bar.get_width() / 2, 105, 
+                axi.text(bar.get_x() + bar.get_width() / 2, 102, 
                 f'{len(list(group_measurements.values())[i])}', ha='center', va='bottom', fontsize=12)
 
         fig.tight_layout()

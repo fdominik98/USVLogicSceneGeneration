@@ -28,6 +28,9 @@ class VesselDesc(ABC):
     def __hash__(self):
         return hash((self.id, self.max_speed, self.min_speed, self.max_length, self.min_length, 'vessel description'))
     
+    def is_OS(self):
+        return isinstance(self, OS)
+    
 
 class OS(VesselDesc):
     max_length = 30 + EPSILON # m
@@ -99,6 +102,6 @@ class Vessel():
         return self.name
     
     def is_OS(self):
-        return isinstance(self.desc, OS)
+        return self.desc.is_OS()
     
  

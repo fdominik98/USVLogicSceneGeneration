@@ -1,5 +1,8 @@
 from typing import List
 
+from matplotlib.colors import to_rgb
+import numpy as np
+
 
 def vessel_number_mapper(vessel_nums : List[int]):
     labels : List[str] = []
@@ -62,5 +65,12 @@ def config_group_mapper(config_groups : List[str]):
             raise Exception('Unknown config group name')
     return labels
 
-full_blue_spectrum_shades = [(i / 8, 0.5, 1 - i / 8) for i in range(9)]
-group_colors = full_blue_spectrum_shades
+def group_colors(size):
+    # Convert the colors to RGB format
+    color1_rgb = np.array((0, 0.5, 1))
+    if size == 1:
+        return color1_rgb
+    color2_rgb = np.array((1, 0.5, 0))
+    # Generate a range of colors by linear interpolation
+    colors = [color1_rgb + (color2_rgb - color1_rgb) * i / (size - 1) for i in range(size)]
+    return [np.array([color[0], color[1], color[2], 0.7]) for color in colors]

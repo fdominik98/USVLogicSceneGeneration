@@ -46,7 +46,7 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
     combs = list(itertools.product([True, False], headon_overtaking_or_crossing))
     perms = list(itertools.product(combs, repeat=len(objects[2:])))
 
-    clauses : Set[RelationDescClause] = set()
+    clauses : List[RelationDescClause] = []
     for rel1 in overtaking_or_crossing:
         for rel2 in headon_overtaking_or_crossing:
             for perm in perms:
@@ -55,7 +55,9 @@ def generate_abstract_models(objects : List[VesselDesc]) -> List[USVEnvironmentD
                                             [RelationDesc(o if pos else _OS, 
                                                           rel(), _OS if pos else o)
                                              for o, (pos, rel) in zip(objects[2:], perm)])
-                clauses.add(clause.get_asymmetric_clause())
+                asymmetric_clause = clause.get_asymmetric_clause()
+                if asymmetric_clause not in clauses:
+                    clauses.append(clause.get_asymmetric_clause())
     
     models : List[MSREnvironmentDesc] = []
     for i, clause in enumerate(clauses):

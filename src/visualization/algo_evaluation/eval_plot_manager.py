@@ -6,10 +6,9 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from model.environment.usv_config import ASSET_FOLDER
 from evolutionary_computation.evaluation_data import EvaluationData
+from visualization.algo_evaluation.table_generator import TableGenerator
 from visualization.my_plot import MyPlot
 from visualization.algo_evaluation.eqv_class_plot import EqvClassPlot
-from visualization.algo_evaluation.success_rate_odds_ratio_plot import SuccessRateOddsRatioPlot
-from visualization.algo_evaluation.success_rate_p_value_plot import SuccessRatePValuePlot
 from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
@@ -25,18 +24,18 @@ class PlotWrapper():
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
         self.eval_datas = sorted(eval_datas, key=lambda x: (x.config_group, x.algorithm_desc, x.aggregate_strat, x.vessel_number))
-        
+        generator = TableGenerator(eval_datas)
+        generator.generate_runtime_summary_table()
+        generator.generate_stat_sign_table()
         self.plots : Dict[str, PlotWrapper] = {
-            "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            "Approach Diversity" : PlotWrapper(EqvClassPlot, {'eval_datas': self.eval_datas}),
             "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'config'}),
             "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'config'}),
             "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'config'}),
-            "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
-            "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),
             "Risk Vector" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
-            "Algo. Success Odds Ratio": PlotWrapper(SuccessRateOddsRatioPlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
-            "Algo. Success P Value" : PlotWrapper(SuccessRatePValuePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
-            "Approach Diversity" : PlotWrapper(EqvClassPlot, {'eval_datas': self.eval_datas}),
+            # "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
+            # "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
+            # "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),
         }
         
         self.root = tk.Tk()

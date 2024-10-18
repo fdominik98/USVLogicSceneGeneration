@@ -23,7 +23,7 @@ class RiskVector():
         self.risk_vector = np.array([self.max_proximity.encounter_dist,
                                      self.nav_risk_vector.find_safe_navigation_ratio(), 
                                      self.nav_risk_vector.find_minimum_turning_metric()])
-        self.distance = np.sqrt(sum([x**2 for x in self.risk_vector]))
+        self.distance = (pow(np.e, np.linalg.norm(self.risk_vector) / np.sqrt(3)) - 1) / (np.e - 1)
         
 
 class ProximityRiskVector():
@@ -33,9 +33,9 @@ class ProximityRiskVector():
         self.dcpa = np.linalg.norm(relation.p21 + relation.v12 * max(0, self.tcpa)) 
         
         dr = 3 * N_MILE_TO_M_CONVERSION
-        ts = 3000
+        ts = 1800
         
-        if self.tcpa < 0 or self.tcpa > ts or self.dcpa > dr:
+        if self.tcpa < 0 or self.tcpa > ts:
             self.dcpa_norm = 0
             self.tcpa_norm = 0
         else:       
@@ -43,9 +43,9 @@ class ProximityRiskVector():
                 self.dcpa_norm = 1
             else:
                 #self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
-                self.dcpa_norm = 1 - (self.dcpa / dr)
+                self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
             #self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
-            self.tcpa_norm = 1 - (self.tcpa / ts)
+            self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
         self.encounter_dist = np.sqrt(self.dcpa_norm * self.tcpa_norm)
         
 class NavigationRiskVector():
@@ -68,13 +68,13 @@ class NavigationRiskVector():
         for i in range(0, 180):
             if not (self.will_collide(self.vessel.heading + np.radians(i), self.vessel.speed) and
                     self.will_collide(self.vessel.heading - np.radians(i), self.vessel.speed)):
-                return i / 180 / 0.25
+                return (pow(np.e, i / 180 / 0.25) - 1) / (np.e - 1)
         return 0.0
             
     def find_safe_navigation_ratio(self) -> float:
         collides = 0
         no_collides = 0
-        partitions = 30
+        partitions = 50
         speeds = [i * (self.vessel.max_speed / partitions)  for i in range(1, partitions + 1)]  
         for speed in speeds:
             for i in range(0, 180):
@@ -83,4 +83,5 @@ class NavigationRiskVector():
                         collides += 1
                     else:
                         no_collides += 1
-        return collides / (collides + no_collides)
+        return (pow(np.e, collides / (collides + no_collides)) - 1) / (np.e - 1)
+    

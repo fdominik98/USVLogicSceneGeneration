@@ -38,7 +38,7 @@ class SuccessRatePValuePlot(SuccessRatePlot):
             else:
                 axi : plt.Axes = axes  
                 
-            axi.bar(comparisons, p_values, color=group_colors)
+            axi.bar(comparisons, p_values, color=group_colors(len(group_labels)))
             axi.axhline(y=0.05, color='red', linestyle='--', label='Significance Level (0.05)')
             axi.set_ylabel('P-value')
             axi.legend()
