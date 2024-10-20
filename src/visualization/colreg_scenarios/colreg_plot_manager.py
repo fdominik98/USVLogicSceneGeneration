@@ -82,7 +82,7 @@ class Checkbox(StandaloneCheckbox):
 
 class ColregPlotManager():
     def __init__(self, env : USVEnvironment,
-                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
+                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
         self.colreg_plot = ColregPlot(env, trajectories)  
         self.metrics_plot = None
         self.env = env

@@ -3,9 +3,10 @@ from typing import List
 
 import numpy as np
 from model.instance_initializer import RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
-from model.environment.usv_environment_desc import USVEnvironmentDesc
+from model.environment.usv_environment_desc import USVEnvironmentDesc, MSREnvironmentDesc
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
-
+from evolutionary_computation.evaluation_data import EvaluationData
+from evaluation.eqv_class_calculator import EqvClassCalculator
 
 class USVEnvironment():
     def __init__(self, env_config : USVEnvironmentDesc, init_method='uniform') -> None:
@@ -70,3 +71,11 @@ class USVEnvironment():
             xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_length, vessel_desc.min_speed]
             xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_length, vessel_desc.max_speed]
         return xl, xu
+    
+    
+class LoadedEnvironment(USVEnvironment):
+    def __init__(self, eval_data : EvaluationData, init_method='uniform'):
+        vessel_descs, clause = EqvClassCalculator().get_clause(eval_data)
+        config = MSREnvironmentDesc(0, vessel_descs, [clause])
+        super().__init__(config, init_method)
+        self.update(eval_data.best_solution)

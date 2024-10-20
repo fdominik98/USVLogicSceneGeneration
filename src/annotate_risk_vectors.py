@@ -1,35 +1,18 @@
+from typing import List
 from model.data_parser import EvalDataParser
-from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.environment.usv_environment import USVEnvironment
-from model.environment.usv_config import EPSILON
+from model.environment.usv_environment import LoadedEnvironment
 from evaluation.risk_evaluation import RiskVector
 from evolutionary_computation.evaluation_data import EvaluationData
-from model.vessel import OS
 
 dp = EvalDataParser()
-eval_datas = dp.load_dirs_merged_as_models()
+eval_datas : List[EvaluationData] = dp.load_dirs_merged_as_models()
 skipped = 0
 done = 0
 
 
 
-# for eval_data in eval_datas:
-#     if 'F4_Abstract' in eval_data.config_name:
-#         eval_data.config_name = eval_data.config_name.replace('F4_Abstract', 'SBO')
-#         eval_data.measurement_name = eval_data.measurement_name.replace('LOGIC', 'SBO')
-#         eval_data.config_group = 'SBO'
-#     elif 'F4' in eval_data.config_name:
-#         eval_data.config_name = eval_data.config_name.replace('F4', 'MSR')
-#         eval_data.measurement_name = eval_data.measurement_name.replace('FUNC', 'MSR')
-#         eval_data.config_group = 'MSR'
-        
-#     config = USV_ENV_DESC_LIST[eval_data.config_name]
-#     add_var = [OS(0).min_length] if len(eval_data.best_solution) != config.all_variable_num else []
-        
-#     env = USVEnvironment(config).update(add_var + eval_data.best_solution)
-#     eval_data.vessel_number = config.vessel_num
-#     eval_data.best_solution = add_var + eval_data.best_solution
-#     eval_data.save_to_json(file_path=eval_data.path)
+# for eval_data in eval_datas:  
+#     eval_data.save_to_json()
 #     done += 1
 #     print(f'Config Group: {eval_data.config_group}. Done {done}, Skipped: {skipped} / {len(eval_datas)}')
 # exit(0)#-------------------------------------------------------
@@ -50,18 +33,15 @@ for i, eval_data in enumerate(eval_datas):
         info(eval_data)
         continue
     
-    config = USV_ENV_DESC_LIST[eval_data.config_name]
-    env = USVEnvironment(config).update(eval_data.best_solution)
+    env = LoadedEnvironment(eval_data)
     if eval_data.best_fitness_index > 0.0:
         eval_data.risk_vector = None
-        eval_data.risk_distance = None
         skipped += 1
         print('Not optimal solution, skipped.')
     else:    
         risk_vector = RiskVector(env)
         eval_data.risk_vector = risk_vector.risk_vector.tolist()
-        eval_data.risk_distance = risk_vector.distance
         done += 1
-    eval_data.save_to_json(file_path=eval_data.path)
+    eval_data.save_to_json()
     info(eval_data)
     

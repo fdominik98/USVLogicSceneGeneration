@@ -3,7 +3,7 @@ import numpy as np
 from typing import List
 from model.environment.usv_config import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
 from model.vessel import OS, Vessel, VesselDesc
-from model.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OvertakingBear, RelationType
+from model.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, RelationType
 
 
 class RelationDesc():
@@ -118,9 +118,9 @@ class Relation():
     def has_os(self)-> bool:
         return self.vessel1.is_OS() or self.vessel2.is_OS()
     
-    def has_collision(self) -> bool:
+    def no_colreg(self) -> bool:
         for rel in self.collision_relations:
-            if isinstance(rel, MayCollide) and not rel.negated:
+            if isinstance(rel, MayCollide) and not isinstance(rel, OutVisOrNoCollide) and not rel.negated:
                 return True
         return False
     

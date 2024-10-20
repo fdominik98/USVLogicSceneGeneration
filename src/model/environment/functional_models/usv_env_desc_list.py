@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from model.environment.usv_environment_desc import MSREnvironmentDesc
 from model.vessel import OS, TS, OSBig, TSBig, VesselDesc
 from model.environment.functional_models import SBO
@@ -6,7 +6,7 @@ from model.environment.functional_models import MSR
 from model.environment.functional_models import f3
 from model.environment.functional_models import f2
 from model.environment.functional_models import f1
-from model.relation import RelationDesc
+from model.relation import RelationDesc, RelationDescClause
 from model.relation_types import crossing_init, head_on_init, overtaking_init
 
 # Length/beam ratio (LBR) = WL/B
@@ -61,6 +61,19 @@ from model.relation_types import crossing_init, head_on_init, overtaking_init
 # 6 vessel : 99
 # 7 vessel : 175
 # 8 vessel : 286
+
+MSR_EQUIV_CLASSES : dict[int, List[RelationDescClause]] = {
+    3 :  [inter.relation_desc_clauses[0] for inter in MSR.three_vessel_interactions],
+    4 :  [inter.relation_desc_clauses[0] for inter in MSR.four_vessel_interactions],
+    5 :  [inter.relation_desc_clauses[0] for inter in MSR.five_vessel_interactions],
+    6 :  [inter.relation_desc_clauses[0] for inter in MSR.six_vessel_interactions]
+}
+MSR_CONFIGS : dict[int, List[MSREnvironmentDesc]] = {
+    3 : MSR.three_vessel_interactions,
+    4 : MSR.four_vessel_interactions,
+    5 : MSR.five_vessel_interactions,
+    6 : MSR.six_vessel_interactions
+}
 
 _OS = OS(id=0)
 TS1 = TS(id=1)

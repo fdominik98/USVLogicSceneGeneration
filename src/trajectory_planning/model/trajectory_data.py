@@ -17,7 +17,7 @@ class TrajectoryData:
                  error_message: Optional[str] = None,
                  rrt_evaluation_times: Optional[Dict[int, float]] = None,
                  overall_eval_time: Optional[float] = None,
-                 trajectories: Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None):
+                 trajectories: Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None):
         self.algorithm_desc = algorithm_desc
         self.env_path = env_path
         self.config_name = config_name

@@ -52,7 +52,7 @@ class ColregAnimation():
         self.init_anim()
         while self.anim_frame_counter < self.anim_max_frames():
             if not self.is_anim_paused:
-                for o in self.dyn_env.vessels:
+                for o in self.dyn_env.vessels: ## TODO MAKE IT SIMPLER
                    o.update(*self.select_next_state(o))
                 for rel in self.dyn_env.relations:
                     rel.update()

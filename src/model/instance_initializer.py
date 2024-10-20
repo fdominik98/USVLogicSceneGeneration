@@ -35,6 +35,7 @@ class InstanceInitializer(ABC):
                 vd1 = relation_desc.vd1
                 vd2 = relation_desc.vd2
                 clause.append(Relation(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
+            clause.update()
             relation_clauses.append(clause)
         return list(vessels.values()), relation_clauses
     

@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Tuple
 import numpy as np
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 from model.environment.usv_environment import USVEnvironment
@@ -10,30 +10,29 @@ from model.vessel import Vessel
 
 class RiskVector():
     def __init__(self, env : USVEnvironment) -> None:
-        self.proximity_vectors : List[ProximityRiskVector] = []
+        self.proximity_vectors = [ProximityRiskIndex(rel) for rel in env.relations if rel.has_os()]
+        self.nav_risk_vector = NavigationRiskIndex(env, env.get_vessel_by_id(0))
+            
+        self.max_proximity_index = max(self.proximity_vectors, key=lambda obj: obj.proximity_index)
+        #self.safe_navigation_area_index = self.nav_risk_vector.find_safe_navigation_area_index()
+        self.danger_sector = self.nav_risk_vector.find_danger_sector()
         
-        for rel in env.relations:
-            if not rel.has_os():
-                continue
-            self.proximity_vectors.append(ProximityRiskVector(rel))
-            
-        self.nav_risk_vector = NavigationRiskVector(env, env.get_vessel_by_id(0))
-            
-        self.max_proximity = max(self.proximity_vectors, key=lambda obj: obj.encounter_dist)
-        self.risk_vector = np.array([self.max_proximity.encounter_dist,
-                                     self.nav_risk_vector.find_safe_navigation_ratio(), 
-                                     self.nav_risk_vector.find_minimum_turning_metric()])
-        self.distance = (pow(np.e, np.linalg.norm(self.risk_vector) / np.sqrt(3)) - 1) / (np.e - 1)
+        self.risk_vector = np.array([self.max_proximity_index.dcpa,
+                                     self.max_proximity_index.tcpa,
+                                     self.danger_sector,
+                                     self.max_proximity_index.proximity_index])
+        
+        #self.distance = (pow(np.e, np.linalg.norm(self.risk_vector) / np.sqrt(3)) - 1) / (np.e - 1)
         
 
-class ProximityRiskVector():
+class ProximityRiskIndex():
     def __init__(self, relation : Relation) -> None:
         self.dist = relation.o_distance
         self.tcpa = relation.dot_p12_v12 / relation.v12_norm_stable**2
         self.dcpa = np.linalg.norm(relation.p21 + relation.v12 * max(0, self.tcpa)) 
         
-        dr = 3 * N_MILE_TO_M_CONVERSION
-        ts = 1800
+        dr = 1 * N_MILE_TO_M_CONVERSION
+        ts = 10 * 60
         
         if self.tcpa < 0 or self.tcpa > ts:
             self.dcpa_norm = 0
@@ -46,9 +45,12 @@ class ProximityRiskVector():
                 self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
             #self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
             self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
-        self.encounter_dist = np.sqrt(self.dcpa_norm * self.tcpa_norm)
+        if self.dcpa_norm * self.tcpa_norm > 0:
+            self.proximity_index = np.sqrt(self.dcpa_norm * self.tcpa_norm)
+        else:
+            self.proximity_index = 0
         
-class NavigationRiskVector():
+class NavigationRiskIndex():
     def __init__(self, env : USVEnvironment, vessel : Vessel) -> None:
         self.env = env
         self.vessel = vessel
@@ -57,21 +59,24 @@ class NavigationRiskVector():
         new_vessel = copy.deepcopy(self.vessel)
         new_vessel.update(self.vessel.p[0], self.vessel.p[1], heading, self.vessel.l, speed)
         for vessel2 in self.env.vessels:
-            if vessel2.id == new_vessel:
+            if vessel2.id == new_vessel.id:
                 continue
-            rel = Relation(new_vessel, [MayCollide(True)], vessel2)
-            if rel.collision_relations[0].get_penalty_norm() > 0.0:
+            rel = Relation(new_vessel, [MayCollide()], vessel2)
+            pr_i = ProximityRiskIndex(rel)
+            if pr_i.dcpa < 1 * N_MILE_TO_M_CONVERSION:
                 return True
         return False
     
-    def find_minimum_turning_metric(self) -> float:
-        for i in range(0, 180):
-            if not (self.will_collide(self.vessel.heading + np.radians(i), self.vessel.speed) and
-                    self.will_collide(self.vessel.heading - np.radians(i), self.vessel.speed)):
-                return (pow(np.e, i / 180 / 0.25) - 1) / (np.e - 1)
-        return 0.0
+    def find_danger_sector(self) -> float:
+        for i in range(91):
+            if not self.will_collide(self.vessel.heading + np.radians(i), self.vessel.speed):
+                break
+        for j in range(91):
+            if not self.will_collide(self.vessel.heading - np.radians(j), self.vessel.speed):
+                break
+        return (i + j) / 180
             
-    def find_safe_navigation_ratio(self) -> float:
+    def find_safe_navigation_area_index(self) -> float:
         collides = 0
         no_collides = 0
         partitions = 50

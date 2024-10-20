@@ -103,7 +103,7 @@ class EvolutionaryAlgorithmBase(ABC):
             os.makedirs(asset_folder)
         file_path=f"{asset_folder}/{eval_data.config_name}_{eval_data.timestamp.replace(':','-')}.json"
         eval_data.path = file_path
-        eval_data.save_to_json(file_path=file_path)
+        eval_data.save_to_json()
         
     def set_seed(self, seed):
         random.seed(seed)

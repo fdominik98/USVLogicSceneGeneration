@@ -28,11 +28,14 @@ class EvalPlotManager():
         generator.generate_runtime_summary_table()
         generator.generate_stat_sign_table()
         self.plots : Dict[str, PlotWrapper] = {
+            "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
+            "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
+            "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
+            "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
             "Approach Diversity" : PlotWrapper(EqvClassPlot, {'eval_datas': self.eval_datas}),
             "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'config'}),
             "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'config'}),
             "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'config'}),
-            "Risk Vector" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
             # "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
             # "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
             # "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),

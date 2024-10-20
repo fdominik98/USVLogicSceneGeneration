@@ -2,10 +2,14 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 from trajectory_planning.proximity_evaluator import TrajProximityMetric
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 
 class ProximityMetricComponent(PlotComponent, ABC):
+    time_treshold = 10 * 60
+    dist_treshold = 1 * N_MILE_TO_M_CONVERSION
+    
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
         super().__init__(ax, env)
         self.metrics = metrics
@@ -13,9 +17,9 @@ class ProximityMetricComponent(PlotComponent, ABC):
         self.threshold_graphs : Dict[str, plt.Line2D] = {}
         self.ax = ax
         
-        self.ax.set_title(self.get_title())
+        #self.ax.set_title(self.get_title())
         self.ax.set_xlabel('Time (s)')
-        self.ax.set_ylabel(f'{self.get_metric_str()} (m)')
+        self.ax.set_ylabel(rf'{self.get_metric_str()}')
         self.ax.set_aspect('auto', adjustable='box')      
     
     @abstractmethod
@@ -28,6 +32,14 @@ class ProximityMetricComponent(PlotComponent, ABC):
     
     @abstractmethod
     def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
+        pass
+    
+    @abstractmethod
+    def get_threshold2_y(self) -> float:
+        pass
+    
+    @abstractmethod
+    def get_threshold2_label(self) -> str:
         pass
     
     @abstractmethod
@@ -44,16 +56,23 @@ class ProximityMetricComponent(PlotComponent, ABC):
             threshold_y = self.get_threshold_y(metric)
             y = self.get_y_metric(metric)
             x = range(0, metric.len)
-            line, = self.ax.plot(x, y, color=colors[ts_vessel.id], linewidth=1.5, label=metric.relation.name, linestyle='-')
+            line, = self.ax.plot(x, y, color=colors[ts_vessel.id],
+                                 linewidth=1.5, label=fr'{metric.relation.vessel1}$\rightarrow${metric.relation.vessel2}', linestyle='-')
             threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
             self.line_graphs[metric.relation.name] = line
             self.threshold_graphs[metric.relation.name] = threshold
             self.graphs += [line, threshold]
+            
+        threshold2, = self.ax.plot(x, [self.get_threshold2_y()] * metric.len, color='black', linewidth=1, linestyle='--')
            
         self.ax.margins(x=0.2, y=0.2) 
         self.ax.set_xlim(0, metric.len)
         self.ax.set_ylim(*self.get_y_lim()) 
         self.ax.legend()
+        
+        ymin, ymax = self.ax.get_ylim()
+        offset = (ymax - ymin) * 0.03  # 5% of the y-axis range
+        self.ax.text(metric.len / 2, self.get_threshold2_y() + offset, self.get_threshold2_label(), ha='center', va='center', fontsize=10, horizontalalignment='center')  
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         return self.graphs 
@@ -66,17 +85,23 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return [vec.dist for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
-        return 'Distance'
+        return 'Distance (m)'
     
     def get_title(self) -> str:
         return 'Distance'
 
     def get_y_lim(self) -> Tuple[float, float]:
         dist = max(self.metrics, key=lambda metric: metric.get_first_distance()).get_first_distance()
-        return 0, dist*2
+        return -0.1, max(dist*2, self.get_threshold2_y()*1.1)
     
     def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [metric.relation.safety_dist] * metric.len
+    
+    def get_threshold2_y(self) -> float:
+        return self.dist_treshold
+    
+    def get_threshold2_label(self) -> str:
+        return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class DCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
@@ -86,18 +111,24 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return [vec.dcpa for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
-        return 'DCPA'
+        return 'DCPA (m)'
     
     def get_title(self) -> str:
         return 'Distance at closest point of approach'
     
     def get_y_lim(self) -> Tuple[float, float]:
         dcpa = max(self.metrics, key=lambda metric: metric.get_first_dcpa()).get_first_dcpa()
-        threshold = max(self.metrics, key=lambda metric: metric.relation.safety_dist).relation.safety_dist
-        return 0, max(dcpa * 2, threshold*1.1)
+        #threshold = max(self.metrics, key=lambda metric: metric.relation.safety_dist).relation.safety_dist
+        return -0.1, max(dcpa * 2, self.get_threshold2_y()*1.1)
     
     def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [metric.relation.safety_dist] * metric.len
+    
+    def get_threshold2_y(self) -> float:
+        return self.dist_treshold
+    
+    def get_threshold2_label(self) -> str:
+        return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class TCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
@@ -107,15 +138,21 @@ class TCPAAxesComponent(ProximityMetricComponent):
         return [vec.tcpa for vec in metric.vectors]
     
     def get_metric_str(self) -> str:
-        return 'TCPA'
+        return 'TCPA (s)'
     
     def get_title(self) -> str:
         return 'Time to closest point of approach'
     
     def get_y_lim(self) -> Tuple[float, float]:
         tcpa0 = max(self.metrics, key=lambda metric: metric.get_first_tcpa()).get_first_tcpa()
-        return 0, tcpa0 * 2
+        return -100, max(tcpa0, self.get_threshold2_y()) * 1.1
     
     def get_threshold_y(self, metric : TrajProximityMetric) -> list[float]:
         return [0] * metric.len
+    
+    def get_threshold2_y(self) -> float:
+        return self.time_treshold
+    
+    def get_threshold2_label(self) -> str:
+        return f'{(self.time_treshold / 60):.0f} min'
     

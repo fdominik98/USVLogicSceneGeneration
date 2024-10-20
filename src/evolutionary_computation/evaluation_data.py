@@ -30,8 +30,7 @@ class EvaluationData:
                  aggregate_strat: Optional[str] = None,  # aggregation strategy
                  risk_vector: Optional[List[float]] = None,  # risk vector
                  config_group: str = 'F4',  # config group
-                 vessel_number: Optional[int] = None,  # New attribute for vessel number
-                 risk_distance: Optional[float] = None):  # New attribute risk_distance
+                 vessel_number: Optional[int] = None,):  # New attribute for vessel number
         self.algorithm_desc = algorithm_desc
         self.config_name = config_name
         self.random_seed = random_seed
@@ -59,7 +58,6 @@ class EvaluationData:
         self.risk_vector = risk_vector
         self.config_group = config_group
         self.vessel_number = vessel_number  # Initialize vessel_number
-        self.risk_distance = risk_distance  # Initialize risk_distance
 
     def to_dict(self):
         return {
@@ -90,11 +88,12 @@ class EvaluationData:
             "risk_vector": self.risk_vector,
             "config_group": self.config_group,
             "vessel_number": self.vessel_number,
-            "risk_distance": self.risk_distance  # Include risk_distance in the dictionary
         }
 
-    def save_to_json(self, file_path: str):
-        with open(file_path, 'w') as json_file:
+    def save_to_json(self):
+        if self.path is None:
+            raise Exception('No path provided')
+        with open(self.path, 'w') as json_file:
             json.dump(self.to_dict(), json_file, indent=4)
 
     @classmethod
@@ -127,7 +126,6 @@ class EvaluationData:
             risk_vector=data.get("risk_vector"),
             config_group=data.get("config_group", 'F4'),
             vessel_number=data.get("vessel_number"),
-            risk_distance=data.get("risk_distance")  # Extract risk_distance from the dictionary
         )
         
     @classmethod

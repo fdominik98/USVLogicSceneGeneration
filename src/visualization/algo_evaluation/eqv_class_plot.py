@@ -4,17 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from evolutionary_computation.evaluation_data import EvaluationData
 from evaluation.eqv_class_calculator import EqvClassCalculator
-from model.environment.functional_models import MSR
-from model.relation import RelationDescClause
-from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
+from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
-
-equiv_classes : dict[int, List[RelationDescClause]] = {
-    3 :  [inter.relation_desc_clauses[0] for inter in MSR.three_vessel_interactions],
-    4 :  [inter.relation_desc_clauses[0] for inter in MSR.four_vessel_interactions],
-    5 :  [inter.relation_desc_clauses[0] for inter in MSR.five_vessel_interactions],
-    6 :  [inter.relation_desc_clauses[0] for inter in MSR.six_vessel_interactions]
-}
+from model.environment.functional_models.usv_env_desc_list import MSR_EQUIV_CLASSES
 
 class EqvClassPlot(MyPlot):  
     def __init__(self, eval_datas : List[EvaluationData]): 
@@ -35,14 +27,17 @@ class EqvClassPlot(MyPlot):
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
+        
+        fig.text(0.5, 0.5, 'MSR', ha='center', va='center', fontsize=12, fontweight='bold')
+        fig.text(0.5, 0.05, 'SBO', ha='center', va='center', fontsize=12, fontweight='bold')
 
         for i, (vessel_num, group_measurements) in enumerate(self.config_data.items()):
             group_labels = config_group_mapper(list(group_measurements.keys()))            
             
             for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
-                data = EqvClassCalculator(eval_datas).clause_desc_set
+                data = EqvClassCalculator().get_equivalence_classes(eval_datas)
                 found_length = len(data)
-                for equiv_class in equiv_classes[vessel_num]:
+                for equiv_class in MSR_EQUIV_CLASSES[vessel_num]:
                     ass_clause = equiv_class.get_asymmetric_clause()
                     ass_clause.remove_non_ego_ralations()
                     if ass_clause not in data:
@@ -56,8 +51,10 @@ class EqvClassPlot(MyPlot):
                 else:
                     axi : plt.Axes = axes  
                 bars : plt.BarContainer = axi.bar(labels, values, color=group_colors(len(group_labels)), edgecolor='black', linewidth=0)
-                axi.set_title(self.vessel_num_labels[i])
-                axi.set_ylabel('Samples')
+                if j == 0:
+                    axi.set_title(self.vessel_num_labels[i])
+                if i == 0:
+                    axi.set_ylabel('Samples')
                 axi.set_aspect('auto', adjustable='box')
                 yticks = np.linspace(0, max(values), 6)
                 yticks = [int(t) for t in yticks] 
@@ -66,10 +63,11 @@ class EqvClassPlot(MyPlot):
                 xticks = [int(t) for t in xticks] 
                 axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False)             
             
-                axi.text(0.98, 0.98, f'covered shapes: {found_length}/{len(data)}', 
+                coverage_percent = found_length/len(data)*100
+                axi.text(0.98, 0.98, f'covered shapes: {found_length}/{len(data)}\n{coverage_percent:.1f}%', 
                 transform=axi.transAxes,  # Use axis coordinates
                 verticalalignment='top', # Align text vertically to the top
                 horizontalalignment='right',
-                fontsize=10)
+                fontsize=11)
 
-        fig.tight_layout()
+        fig.tight_layout(rect=[0, 0.04, 1, 1])

@@ -6,10 +6,11 @@ import queue
 import threading
 from model.data_parser import EvalDataParser
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LoadedEnvironment, USVEnvironment
 import dash
 from dash import dash_table, html
 from dash.dependencies import Input, Output
+from evolutionary_computation.evaluation_data import EvaluationData
 
 
 class DashThread(threading.Thread):
@@ -158,8 +159,7 @@ class DashThread(threading.Thread):
             if selected_rows:
                 selected_index = selected_rows[0]
                 row = self.df.iloc[selected_index]
-                config = USV_ENV_DESC_LIST[row['config_name']]
-                env = USVEnvironment(config).update(row['best_solution'])
+                env = LoadedEnvironment(EvaluationData.from_dict(row))
                 self.data_queue.put(env)
                 return f"Selected Row:\n{pprint.pformat(dict(sorted(row.to_dict().items())))}"
             return "No row selected"

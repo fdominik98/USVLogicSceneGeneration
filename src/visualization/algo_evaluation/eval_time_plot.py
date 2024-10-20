@@ -14,7 +14,7 @@ class EvalTimePlot(MyPlot):
         self.mode = mode
         self.all = all
         self.eval_datas = eval_datas
-        self.eval_times : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
+        self.runtimes : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
         for eval_data in eval_datas:
             if self.mode == 'algo':
                 group_key = eval_data.algorithm_desc
@@ -22,22 +22,22 @@ class EvalTimePlot(MyPlot):
                 group_key = eval_data.config_group
             else:
                 raise Exception('Unknown grouping mode')
-            if eval_data.best_fitness_index == 0.0 or all:                
-                self.eval_times[eval_data.vessel_number][group_key].append(eval_data.evaluation_time)
+            if eval_data.best_fitness_index == 0.0 or all:     
+                self.runtimes[eval_data.vessel_number][group_key].append(eval_data.evaluation_time)
             else: 
-                self.eval_times[eval_data.vessel_number][group_key] = self.eval_times[eval_data.vessel_number][group_key]
+                self.runtimes[eval_data.vessel_number][group_key] = self.runtimes[eval_data.vessel_number][group_key]
             
-        self.vessel_num_labels = vessel_number_mapper(list(self.eval_times.keys()))
+        self.vessel_num_labels = vessel_number_mapper(list(self.runtimes.keys()))
         MyPlot.__init__(self)
         
     def create_fig(self):
         figsize = (10, 4) if self.mode == 'algo' else (6, 3)
-        fig, axes = plt.subplots(1, len(self.eval_times), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.eval_times)})
+        fig, axes = plt.subplots(1, len(self.runtimes), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.runtimes)})
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
-        for i, (vessel_num, group_measurements) in enumerate(self.eval_times.items()):
+        for i, (vessel_num, group_measurements) in enumerate(self.runtimes.items()):
             if self.mode == 'algo':
                 group_labels = algo_mapper(list(group_measurements.keys()))
             elif self.mode == 'config':
@@ -53,7 +53,8 @@ class EvalTimePlot(MyPlot):
                 axi : plt.Axes = axes     
             violinplot = axi.violinplot(data, widths=0.7, showmeans=True, showmedians=True)
             axi.set_title(self.vessel_num_labels[i])
-            axi.set_ylabel('Runtime (s)')
+            if i == 0:
+                axi.set_ylabel('Runtime (s)')
             axi.set_aspect('auto', adjustable='box')
             #axi.set_yticks(range(max([max(d) for d in data])))
             axi.set_xticks(range(1, len(group_labels)+1), group_labels)
@@ -63,19 +64,19 @@ class EvalTimePlot(MyPlot):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)   
             
-            violinplot['cmeans'].set_color('brown')
+            violinplot['cmeans'].set_color('green')
             violinplot['cmeans'].set_linewidth(1.5)
             violinplot['cmedians'].set_color('red')
             violinplot['cmedians'].set_linewidth(1.5)
             
-            maxy = max([max(d) for d in data])
+            maxy = axi.get_ylim()[1]
+            axi.set_ylim(0, maxy*1.15)
                     
             # Annotate each box with the number of samples
             for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(i, maxy + 5, f'{sample_size}', ha='center', va='center', fontsize=12, horizontalalignment='center')                   
+                axi.text(i, maxy*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
                     
-            axi.set_ylim(0, maxy)
             
 
         fig.tight_layout()

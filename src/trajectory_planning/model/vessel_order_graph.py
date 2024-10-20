@@ -38,7 +38,7 @@ class VesselOrderGraph():
             self.nodes[rel.vessel2.id] = node2
 
     def add_edge(self, rel : Relation):
-        if not rel.has_collision():
+        if not rel.no_colreg():
             return
         node1 = self.nodes[rel.vessel1.id]
         node2 = self.nodes[rel.vessel2.id]

@@ -10,7 +10,6 @@ from evolutionary_computation.evaluation_data import EvaluationData
 from evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from model.environment.functional_models import SBO
 from model.environment.functional_models import MSR
-from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 
 NUMBER_OF_RUNS = {3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
 NUMBER_OF_RUNS = {3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}

@@ -2,15 +2,15 @@ from typing import Dict, List, Tuple
 from model.environment.usv_environment import USVEnvironment
 import copy
 from model.relation import Relation
-from evaluation.risk_evaluation import RiskVector, ProximityRiskVector
+from evaluation.risk_evaluation import RiskVector, ProximityRiskIndex, NavigationRiskIndex
 
 class TrajProximityMetric():
     def __init__(self, relation : Relation) -> None:
-        self.vectors : List[ProximityRiskVector] = []
+        self.vectors : List[ProximityRiskIndex] = []
         self.len = 0
         self.relation = relation
         
-    def append(self, pv : ProximityRiskVector):
+    def append(self, pv : ProximityRiskIndex):
         self.vectors.append(pv)
         self.len += 1
         
@@ -24,7 +24,7 @@ class TrajProximityMetric():
         return self.vectors[0].tcpa
 
 class TrajProximityEvaluator():
-    def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
+    def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float, float, float, float, float]]]) -> None:
         self.env = env
         self.trajectories = trajectories
         self.metrics : List[TrajProximityMetric] = []
@@ -46,34 +46,38 @@ class TrajProximityEvaluator():
             v1.update(*pos1)
             v2.update(*pos2)
             dyn_rel.update()
-            metrics.append(ProximityRiskVector(dyn_rel))
+            metrics.append(ProximityRiskIndex(dyn_rel))
             
         return metrics
     
 class TrajNavigationRiskEvaluator():
-    def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float,float,float,float]]]) -> None:
+    def __init__(self, env : USVEnvironment, trajectories: Dict[int, List[Tuple[float, float, float, float, float]]]) -> None:
         self.env = env
         self.trajectories = trajectories
-        self.risk_metrics : Dict[int, List[float]] = {v.id : [] for v in env.vessels}
+        self.danger_sector_metrics : Dict[int, List[float]] = {v.id : [] for v in env.vessels}
+        self.proximity_metrics : Dict[int, List[float]] = {v.id : [] for v in env.vessels}
         
         dyn_env = copy.deepcopy(env)
         
         for t in range(len(trajectories[0])):
-            if t % 30 == 0:
-                for o in dyn_env.vessels:
+            if t % 30 == 0:                    
+                for o in dyn_env.vessels: ## TODO MAKE IT SIMPLER
                     traj = trajectories[o.id]
                     o.update(*(traj[t]))
-                    
+                for rel in dyn_env.relations:
+                    rel.update()
                 for o in dyn_env.vessels: 
                     if not o.is_OS():
                         continue   
-                    risk_vector = RiskVector(dyn_env)               
-                    self.risk_metrics[o.id].append(risk_vector.distance)       
+                    risk_vector = RiskVector(env=dyn_env)
+                    self.danger_sector_metrics[o.id].append(risk_vector.danger_sector)
+                    self.proximity_metrics[o.id].append(risk_vector.max_proximity_index.proximity_index)      
             else:
                 for o in dyn_env.vessels: 
                     if not o.is_OS():
                         continue 
-                    self.risk_metrics[o.id].append(self.risk_metrics[o.id][-1])       
+                    self.danger_sector_metrics[o.id].append(self.danger_sector_metrics[o.id][-1])
+                    self.proximity_metrics[o.id].append(self.proximity_metrics[o.id][-1])      
                     
                     
                     

@@ -19,7 +19,7 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone
 from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
 
 class TrajectoryReceiver():
-    def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None) -> None:
+    def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None) -> None:
         self.env = env
         self.trajectories = trajectories
         if self.trajectories is None:
@@ -30,7 +30,7 @@ class TrajectoryReceiver():
 
 class ColregPlot(TrajectoryReceiver, MyPlot):  
     def __init__(self, env : USVEnvironment, 
-                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float]]]] = None): 
+                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
         MyPlot.__init__(self)
         TrajectoryReceiver.__init__(self, env, trajectories)
         
@@ -93,7 +93,7 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         #self.fig.tight_layout(pad=10)
         self.ax.grid(False)
        
-        self.ax.set_title(f'USV situation\n{self.title}')
+        #self.ax.set_title(f'USV situation\n{self.title}')
         self.ax.set_xlabel('X Position (m)')
         self.ax.set_ylabel('Y Position (m)')
         self.ax.set_aspect('equal', adjustable='box')      

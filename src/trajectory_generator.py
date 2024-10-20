@@ -9,8 +9,7 @@ from trajectory_planning.model.vessel_order_graph import VesselNode, VesselOrder
 from trajectory_planning.model.trajectory_data import TrajectoryData
 from trajectory_planning.path_interpolator import PathInterpolator
 from model.data_parser import EvalDataParser
-from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LoadedEnvironment
 import numpy as np
 from trajectory_planning.bidirectional_rrt_star_fnd import BidirectionalRRTStarFND, DIM
 
@@ -19,6 +18,8 @@ SCALER = 1 / MAX_COORD  * DIM
 DIRECTION_THRESHOLD = 100 # meter
 GOAL_SAMPLE_RATE = 20.0 #%
 MAX_ITER = np.inf
+
+
 measurement_name = 'test'
 measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
 
@@ -43,14 +44,13 @@ if len(data_models) == 0:
 
 data = data_models[0]
 
-config = USV_ENV_DESC_LIST[data.config_name]
-env = USVEnvironment(config).update(data.best_solution)
+env = LoadedEnvironment(data)
 ColregPlotManager(env)
 
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
     print(f'Calculation {o}:')
-    expand_distance = o.speed * 60 # 1 minute precision
+    expand_distance = o.speed * 20 # 1 minute precision
     
     if len(v_node.relations) == 0:
         return [], 0, expand_distance

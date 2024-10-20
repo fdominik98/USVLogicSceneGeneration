@@ -22,8 +22,11 @@ class DataParser(ABC):
         self.column_names = column_names
         self.dir = dir
         
-    @abstractmethod    
     def get_data_lines(self, files : List[str]) -> List[dict]:
+        return [self.load_dict_from_file(file) for file in files]
+    
+    @abstractmethod
+    def load_dict_from_file(self, file : str) -> dict:
         pass
 
     def get_all_file_paths(self, directory):
@@ -33,33 +36,7 @@ class DataParser(ABC):
                 if '.json' in file:
                     file_paths.append(os.path.join(root, file))
         return file_paths
-    
-        
-    def load_dirs(self) -> Tuple[List[pd.DataFrame], List[str]]:
-        dfs : List[pd.DataFrame] = []    
-        df_names : List[str] = []
-        for dir in tkfilebrowser.askopendirnames(initialdir=self.dir):
-            files = self.get_all_file_paths(dir)
-            if len(files) == 0:
-                continue
-            df = self.load_df_from_files(files)
-            df_name = f'{df["measurement_name"][0]}/{df["algorithm_desc"][0]}'
-            dfs.append(df)
-            df_names.append(df_name)
-        return dfs, df_names
-    
-        
-    
-    def load_df(self) -> Tuple[pd.DataFrame, str]:
-        files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
-        df = self.load_df_from_files(files)
-        if len(files) == 0:
-            df_name = ''
-        else:
-            df_name = f'{df["measurement_name"][0]}/{df["algorithm_desc"][0]}'
-        return df, df_name
-        
-            
+         
     def load_df_from_files(self, files : List[str]) -> pd.DataFrame:        
         data_lines = self.get_data_lines(files)
         data_lists : List[List[float]] = []
@@ -89,16 +66,12 @@ class EvalDataParser(DataParser):
     def __init__(self) -> None:
         super().__init__(self.EVAL_DATA_COLUMN_NAMES, self.gen_data_dir)
 
-    
-    def get_data_lines(self, files : List[str]) -> List[dict]:
-        return [EvaluationData.load_dict_from_json(file) for file in files]
-    
     def load_data_models(self) -> List[EvaluationData]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
         return self.load_data_models_from_files(files)
     
     def load_data_models_from_files(self, files : List[str]) -> List[EvaluationData]:
-        data_models = [EvaluationData.load_from_json(file) for file in files]
+        data_models = [self.load_model_from_file(file) for file in files]
         return [model for model in data_models if model.error_message is None and model.best_solution is not None]
     
     def load_dirs_merged_as_models(self) -> List[EvaluationData]:
@@ -109,19 +82,34 @@ class EvalDataParser(DataParser):
                 continue
         return self.load_data_models_from_files(files)
     
+    def load_dict_from_file(self, file : str) -> dict:
+        dict = EvaluationData.load_dict_from_json(file)
+        dict['path'] = file
+        return dict
+    
+    def load_model_from_file(self, file : str) -> EvaluationData:
+        model = EvaluationData.load_from_json(file)
+        model.path = file
+        return model
+    
 class TrajDataParser(DataParser):    
     def __init__(self) -> None:
         super().__init__(self.TRAJ_COLUMN_NAMES, self.RRT_DIR)
 
-    
-    def get_data_lines(self, files : List[str]) -> List[dict]:
-        return [TrajectoryData.load_dict_from_json(file) for file in files]
-    
     def load_data_models(self) -> List[TrajectoryData]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
-        return self.load_data_models_from_files(files)
+        return self.load_models_from_files(files)
     
-    def load_data_models_from_files(self, files : List[str]) -> List[TrajectoryData]:
-        data_models = [TrajectoryData.load_from_json(file) for file in files]
+    def load_models_from_files(self, files : List[str]) -> List[TrajectoryData]:
+        data_models = [self.load_model_from_file(file) for file in files]
         return [model for model in data_models if model.error_message is None and model.trajectories is not None]
     
+    def load_dict_from_file(self, file : str) -> dict:
+        dict = TrajectoryData.load_dict_from_json(file)
+        dict['path'] = file
+        return dict
+    
+    def load_model_from_file(self, file : str) -> TrajectoryData:
+        model = TrajectoryData.load_from_json(file)
+        model.path = file
+        return model

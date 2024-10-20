@@ -1,6 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 import numpy as np
+from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 from trajectory_planning.model.vessel_order_graph import VesselNode
 from trajectory_planning.model.rrt_models import Node, Obstacle, RandomPoint, TrajectoryState
 from trajectory_planning.path_interpolator import PathInterpolator
@@ -15,7 +16,7 @@ class BidirectionalRRTStarFND():
     def __init__(self, v_node : VesselNode, start : np.ndarray, goal : np.ndarray,
                  obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,
-                expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0, max_nodes = 1500):
+                expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0, max_nodes = 3000):
         self.vessel = v_node.vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
@@ -250,16 +251,17 @@ class BidirectionalRRTStarFND():
         delta_pos = node.p - parent_node.p
         dist = float(np.linalg.norm(delta_pos))
         if parent_node.parent is not None:
-             delta_pos_parent = parent_node.p - self.node_list[parent_node.parent].p
-             angle_parent = self.angle_between_vectors(delta_pos_parent, delta_pos, dist)
-             if not (np.radians(0) <= angle_parent <= np.radians(3) or
-                     np.radians(30) <= angle_parent <= np.radians(60)):
-                 return False, dist, next_state
+            pass
+            #  delta_pos_parent = parent_node.p - self.node_list[parent_node.parent].p
+            #  angle_parent = self.angle_between_vectors(delta_pos_parent, delta_pos, dist)
+            #  if not (np.radians(0) <= angle_parent <= np.radians(3) or
+            #          np.radians(30) <= angle_parent <= np.radians(60)):
+            #      return False, dist, next_state
         else:
              angle_start_end = self.angle_between_vectors(self.delta_pos_start_end, delta_pos, dist)
-             if not (np.radians(0) <= angle_start_end <= np.radians(3)):
+             if not (np.radians(0) <= angle_start_end <= np.radians(0.1)):
                  return False, dist, next_state
-        #     next_state = self.state_transitions(parent_node, delta_pos_parent, delta_pos, dist)
+        #    next_state = self.state_transitions(parent_node, delta_pos_parent, delta_pos, dist)
         #else:
         #     if parent_node.state != TrajectoryState.START:
         #         raise Exception('Root node must be in START state')
@@ -283,12 +285,13 @@ class BidirectionalRRTStarFND():
     def check_no_collision(self, node : Node, obstacleList : List[Obstacle]):
         for obs in obstacleList:
             if not obs.check_no_collision(node):
-                print(f'Hit obstacle {obs} at {node.p}')
+                #print(f'Hit obstacle {obs} at {node.p}')
                 return False
             
         # The two trajectories will collide at the specific second
         for obs_vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
-            if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
+            # if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
+            if np.linalg.norm(node.p - pos) <= 0.5 * N_MILE_TO_M_CONVERSION:
                 print(f'Hit trajectory of {obs_vessel} at {pos}.')
                 return False
         return True  # safe

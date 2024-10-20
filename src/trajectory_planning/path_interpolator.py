@@ -5,7 +5,7 @@ from trajectory_planning.model.rrt_models import Node
 
 class PathInterpolator():
     def __init__(self) -> None:
-        self.interpolated_paths : Dict[int, List[Tuple[float, float, float, float,float]]] = {}
+        self.interpolated_paths : Dict[int, List[Tuple[float, float, float, float, float]]] = {}
         self.vessels : Dict[int, Vessel] = {}
         self.path_length = 45 * 60
 
@@ -81,7 +81,7 @@ class PathInterpolator():
         interpolated_headings.append(vessel.heading)
         interpolated_speeds.append(vessel.speed)
         
-        result : List[Tuple[float,float,float,float,float]] = []
+        result : List[Tuple[float, float, float, float, float]] = []
         
         for i, heading in enumerate(interpolated_headings):
             pos = interpolated_positions[i]
@@ -91,7 +91,7 @@ class PathInterpolator():
         return result
     
     @staticmethod
-    def interpolate_headings(trajectory : List[Tuple[float,float,float,float,float]])  -> List[Tuple[float, float, float, float,float]]:
+    def interpolate_headings(trajectory : List[Tuple[float, float, float, float, float]])  -> List[Tuple[float, float, float, float, float]]:
         headings = [t[2] for t in trajectory]
         def interpolate_chunk(start, end, num_steps):
             """Linearly interpolate between start and end in num_steps steps."""
