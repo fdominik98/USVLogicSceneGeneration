@@ -70,10 +70,10 @@ class RelationTypeDisj(RelationType, ABC):
 ############ COLLISION ##################
 class MayCollide(RelationType):
     def __init__(self, negated : bool= False) -> None:
-        RelationType.__init__(self, 'mayCollide', negated, np.pi)
+        RelationType.__init__(self, 'mayCollide', negated, MAX_DISTANCE)
     
     def get_penalty_norm(self) -> float:
-        return self.penalty(self.relation.angle_v12_p12, 0, self.relation.angle_half_cone)
+        return self.penalty(self.relation.dcpa, 0, self.relation.safety_dist)
     
     def is_bidir(self) -> bool:
         return True

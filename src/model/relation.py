@@ -162,11 +162,8 @@ class Relation():
         #self.cos_p12_v12_theta = np.clip(self.dot_p12_v12 / self.o_distance / self.v12_norm_stable, -1, 1)
         #self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
         
-        self.cos_p12_v12_theta = np.clip(self.dot_p12_v12 / self.o_distance / self.v12_norm_stable, -1, 1)
-        self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
-        
-        self.sin_half_cone_theta = np.clip(self.safety_dist / self.o_distance, -1, 1)
-        self.angle_half_cone = abs(np.arcsin(self.sin_half_cone_theta)) # [0, pi/2] 
+        self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
+        self.dcpa = np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)) 
         
         self.cat_penalties = self.get_penalty_norms()
         self.penalties_sum = sum(penalty for penalty in self.cat_penalties[0] +

@@ -24,6 +24,11 @@ class ShipMarkingsComponent(PlotComponent):
             self.ax.add_artist(radius_circle)
             self.radius_graphs.append(radius_circle)
 
+            # Plot the positions
+            dot_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
+            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=dot_label, zorder=self.zorder)
+            self.ship_dot_graphs.append(ship_dot)
+            
             angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
             speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
             velocity_label =f'{o} Velocity: {angle}, {speed}'
@@ -31,11 +36,7 @@ class ShipMarkingsComponent(PlotComponent):
             ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=velocity_label, zorder=self.zorder-10)
             self.velocity_graphs.append(ship_vel)
             
-            # Plot the positions
-            dot_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
-            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=dot_label, zorder=self.zorder)
-            self.ship_dot_graphs.append(ship_dot)
-            #self.graphs += [name_text, radius_circle, ship_vel, ship_dot]
+            
             self.graphs += [radius_circle, ship_vel, ship_dot]
         
                      

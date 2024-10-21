@@ -27,8 +27,10 @@ class VOConeComponent(PlotComponent):
                 p12 = rel.p12
             # Calculate the angles of the cone
             angle_rel = np.arctan2(p12[1], p12[0])
-            angle1 = angle_rel + rel.angle_half_cone
-            angle2 = angle_rel - rel.angle_half_cone
+            sin_half_cone_theta = np.clip(rel.safety_dist / rel.o_distance, -1, 1)
+            angle_half_cone = abs(np.arcsin(sin_half_cone_theta)) # [0, pi/2] 
+            angle1 = angle_rel + angle_half_cone
+            angle2 = angle_rel - angle_half_cone
             
             cone_size = max(rel.o_distance / 2, (o1.speed + o2.speed) * 1.2)
                         
@@ -64,8 +66,12 @@ class VOConeComponent(PlotComponent):
                 p12 = rel.p12
             # Calculate the angles of the cone
             angle_rel = np.arctan2(p12[1], p12[0])
-            angle1 = angle_rel + rel.angle_half_cone
-            angle2 = angle_rel - rel.angle_half_cone
+            # Calculate the angles of the cone
+            angle_rel = np.arctan2(p12[1], p12[0])
+            sin_half_cone_theta = np.clip(rel.safety_dist / rel.o_distance, -1, 1)
+            angle_half_cone = abs(np.arcsin(sin_half_cone_theta)) # [0, pi/2] 
+            angle1 = angle_rel + angle_half_cone
+            angle2 = angle_rel - angle_half_cone
             
             cone_size = max(rel.o_distance / 2, (o1.speed + o2.speed) * 1.2)
                         

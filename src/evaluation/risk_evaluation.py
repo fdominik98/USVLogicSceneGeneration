@@ -28,8 +28,8 @@ class RiskVector():
 class ProximityRiskIndex():
     def __init__(self, relation : Relation) -> None:
         self.dist = relation.o_distance
-        self.tcpa = relation.dot_p12_v12 / relation.v12_norm_stable**2
-        self.dcpa = np.linalg.norm(relation.p21 + relation.v12 * max(0, self.tcpa)) 
+        self.tcpa = relation.tcpa
+        self.dcpa = relation.dcpa
         
         dr = 1 * N_MILE_TO_M_CONVERSION
         ts = 10 * 60

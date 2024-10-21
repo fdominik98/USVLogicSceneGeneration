@@ -61,10 +61,10 @@ class TableGenerator():
     def generate_runtime_summary_table(self):
         latex_code = "\\begin{tabular}{ccccc}\n"
         latex_code += "    \\toprule\n"
-        latex_code += "    Number of vessels & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])
+        latex_code += "    Number of vessels (\(K\)) & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])
         latex_code += "    \\midrule\n"
-        latex_code += "    Average time (s) per scene (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.average_runtimes)
-        latex_code += "    Success rate adjusted runtime (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.success_rate_adjusted)
+        latex_code += "    Average time (s) per run (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.average_runtimes)
+        latex_code += "    Average time (s) per scene (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.success_rate_adjusted)
         latex_code += "    \\bottomrule\n"
         latex_code += "\\end{tabular}"
         print(latex_code)

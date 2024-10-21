@@ -16,7 +16,7 @@ NUMBER_OF_RUNS = {3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
 NUMBER_OF_RUNS = {3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
 WARMUPS = 2
 RANDOM_SEED = 1234
-TIMEOUT = 120
+TIMEOUT = 240
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
@@ -35,6 +35,10 @@ measurement_names= ['test_3_vessel_scenarios_MSR_long', 'test_3_vessel_scenarios
 
 measurement_names= ['test_3_vessel_scenarios_MSR_many_long', 'test_3_vessel_scenarios_SBO_many_long', 'test_4_vessel_scenarios_MSR_many_long', 'test_4_vessel_scenarios_SBO_many_long',
                     'test_5_vessel_scenarios_MSR_many_long', 'test_5_vessel_scenarios_SBO_many_long', 'test_6_vessel_scenarios_MSR_many_long', 'test_6_vessel_scenarios_SBO_many_long']
+
+measurement_names= ['test_3_vessel_scenarios_MSR', 'test_3_vessel_scenarios_SBO', 'test_4_vessel_scenarios_MSR', 'test_4_vessel_scenarios_SBO',
+                    'test_5_vessel_scenarios_MSR', 'test_5_vessel_scenarios_SBO', 'test_6_vessel_scenarios_MSR', 'test_6_vessel_scenarios_SBO']
+
 
 interactions = [SBO.three_vessel_interactions, MSR.three_vessel_interactions]
 interactions = [SBO.four_vessel_interactions, MSR.four_vessel_interactions]

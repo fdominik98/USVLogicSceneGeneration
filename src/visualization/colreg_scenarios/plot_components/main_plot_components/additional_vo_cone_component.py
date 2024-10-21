@@ -29,8 +29,10 @@ class AdditionalVOConeComponent(PlotComponent):
             self.circle_graphs[rel.name] = vo_circle
             # Calculate the angles of the cone
             angle_rel = np.arctan2(p12[1], p12[0])
-            angle1 = angle_rel + rel.angle_half_cone
-            angle2 = angle_rel - rel.angle_half_cone
+            sin_half_cone_theta = np.clip(rel.safety_dist / rel.o_distance, -1, 1)
+            angle_half_cone = abs(np.arcsin(sin_half_cone_theta)) # [0, pi/2] 
+            angle1 = angle_rel + angle_half_cone
+            angle2 = angle_rel - angle_half_cone
             
             # Plot the velocity obstacle cone
             cone1 = o1.p + np.array([np.cos(angle1), np.sin(angle1)]) * rel.o_distance
@@ -60,8 +62,13 @@ class AdditionalVOConeComponent(PlotComponent):
             # Calculate the angles of the cone
             # Calculate the angles of the cone
             angle_rel = np.arctan2(p12[1], p12[0])
-            angle1 = angle_rel + rel.angle_half_cone
-            angle2 = angle_rel - rel.angle_half_cone
+            
+            # Calculate the angles of the cone
+            angle_rel = np.arctan2(p12[1], p12[0])
+            sin_half_cone_theta = np.clip(rel.safety_dist / rel.o_distance, -1, 1)
+            angle_half_cone = abs(np.arcsin(sin_half_cone_theta)) # [0, pi/2] 
+            angle1 = angle_rel + angle_half_cone
+            angle2 = angle_rel - angle_half_cone
             
             # Plot the velocity obstacle cone
             cone1 = o1.p + np.array([np.cos(angle1), np.sin(angle1)]) * rel.o_distance
