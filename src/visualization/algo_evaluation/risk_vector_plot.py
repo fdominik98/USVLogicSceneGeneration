@@ -75,10 +75,11 @@ class RiskVectorPlot(MyPlot):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)   
             
-            violinplot['cmeans'].set_color('green')
-            violinplot['cmeans'].set_linewidth(1.5)
-            violinplot['cmedians'].set_color('red')
-            violinplot['cmedians'].set_linewidth(1.5)
+            violinplot['cmeans'].set_color('black')
+            violinplot['cmeans'].set_linewidth(2)
+            violinplot['cmedians'].set_color('grey')
+            violinplot['cmedians'].set_linewidth(2)
+            violinplot['cmedians'].set_linestyle(':')
             
             axi.set_ylim(0, self.metric_map_max[self.metric] * 1.15)
                     

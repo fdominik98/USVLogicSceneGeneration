@@ -92,7 +92,7 @@ class TrajectoryVisualizer():
             if e.type == pygame.MOUSEBUTTONDOWN:
                 if e.button == 1:
                     coords = self.inverse_reverse_coord(np.array(e.pos))
-                    obstacle_list.append(CircularObstacle(coords, 400))
+                    obstacle_list.append(CircularObstacle(coords, 3000))
                     path_validation()
                 elif e.button == 3:
                     end.p = self.inverse_reverse_coord(np.array(e.pos))

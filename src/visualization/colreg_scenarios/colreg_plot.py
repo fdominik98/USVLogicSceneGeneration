@@ -23,10 +23,13 @@ class TrajectoryReceiver():
         self.env = env
         self.trajectories = trajectories
         if self.trajectories is None:
-            interpolator = PathInterpolator()
-            for v in env.vessels:
-                interpolator.add_path(v, [])
-            self.trajectories = interpolator.interpolated_paths
+            self.trajectories = self.gen_trajectories()
+            
+    def gen_trajectories(self):
+        interpolator = PathInterpolator()
+        for v in self.env.vessels:
+            interpolator.add_path(v, [])
+        return interpolator.interpolated_paths
 
 class ColregPlot(TrajectoryReceiver, MyPlot):  
     def __init__(self, env : USVEnvironment, 

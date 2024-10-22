@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from model.environment.usv_environment import USVEnvironment
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
@@ -10,10 +10,12 @@ class ProximityMetricComponent(PlotComponent, ABC):
     time_treshold = 10 * 60
     dist_treshold = 1 * N_MILE_TO_M_CONVERSION
     
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
         super().__init__(ax, env)
         self.metrics = metrics
+        self.reference_metrics = reference_metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
+        self.reference_line_graphs : Dict[str, plt.Line2D] = {}
         self.threshold_graphs : Dict[str, plt.Line2D] = {}
         self.ax = ax
         
@@ -51,19 +53,31 @@ class ProximityMetricComponent(PlotComponent, ABC):
         pass
     
     def do_draw(self):
+        if self.reference_metrics is not None:
+            for metric in self.reference_metrics:
+                ts_vessel = metric.relation.vessel1 if metric.relation.vessel1.id != 0 else metric.relation.vessel2
+                y = self.get_y_metric(metric)
+                x = range(0, metric.len)
+                line, = self.ax.plot(x, y, color=light_colors[ts_vessel.id], linewidth=1.3)
+                self.reference_line_graphs[metric.relation.name] = line
+                self.graphs += [line]
+        
+        
         for metric in self.metrics:
             ts_vessel = metric.relation.vessel1 if metric.relation.vessel1.id != 0 else metric.relation.vessel2
             threshold_y = self.get_threshold_y(metric)
             y = self.get_y_metric(metric)
             x = range(0, metric.len)
             line, = self.ax.plot(x, y, color=colors[ts_vessel.id],
-                                 linewidth=1.5, label=fr'{metric.relation.vessel1}$\rightarrow${metric.relation.vessel2}', linestyle='-')
+                                 linewidth=1.7, label=fr'{metric.relation.vessel1}$\rightarrow${metric.relation.vessel2}', linestyle='-')
             threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
             self.line_graphs[metric.relation.name] = line
             self.threshold_graphs[metric.relation.name] = threshold
             self.graphs += [line, threshold]
             
         threshold2, = self.ax.plot(x, [self.get_threshold2_y()] * metric.len, color='black', linewidth=1, linestyle='--')
+        self.threshold_graphs['basic'] = threshold2
+        self.graphs += [threshold2]
            
         self.ax.margins(x=0.2, y=0.2) 
         self.ax.set_xlim(0, metric.len)
@@ -78,8 +92,8 @@ class ProximityMetricComponent(PlotComponent, ABC):
         return self.graphs 
 
 class DistanceAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
-        super().__init__(ax, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+        super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.dist for vec in metric.vectors]
@@ -104,8 +118,8 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class DCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
-        super().__init__(ax, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+        super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.dcpa for vec in metric.vectors]
@@ -131,8 +145,8 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class TCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric]) -> None:
-        super().__init__(ax, env, metrics)  
+    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+        super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
         return [vec.tcpa for vec in metric.vectors]

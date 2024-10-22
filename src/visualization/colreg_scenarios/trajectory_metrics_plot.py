@@ -18,11 +18,15 @@ class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):
         self.proximity_evaluator = TrajProximityEvaluator(trajectories=self.trajectories, env=self.env)
         self.risk_evaluator = TrajNavigationRiskEvaluator(trajectories=self.trajectories, env=self.env)
         
-        DistanceAxesComponent(self.axes[0], self.env, self.proximity_evaluator.metrics).draw()
-        DCPAAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics).draw()
-        TCPAAxesComponent(self.axes[2], self.env, self.proximity_evaluator.metrics).draw()
-        RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.danger_sector_metrics, 'DS-based index', False).draw()
-        RiskMetricComponent(self.axes[4], self.env, self.risk_evaluator.proximity_metrics, 'Proximity index', True).draw()
+        ref_trajs = self.gen_trajectories()
+        self.ref_proximity_evaluator = TrajProximityEvaluator(trajectories=ref_trajs, env=self.env)
+        self.ref_risk_evaluator = TrajNavigationRiskEvaluator(trajectories=ref_trajs, env=self.env)
+        
+        DistanceAxesComponent(self.axes[0], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
+        DCPAAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
+        TCPAAxesComponent(self.axes[2], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
+        RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.proximity_metrics, 'Proximity index', True, self.ref_risk_evaluator.proximity_metrics).draw()
+        RiskMetricComponent(self.axes[4], self.env, self.risk_evaluator.danger_sector_metrics, 'DS-based index', False, self.ref_risk_evaluator.danger_sector_metrics).draw()
         
         self.fig.tight_layout()
         

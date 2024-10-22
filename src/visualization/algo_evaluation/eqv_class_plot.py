@@ -33,6 +33,7 @@ class EqvClassPlot(MyPlot):
 
         for i, (vessel_num, group_measurements) in enumerate(self.config_data.items()):
             group_labels = config_group_mapper(list(group_measurements.keys()))            
+            colros = group_colors(len(group_labels))
             
             for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
                 data = EqvClassCalculator().get_equivalence_classes(eval_datas)
@@ -50,7 +51,7 @@ class EqvClassPlot(MyPlot):
                     axi : plt.Axes = axes[j][i]
                 else:
                     axi : plt.Axes = axes  
-                bars : plt.BarContainer = axi.bar(labels, values, color=group_colors(len(group_labels)), edgecolor='black', linewidth=0)
+                bars : plt.BarContainer = axi.bar(labels, values, color=colros[j], edgecolor='black', linewidth=0)
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])
                 if i == 0:

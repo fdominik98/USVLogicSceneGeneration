@@ -62,12 +62,13 @@ class EvalTimePlot(MyPlot):
             
             for patch, color in zip(violinplot['bodies'], group_colors(len(group_labels))):
                 patch.set_facecolor(color)           # Set fill color
-                patch.set_linewidth(1.5)   
+                patch.set_linewidth(1.0)   
             
-            violinplot['cmeans'].set_color('green')
-            violinplot['cmeans'].set_linewidth(1.5)
-            violinplot['cmedians'].set_color('red')
-            violinplot['cmedians'].set_linewidth(1.5)
+            violinplot['cmeans'].set_color('black')
+            violinplot['cmeans'].set_linewidth(2)
+            violinplot['cmedians'].set_color('grey')
+            violinplot['cmedians'].set_linewidth(2)
+            violinplot['cmedians'].set_linestyle(':')
             
             maxy = axi.get_ylim()[1]
             axi.set_ylim(0, maxy*1.15)

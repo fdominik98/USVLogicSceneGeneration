@@ -16,7 +16,7 @@ class BidirectionalRRTStarFND():
     def __init__(self, v_node : VesselNode, start : np.ndarray, goal : np.ndarray,
                  obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,
-                expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0, max_nodes = 3000):
+                expand_dist=10.0, goal_sample_rate=15, max_iter=1500, scaler = 1.0, max_nodes = 1500):
         self.vessel = v_node.vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
