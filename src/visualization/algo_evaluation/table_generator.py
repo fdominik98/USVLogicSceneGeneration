@@ -22,8 +22,8 @@ class TableGenerator():
         
         self.stat_sign_runtime : List[MannWhitneyUCliffDelta] = []
         self.stat_sign_success : List[FisherExactOddsRatio] = []
-        self.average_runtimes : List[float] = []
-        self.success_rate_adjusted  : List[float] = []
+        self.average_runtimes : List[List[float]] = [[], []]
+        self.success_rate_adjusted  : List[List[float]] = [[], []]
         
         for runtime_group_measurements, success_rate_group_measurements in zip(self.runtimes.values(), self.success_rates.values()): 
             if len(runtime_group_measurements) != 2:
@@ -32,10 +32,15 @@ class TableGenerator():
             success_rate_data = list(success_rate_group_measurements.values())
             group_labels = config_group_mapper(list(runtime_group_measurements.keys())) 
             
-            mean = [np.mean(runtime_data[0]), np.mean(runtime_data[1])]
-            success_rate_adjusted = [mean[0] / np.mean(success_rate_data[0]), mean[1] / np.mean(success_rate_data[1])]
-            self.average_runtimes += mean
-            self.success_rate_adjusted += success_rate_adjusted
+            mean_msr = np.mean(runtime_data[0])
+            mean_sbo = np.mean(runtime_data[1])
+            succ_msr = np.mean(success_rate_data[0])
+            succ_sbo = np.mean(success_rate_data[1])
+            
+            self.average_runtimes[0] += [mean_msr]
+            self.average_runtimes[1] += [mean_sbo]
+            self.success_rate_adjusted[0] += [mean_msr / succ_msr]
+            self.success_rate_adjusted[1] += [mean_sbo / succ_sbo]
                 
             if len(runtime_data) != 0:
                 stat_signif_runtime = MannWhitneyUCliffDelta({group : value for group, value in zip(group_labels, runtime_data)})
@@ -61,10 +66,12 @@ class TableGenerator():
     def generate_runtime_summary_table(self):
         latex_code = "\\begin{tabular}{ccccc}\n"
         latex_code += "    \\toprule\n"
-        latex_code += "    Number of vessels (\(K\)) & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])
+        latex_code += "    \(K\) & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])
         latex_code += "    \\midrule\n"
-        latex_code += "    Average time (s) per run (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.average_runtimes)
-        latex_code += "    Average time (s) per scene (\\aMSR~| \\aSBO) & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} & {:.1f} | {:.1f} \\\\\n".format(*self.success_rate_adjusted)
+        latex_code += "    Avg. time/run (s) & {:.1f} & {:.1f} & {:.1f} & {:.1f} \\\\\n".format(*self.average_runtimes[0])
+        latex_code += "    (\\aMSR~| \\aSBO) & | {:.1f} & | {:.1f} & | {:.1f} & | {:.1f} \\\\\n".format(*self.average_runtimes[1])
+        latex_code += "    Avg. time/scene (s) & {:.1f} & {:.1f} & {:.1f} & {:.1f} \\\\\n".format(*self.success_rate_adjusted[0])
+        latex_code += "    (\\aMSR~| \\aSBO) & | {:.1f} & | {:.1f} & | {:.1f} & | {:.1f} \\\\\n".format(*self.success_rate_adjusted[1])
         latex_code += "    \\bottomrule\n"
         latex_code += "\\end{tabular}"
         print(latex_code)

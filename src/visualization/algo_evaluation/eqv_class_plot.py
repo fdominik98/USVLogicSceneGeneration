@@ -69,6 +69,7 @@ class EqvClassPlot(MyPlot):
                 transform=axi.transAxes,  # Use axis coordinates
                 verticalalignment='top', # Align text vertically to the top
                 horizontalalignment='right',
-                fontsize=11)
+                fontsize=11,
+                fontweight='bold')
 
         fig.tight_layout(rect=[0, 0.04, 1, 1])
