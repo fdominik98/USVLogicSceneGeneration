@@ -36,10 +36,10 @@ measurement_names= ['test_3_vessel_scenarios_MSR_long', 'test_3_vessel_scenarios
 measurement_names= ['test_3_vessel_scenarios_MSR_many_long', 'test_3_vessel_scenarios_SBO_many_long', 'test_4_vessel_scenarios_MSR_many_long', 'test_4_vessel_scenarios_SBO_many_long',
                     'test_5_vessel_scenarios_MSR_many_long', 'test_5_vessel_scenarios_SBO_many_long', 'test_6_vessel_scenarios_MSR_many_long', 'test_6_vessel_scenarios_SBO_many_long']
 
-measurement_names= ['test_3_vessel_scenarios_MSR', 'test_3_vessel_scenarios_SBO', 'test_4_vessel_scenarios_MSR', 'test_4_vessel_scenarios_SBO',
-                    'test_5_vessel_scenarios_MSR', 'test_5_vessel_scenarios_SBO', 'test_6_vessel_scenarios_MSR', 'test_6_vessel_scenarios_SBO']
-
 measurement_names = ['test_6_vessel_scenarios_SBO']
+measurement_names= ['test_3_vessel_scenarios_MSR_big', 'test_3_vessel_scenarios_SBO_big', 'test_4_vessel_scenarios_MSR_big', 'test_4_vessel_scenarios_SBO_big',
+                    'test_5_vessel_scenarios_MSR_big', 'test_5_vessel_scenarios_SBO_big', 'test_6_vessel_scenarios_MSR_big', 'test_6_vessel_scenarios_SBO_big']
+
 
 interactions = [SBO.three_vessel_interactions, MSR.three_vessel_interactions]
 interactions = [SBO.four_vessel_interactions, MSR.four_vessel_interactions]
@@ -49,10 +49,10 @@ interactions = [MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 interactions = [SBO.three_vessel_interactions, SBO.four_vessel_interactions, SBO.five_vessel_interactions, SBO.six_vessel_interactions]
 
 interactions = [MSR.three_vessel_interactions, MSR.four_vessel_interactions, MSR.five_vessel_interactions, MSR.six_vessel_interactions]
+interactions = [SBO.six_vessel_interactions]
 interactions = [MSR.three_vessel_interactions, SBO.three_vessel_interactions, MSR.four_vessel_interactions, SBO.four_vessel_interactions, 
                 MSR.five_vessel_interactions, SBO.five_vessel_interactions, MSR.six_vessel_interactions, SBO.six_vessel_interactions]
 
-interactions = [SBO.six_vessel_interactions]
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,

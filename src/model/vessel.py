@@ -6,8 +6,8 @@ from model.environment.usv_config import EPSILON, KNOT_TO_MS_CONVERSION
 
 class VesselDesc(ABC):
     max_speed = 30 * KNOT_TO_MS_CONVERSION # kn
-    min_speed = 5 * KNOT_TO_MS_CONVERSION
-    max_length = 60 # m
+    min_speed = 2 * KNOT_TO_MS_CONVERSION
+    max_length = 100 # m
     min_length = 10
         
     def __init__(self, id : int):
@@ -83,7 +83,7 @@ class Vessel():
         self.speed = speed    
         self.heading = heading
         self.l = l
-        self.r = l * 2.0
+        self.r = l * 6.0
         
     def v_norm(self) -> np.ndarray:
         return self.v / self.speed
