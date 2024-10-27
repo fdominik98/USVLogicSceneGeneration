@@ -63,7 +63,7 @@ class NavigationRiskIndex():
                 continue
             rel = Relation(new_vessel, [MayCollide()], vessel2)
             pr_i = ProximityRiskIndex(rel)
-            if pr_i.dcpa < 1 * N_MILE_TO_M_CONVERSION:
+            if pr_i.dcpa < rel.safety_dist:
                 return True
         return False
     
@@ -74,7 +74,7 @@ class NavigationRiskIndex():
         for j in range(91):
             if not self.will_collide(self.vessel.heading - np.radians(j), self.vessel.speed):
                 break
-        return (i + j) / 180
+        return pow((i + j) / 180, 0.33)
             
     def find_safe_navigation_area_index(self) -> float:
         collides = 0

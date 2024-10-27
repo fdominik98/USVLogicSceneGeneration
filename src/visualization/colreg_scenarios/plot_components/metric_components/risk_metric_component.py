@@ -25,7 +25,7 @@ class RiskMetricComponent(PlotComponent):
                     continue
                 vessel = self.env.get_vessel_by_id(id)
                 x = range(0, len(metric))
-                line, = self.ax.plot(x, metric, color=light_colors[id], linewidth=1.3)
+                line, = self.ax.plot(x, metric, color=light_colors[id], linestyle=':', label=f'{vessel.name} no intervention', linewidth=2)
                 self.reference_line_graphs[id] = line
                 self.graphs += [line]
                 
@@ -35,9 +35,9 @@ class RiskMetricComponent(PlotComponent):
                 continue
             vessel = self.env.get_vessel_by_id(id)
             x = range(0, len(metric))
-            line, = self.ax.plot(x, metric, color=colors[id], linewidth=1.7, label=vessel.name, linestyle='-')
+            line, = self.ax.plot(x, metric, color=colors[id], linewidth=1.7, label=f'{vessel.name} COLREGS compliant', linestyle='-')
             self.line_graphs[id] = line
-            self.graphs += [line]
+            self.graphs += [line]   
            
         self.ax.margins(x=0.2, y=0.2) 
         longest = max(list(self.metrics.values()), key=len)

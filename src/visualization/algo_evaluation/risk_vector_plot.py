@@ -66,10 +66,12 @@ class RiskVectorPlot(MyPlot):
             axi.set_title(self.vessel_num_labels[i])
             if i == 0:
                 axi.set_ylabel(self.metric_map_title[self.metric], fontsize=11)
+            if i != 0:
+                axi.set_yticks([])
             axi.set_aspect('auto', adjustable='box')
             #axi.set_yticks(range(max([max(d) for d in data])))
             axi.set_xticks(range(1, len(group_labels)+1), group_labels)
-            axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')            
+            axi.set_xticklabels(group_labels, rotation=0, ha='right', fontweight='bold')            
             
             for patch, color in zip(violinplot['bodies'], group_colors(len(group_labels))):
                 patch.set_facecolor(color)           # Set fill color

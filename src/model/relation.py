@@ -140,7 +140,7 @@ class Relation():
         self.do_update()
         
     def do_update(self):
-        self.safety_dist = self.vessel1.r + self.vessel2.r  
+        self.safety_dist = (self.vessel1.r + self.vessel2.r) / 2
         self.p12 = self.vessel2.p - self.vessel1.p
         self.p21 = self.vessel1.p - self.vessel2.p
         self.v12 = self.vessel1.v - self.vessel2.v

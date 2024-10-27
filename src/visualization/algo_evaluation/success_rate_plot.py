@@ -54,10 +54,13 @@ class SuccessRatePlot(MyPlot):
             axi.set_aspect('auto', adjustable='box')
             axi.set_xticks(range(len(group_labels))) 
             axi.set_xticklabels(group_labels, rotation=45, ha='right', fontweight='bold')
+            if i != 0:
+                axi.set_yticks([])
             axi.set_ylim(0, 115)
             
             for i, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, 102, 
                 f'{len(list(group_measurements.values())[i])}', ha='center', va='bottom', fontsize=10)
+                
 
         fig.tight_layout()

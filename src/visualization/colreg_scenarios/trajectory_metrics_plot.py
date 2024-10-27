@@ -19,14 +19,17 @@ class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):
         self.risk_evaluator = TrajNavigationRiskEvaluator(trajectories=self.trajectories, env=self.env)
         
         ref_trajs = self.gen_trajectories()
+        for id in ref_trajs.keys():
+            if id != 0 and trajectories is not None:
+                ref_trajs[id] = trajectories[id]
         self.ref_proximity_evaluator = TrajProximityEvaluator(trajectories=ref_trajs, env=self.env)
         self.ref_risk_evaluator = TrajNavigationRiskEvaluator(trajectories=ref_trajs, env=self.env)
         
         DistanceAxesComponent(self.axes[0], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
         DCPAAxesComponent(self.axes[1], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
         TCPAAxesComponent(self.axes[2], self.env, self.proximity_evaluator.metrics, self.ref_proximity_evaluator.metrics).draw()
-        RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.proximity_metrics, 'Proximity index', True, self.ref_risk_evaluator.proximity_metrics).draw()
-        RiskMetricComponent(self.axes[4], self.env, self.risk_evaluator.danger_sector_metrics, 'DS-based index', False, self.ref_risk_evaluator.danger_sector_metrics).draw()
+        #RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.proximity_metrics, 'Proximity index', True, self.ref_risk_evaluator.proximity_metrics).draw()
+        RiskMetricComponent(self.axes[3], self.env, self.risk_evaluator.danger_sector_metrics, 'DS-based index', True, self.ref_risk_evaluator.danger_sector_metrics).draw()
         
         self.fig.tight_layout()
         
@@ -34,18 +37,17 @@ class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):
     def create_fig(self):
         self.fig : plt.Figure = plt.figure(figsize=(12, 3))
         # Create a GridSpec with 2 rows and 2 columns
-        gs = gridspec.GridSpec(2, 4, height_ratios=[1, 1], width_ratios=[1, 1, 1, 1])
+        gs = gridspec.GridSpec(2, 3, height_ratios=[1,1], width_ratios=[1, 1, 1])
 
+        ax4 = self.fig.add_subplot(gs[0, 2])
         # Create axes for the first column (occupying both rows)
-        ax1 = self.fig.add_subplot(gs[:, 0])
-        ax2 = self.fig.add_subplot(gs[:, 1])
-        ax3 = self.fig.add_subplot(gs[:, 2])
+        ax1 = self.fig.add_subplot(gs[1, 0])
+        ax2 = self.fig.add_subplot(gs[1, 1])
+        ax3 = self.fig.add_subplot(gs[1, 2])
 
-        # Create axes for the second column (occupying only one row each)
-        ax4 = self.fig.add_subplot(gs[0, 3])
-        ax5 = self.fig.add_subplot(gs[1, 3])
+        #ax5 = self.fig.add_subplot(gs[1, 3])
         
         self.fig.subplots_adjust(wspace=0.5)
         
-        self.axes : List[plt.Axes] = [ax1, ax2, ax3, ax4, ax5]
+        self.axes : List[plt.Axes] = [ax1, ax2, ax3, ax4]
         

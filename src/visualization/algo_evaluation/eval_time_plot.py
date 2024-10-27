@@ -55,6 +55,8 @@ class EvalTimePlot(MyPlot):
             axi.set_title(self.vessel_num_labels[i])
             if i == 0:
                 axi.set_ylabel('Runtime (s)')
+            else:
+                axi.set_yticks([])
             axi.set_aspect('auto', adjustable='box')
             #axi.set_yticks(range(max([max(d) for d in data])))
             axi.set_xticks(range(1, len(group_labels)+1), group_labels)

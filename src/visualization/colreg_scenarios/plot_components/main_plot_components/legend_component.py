@@ -18,11 +18,13 @@ class LegendComponent(PlotComponent):
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         for i, o in enumerate(new_env.vessels):
-            pos_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
-            self.legend.get_texts()[i * 3 + 1].set_text(pos_label) 
-            angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
-            speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
-            velocity_label =f'{o} Velocity: {angle}, {speed}'
-            self.legend.get_texts()[i * 3 + 2].set_text(velocity_label) 
+            # Plot the positions
+            dot_label = f'{o}\; p: ({o.p[0]:.1f}, {o.p[1]:.1f}), r: {o.r:.1f} m'
+            angle = f'h: {np.degrees(o.heading):.1f}^\circ'
+            speed = f'sp: {(o.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
+            velocity_label =f'{o}\; {angle}, {speed}'
+            
+            self.legend.get_texts()[i * 2 + 0].set_text(rf'${dot_label}$') 
+            self.legend.get_texts()[i * 2 + 1].set_text(rf'${velocity_label}$') 
         return self.graphs
     

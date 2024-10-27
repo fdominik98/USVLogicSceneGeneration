@@ -71,7 +71,7 @@ class Vessel():
     def __init__(self, desc: VesselDesc):
         self.desc = desc
         self.id = desc.id
-        self.name = r'OS' if self.is_OS() else fr'$TS_{self.id}$'
+        self.name = 'OS' if self.is_OS() else f'TS_{self.id}'
         self.max_speed = desc.max_speed
         self.min_speed = desc.min_speed
         self.max_length = desc.max_length
@@ -83,7 +83,7 @@ class Vessel():
         self.speed = speed    
         self.heading = heading
         self.l = l
-        self.r = l * 6.0
+        self.r = l * 4.0
         
     def v_norm(self) -> np.ndarray:
         return self.v / self.speed

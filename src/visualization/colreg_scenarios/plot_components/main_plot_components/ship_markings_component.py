@@ -20,20 +20,20 @@ class ShipMarkingsComponent(PlotComponent):
     def do_draw(self):
         for o in self.env.vessels:
             #Plot the positions and radius as circles
-            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', label=f'{o} Radius: {o.r:.2f}m', zorder=self.zorder)
+            radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', zorder=self.zorder)
             self.ax.add_artist(radius_circle)
             self.radius_graphs.append(radius_circle)
 
             # Plot the positions
-            dot_label = f'{o} Position: ({o.p[0]:.2f}, {o.p[1]:.2f})'
-            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=dot_label, zorder=self.zorder)
+            dot_label = f'{o}\; p: ({o.p[0]:.1f}, {o.p[1]:.1f}), r: {o.r:.1f} m'
+            ship_dot = self.ax.scatter(o.p[0], o.p[1], color=colors[o.id], s=self.DYNAMIC_ZOOM, label=rf'${dot_label}$', zorder=self.zorder)
             self.ship_dot_graphs.append(ship_dot)
             
-            angle = fr'$\theta = {np.degrees(o.heading):.2f}^\circ$'
-            speed = f'speed = {(o.speed / KNOT_TO_MS_CONVERSION):.2f}kn'
-            velocity_label =f'{o} Velocity: {angle}, {speed}'
+            angle = f'h: {np.degrees(o.heading):.1f}^\circ'
+            speed = f'sp: {(o.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
+            velocity_label =f'{o}\; {angle}, {speed}'
             # Plot the velocity vector with their actual lengths
-            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=velocity_label, zorder=self.zorder-10)
+            ship_vel = self.ax.quiver(o.p[0], o.p[1], o.v[0], o.v[1], angles='xy', scale_units='xy', scale=1, color=colors[o.id], label=rf'${velocity_label}$', zorder=self.zorder-10)
             self.velocity_graphs.append(ship_vel)
             
             

@@ -58,7 +58,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
                 ts_vessel = metric.relation.vessel1 if metric.relation.vessel1.id != 0 else metric.relation.vessel2
                 y = self.get_y_metric(metric)
                 x = range(0, metric.len)
-                line, = self.ax.plot(x, y, color=light_colors[ts_vessel.id], linewidth=1.3)
+                line, = self.ax.plot(x, y, color=light_colors[ts_vessel.id], linewidth=2, linestyle=':')
                 self.reference_line_graphs[metric.relation.name] = line
                 self.graphs += [line]
         
@@ -69,13 +69,14 @@ class ProximityMetricComponent(PlotComponent, ABC):
             y = self.get_y_metric(metric)
             x = range(0, metric.len)
             line, = self.ax.plot(x, y, color=colors[ts_vessel.id],
-                                 linewidth=1.7, label=fr'{metric.relation.vessel1}$\rightarrow${metric.relation.vessel2}', linestyle='-')
-            threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
+                                 linewidth=1.7, label=fr'${metric.relation.vessel1} \rightarrow {metric.relation.vessel2}$', linestyle='-')
+            #threshold, = self.ax.plot(x, threshold_y, color=light_colors[ts_vessel.id], linewidth=1, linestyle='--')
             self.line_graphs[metric.relation.name] = line
-            self.threshold_graphs[metric.relation.name] = threshold
-            self.graphs += [line, threshold]
+            #self.threshold_graphs[metric.relation.name] = threshold
+            self.graphs += [line]
             
-        threshold2, = self.ax.plot(x, [self.get_threshold2_y()] * metric.len, color='black', linewidth=1, linestyle='--')
+        threshold2, = self.ax.plot(x, [self.get_threshold2_y()] * metric.len, color='black', linewidth=1.5, linestyle='--')
+        threshold2, = self.ax.plot(x, [0] * metric.len, color='black', linewidth=1.5, linestyle='--')
         self.threshold_graphs['basic'] = threshold2
         self.graphs += [threshold2]
            
@@ -86,7 +87,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
         
         ymin, ymax = self.ax.get_ylim()
         offset = (ymax - ymin) * 0.03  # 5% of the y-axis range
-        self.ax.text(metric.len / 2, self.get_threshold2_y() + offset, self.get_threshold2_label(), ha='center', va='center', fontsize=10, horizontalalignment='center')  
+        self.ax.text(metric.len / 2, self.get_threshold2_y() + offset, self.get_threshold2_label(), ha='center', va='center', fontsize=11, horizontalalignment='center')  
         
     def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
         return self.graphs 
