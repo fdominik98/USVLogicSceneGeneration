@@ -10,9 +10,10 @@ skipped = 0
 done = 0
 
 
-
-# for eval_data in eval_datas:  
-#     eval_data.save_to_json()
+# for eval_data in eval_datas:
+#     path = eval_data.path
+#     eval_data.path = None 
+#     eval_data.save_to_json(path2=path)
 #     done += 1
 #     print(f'Config Group: {eval_data.config_group}. Done {done}, Skipped: {skipped} / {len(eval_datas)}')
 # exit(0)#-------------------------------------------------------

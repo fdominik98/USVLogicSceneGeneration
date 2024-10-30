@@ -90,11 +90,15 @@ class EvaluationData:
             "vessel_number": self.vessel_number,
         }
 
-    def save_to_json(self):
+    def save_to_json(self, path2=None):
         if self.path is None:
-            raise Exception('No path provided')
-        with open(self.path, 'w') as json_file:
-            json.dump(self.to_dict(), json_file, indent=4)
+            if path2 is None:
+                raise Exception('No path provided')
+            with open(path2, 'w') as json_file:
+                json.dump(self.to_dict(), json_file, indent=4)
+        else:
+            with open(self.path, 'w') as json_file:
+                json.dump(self.to_dict(), json_file, indent=4)
 
     @classmethod
     def from_dict(cls, data: dict):
