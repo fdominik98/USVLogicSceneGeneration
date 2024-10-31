@@ -23,8 +23,8 @@ The following tree provides an overview of the project structure:
 
 ```
 USVLogicSceneGeneration
+├── assets                 # Stores image assets used in visualizations, also generated scene descriptions are saved here.
 ├── .vscode                # Editor configuration for VSCode
-├── assets                 # Stores image assets used in visualizations, generated scene and trajectory descriptions are saved here.
 ├── refinery_functional_models  # Functional model definitions in Refinery's domain specific language: https://refinery.services/
 ├── requirements.txt       # Python dependencies required for the project
 └── src                    # Source code directory
