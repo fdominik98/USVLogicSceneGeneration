@@ -3,22 +3,15 @@
 
 A Python 3.10-based project for generating and evaluating Unmanned Surface Vehicle (USV) interaction scenes. This repository includes utilities for risk vector analysis, evolutionary computation, and trajectory planning, with detailed visualization and evaluation tools.
 
-This project serves as supplementary material for our research paper **Automated Scene Generation for Testing COLREGS-Compliance of Autonomous Surface Vehicles**
+This project serves as supplementary material for our research paper **Automated Scene Generation for Testing COLREGS-Compliance of Autonomous Surface Vehicles**.
 
 ## Table of Contents
-
-- [Getting Started](#getting-started)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
 - [Requirements](#requirements)
 - [Usage](#usage)
 
-## Getting Started
-
-These instructions will help you set up and run the project on your local machine for development and testing purposes.
-
 ## Project Structure
-
 The following tree provides an overview of the project structure:
 
 ```
