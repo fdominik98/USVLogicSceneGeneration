@@ -41,6 +41,10 @@ USVLogicSceneGeneration
   - `images/distr.png`: Distribution plot image from https://doi.org/10.1016/j.oceaneng.2023.116436.
   - `images/gradient.png`: Gradient scale from https://doi.org/10.1016/j.oceaneng.2023.116436. Used to map values to colors and extract distribution from plot.
   - `gen_data/`: **All the evaluation data generated to showcase the results of scene generation.**
+    - `test_*_MSR`: Measurements using MSR with 4 minutes timeout.
+    - `test_*_SBO`: Measurements using SBO with 4 minutes timeout.
+    - `test_*_MSR_long`: Measurements using MSR with 10 minutes timeout.
+    - `test_*_SBO_long`: Measurements using SBO with 10 minutes timeout.
   - `figures/`: **All the figures used to showcase the results of scene generation.**
 
 #### `refinery_functional_models`

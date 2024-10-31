@@ -13,7 +13,7 @@ class RiskVector():
         self.proximity_vectors = [ProximityRiskIndex(rel) for rel in env.relations if rel.has_os()]
         self.nav_risk_vector = NavigationRiskIndex(env, env.get_vessel_by_id(0))
             
-        self.max_proximity_index = max(self.proximity_vectors, key=lambda obj: obj.proximity_index)
+        self.max_proximity_index = min(self.proximity_vectors, key=lambda obj: obj.tcpa)
         #self.safe_navigation_area_index = self.nav_risk_vector.find_safe_navigation_area_index()
         self.danger_sector = self.nav_risk_vector.find_danger_sector()
         
