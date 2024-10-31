@@ -32,10 +32,6 @@ USVLogicSceneGeneration
 
 ### Detailed Description
 
-#### `.vscode`
-- `launch.json`: Configures debug settings and launch shortcuts for VSCode.
-- `settings.json`: Includes project-specific settings for VSCode.
-
 #### `assets`
 - Contains images and plot exports used in the project. Also generated scene and trajectory descriptions are saved here.
   - `images/distr.png`: Distribution plot image from https://doi.org/10.1016/j.oceaneng.2023.116436.
@@ -46,6 +42,10 @@ USVLogicSceneGeneration
     - `test_*_MSR_long`: Measurements using MSR with 10 minutes timeout.
     - `test_*_SBO_long`: Measurements using SBO with 10 minutes timeout.
   - `figures/`: **All the figures used to showcase the results of scene generation.**
+
+#### `.vscode`
+- `launch.json`: Configures debug settings and launch shortcuts for VSCode.
+- `settings.json`: Includes project-specific settings for VSCode.
 
 #### `refinery_functional_models`
 - Contains `COLREGS.problem` files with functional COLREGS scenario specifications in Refinery DSL:  https://refinery.services/.
