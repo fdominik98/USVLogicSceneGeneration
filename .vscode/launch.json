@@ -81,5 +81,15 @@
             "program": "src/wang24_eval.py",
             "console": "integratedTerminal"
         },
+        {
+            "name": "Run Manim",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/manim_first.py",
+            "args": [
+                "-p -f -ql --disable_caching ${workspaceFolder}/src/manim_first.py PointsWithVectorsAndRadius",
+            ],
+            "console": "integratedTerminal"
+        }
     ]
 }

@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Manim",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "manim",
+                "-ql",
+                "-s",
+                "src/manim_first.py",
+                "PointsWithVectorsAndRadius"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
