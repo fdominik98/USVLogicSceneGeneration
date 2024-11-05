@@ -21,15 +21,22 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.additio
 class TrajectoryReceiver():
     def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None) -> None:
         self.env = env
-        self.trajectories = trajectories
-        if self.trajectories is None:
+        if trajectories is None:
             self.trajectories = self.gen_trajectories()
+        else:
+            self.trajectories = trajectories            
             
     def gen_trajectories(self):
         interpolator = PathInterpolator()
         for v in self.env.vessels:
             interpolator.add_path(v, [])
         return interpolator.interpolated_paths
+    
+    def convert_to_states(self) -> List[List[float]]:
+        return [[element for key in sorted(self.trajectories.keys()) for element in self.trajectories[key][i]]
+                for i in range(len(next(iter(self.trajectories.values()))))
+        ]
+        
 
 class ColregPlot(TrajectoryReceiver, MyPlot):  
     def __init__(self, env : USVEnvironment, 
@@ -63,7 +70,7 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         
         self.draw()  
          
-        self.animation = ColregAnimation(self.fig, self.env, self.components, self.trajectories)
+        self.animation = ColregAnimation(self.fig, self.env, self.components, self.convert_to_states())
         
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))

@@ -2,7 +2,30 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Manim",
+            "label": "Run Manim video",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "manim",
+                "-ql",
+                //"-s",
+                "src/manim_first.py",
+                "PointsWithVectorsAndRadius"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+
+        {
+            "label": "Run Manim last scene",
             "type": "shell",
             "command": "python",
             "args": [
@@ -12,6 +35,29 @@
                 "-s",
                 "src/manim_first.py",
                 "PointsWithVectorsAndRadius"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+
+        {
+            "label": "Run Manim test",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "manim",
+                "-ql",
+                "-s",
+                "src/manim_first.py",
+                "LineJointVariants"
             ],
             "group": {
                 "kind": "build",

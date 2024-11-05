@@ -1,9 +1,8 @@
 import copy
-from typing import Dict, List, Tuple
+from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from model.environment.usv_environment import USVEnvironment
-from model.vessel import Vessel
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 TWO_HOURS = 2 * 60 * 60
@@ -30,7 +29,7 @@ class ColregAnimation():
     
     def __init__(self, fig : plt.Figure,
                  env : USVEnvironment, components : List[PlotComponent],
-                 trajectories : Dict[int, List[Tuple[float, float, float, float, float]]]) -> None:
+                 trajectories : List[List[float]]) -> None:
         self.fig = fig
         self.env = env
         self.components = components
@@ -51,24 +50,11 @@ class ColregAnimation():
     def update_anim(self):
         self.init_anim()
         while self.anim_frame_counter < self.anim_max_frames():
-            if not self.is_anim_paused:
-                for o in self.dyn_env.vessels: ## TODO MAKE IT SIMPLER
-                   o.update(*self.select_next_state(o))
-                for rel in self.dyn_env.relations:
-                    rel.update()
+            frame_index = int(self.anim_frame_counter * REAL_TIME * self.speed_up_ratio())
+            if frame_index < len(self.trajectories) and not self.is_anim_paused:   
+                self.dyn_env.do_update(self.trajectories[frame_index])
                 self.anim_frame_counter += 1
             yield self.dyn_env
-            
-            
-    def select_next_state(self, o: Vessel):
-        speed_up = self.speed_up_ratio()
-        traj = self.trajectories[o.id]
-        frame_index = int(self.anim_frame_counter * REAL_TIME * speed_up)
-        if frame_index < len(traj):                
-            return traj[frame_index]
-            
-        vec = o.v * REAL_TIME * speed_up
-        return (o.p[0] + vec[0], o.p[1] + vec[1], o.heading, o.l, o.speed)
         
     def update_graphs(self, data):
         #self.auto_scale()
