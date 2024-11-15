@@ -108,6 +108,9 @@ random_configs = [
     
     
     
+    MSREnvironmentDesc('crossing_and_overtaking', [_OS, TS1, TS2],
+                    [RelationDesc(_OS, overtaking_init(), TS1),
+                    RelationDesc(TS2, crossing_init(), _OS)]),
     
     MSREnvironmentDesc('overtaking_and_crossing', [_OS, TS1, TS2],
                     [RelationDesc(_OS, crossing_init(), TS1),

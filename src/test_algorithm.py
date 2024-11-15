@@ -16,7 +16,9 @@ test_config_PSO = EvaluationData(population_size = 10, c_1=1.5, c_2=1.7, w=0.5,
 
 configs = ['two_way_overtaking_BIG', 'overtaking_and_head_on_BIG', 'crossing_and_head_on_BIG', 'two_way_crossing_BIG', 'overtaking_and_crossing_BIG']
 configs = ['crossing']
-alg = SciPyDEAlgorithm(measurement_name='test_dse_normal', env_configs=configs, test_config=de_config, number_of_runs=20, warmups=0, verbose=True)
+
+configs = ['two_way_overtaking', 'overtaking_and_head_on', 'crossing_and_head_on', 'two_way_crossing', 'overtaking_and_crossing']
+alg = SciPyDEAlgorithm(measurement_name='test_for_progress_report', env_configs=configs, test_config=de_config, number_of_runs=20, warmups=0, verbose=True)
 
 #alg = PySwarmPSOAlgorithm(measurement_name='test_pso', env_configs=['two_way_overtaking'], test_config=test_config_PSO, number_of_runs=1, warmups=0, verbose=True)
 
