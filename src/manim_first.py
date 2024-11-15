@@ -1,13 +1,17 @@
 import copy
+from typing import Any, Tuple
 from manim import *
+from manim.constants import DEFAULT_DOT_RADIUS, ORIGIN
+from manim.utils.color import WHITE
+from numpy import floating
 from model.environment.usv_config import ASSET_FOLDER, MAX_COORD
 from model.data_parser import EvalDataParser, TrajDataParser
 from model.environment.usv_environment import LoadedEnvironment
 from src.model.vessel import Vessel
 from src.visualization.colreg_scenarios.colreg_plot import TrajectoryReceiver
 
-light_colors = [BLUE_A, RED_A, GREEN_A, YELLOW_A]
-colors = [BLUE_C, RED_C, GREEN_C, YELLOW_C]
+light_colors = [BLUE_A, RED_A, GREEN_A, YELLOW_A, LIGHT_BROWN]
+colors = [BLUE_C, RED_C, GREEN_C, YELLOW_C, DARK_BROWN]
 class VesselData():
     def __init__(self, axes : ThreeDAxes, vessel: Vessel) -> None:
         self.point = axes.c2p(vessel.p[0], vessel.p[1], 0)
@@ -41,6 +45,74 @@ class VesselData():
         self.r.set_z(5000)
         self.ship_image.set_z(5000)
         
+        
+        
+class Animated(Mobject):
+    def animate(self, mobject, t):
+        pass
+    
+    def refresh_data(self):
+        pass
+
+class SimDot(Dot, Animated):
+    def __init__(self, vessel : Vessel, axes : ThreeDAxes, traj: List[Tuple[float, float, float, float, float]]) -> None:
+        self.traj = traj
+        self.axes = axes
+        self.vessel = vessel
+        self.traj_length = len(self.traj) - 1
+        self.refresh_data()
+        super().__init__(self.point_lifted, color=colors[vessel.id])
+        
+    def animate(self, mobject, t):
+        index = int(self.traj_length * t)
+        self.vessel.update(*self.traj[index])
+        self.refresh_data()
+        self.move_to(self.point_lifted)
+        
+    def refresh_data(self):
+        self.point_lifted = self.axes.c2p(self.vessel.p[0], self.vessel.p[1], 10)
+        
+class SimVec(Arrow, Animated):
+    def __init__(self, vessel : Vessel, axes : ThreeDAxes, traj: List[Tuple[float, float, float, float, float]]) -> None:
+        self.traj = traj
+        self.axes = axes
+        self.vessel = vessel
+        self.traj_length = len(self.traj) - 1
+        self.refresh_data()
+        super().__init__(self.point_lifted, self.end_lifted, color=colors[vessel.id])
+        
+    def animate(self, mobject, t):
+        index = int(self.traj_length * t)
+        self.vessel.update(*self.traj[index])
+        self.refresh_data()
+        self._set_start_and_end_attrs(self.point_lifted, self.end_lifted)
+        
+    def refresh_data(self):
+        self.point_lifted = self.axes.c2p(self.vessel.p[0], self.vessel.p[1], 10)
+        self.v_end = (self.vessel.p + self.vessel.v*500)
+        self.end_lifted = self.axes.c2p(self.v_end[0], self.v_end[1], 10)
+        
+        
+class SimImage(SVGMobject, Animated):
+     def __init__(self, vessel : Vessel, axes : ThreeDAxes, traj: List[Tuple[float, float, float, float, float]]) -> None:
+        self.traj = traj
+        self.axes = axes
+        self.vessel = vessel
+        self.traj_length = len(self.traj) - 1
+        self.refresh_data()
+        super().__init__(f'{ASSET_FOLDER}/images/ship_white.svg', height=0.3, width=0.3)
+        
+     def refresh_data(self):
+        self.point = self.axes.c2p(self.vessel.p[0], self.vessel.p[1], 0)
+        
+     def animate(self, mobject, t):
+        index = int(self.traj_length * t)
+        self.vessel.update(*self.traj[index])
+        self.refresh_data()
+        self.move_to(self.point)
+        self.set_sheen_direction(self.vessel.heading)
+        
+        
 class PointsWithVectorsAndRadius(ThreeDScene):
     def construct(self):
         
@@ -60,67 +132,21 @@ class PointsWithVectorsAndRadius(ThreeDScene):
                              y_axis_config={"numbers_to_include": [int(val) for val in np.arange(0, MAX_COORD*3, MAX_COORD *3 / 5)]},
                              tips=False,)
         labels = axes_3d.get_axis_labels(x_label=Tex("x (m)"), y_label=Tex("y (m)"))
-        
-        # Create the first 2D axes on the yz-plane
-        # axes_yz_1 = Axes(
-        #     x_range=[0, MAX_COORD / 3, MAX_COORD / 15],  # y-axis values
-        #     y_range=[0, MAX_COORD / 3, MAX_COORD / 15],  # z-axis values
-        #     x_length=5,
-        #     y_length=5,
-        #     axis_config={"color": GREEN}
-        # )
-        # # Rotate and shift the first 2D axes to the yz-plane
-        # axes_yz_1.rotate(PI / 2, axis=DOWN)
-        # axes_yz_1.move_to(axes_3d.c2p(0,0,0))  # Adjust position as needed
-
-        # # Create the second 2D axes on the yz-plane
-        # axes_yz_2 = Axes(
-        #     x_range=[0, MAX_COORD / 3, MAX_COORD / 15],  # y-axis values
-        #     y_range=[0, MAX_COORD / 3, MAX_COORD / 15],  # z-axis values
-        #     x_length=5,
-        #     y_length=5,
-        #     axis_config={"color": YELLOW}
-        # )
-        # # Rotate and shift the second 2D axes to the yz-plane
-        # axes_yz_2.move_to(axes_3d.c2p(0,MAX_COORD/5,50))  # Adjust position as needed
-        # axes_yz_2.rotate(PI / 2, axis=DOWN)
-
-        # # Add the 3D and 2D axes to the scene
-        # self.add(axes_yz_1, axes_yz_2)
-        
+                
         self.add(axes_3d, labels)
         self.move_camera(frame_center=axes_3d.center(), zoom=1)
         self.wait(1)
         self.move_camera(phi=60 * DEGREES, theta=-45 * DEGREES, run_time=3)
         
-        graphs : Dict[int, VesselData] = {}
+        graphs : List[Animated] = []
         # Define two points with sufficient distance
         for vessel in self.env.vessels:
-            data = VesselData(axes_3d, vessel)
-            data.lift()
-            graphs[vessel.id] = data
-            self.add(data.ship_image, data.vec, data.dot, data.r,)
+            traj = self.trajectories.trajectories[vessel.id]
+            graphs += [SimDot(vessel, axes_3d, traj), SimVec(vessel, axes_3d, traj), SimImage(vessel, axes_3d, traj)]
+            
+        for g in graphs:
+            self.add(g)
             
         self.wait(2)
-        self.play(
-            *[trans for v in self.env.vessels for trans in graphs[v.id].transform(VesselData(axes_3d, v))],
-            run_time=1,
-            rate_func=linear,
-            lag_ratio=0
-        )
-            
-        self.wait(0.5)        
-        
-        return
-        self.dyn_env = copy.deepcopy(self.env)
-        trajs = self.trajectories.convert_to_states()
-        for i in range(0, len(trajs), 60):
-            states = trajs[i]
-            self.dyn_env.do_update(states)
-            self.play(
-                *[Create(Dot(graphs[v.id].point, color=light_colors[v.id], radius=DEFAULT_DOT_RADIUS/2)) for v in self.dyn_env.vessels],
-                *[trans for v in self.dyn_env.vessels for trans in graphs[v.id].transform(VesselData(axes_3d, v))],
-                run_time=0.3,
-                rate_func=linear,
-                lag_ratio=0
-            )
+
+        self.play(*[UpdateFromAlphaFunc(g, g.animate) for g in graphs], rate_func=linear, lag_ratio=0, run_time=10)
