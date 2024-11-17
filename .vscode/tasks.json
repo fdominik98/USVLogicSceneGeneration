@@ -9,6 +9,7 @@
                 "-m",
                 "manim",
                 "-ql",
+                //"--disable_caching",
                 //"-s",
                 "src/manim_first.py",
                 "PointsWithVectorsAndRadius"
@@ -23,6 +24,32 @@
             },
             "problemMatcher": []
         },
+
+
+        {
+            "label": "Run Manim video HQ",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "manim",
+                "-qh",
+                //"--disable_caching",
+                //"-s",
+                "src/manim_first.py",
+                "PointsWithVectorsAndRadius"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+
 
         {
             "label": "Run Manim last scene",
