@@ -33,6 +33,12 @@ class USVEnvironment():
             raise Exception("the variable number is insufficient.")
         
         states = OWN_VESSEL_STATES + states
+        return self.do_update(states)
+    
+    def do_update(self, states : List[float]):
+        if len(states) != VARIABLE_NUM * self.config.vessel_num:
+            raise Exception("the variable number is insufficient.")
+        
         for vessel in self.vessels:
             vessel.update(states[vessel.id * VARIABLE_NUM],
                                 states[vessel.id * VARIABLE_NUM + 1],
@@ -46,6 +52,7 @@ class USVEnvironment():
         self.relations = self.clause.relations  
         
         return self
+    
          
     def get_population(self, pop_size) -> List[List[float]]:
         population = self.initializer.get_population(pop_size=pop_size)
