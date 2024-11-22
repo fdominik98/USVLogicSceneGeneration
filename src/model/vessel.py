@@ -104,4 +104,10 @@ class Vessel():
     def is_OS(self):
         return self.desc.is_OS()
     
+    def p_3d(self):
+        return [self.p[0], self.p[1], 5]
+    
+    def v_3d(self):
+        return [self.v[0], self.v[1], 5]
+    
  
