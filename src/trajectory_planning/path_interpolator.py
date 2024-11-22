@@ -7,7 +7,7 @@ class PathInterpolator():
     def __init__(self) -> None:
         self.interpolated_paths : Dict[int, List[Tuple[float, float, float, float, float]]] = {}
         self.vessels : Dict[int, Vessel] = {}
-        self.path_length = 90 * 60
+        self.path_length = 45 * 60
 
     def add_path(self, vessel : Vessel, path : List[Node]):
         if vessel.id in self.interpolated_paths:
