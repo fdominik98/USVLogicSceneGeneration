@@ -90,6 +90,9 @@ class PolygonalObstacle(Obstacle):
     
     
 class LineObstacle(Obstacle):
+    def extend(self):
+        return LineObstacle(self.p[0], self.p[1], self.dir_vec, self.above_initial_point, self.shift*2)
+    
     def __init__(self, x : float, y : float, dir_vec : np.ndarray, above_initial_point : bool, shift) -> None:
         super().__init__(x, y)
         self.shift = shift

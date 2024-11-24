@@ -290,8 +290,7 @@ class BidirectionalRRTStarFND():
             
         # The two trajectories will collide at the specific second
         for obs_vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
-            # if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
-            if np.linalg.norm(node.p - pos) <= 0.5 * N_MILE_TO_M_CONVERSION:
+            if np.linalg.norm(node.p - pos) <= (self.vessel.r + obs_vessel.r):
                 print(f'Hit trajectory of {obs_vessel} at {pos}.')
                 return False
         return True  # safe
@@ -308,71 +307,6 @@ class BidirectionalRRTStarFND():
         cos_theta = np.clip(cos_theta, -1.0, 1.0)
         # Calculate the angle in radians and then in degrees
         return np.arccos(cos_theta)
-    
-    def cross_2d(self, reference, vec1, vec2):
-        # A and B are 2D vectors (numpy arrays)
-        reference = reference / np.linalg.norm(reference)
-        vec1 = vec1 / np.linalg.norm(vec1)
-        vec2 = vec2 / np.linalg.norm(vec2)
-        sub_vec = vec2 - vec1
-        sub_vec = sub_vec / np.linalg.norm(sub_vec)
-        return reference[0] * sub_vec[1] - reference[1] * sub_vec[0]
-    
-    def state_transitions(self, parent_node : Node, delta_pos_parent, delta_pos, dist_parent):
-        angle_start_end = self.angle_between_vectors(self.delta_pos_start_end, delta_pos, dist_parent)
-        straight_angle_pred = np.radians(0) <= angle_start_end < np.radians(5)
-        if parent_node.state == TrajectoryState.START:
-            arc_angle_pred = np.radians(1) <= angle_start_end <= np.radians(40)
-            cross_start_end = self.cross_2d(self.delta_pos_start_end, self.delta_pos_start_end, delta_pos)
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_1
-            elif cross_start_end < 0 and arc_angle_pred:
-                return TrajectoryState.GIVE_WAY_ARC
-            return None
-        
-        angle_parent = self.angle_between_vectors(delta_pos_parent, delta_pos, dist_parent)
-        cross_new_vec = self.cross_2d(self.delta_pos_start_end, delta_pos_parent, delta_pos)
-        arc_angle_pred = np.radians(1) <= angle_parent <= np.radians(40)
-        if parent_node.state == TrajectoryState.STAND_ON_1:
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_1
-            elif cross_new_vec <  0 and arc_angle_pred:
-                return TrajectoryState.GIVE_WAY_ARC
-            
-        elif parent_node.state == TrajectoryState.GIVE_WAY_ARC:           
-            if cross_new_vec < 0 and arc_angle_pred:
-                return TrajectoryState.GIVE_WAY_ARC 
-            elif cross_new_vec > 0 and arc_angle_pred:
-                return TrajectoryState.GIVE_WAY_ARC_ADJUST
-            
-        elif parent_node.state == TrajectoryState.GIVE_WAY_ARC_ADJUST:  
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_2         
-            if cross_new_vec > 0 and arc_angle_pred:
-                return TrajectoryState.GIVE_WAY_ARC_ADJUST 
-            
-        elif parent_node.state == TrajectoryState.STAND_ON_2:
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_2
-            elif cross_new_vec > 0 and arc_angle_pred:
-                return TrajectoryState.RETURN_ARC 
 
-        elif parent_node.state == TrajectoryState.RETURN_ARC:
-            if cross_new_vec > 0 and arc_angle_pred:
-                return TrajectoryState.RETURN_ARC 
-            elif cross_new_vec < 0 and arc_angle_pred:
-                return TrajectoryState.RETURN_ARC_ADJUST
-            
-        elif parent_node.state == TrajectoryState.RETURN_ARC_ADJUST:  
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_3         
-            if cross_new_vec < 0 and arc_angle_pred:
-                return TrajectoryState.RETURN_ARC_ADJUST
-            
-        elif parent_node.state == TrajectoryState.STAND_ON_3:
-            if straight_angle_pred:
-                return TrajectoryState.STAND_ON_3   
-            
-        return None
-        
+
 

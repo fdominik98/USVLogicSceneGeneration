@@ -3,6 +3,7 @@ import os
 import random
 from typing import List, Dict
 from model.environment.usv_config import ASSET_FOLDER, MAX_COORD
+from model.vessel import Vessel
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from trajectory_planning.model.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from trajectory_planning.model.vessel_order_graph import VesselNode, VesselOrderGraph
@@ -50,48 +51,57 @@ ColregPlotManager(env)
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
     print(f'Calculation {o}:')
-    expand_distance = o.speed * 20 # 1 minute precision
+    expand_distance = o.speed * 30 # half minute precision
     
     if len(v_node.relations) == 0:
         return [], 0, expand_distance
     
     obstacle_list : List[Obstacle] = []
-    collision_points : List[np.ndarray] = []    
+    colliding_vessels : List[Vessel] = []
     
     for rel in v_node.relations:
         print(f'Collision points for static colreg {rel}')
         colreg_collision_points = rel.get_collision_points()
-        collision_points += colreg_collision_points
-    #colreg_collision_center, colreg_collision_radius = find_center_and_radius(colreg_collision_points)
+        vessel2 = rel.get_other_vessel(o)
+        for p in colreg_collision_points:
+            vessel2 = vessel2.copy_update(p_x=p[0], p_y=p[1])
+            colliding_vessels += [vessel2]
    
     for id, path in interpolator.interpolated_paths.items():
         vessel = env.get_vessel_by_id(id)
         for i in range(interpolator.path_length):
             new_pos = o.p + i * o.v
-            if np.linalg.norm(new_pos - np.array([path[i][0], path[i][1]])) < o.r + vessel.r:
-                collision_points.append(new_pos)   
+            vessel2 = vessel.copy_update(p_x=path[i][0], p_y=path[i][1])
+            if np.linalg.norm(new_pos - vessel2.p) <= (vessel2.r + o.r):
+                colliding_vessels.append(vessel2)   
         
-    if len(collision_points) != 0:
-        collision_center, collision_radius = find_center_and_radius(collision_points)
+    collision_points = [v.p for v in colliding_vessels]
+    if len(colliding_vessels) != 0:
+        collision_center, _ = find_center_and_radius(collision_points)
     else:
-        collision_center, collision_radius = o.p + o.v * interpolator.path_length / 2, 0
+        collision_center = o.p + o.v * interpolator.path_length / 2
     
     start_coll_center_dist = np.linalg.norm(o.p - collision_center)
-    start_goal_dist = start_coll_center_dist + max(start_coll_center_dist, collision_radius * 3)
+    start_goal_dist = start_coll_center_dist * 2
     goal_vector = o.v_norm() * start_goal_dist
     goal = o.p + goal_vector
-    poly_p1 = o.p + goal_vector / 4
-    poly_p2 = o.p + goal_vector / 4 * 3
-    poly_p3 = poly_p2 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
-    poly_p4 = poly_p1 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
+    #poly_p1 = o.p + goal_vector / 4
+    #poly_p2 = o.p + goal_vector / 4 * 3
+    #poly_p3 = poly_p2 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
+    #poly_p4 = poly_p1 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
     #obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]
-    obstacle_list += [CircularObstacle(collision_center, collision_radius)]
+    
+    obstacle_list += [CircularObstacle(v.p, v.r) for v in colliding_vessels]
+    
+    max_sized_vessel = max(colliding_vessels, key=lambda v: v.r)
+    max_go_around_dist = (max_sized_vessel.r + o.r) * 8
     
     # Define the bounding lines
+    
     bounding_lines = [
         LineObstacle(o.p[0], o.p[1], o.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal[0], goal[1], o.v_norm(), False, max(start_coll_center_dist, collision_radius * 8)), # Right bounding line
-        LineObstacle(o.p[0], o.p[1], o.v_norm(), False, max(start_coll_center_dist, collision_radius * 8    )), # Right bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm(), False, max_go_around_dist), # Right bounding line
+        LineObstacle(o.p[0], o.p[1], o.v_norm(), False, max_go_around_dist), # Right bounding line
         LineObstacle(o.p[0], o.p[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
