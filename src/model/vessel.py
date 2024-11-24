@@ -66,7 +66,7 @@ class OSBig(OS, VesselDescBig):
     min_length = 400
 class TSBig(TS, VesselDescBig):
     pass
-    
+       
 class Vessel():
     def __init__(self, desc: VesselDesc):
         self.desc = desc
@@ -77,13 +77,26 @@ class Vessel():
         self.max_length = desc.max_length
         self.min_length = desc.min_length
         
-    def update(self, p_x, p_y, heading, l, speed) -> None:
+    def update(self, p_x, p_y, heading, l, speed):
         self.p = np.array([p_x, p_y])
         self.v = np.array([np.cos(heading), np.sin(heading)]) * speed
         self.speed = speed    
         self.heading = heading
         self.l = l
         self.r = l * 4.0
+        return self
+    
+    def copy_update(self, p_x=None, p_y=None, heading=None, l=None, speed=None):
+        return Vessel(self.desc).update(
+            p_x or self.p[0],
+            p_y or self.p[1],
+            heading or self.heading,
+            l or self.l,
+            speed or self.speed
+        )
+        
+    def do_collide(self, other):
+        return np.linalg.norm(self.p - other.p) < max(self.r, other.r)
         
     def v_norm(self) -> np.ndarray:
         return self.v / self.speed

@@ -140,7 +140,7 @@ class Relation():
         self.do_update()
         
     def do_update(self):
-        self.safety_dist = (self.vessel1.r + self.vessel2.r) / 2
+        self.safety_dist = max(self.vessel1.r, self.vessel2.r)
         self.p12 = self.vessel2.p - self.vessel1.p
         self.p21 = self.vessel1.p - self.vessel2.p
         self.v12 = self.vessel1.v - self.vessel2.v
@@ -178,6 +178,12 @@ class Relation():
             print(f'relation: {r.name}, penalty: {r.get_penalty_norm()}')
         print('---------------------------------------------')
         
+    def get_other_vessel(self, v : Vessel):
+        if self.vessel1.id == v.id:
+            return self.vessel2
+        if self.vessel2.id == v.id:
+            return self.vessel1
+        raise Exception('Vessel is not part of the relation')
     
     def get_collision_points(self, time_limit=np.inf) -> List[np.ndarray]:
         # Relative position and velocity
