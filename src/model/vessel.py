@@ -28,7 +28,7 @@ class VesselDesc(ABC):
     def __hash__(self):
         return hash((self.id, self.max_speed, self.min_speed, self.max_length, self.min_length, 'vessel description'))
     
-    def is_OS(self):
+    def is_os(self):
         return isinstance(self, OS)
     
 
@@ -115,7 +115,7 @@ class Vessel():
         return self.name
     
     def is_OS(self):
-        return self.desc.is_OS()
+        return self.desc.is_os()
     
     def p_3d(self):
         return [self.p[0], self.p[1], 5]

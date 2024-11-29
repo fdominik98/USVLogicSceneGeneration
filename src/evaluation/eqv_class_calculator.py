@@ -45,7 +45,7 @@ class EqvClassCalculator():
         combinations = list(itertools.combinations(vessels.keys(), 2))
         clause_desc = RelationDescClause([])
         for id1, id2 in combinations:
-            if not id1.is_OS() and not id2.is_OS():
+            if not id1.is_os() and not id2.is_os():
                 continue
             v1 = vessels[id1]
             v2 = vessels[id2]

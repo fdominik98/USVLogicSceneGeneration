@@ -14,12 +14,10 @@ from model.environment.usv_environment import LoadedEnvironment
 import numpy as np
 from trajectory_planning.bidirectional_rrt_star_fnd import BidirectionalRRTStarFND, DIM
 
-SCALER = 1 / MAX_COORD  * DIM
+SCALER = 1 / MAX_COORD / 1.5  * DIM
 
 DIRECTION_THRESHOLD = 100 # meter
-GOAL_SAMPLE_RATE = 20.0 #%
-MAX_ITER = np.inf
-
+GOAL_SAMPLE_RATE = 5.0 #%
 
 measurement_name = 'test'
 measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
@@ -51,7 +49,7 @@ ColregPlotManager(env)
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
     print(f'Calculation {o}:')
-    expand_distance = o.speed * 30 # half minute precision
+    expand_distance = o.speed * 20 # half minute precision
     
     if len(v_node.relations) == 0:
         return [], 0, expand_distance
@@ -72,36 +70,42 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
         for i in range(interpolator.path_length):
             new_pos = o.p + i * o.v
             vessel2 = vessel.copy_update(p_x=path[i][0], p_y=path[i][1])
-            if np.linalg.norm(new_pos - vessel2.p) <= (vessel2.r + o.r):
+            if np.linalg.norm(new_pos - vessel2.p) <= max(vessel2.r, o.r):
                 colliding_vessels.append(vessel2)   
         
     collision_points = [v.p for v in colliding_vessels]
+    
+    furthest_collision_point = max(collision_points, key=lambda p: np.linalg.norm(p - o.p))
+    
     if len(colliding_vessels) != 0:
         collision_center, _ = find_center_and_radius(collision_points)
     else:
         collision_center = o.p + o.v * interpolator.path_length / 2
     
     start_coll_center_dist = np.linalg.norm(o.p - collision_center)
+    start_furthest_point_dist = np.linalg.norm(o.p - furthest_collision_point)
     start_goal_dist = start_coll_center_dist * 2
     goal_vector = o.v_norm() * start_goal_dist
     goal = o.p + goal_vector
-    #poly_p1 = o.p + goal_vector / 4
-    #poly_p2 = o.p + goal_vector / 4 * 3
-    #poly_p3 = poly_p2 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
-    #poly_p4 = poly_p1 + o.v_norm_perp() * max(start_coll_center_dist, collision_radius * 4)
-    #obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]
+    max_sized_vessel = max(colliding_vessels, key=lambda v: v.r)
+    min_go_around_dist = (max_sized_vessel.r + o.r) * 2
     
+    poly_p1 = o.p + o.v_norm() * start_coll_center_dist / 3
+    poly_p2 = o.p + o.v_norm() * start_furthest_point_dist
+    poly_p3 = poly_p2 + o.v_norm_perp() * min_go_around_dist
+    poly_p4 = poly_p1 + o.v_norm_perp() * min_go_around_dist
+        
+    obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]    
     obstacle_list += [CircularObstacle(v.p, v.r) for v in colliding_vessels]
     
-    max_sized_vessel = max(colliding_vessels, key=lambda v: v.r)
-    max_go_around_dist = (max_sized_vessel.r + o.r) * 8
-    
     # Define the bounding lines
+    min_go_around_line = LineObstacle(o.p[0], o.p[1], o.v_norm(), False, min_go_around_dist)
+    go_around_split_line = LineObstacle(collision_center[0], collision_center[1], o.v_norm_perp(), False, 0)
     
     bounding_lines = [
         LineObstacle(o.p[0], o.p[1], o.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal[0], goal[1], o.v_norm(), False, max_go_around_dist), # Right bounding line
-        LineObstacle(o.p[0], o.p[1], o.v_norm(), False, max_go_around_dist), # Right bounding line
+        LineObstacle(goal[0], goal[1], o.v_norm(), False, min_go_around_dist * 5), # Right bounding line
+        LineObstacle(o.p[0], o.p[1], o.v_norm(), False, min_go_around_dist * 5), # Right bounding line
         LineObstacle(o.p[0], o.p[1], o.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal[0], goal[1], o.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
@@ -123,14 +127,16 @@ def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
                     v_node=v_node,
                     start=o.p,
                     goal=goal,
+                    min_go_around_line=min_go_around_line,
+                    go_around_split_line=go_around_split_line,
                     sample_area=[X_DIST, Y_DIST],
                     obstacle_list=obstacle_list,
                     expand_dist=expand_distance,
                     goal_sample_rate=GOAL_SAMPLE_RATE,
-                    max_iter=MAX_ITER,
                     collision_points=collision_points,
                     interpolator=interpolator,
                     scaler = SCALER * MAX_COORD / start_goal_dist / 1.5)
+    
     # Add the original position to start the path
     path = rrt.plan_trajectory()
     
@@ -168,7 +174,7 @@ timestamp = datetime.now().isoformat()
 traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_numbers, algorithm_desc='RRTStar_algo', 
                         config_name=data.config_name, env_path=data.path, random_seed=seed,
                         expand_distances=expand_distances, goal_sample_rate=GOAL_SAMPLE_RATE,
-                        max_iter=MAX_ITER, timestamp=timestamp, trajectories=interpolator.interpolated_paths,
+                        timestamp=timestamp, trajectories=interpolator.interpolated_paths,
                         overall_eval_time=overall_eval_time, rrt_evaluation_times=eval_times)
 
 

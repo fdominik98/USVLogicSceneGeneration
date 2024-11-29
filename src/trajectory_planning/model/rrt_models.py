@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import Optional, Tuple
+import random
+from typing import List, Optional, Tuple
 import numpy as np
 from shapely import Point, Polygon
 from model.vessel import Vessel
@@ -20,6 +21,10 @@ class RandomPoint():
     def __init__(self, p : np.ndarray, towards_goal : bool) -> None:
         self.p = p
         self.towards_goal = towards_goal
+    
+    @staticmethod
+    def get(sample_area : List[Tuple[float, float]]):
+        return RandomPoint(np.array([random.uniform(*sample_area[0]), random.uniform(*sample_area[1])]), False)
 
 class Node():
     """
@@ -32,7 +37,6 @@ class Node():
         self.s_fraction  : float = 0.0
         self.parent : Optional[int] = None
         self.children : set[int] = set()
-        self.state = TrajectoryState.START
         
     @staticmethod
     def calc_cost(vessel : Vessel, d : float) -> Tuple[int, float]:

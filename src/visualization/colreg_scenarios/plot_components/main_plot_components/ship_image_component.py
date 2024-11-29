@@ -23,8 +23,8 @@ class ShipImageComponent(PlotComponent):
         self.zorder = -4
         
     def do_draw(self):
-        for o in self.env.vessels:
-            (line,) = self.ax.plot([], [], ':', lw=3, color=light_colors[o.id], zorder=self.zorder-10)
+        for o in self.env.vessels:           
+            (line,) = self.ax.plot(self.xs[o.id], self.ys[o.id], ':', lw=3, color=light_colors[o.id], zorder=self.zorder-10)
             self.traj_line_graphs.append(line)
             
             # Rotate and plot image
@@ -43,9 +43,9 @@ class ShipImageComponent(PlotComponent):
             ys = self.ys[o.id]
             if o.p[0] not in xs or o.p[1] not in ys:
                 xs.append(o.p[0])
-                ys.append(o.p[1])
-                
-            self.traj_line_graphs[o.id].set_data(self.xs[o.id], self.ys[o.id])
+                ys.append(o.p[1])                
+
+            self.traj_line_graphs[o.id].set_data(xs, xs)
             
             rotated_image = np.clip(rotate(self.image, np.degrees(o.heading)-90, reshape=True), 0, 1)
             

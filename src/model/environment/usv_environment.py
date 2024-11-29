@@ -24,8 +24,6 @@ class USVEnvironment():
         self.clause = min(self.relation_clauses, key=lambda clause: clause.penalties_sum)
         self.relations = self.clause.relations
           
-        self.smallest_ship = min(self.vessels, key=lambda v: v.r)
-        self.largest_ship = max(self.vessels, key=lambda v: v.r)
         self.xl, self.xu = self.generate_gene_space()
         
     def update(self, states : List[float]):

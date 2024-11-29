@@ -83,7 +83,7 @@ class RelationDescClause():
         return self_copy
     
     def remove_non_ego_ralations(self):
-        self.relation_descs = [x for x in self.relation_descs if x.vd1.is_OS() or x.vd2.is_OS()]
+        self.relation_descs = [x for x in self.relation_descs if x.vd1.is_os() or x.vd2.is_os()]
         self.sort()
     
     def __hash__(self):

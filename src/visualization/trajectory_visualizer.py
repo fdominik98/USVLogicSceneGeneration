@@ -27,21 +27,26 @@ class TrajectoryVisualizer():
         pygame.display.set_caption(f'{conf_rels}, Conflicting trajectories: {conf_trajs}')
         
     
-    def draw_obstacles(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray]):
+    def draw_obstacles(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray], min_go_around_line : LineObstacle, go_around_split_line : LineObstacle):
         for o in obstacle_list:
             if isinstance(o, LineObstacle):
-                start = self.reverse_coord(o.shifted_point + o.dir_vec * 2 * self.dim / self.scaler)
-                end = self.reverse_coord(o.shifted_point - o.dir_vec * 2 * self.dim / self.scaler)
-                pygame.draw.line(self.screen,(0,0,0), start, end, 4)
-                pygame.draw.circle(self.screen,(23,231,5), self.reverse_coord(o.shifted_point), 5) 
+                self.draw_line(o, (0,0,0), 5)                
             elif isinstance(o, CircularObstacle):
                 pygame.draw.circle(self.screen,(255,0,0), self.reverse_coord(o.p), o.radius * self.scaler, width=5)
             elif isinstance(o, PolygonalObstacle):
                 pygame.draw.polygon(self.screen, (0,0,0), [self.reverse_coord(p) for p in o.polygon])
 
+        self.draw_line(min_go_around_line, (255, 165, 0), 5)  
+        self.draw_line(go_around_split_line, (255, 165, 0), 5)    
+        
         for cp in collision_points:
             pygame.draw.circle(self.screen,(255,0,0), self.reverse_coord(cp), 3)
             
+    def draw_line(self, line : LineObstacle, color : Tuple[int,int,int], width : int):
+        start = self.reverse_coord(line.shifted_point + line.dir_vec * 2 * self.dim / self.scaler)
+        end = self.reverse_coord(line.shifted_point - line.dir_vec * 2 * self.dim / self.scaler)
+        pygame.draw.line(self.screen, color, start, end, width-1)
+        pygame.draw.circle(self.screen,(23,231,5), self.reverse_coord(line.shifted_point), width) 
         
     def draw_branches(self, start : Node, end : Node, node_list : dict[int, Node], last_index : Optional[int], gen_final_course):
         pygame.draw.circle(self.screen, (0,0,255), self.reverse_coord(start.p), 7)
@@ -59,30 +64,15 @@ class TrajectoryVisualizer():
             path : List[Node] = gen_final_course(last_index)
 
             ind = len(path)
-            while ind > 1:
-                if (path[ind-2].state is TrajectoryState.STAND_ON_1 or
-                    path[ind-2].state is TrajectoryState.STAND_ON_2 or
-                    path[ind-2].state is TrajectoryState.STAND_ON_3):
-                    color = (255,0, 0)
-                elif path[ind-2].state is TrajectoryState.START:
-                    color = (0, 0, 0)
-                elif path[ind-2].state is TrajectoryState.GIVE_WAY_ARC:
-                    color = (0, 0, 255)
-                elif path[ind-2].state is TrajectoryState.GIVE_WAY_ARC_ADJUST:
-                    color = (0, 100, 255)
-                elif path[ind-2].state is TrajectoryState.RETURN_ARC:
-                    color = (0, 180, 255)
-                elif path[ind-2].state is TrajectoryState.RETURN_ARC_ADJUST:
-                    color = (0, 255, 255)
-                else:
-                    color = (255,255,255)
+            while ind > 1:  
+                color = (0,0,0)
                 pygame.draw.line(self.screen, color, self.reverse_coord(path[ind-2].p), self.reverse_coord(path[ind-1].p), 5)
                 ind-=1
 
-    def update(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray],
+    def update(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray], min_go_around_line : LineObstacle, go_around_split_line : LineObstacle,
                start : Node, end : Node, node_list : dict[int, Node], last_index : Optional[int], gen_final_course):
         self.screen.fill((255, 255, 255))
-        self.draw_obstacles(obstacle_list, collision_points)
+        self.draw_obstacles(obstacle_list, collision_points, min_go_around_line, go_around_split_line)
         self.draw_branches(start, end, node_list, last_index, gen_final_course)
         pygame.display.update()
         
