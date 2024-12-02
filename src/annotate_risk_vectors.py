@@ -17,7 +17,7 @@ skipped = 0
 done = 0
 
 
-for eval_data in eval_datas:
+for eval_data in eval_datas:    
     all_vessels_descs = [_OS, TS1, TS2, TS3, TS4, TS5]
     states = OWN_VESSEL_STATES + eval_data.best_solution
     vessel_descs = all_vessels_descs[:eval_data.vessel_number]

@@ -1,8 +1,8 @@
 from dataclasses import asdict, dataclass
-import json
 import pprint
 from typing import Optional, List
 from concrete_level.model.concrete_scene import ConcreteScene
+import jsonpickle
 
 @dataclass()
 class EvaluationData2:
@@ -33,20 +33,21 @@ class EvaluationData2:
     best_scene: Optional[ConcreteScene] = None    
 
     def save_to_json(self, path2=None):
+        json_str = jsonpickle.encode(self, indent=1)
         if self.path is None:
             if path2 is None:
                 raise Exception('No path provided')
-            with open(path2, 'w') as json_file:
-                json.dump(asdict(self), json_file, indent=4)
+            with open(path2, "w") as file:
+                file.write(json_str)
         else:
-            with open(self.path, 'w') as json_file:
-                json.dump(asdict(self), json_file, indent=4)
+            with open(self.path, 'w') as file:
+                file.write(json_str)
 
     @classmethod
     def load_from_json(cls, file_path: str):
-        with open(file_path, 'r') as json_file:
-            data = json.load(json_file)
-            return cls(**data)
+        with open(file_path, "r") as file:
+            json_str = file.read()
+            return jsonpickle.decode(json_str)
         
     @classmethod
     def load_dict_from_json(cls, file_path: str) -> dict:

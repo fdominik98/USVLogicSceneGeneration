@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 import os
 from typing import List, Tuple
 import pandas as pd
-from model.environment.usv_environment import USVEnvironment
 from evolutionary_computation.evaluation_data import EvaluationData
 import tkfilebrowser
 from model.environment.usv_config import ASSET_FOLDER
