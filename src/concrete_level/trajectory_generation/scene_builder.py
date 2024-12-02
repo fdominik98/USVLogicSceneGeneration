@@ -1,7 +1,8 @@
 from typing import Dict
 from concrete_level.model.concrete_vessel import ConcreteVessel
 from concrete_level.model.vessel_state import VesselState
-from src.concrete_level.model.concrete_scene import ConcreteScene
+from concrete_level.model.concrete_scene import ConcreteScene
+from logical_level.constraint_satisfaction.assignments import Assignments
 
 
 class SceneBuilder(Dict[ConcreteVessel, VesselState]):  
@@ -16,5 +17,10 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
        self[vessel] = state
        
             
-    def build(self):
+    def build(self) -> ConcreteScene:
         return ConcreteScene(self)
+    
+    @staticmethod
+    def build_from_assignments(assignments : Assignments) -> ConcreteScene:
+        return ConcreteScene({ConcreteVessel(vessel_var.id, values.l, values.r, vessel_var.max_speed) :
+            VesselState(values.x, values.y, values.sp, values.h) for vessel_var, values in assignments.items()})

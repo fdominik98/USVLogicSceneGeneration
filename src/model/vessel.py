@@ -5,36 +5,25 @@ from model.environment.usv_config import EPSILON, KNOT_TO_MS_CONVERSION
 
 
 class VesselDesc(ABC):
-    max_speed = 30 * KNOT_TO_MS_CONVERSION # kn
-    min_speed = 2 * KNOT_TO_MS_CONVERSION
-    max_length = 100 # m
-    min_length = 10
-        
     def __init__(self, id : int):
         super().__init__()
         self.id = id
         
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, VesselDesc) and
-            self.id == value.id and            
-            self.max_speed == value.max_speed and
-            self.min_speed == value.min_speed and
-            self.max_length == value.max_length and
-            self.min_length == value.min_length)
+            self.id == value.id)
         
     def __repr__(self) -> str:
         return 'desc'
     
     def __hash__(self):
-        return hash((self.id, self.max_speed, self.min_speed, self.max_length, self.min_length, 'vessel description'))
+        return hash((self.id, 'vessel description'))
     
     def is_os(self):
         return isinstance(self, OS)
     
 
 class OS(VesselDesc):
-    max_length = 30 + EPSILON # m
-    min_length = 30 - EPSILON
     def __eq__(self, value: object) -> bool:
         return (isinstance(value, OS) and super().__eq__(value))
         
@@ -72,10 +61,6 @@ class Vessel():
         self.desc = desc
         self.id = desc.id
         self.name = 'OS' if self.is_OS() else f'TS_{self.id}'
-        self.max_speed = desc.max_speed
-        self.min_speed = desc.min_speed
-        self.max_length = desc.max_length
-        self.min_length = desc.min_length
         
     def update(self, p_x, p_y, heading, l, speed):
         self.p = np.array([p_x, p_y])

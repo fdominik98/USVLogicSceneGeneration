@@ -1,48 +1,31 @@
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import numpy as np
-from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
-from model.vessel import Vessel, VesselDesc
+from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from model.vessel import VesselDesc
 from model.relation import Relation, RelationClause, RelationDescClause
 from abc import ABC, abstractmethod
+from logical_level.model.vessel_variable import VesselVariable
+from logical_level.constraint_satisfaction.assignments import Assignments
 
 class InstanceInitializer(ABC):    
     def __init__(self, vessel_descs : List[VesselDesc], relation_desc_clauses : List[RelationDescClause]) -> None:
-        self.vessel_descs = vessel_descs
-        self.actor_num = len(vessel_descs)
-        self.relation_desc_clauses = relation_desc_clauses
-       
-    @abstractmethod     
-    def get_population(self, pop_size) -> List[List[float]]:
-        pass
-
-    def convert_population_to_objects(self, states: List[float]) -> Tuple[List[Vessel], List[RelationClause]]:
-        states = OWN_VESSEL_STATES + states
-        vessels: Dict[VesselDesc, Vessel] = {}
-        for id, vessel_desc in enumerate(self.vessel_descs):
-            vessel = Vessel(vessel_desc)
-            vessel.update(states[id * VARIABLE_NUM],
-                            states[id * VARIABLE_NUM + 1],
-                            states[id * VARIABLE_NUM + 2],
-                            states[id * VARIABLE_NUM + 3],
-                            states[id * VARIABLE_NUM + 4])
-            vessels[vessel_desc] = vessel
-            
-        relation_clauses : List[RelationClause] = []     
-        for relation_desc_clause in self.relation_desc_clauses:
+        vessels: Dict[VesselDesc, VesselVariable] = {vessel_desc : VesselVariable(vessel_desc) for vessel_desc in vessel_descs}
+        self.assignments = Assignments(list(vessels.values()))
+        self.vessel_vars = list(self.assignments.keys())
+        
+        for relation_desc_clause in relation_desc_clauses:
             clause = RelationClause()
             for relation_desc in relation_desc_clause.relation_descs:
                 vd1 = relation_desc.vd1
                 vd2 = relation_desc.vd2
                 clause.append(Relation(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
-            clause.update()
-            relation_clauses.append(clause)
-        return list(vessels.values()), relation_clauses
-    
-    
-    def get_one_population_as_objects(self) -> Tuple[List[Vessel], List[RelationClause]]:
-        return self.convert_population_to_objects(self.get_population(1)[0])
-    
+            self.assignments.register_clause(clause)    
+        
+       
+    @abstractmethod     
+    def get_population(self, pop_size) -> List[List[float]]:
+        pass
 class RandomInstanceInitializer(InstanceInitializer):
     def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
         super().__init__(vessel_descs, relation_descs)
@@ -50,14 +33,14 @@ class RandomInstanceInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
         for i in range(int(pop_size)):
-            population : List[float] = [random.uniform(self.vessel_descs[0].min_length, self.vessel_descs[0].max_length), 
-                                        random.uniform(self.vessel_descs[0].min_speed, self.vessel_descs[0].max_speed)]
-            for vessel_desc in self.vessel_descs[1:]:
+            population : List[float] = [random.uniform(self.vessel_vars[0].min_length, self.vessel_vars[0].max_length), 
+                                        random.uniform(self.vessel_vars[0].min_speed, self.vessel_vars[0].max_speed)]
+            for vessel_var in self.vessel_vars[1:]:
                 group = [random.uniform(MIN_COORD, MAX_COORD),
                         random.uniform(MIN_COORD, MAX_COORD),
                         random.uniform(MIN_HEADING, MAX_HEADING),
-                        random.uniform(vessel_desc.min_length, vessel_desc.max_length),
-                        random.uniform(vessel_desc.min_speed, vessel_desc.max_speed)]
+                        random.uniform(vessel_var.min_length, vessel_var.max_length),
+                        random.uniform(vessel_var.min_speed, vessel_var.max_speed)]
                 population.extend(group)
             result.append(population)
         return result  
@@ -71,12 +54,12 @@ class DeterministicInitializer(InstanceInitializer):
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
         for i in range(int(pop_size)):
-            population : List[float] = [(self.vessel_descs[0].min_length + self.vessel_descs[0].max_length) / 2.0,
-                                        (self.vessel_descs[0].min_speed + self.vessel_descs[0].max_speed) / 2.0]
-            for vessel_desc in self.vessel_descs[1:]:
+            population : List[float] = [(self.vessel_vars[0].min_length + self.vessel_vars[0].max_length) / 2.0,
+                                        (self.vessel_vars[0].min_speed + self.vessel_vars[0].max_speed) / 2.0]
+            for vessel_var in self.vessel_vars[1:]:
                 group = [MAX_COORD / 2, MAX_COORD / 2, 0, 
-                         (vessel_desc.min_length + vessel_desc.max_length) / 2,
-                         (vessel_desc.min_speed + vessel_desc.max_speed) / 2]
+                         (vessel_var.min_length + vessel_var.max_length) / 2,
+                         (vessel_var.min_speed + vessel_var.max_speed) / 2]
                 population.extend(group)
             result.append(population)
         return result 
@@ -116,15 +99,15 @@ class LatinHypercubeInitializer(InstanceInitializer):
             population: List[float] = []
             
             # First vessel (speed only)
-            first_length = self.lhs_sampling(1, [self.vessel_descs[0].min_length], [self.vessel_descs[0].max_length])[0]
+            first_length = self.lhs_sampling(1, [self.vessel_vars[0].min_length], [self.vessel_vars[0].max_length])[0]
             population.extend(first_length)
-            first_speed = self.lhs_sampling(1, [self.vessel_descs[0].min_speed], [self.vessel_descs[0].max_speed])[0]
+            first_speed = self.lhs_sampling(1, [self.vessel_vars[0].min_speed], [self.vessel_vars[0].max_speed])[0]
             population.extend(first_speed)
 
             # Subsequent vessels (coordinate, heading, and speed)
-            for vessel_desc in self.vessel_descs[1:]:
-                lower_bounds = [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_length, vessel_desc.min_speed]
-                upper_bounds = [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_length, vessel_desc.max_speed]
+            for vessel_var in self.vessel_vars[1:]:
+                lower_bounds = [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_var.min_length, vessel_var.min_speed]
+                upper_bounds = [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_var.max_length, vessel_var.max_speed]
                 
                 # LHS for this vessel's parameters
                 group = self.lhs_sampling(1, lower_bounds, upper_bounds)[0]

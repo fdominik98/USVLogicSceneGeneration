@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import json
 from typing import Optional
 
@@ -9,11 +9,13 @@ class ConcreteVessel:
     radius: float
     max_speed: float
     breadth: Optional[float] = None
+    max_turning_angle: float = field(init=False)
+    max_acceleration: float = field(init=False)
     
     # Based on STANDARDS FOR SHIP MANOEUVRABILITY
     def __post_init__(self):
-        self.max_turning_angle = self.max_speed / 2.5 * self.length # r/s
-        self.max_acceleration = self.max_speed**2 / (2* 15 * self.length) # m/s^2
+        object.__setattr__(self, 'max_turning_angle', self.max_speed / 2.5 * self.length)
+        object.__setattr__(self, 'max_acceleration', self.max_speed**2 / (2* 15 * self.length))
 
     def to_json(self) -> str:
         """Serialize the class instance to a JSON string."""

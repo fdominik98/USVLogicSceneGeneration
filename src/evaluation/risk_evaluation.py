@@ -1,5 +1,4 @@
 import copy
-from typing import List, Tuple
 import numpy as np
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 from model.environment.usv_environment import USVEnvironment

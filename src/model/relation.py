@@ -2,8 +2,11 @@ import copy
 import numpy as np
 from typing import List
 from model.environment.usv_config import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
-from model.vessel import OS, Vessel, VesselDesc
+from model.vessel import OS, VesselDesc
 from model.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, RelationType
+from logical_level.model.vessel_variable import VesselVariable
+from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.model.values import Values
 
 
 class RelationDesc():
@@ -93,7 +96,7 @@ class RelationDescClause():
         
 
 class Relation():
-    def __init__(self, vessel1 : Vessel, relation_types : List[RelationType], vessel2 : Vessel) -> None:
+    def __init__(self, vessel1 : VesselVariable, relation_types : List[RelationType], vessel2 : VesselVariable) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
@@ -113,10 +116,9 @@ class Relation():
             self.relation_types.append(r)
             
         self.name = rf'{self.vessel1} - ({", ".join([r.name for r in self.relation_types])}) -> {self.vessel2}'
-        self.do_update()
         
     def has_os(self)-> bool:
-        return self.vessel1.is_OS() or self.vessel2.is_OS()
+        return self.vessel1.is_os or self.vessel2.is_os
     
     def no_colreg(self) -> bool:
         for rel in self.collision_relations:
@@ -136,25 +138,24 @@ class Relation():
     def get_penalty_norms(self):
         return [rel.get_penalty_norm() for rel in self.visibility_relations], [rel.get_penalty_norm() for rel in self.bearing_relations], [rel.get_penalty_norm() for rel in self.collision_relations]
            
-    def update(self):
-        self.do_update()
-        
-    def do_update(self):
-        self.safety_dist = max(self.vessel1.r, self.vessel2.r)
-        self.p12 = self.vessel2.p - self.vessel1.p
-        self.p21 = self.vessel1.p - self.vessel2.p
-        self.v12 = self.vessel1.v - self.vessel2.v
+    def update(self, assignments : Assignments):
+        val1 : Values = assignments(self.vessel1)
+        val2 : Values = assignments(self.vessel2)
+        self.safety_dist = max(val1.r, val2.r)
+        self.p12 = val2.p - val1.p
+        self.p21 = val1.p - val2.p
+        self.v12 = val1.v - val2.v
         
         # Define the norm of the relative position (distance(p1 p2))
         self.o_distance = max(np.linalg.norm(self.p12), EPSILON)   
         
-        self.cos_p21_v2_theta = np.clip(np.dot(self.p21, self.vessel2.v) / self.o_distance / self.vessel2.speed, -1, 1)
+        self.cos_p21_v2_theta = np.clip(np.dot(self.p21, val2.v) / self.o_distance / val2.sp, -1, 1)
         self.angle_p21_v2 = np.arccos(self.cos_p21_v2_theta)        
-        self.cos_p12_v1_theta = np.clip(np.dot(self.p12, self.vessel1.v) / self.o_distance / self.vessel1.speed, -1, 1)
+        self.cos_p12_v1_theta = np.clip(np.dot(self.p12, val1.v) / self.o_distance / val1.sp, -1, 1)
         self.angle_p12_v1 = np.arccos(self.cos_p12_v1_theta)
         
-        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.vessel1.l),
-                           o2VisibilityByo1(self.angle_p21_v2, self.vessel2.l)) *  N_MILE_TO_M_CONVERSION
+        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, val1.l),
+                           o2VisibilityByo1(self.angle_p21_v2, val2.l)) *  N_MILE_TO_M_CONVERSION
         # angle between the relative velocity and the relative position vector
         
         self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
@@ -178,7 +179,7 @@ class Relation():
             print(f'relation: {r.name}, penalty: {r.get_penalty_norm()}')
         print('---------------------------------------------')
         
-    def get_other_vessel(self, v : Vessel):
+    def get_other_vessel(self, v : VesselVariable):
         if self.vessel1.id == v.id:
             return self.vessel2
         if self.vessel2.id == v.id:
@@ -223,13 +224,12 @@ class Relation():
 class RelationClause():
     def __init__(self) -> None:
         self.relations :  List[Relation] = []
-        self.update()
         
     def append(self, rel : Relation):
         self.relations.append(rel)
         
-    def update(self):
-        [rel.update() for rel in self.relations]
+    def update(self, assignments : Assignments):
+        [rel.update(assignments) for rel in self.relations]
         self.calc_penalties()
         
     def calc_penalties(self):
@@ -243,20 +243,4 @@ class RelationClause():
     def __repr__(self) -> str:
         return ', '.join([relation.__repr__() for relation in self.relations])
         
-class RelationDisj(Relation):
-    def __init__(self, relations : List[Relation]) -> None:
-        self.relations = relations
-        Relation.__init__(self, self.relations[0].vessel1, self.relations[0].relation_types, self.relations[0].vessel2)
-        
-        
-    def update(self):
-        min_sum_penalties = np.inf
-        main_relation = self.relations[0]
-        for rel in self.relations:
-            Relation.__init__(self, rel.vessel1, rel.relation_types, rel.vessel2)
-            
-            if self.penalties_sum < min_sum_penalties:
-                min_sum_penalties = self.penalties_sum
-                main_relation = rel
-        Relation.__init__(self, main_relation.vessel1, main_relation.relation_types, main_relation.vessel2)
         

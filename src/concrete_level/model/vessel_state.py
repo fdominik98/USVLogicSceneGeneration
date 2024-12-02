@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import json
 
 import numpy as np
@@ -10,12 +10,17 @@ class VesselState:
     speed : float
     heading : float
     
+    p: np.ndarray = field(init=False)
+    v: np.ndarray = field(init=False)
+    v_norm: np.ndarray = field(init=False)
+    v_norm_perp: np.ndarray = field(init=False)
+    
     # Based on 
     def __post_init__(self):
-        self.p = np.array([self.x, self.y])
-        self.v = np.array([np.cos(self.heading), np.sin(self.heading)]) * self.speed
-        self.v_norm = self.v / self.speed
-        self.v_norm_perp = np.array([self.v_norm[1], -self.v_norm[0]])
+        object.__setattr__(self, 'p', np.array([self.x, self.y]))
+        object.__setattr__(self, 'v', np.array([np.cos(self.heading), np.sin(self.heading)]) * self.speed)
+        object.__setattr__(self, 'v_norm', self.v / self.speed)
+        object.__setattr__(self, 'v_norm_perp', np.array([self.v_norm[1], -self.v_norm[0]]))
         
     def to_json(self) -> str:
         """Serialize the class instance to a JSON string."""

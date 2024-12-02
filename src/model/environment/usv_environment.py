@@ -1,10 +1,8 @@
-import math
 from typing import List
-
 import numpy as np
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
 from model.environment.usv_environment_desc import USVEnvironmentDesc, MSREnvironmentDesc
-from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
+from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES
 from evolutionary_computation.evaluation_data import EvaluationData
 from evaluation.eqv_class_calculator import EqvClassCalculator
 
@@ -19,10 +17,9 @@ class USVEnvironment():
             self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
         else:
             raise Exception('unknown parameter')
-            
-        self.vessels, self.relation_clauses = self.initializer.get_one_population_as_objects()    
-        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalties_sum)
-        self.relations = self.clause.relations
+        
+        self.vessels = self.initializer.vessel_vars
+        self.assignments = self.initializer.assignments
           
         self.xl, self.xu = self.generate_gene_space()
         
@@ -34,21 +31,10 @@ class USVEnvironment():
         return self.do_update(states)
     
     def do_update(self, states : List[float]):
-        if len(states) != VARIABLE_NUM * self.config.vessel_num:
-            raise Exception("the variable number is insufficient.")
+        self.assignments.update_from_population(states)
         
-        for vessel in self.vessels:
-            vessel.update(states[vessel.id * VARIABLE_NUM],
-                                states[vessel.id * VARIABLE_NUM + 1],
-                                states[vessel.id * VARIABLE_NUM + 2],
-                                states[vessel.id * VARIABLE_NUM + 3],
-                                states[vessel.id * VARIABLE_NUM + 4])
-        
-        for clause in self.relation_clauses:
-            clause.update()
-        self.clause = min(self.relation_clauses, key=lambda clause: clause.penalties_sum)
-        self.relations = self.clause.relations  
-        
+        self.clause = min(self.assignments.registered_clauses, key=lambda clause: clause.penalties_sum)
+        self.relations = self.clause.relations        
         return self
     
          
@@ -70,11 +56,11 @@ class USVEnvironment():
     
     # Attribute generator with different boundaries
     def generate_gene_space(self):
-        xl = [self.config.vessel_descs[0].min_length, self.config.vessel_descs[0].min_speed]
-        xu = [self.config.vessel_descs[0].max_length, self.config.vessel_descs[0].max_speed]
-        for vessel_desc in self.config.vessel_descs[1:]:
-            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_desc.min_length, vessel_desc.min_speed]
-            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_desc.max_length, vessel_desc.max_speed]
+        xl = [self.vessels[0].min_length, self.vessels[0].min_speed]
+        xu = [self.vessels[0].max_length, self.vessels[0].max_speed]
+        for vessel in self.vessels[1:]:
+            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel.min_length, vessel.min_speed]
+            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel.max_length, vessel.max_speed]
         return xl, xu
     
     
