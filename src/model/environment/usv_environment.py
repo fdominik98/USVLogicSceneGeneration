@@ -2,7 +2,7 @@ import math
 from typing import List
 
 import numpy as np
-from model.instance_initializer import RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
+from logical_level.mapping.instance_initializer import RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
 from model.environment.usv_environment_desc import USVEnvironmentDesc, MSREnvironmentDesc
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES, VARIABLE_NUM
 from evolutionary_computation.evaluation_data import EvaluationData
