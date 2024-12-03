@@ -1,40 +1,43 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Set
 import numpy as np
-from logical_level.mapping.instance_initializer import RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
+from logical_level.mapping.instance_initializer import InstanceInitializer, RandomInstanceInitializer, DeterministicInitializer, LatinHypercubeInitializer
 from model.environment.usv_environment_desc import USVEnvironmentDesc, MSREnvironmentDesc
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING, OWN_VESSEL_STATES
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from evaluation.eqv_class_calculator import EqvClassCalculator
+from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.model.vessel_variable import VesselVariable
+from model.relation import Relation, RelationClause
 
-class USVEnvironment():
-    def __init__(self, env_config : USVEnvironmentDesc, init_method='uniform') -> None:
-        self.config = env_config
-        if init_method == 'uniform': 
-            self.initializer = RandomInstanceInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
-        elif init_method == 'deterministic':
-            self.initializer = DeterministicInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
-        elif init_method == 'lhs':
-            self.initializer = LatinHypercubeInitializer(self.config.vessel_descs, self.config.relation_desc_clauses) 
-        else:
-            raise Exception('unknown parameter')
-        
-        self.vessels = self.initializer.vessel_vars
-        self.assignments = self.initializer.assignments
-          
-        self.xl, self.xu = self.generate_gene_space()
+@dataclass(frozen=True)
+class LogicalScenario():
+    config : USVEnvironmentDesc
+    initializer : InstanceInitializer
+    assignments : Assignments
+    xl : List[float]
+    xu : List[float]   
+    
+    @property
+    def vessel_vars(self) -> List[VesselVariable]:
+        return list(self.assignments.keys())
+    
+    @property
+    def clauses(self) -> Set[RelationClause]:
+        return self.assignments.registered_clauses
+    
+    @property
+    def relations(self) -> List[Relation]:
+        return self.assignments.relations
         
     def update(self, states : List[float]):
         if len(states) != self.config.all_variable_num:
-            raise Exception("the variable number is insufficient.")
-        
+            raise Exception("the variable number is insufficient.")        
         states = OWN_VESSEL_STATES + states
         return self.do_update(states)
     
     def do_update(self, states : List[float]):
-        self.assignments.update_from_population(states)
-        
-        self.clause = min(self.assignments.registered_clauses, key=lambda clause: clause.penalties_sum)
-        self.relations = self.clause.relations        
+        self.assignments.update_from_population(states)             
         return self
     
          
@@ -49,24 +52,8 @@ class USVEnvironment():
         return np.array(new_pop)
     
     def get_vessel_by_id(self, id):
-        vessel = next((v for v in self.vessels if v.id == id), None)
-        if vessel is None:
+        vessel_var = next((v for v in self.vessel_vars if v.id == id), None)
+        if vessel_var is None:
             raise Exception(f"No vessel with id {id}")
-        return vessel
+        return vessel_var    
     
-    # Attribute generator with different boundaries
-    def generate_gene_space(self):
-        xl = [self.vessels[0].min_length, self.vessels[0].min_speed]
-        xu = [self.vessels[0].max_length, self.vessels[0].max_speed]
-        for vessel in self.vessels[1:]:
-            xl += [MIN_COORD, MIN_COORD, MIN_HEADING, vessel.min_length, vessel.min_speed]
-            xu += [MAX_COORD, MAX_COORD, MAX_HEADING, vessel.max_length, vessel.max_speed]
-        return xl, xu
-    
-    
-class LoadedEnvironment(USVEnvironment):
-    def __init__(self, eval_data : EvaluationData, init_method='uniform'):
-        vessel_descs, clause = EqvClassCalculator().get_clause(eval_data)
-        config = MSREnvironmentDesc(0, vessel_descs, [clause])
-        super().__init__(config, init_method)
-        self.update(eval_data.best_solution)

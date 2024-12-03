@@ -1,51 +1,649 @@
 {
-    "algorithm_desc": "pymoo_NSGA2_algorithm_vessel",
-    "config_name": "3vessel_SBO_1",
-    "random_seed": 1234,
-    "evaluation_time": 0.250345,
-    "number_of_generations": 33,
-    "population_size": 20,
-    "num_parents_mating": 2,
-    "best_solution": [
-        30.000000000048992,
-        7.810979161840365,
-        14595.0140008132,
-        20969.512465011572,
-        -2.11213357123294,
-        48.86893970660674,
-        9.179875897995485,
-        3437.817643296952,
-        15521.977436942052,
-        0.6302208061045435,
-        57.20806791588625,
-        8.630405941284677
-    ],
-    "best_fitness": [
-        0.0,
-        0.0,
-        0.0
-    ],
-    "mutate_eta": 15,
-    "mutate_prob": 0.8,
-    "crossover_eta": 15,
-    "crossover_prob": 0.8,
-    "error_message": null,
-    "timestamp": "2024-10-21T12:24:59.502777",
-    "measurement_name": "test_3_vessel_scenarios_SBO",
-    "path": null,
-    "timeout": 240,
-    "init_method": "uniform",
-    "c_1": null,
-    "c_2": null,
-    "w": null,
-    "best_fitness_index": 0.0,
-    "aggregate_strat": "vessel",
-    "risk_vector": [
-        131.80533943583896,
-        567.2441078287832,
-        0.37210036962822773,
-        0.1807075236046107
-    ],
-    "config_group": "SBO",
-    "vessel_number": 3
+ "py/object": "logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data.EvaluationData",
+ "algorithm_desc": "pymoo_NSGA2_algorithm_vessel",
+ "config_name": "3vessel_SBO_1",
+ "random_seed": 1234,
+ "evaluation_time": 0.250345,
+ "number_of_generations": 33,
+ "population_size": 20,
+ "num_parents_mating": 2,
+ "best_fitness": [
+  0.0,
+  0.0,
+  0.0
+ ],
+ "mutate_eta": 15,
+ "mutate_prob": 0.8,
+ "crossover_eta": 15,
+ "crossover_prob": 0.8,
+ "error_message": null,
+ "timestamp": "2024-10-21T12:24:59.502777",
+ "measurement_name": "test_3_vessel_scenarios_SBO",
+ "path": "C:\\Users\\domfr93\\Desktop\\USVLogicSceneGeneration\\assets\\gen_data\\test_3_vessel_scenarios_SBO\\SBO\\pymoo_NSGA2_algorithm_vessel\\3vessel_SBO_1_2024-10-21T12-24-59.502777.json",
+ "timeout": 240,
+ "init_method": "uniform",
+ "c_1": null,
+ "c_2": null,
+ "w": null,
+ "best_fitness_index": 0.0,
+ "aggregate_strat": "vessel",
+ "config_group": "SBO",
+ "best_scene": {
+  "py/object": "concrete_level.model.concrete_scene.ConcreteScene",
+  "_data": {
+   "ConcreteVessel(id=0, length=30.000000000048992, radius=120.00000000019597, max_speed=15.433340999999999, breadth=None, max_turning_angle=185.20009200030242, max_acceleration=0.2646533493576578)": {
+    "py/object": "concrete_level.model.vessel_state.VesselState",
+    "x": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/reduce": [
+          {
+           "py/type": "numpy.dtype"
+          },
+          {
+           "py/tuple": [
+            "f8",
+            false,
+            true
+           ]
+          },
+          {
+           "py/tuple": [
+            3,
+            "<",
+            null,
+            null,
+            null,
+            -1,
+            -1,
+            0
+           ]
+          }
+         ]
+        },
+        {
+         "py/b64": "tvP91ACDx0A="
+        }
+       ]
+      }
+     ]
+    },
+    "y": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/id": 6
+        },
+        {
+         "py/b64": "tvP91ACDx0A="
+        }
+       ]
+      }
+     ]
+    },
+    "speed": 7.810979161840365,
+    "heading": 1.5707963267948966,
+    "p": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "tvP91ACDx0C28/3UAIPHQA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "YrOWa2U7wTwQXkdScT4fQA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "B1wUMyamkTwAAAAAAADwPw=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm_perp": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "AAAAAAAA8D8HXBQzJqaRvA=="
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "ConcreteVessel(id=1, length=48.86893970660674, radius=195.47575882642695, max_speed=15.433340999999999, breadth=None, max_turning_angle=301.68440432020066, max_acceleration=0.1624672139074325)": {
+    "py/object": "concrete_level.model.vessel_state.VesselState",
+    "x": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/id": 6
+        },
+        {
+         "py/b64": "aFXHyoGBzEA="
+        }
+       ]
+      }
+     ]
+    },
+    "y": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/id": 6
+        },
+        {
+         "py/b64": "Qww6zGB61EA="
+        }
+       ]
+      }
+     ]
+    },
+    "speed": 9.179875897995485,
+    "heading": -2.11213357123294,
+    "p": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "aFXHyoGBzEBDDDrMYHrUQA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "H5pJQMHrEsA+8McwKHgfwA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "EFeFuDF94L8n9/EFtmzrvw=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm_perp": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "J/fxBbZs678QV4W4MX3gPw=="
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "ConcreteVessel(id=2, length=57.20806791588625, radius=228.832271663545, max_speed=15.433340999999999, breadth=None, max_turning_angle=353.1646480388127, max_acceleration=0.13878462898653376)": {
+    "py/object": "concrete_level.model.vessel_state.VesselState",
+    "x": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/id": 6
+        },
+        {
+         "py/b64": "aGgkoqLbqkA="
+        }
+       ]
+      }
+     ]
+    },
+    "y": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray.scalar"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/id": 6
+        },
+        {
+         "py/b64": "AlqnHP1QzkA="
+        }
+       ]
+      }
+     ]
+    },
+    "speed": 8.630405941284677,
+    "heading": 0.6302208061045435,
+    "p": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "aGgkoqLbqkACWqcc/VDOQA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "FC1QdtLjG0CHJVkaKlgUQA=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "IuPvpkva6T8aouY+vNviPw=="
+        }
+       ]
+      }
+     ]
+    },
+    "v_norm_perp": {
+     "py/reduce": [
+      {
+       "py/function": "numpy.core.multiarray._reconstruct"
+      },
+      {
+       "py/tuple": [
+        {
+         "py/type": "numpy.ndarray"
+        },
+        {
+         "py/tuple": [
+          0
+         ]
+        },
+        {
+         "py/b64": "Yg=="
+        }
+       ]
+      },
+      {
+       "py/tuple": [
+        1,
+        {
+         "py/tuple": [
+          2
+         ]
+        },
+        {
+         "py/id": 6
+        },
+        false,
+        {
+         "py/b64": "GqLmPrzb4j8i4++mS9rpvw=="
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  "dcpa": null,
+  "tcpa": null,
+  "danger_sector": null,
+  "proximity_index": null,
+  "vessel_number": 3
+ }
 }

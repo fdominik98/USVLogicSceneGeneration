@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 
 
 class DrawingComponent(PlotComponent):
-    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env)
         self.fig = fig
         self.draw_x : List[List[float]] = []
@@ -15,7 +15,7 @@ class DrawingComponent(PlotComponent):
     def do_draw(self):
         pass
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
         return self.graphs 
     
     # Function to handle mouse clicks

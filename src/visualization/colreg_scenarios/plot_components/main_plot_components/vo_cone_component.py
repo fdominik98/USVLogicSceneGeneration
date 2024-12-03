@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors
 
 
 class VOConeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env)
         self.other_velocity_graphs : Dict[str, plt.Quiver] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
@@ -54,7 +54,7 @@ class VOConeComponent(PlotComponent):
             
             self.graphs += [line1, line2, other_velocity, filling[0]] 
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
         for rel in new_env.relations:
             if rel.vessel2.is_OS():
                 o1 = rel.vessel2

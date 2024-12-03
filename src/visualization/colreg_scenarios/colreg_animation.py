@@ -2,7 +2,7 @@ import copy
 from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 TWO_HOURS = 2 * 60 * 60
@@ -28,7 +28,7 @@ class ColregAnimation():
         return f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)} s'
     
     def __init__(self, fig : plt.Figure,
-                 env : USVEnvironment, components : List[PlotComponent],
+                 env : LogicalScenario, components : List[PlotComponent],
                  trajectories : List[List[float]]) -> None:
         self.fig = fig
         self.env = env

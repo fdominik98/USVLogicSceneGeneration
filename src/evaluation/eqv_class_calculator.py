@@ -7,7 +7,7 @@ from model.environment.functional_models.model_utils import _OS, TS1, TS2
 from model.vessel import Vessel, VesselDesc
 from model.relation import Relation, RelationDesc, RelationDescClause
 from model.relation_types import RelationType, crossing_init, head_on_init, overtaking_init
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 
 class EqvClassCalculator():
     def __init__(self):        

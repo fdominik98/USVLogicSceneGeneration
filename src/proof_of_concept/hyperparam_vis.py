@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pandas.plotting import parallel_coordinates
 from mpl_toolkits.mplot3d import Axes3D
 
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 
 dp = EvalDataParser()
 eval_datas = dp.load_dirs_merged_as_models()

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 from trajectory_planning.proximity_evaluator import TrajProximityMetric
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
@@ -10,7 +10,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
     time_treshold = 10 * 60
     dist_treshold = 1 * N_MILE_TO_M_CONVERSION
     
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+    def __init__(self, ax : plt.Axes, env : LogicalScenario, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
         super().__init__(ax, env)
         self.metrics = metrics
         self.reference_metrics = reference_metrics
@@ -89,11 +89,11 @@ class ProximityMetricComponent(PlotComponent, ABC):
         offset = (ymax - ymin) * 0.03  # 5% of the y-axis range
         self.ax.text(metric.len / 2, self.get_threshold2_y() + offset, self.get_threshold2_label(), ha='center', va='center', fontsize=11, horizontalalignment='center')  
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
         return self.graphs 
 
 class DistanceAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+    def __init__(self, ax : plt.Axes, env : LogicalScenario, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
         super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
@@ -119,7 +119,7 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class DCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+    def __init__(self, ax : plt.Axes, env : LogicalScenario, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
         super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:
@@ -146,7 +146,7 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class TCPAAxesComponent(ProximityMetricComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
+    def __init__(self, ax : plt.Axes, env : LogicalScenario, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
         super().__init__(ax, env, metrics, reference_metrics)  
           
     def get_y_metric(self, metric : TrajProximityMetric) -> list[float]:

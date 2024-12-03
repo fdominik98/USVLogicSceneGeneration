@@ -6,17 +6,17 @@ import queue
 import threading
 from model.data_parser import EvalDataParser
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.environment.usv_environment import LoadedEnvironment, USVEnvironment
+from model.environment.usv_environment import LoadedEnvironment, LogicalScenario
 import dash
 from dash import dash_table, html
 from dash.dependencies import Input, Output
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 
 
 class DashThread(threading.Thread):
     def __init__(self) -> None:
         super().__init__(daemon=True, name='Dash Thread')
-        self.data_queue : queue.Queue[USVEnvironment] = queue.Queue()
+        self.data_queue : queue.Queue[LogicalScenario] = queue.Queue()
         self.dp = EvalDataParser()
         self.dirs : List[str] = []        
         self.df, self.dirs = self.dp.load_dirs_merged(self.dirs)

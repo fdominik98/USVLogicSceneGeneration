@@ -1,10 +1,10 @@
 from typing import Dict, List, Optional
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 
 class RiskMetricComponent(PlotComponent):
-    def __init__(self, ax : plt.Axes, env : USVEnvironment, metrics : Dict[int, List[float]], y_label : str, x_label : bool, reference_metrics : Optional[Dict[int, List[float]]] = None) -> None:
+    def __init__(self, ax : plt.Axes, env : LogicalScenario, metrics : Dict[int, List[float]], y_label : str, x_label : bool, reference_metrics : Optional[Dict[int, List[float]]] = None) -> None:
         super().__init__(ax, env)
         self.metrics = metrics
         self.reference_metrics = reference_metrics
@@ -45,5 +45,5 @@ class RiskMetricComponent(PlotComponent):
         self.ax.set_ylim(-0.05, 1.05) 
         self.ax.legend()
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
         return self.graphs

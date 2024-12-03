@@ -1,7 +1,7 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import KNOT_TO_MS_CONVERSION
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors
 
@@ -9,7 +9,7 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 class ShipMarkingsComponent(PlotComponent):
     STATIC_ZOOM = 100
     DYNAMIC_ZOOM = 50
-    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env)
         self.radius_graphs : List[plt.Circle] = []
         self.velocity_graphs : List[plt.Quiver] = []
@@ -18,7 +18,7 @@ class ShipMarkingsComponent(PlotComponent):
         
             
     def do_draw(self):
-        for o in self.env.vessels:
+        for o in self.env.vessel_vars:
             #Plot the positions and radius as circles
             radius_circle = plt.Circle(o.p, o.r, color=colors[o.id], fill=False, linestyle='--', zorder=self.zorder)
             self.ax.add_artist(radius_circle)
@@ -40,8 +40,8 @@ class ShipMarkingsComponent(PlotComponent):
             self.graphs += [radius_circle, ship_vel, ship_dot]
         
                      
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
-        for o in new_env.vessels:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+        for o in new_env.vessel_vars:
             self.radius_graphs[o.id].set_center(o.p)
             self.radius_graphs[o.id].set_radius(o.r)            
             self.ship_dot_graphs[o.id].set_offsets([o.p])  

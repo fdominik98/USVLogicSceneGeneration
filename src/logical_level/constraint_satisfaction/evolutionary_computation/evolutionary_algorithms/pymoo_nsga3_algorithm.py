@@ -1,12 +1,12 @@
 
 from typing import List
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.operators.crossover.sbx import SBX
 from pymoo.operators.mutation.pm import PM
-from model.environment.usv_environment import USVEnvironment
-from evolutionary_computation.evolutionary_algorithms.pymoo_nsga_algorithm import BestSolutionCallback, NSGAProblem, OptimumTermination, PyMooNSGAAlgorithm
+from model.environment.usv_environment import LogicalScenario
+from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga_algorithm import BestSolutionCallback, NSGAProblem, OptimumTermination, PyMooNSGAAlgorithm
 from pymoo.core.population import Population
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 import time
@@ -18,7 +18,7 @@ class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
         super().__init__(measurement_name, 'pymoo_NSGA3_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
         
     
-    def init_problem(self, env : USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, env : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
             # Instantiate the problem
             problem = NSGAProblem(env, eval_data)
             initial_population = Population.new("X", initial_population)

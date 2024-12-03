@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import *
-from evolutionary_computation.aggregates import AggregateAll
+from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import AggregateAll
 from visualization.my_plot import MyPlot
 from trajectory_planning.path_interpolator import PathInterpolator
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
@@ -19,7 +19,7 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone
 from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
 
 class TrajectoryReceiver():
-    def __init__(self, env : USVEnvironment, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None) -> None:
+    def __init__(self, env : LogicalScenario, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None) -> None:
         self.env = env
         if trajectories is None:
             self.trajectories = self.gen_trajectories()
@@ -28,7 +28,7 @@ class TrajectoryReceiver():
             
     def gen_trajectories(self):
         interpolator = PathInterpolator()
-        for v in self.env.vessels:
+        for v in self.env.vessel_vars:
             interpolator.add_path(v, [])
         return interpolator.interpolated_paths
     
@@ -39,7 +39,7 @@ class TrajectoryReceiver():
         
 
 class ColregPlot(TrajectoryReceiver, MyPlot):  
-    def __init__(self, env : USVEnvironment, 
+    def __init__(self, env : LogicalScenario, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
         MyPlot.__init__(self)
         TrajectoryReceiver.__init__(self, env, trajectories)

@@ -1,14 +1,14 @@
 from typing import List
 from matplotlib import patches, pyplot as plt
 import numpy as np
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
 from visualization.colreg_scenarios.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
 
 
 class CenteredAngleCircleComponent(AngleCircleComponent):
     radius_ratio = 1.7
-    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env, linewidth=2.0, radius_ratio = self.radius_ratio)
         self.wedge_sterns : List[patches.Wedge]  = []
         self.wedge_bows : List[patches.Wedge]  = []
@@ -16,7 +16,7 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         self.graphs_by_vessel += [self.wedge_sterns, self.wedge_bows, self.wedge_mastheads]          
         
     def do_draw(self):
-        for o in self.env.vessels:
+        for o in self.env.vessel_vars:
             angle1_masthead = np.degrees(o.heading + MASTHEAD_LIGHT_ANGLE / 2)
             angle2_masthead = np.degrees(o.heading - MASTHEAD_LIGHT_ANGLE / 2)
             
@@ -52,8 +52,8 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
             self.graphs += [wedge_stern, wedge_masthead, wedge_bow]
         super().do_draw()
             
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
-        for o in new_env.vessels:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+        for o in new_env.vessel_vars:
             angle1_masthead = np.degrees(o.heading + MASTHEAD_LIGHT_ANGLE / 2)
             angle2_masthead = np.degrees(o.heading - MASTHEAD_LIGHT_ANGLE / 2)
             

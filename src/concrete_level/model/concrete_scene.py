@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from concrete_level.model.concrete_vessel import ConcreteVessel
 from concrete_level.model.vessel_state import VesselState
 
@@ -12,10 +12,7 @@ class ConcreteScene():
     danger_sector : Optional[float] = None
     proximity_index : Optional[float] = None
     
-    vessel_number : int = field(init=False)
-    
     def __post_init__(self):
-        object.__setattr__(self, 'vessel_number', len(self))
         object.__setattr__(self, '_data', dict(self._data))
             
     def __getitem__(self, key):
@@ -40,5 +37,17 @@ class ConcreteScene():
         return iter(self._data)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self._data})" 
+        return f"{self.__class__.__name__}({self._data})"
+    
+    @property
+    def population(self) -> List[float]:
+        sorted_items = sorted(self.items(), key=lambda item: item[0].id)
+        population : List[float] = []
+        for vessel, state in sorted_items:
+            population += [state.x, state.y, state.heading, vessel.length, state.speed]
+        return population
+    
+    @property
+    def vessel_number(self) -> int:
+        return len(self)
     

@@ -1,5 +1,5 @@
 from typing import List
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from trajectory_planning.model.trajectory_data import TrajectoryData
 from model.data_parser import EvalDataParser, TrajDataParser

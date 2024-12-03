@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
 
 
 class DistanceComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env)
         self.text_graphs : Dict[str, plt.Text] = {}
         self.line_graphs : Dict[str, plt.Line2D] = {}
@@ -27,7 +27,7 @@ class DistanceComponent(PlotComponent):
             
             self.graphs += [text, line]
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
         for rel in new_env.relations:
             o1 = rel.vessel1
             o2 = rel.vessel2   

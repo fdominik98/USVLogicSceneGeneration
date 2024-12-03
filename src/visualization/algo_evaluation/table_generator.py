@@ -5,7 +5,7 @@ from typing import Dict, List
 import numpy as np
 
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper
 

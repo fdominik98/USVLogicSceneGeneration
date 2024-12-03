@@ -5,7 +5,7 @@ from concrete_level.model.concrete_scene import ConcreteScene
 import jsonpickle
 
 @dataclass()
-class EvaluationData2:
+class EvaluationData:
     algorithm_desc: Optional[str] = None
     config_name: Optional[str] = None
     random_seed: Optional[int] = None

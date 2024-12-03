@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os
 from typing import List, Tuple
 import pandas as pd
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 import tkfilebrowser
 from model.environment.usv_config import ASSET_FOLDER
 from trajectory_planning.model.trajectory_data import TrajectoryData

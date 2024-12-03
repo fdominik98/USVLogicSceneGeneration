@@ -27,6 +27,9 @@ class Assignments(Dict[VesselVariable, Values]):
         for clause in self.registered_clauses:
             clause.update(self)
             
+        self.clause = min(self.registered_clauses, key=lambda clause: clause.penalties_sum)
+        self.relations = self.clause.relations  
+            
     def register_clause(self, clause):
         self.registered_clauses.add(clause)
         

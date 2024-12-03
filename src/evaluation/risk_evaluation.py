@@ -1,14 +1,14 @@
 import copy
 import numpy as np
 from model.environment.usv_config import N_MILE_TO_M_CONVERSION
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.relation import Relation
 from model.relation_types import MayCollide
 from model.vessel import Vessel
 
 
 class RiskVector():
-    def __init__(self, env : USVEnvironment) -> None:
+    def __init__(self, env : LogicalScenario) -> None:
         self.proximity_vectors = [ProximityRiskIndex(rel) for rel in env.relations if rel.has_os()]
         self.nav_risk_vector = NavigationRiskIndex(env, env.get_vessel_by_id(0))
             
@@ -50,14 +50,14 @@ class ProximityRiskIndex():
             self.proximity_index = 0
         
 class NavigationRiskIndex():
-    def __init__(self, env : USVEnvironment, vessel : Vessel) -> None:
+    def __init__(self, env : LogicalScenario, vessel : Vessel) -> None:
         self.env = env
         self.vessel = vessel
     
     def will_collide(self, heading, speed) -> bool:
         new_vessel = copy.deepcopy(self.vessel)
         new_vessel.update(self.vessel.p[0], self.vessel.p[1], heading, self.vessel.l, speed)
-        for vessel2 in self.env.vessels:
+        for vessel2 in self.env.vessel_vars:
             if vessel2.id == new_vessel.id:
                 continue
             rel = Relation(new_vessel, [MayCollide()], vessel2)

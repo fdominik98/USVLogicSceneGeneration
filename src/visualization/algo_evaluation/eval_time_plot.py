@@ -3,7 +3,7 @@ import pprint
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from model.environment.usv_config import EPSILON
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors

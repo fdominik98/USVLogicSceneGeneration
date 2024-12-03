@@ -1,7 +1,7 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from model.vessel import Vessel
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
@@ -12,7 +12,7 @@ class AngleCircleComponent(PlotComponent):
     angle_circle_slice_1 = BOW_ANGLE  # 20 degree slice
     angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
     
-    def __init__(self, ax: plt.Axes, env : USVEnvironment, linewidth=0.8, radius_ratio = 10) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario, linewidth=0.8, radius_ratio = 10) -> None:
         super().__init__(ax, env)
         self.circle_graphs : List[plt.Circle] = []
         self.line1_graphs : List[plt.Line2D] = []
@@ -26,7 +26,7 @@ class AngleCircleComponent(PlotComponent):
         self.angle_circle_radius = MAX_COORD / radius_ratio
             
     def do_draw(self):
-        for o in self.env.vessels:
+        for o in self.env.vessel_vars:
             self.one_draw(o, self.zorder, light_colors[o.id])
             
     
@@ -72,8 +72,8 @@ class AngleCircleComponent(PlotComponent):
         end_point = origin + length * rotated_direction
         return [origin[0], end_point[0]], [origin[1], end_point[1]]
             
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
-        for o in new_env.vessels:
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+        for o in new_env.vessel_vars:
             self.update_one(o)
             
         return self.graphs

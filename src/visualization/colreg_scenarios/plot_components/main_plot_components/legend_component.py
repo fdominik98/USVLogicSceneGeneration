@@ -2,13 +2,13 @@ from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.legend import Legend
 import numpy as np
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import KNOT_TO_MS_CONVERSION
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):
     
-    def __init__(self, ax: plt.Axes, env : USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
         super().__init__(ax, env)
         self.zorder = 0
 
@@ -16,8 +16,8 @@ class LegendComponent(PlotComponent):
         self.legend : Legend = self.ax.legend()
         self.graphs += [self.legend]
         
-    def do_update(self, new_env : USVEnvironment) -> List[plt.Artist]:
-        for i, o in enumerate(new_env.vessels):
+    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+        for i, o in enumerate(new_env.vessel_vars):
             # Plot the positions
             dot_label = f'{o}\; p: ({o.p[0]:.1f}, {o.p[1]:.1f}), r: {o.r:.1f} m'
             angle = f'h: {np.degrees(o.heading):.1f}^\circ'

@@ -1,34 +1,22 @@
 import random
-from typing import Dict, List
+from typing import List
 import numpy as np
 from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
-from model.vessel import VesselDesc
-from model.relation import Relation, RelationClause, RelationDescClause
 from abc import ABC, abstractmethod
 from logical_level.model.vessel_variable import VesselVariable
-from logical_level.constraint_satisfaction.assignments import Assignments
 
 class InstanceInitializer(ABC):    
-    def __init__(self, vessel_descs : List[VesselDesc], relation_desc_clauses : List[RelationDescClause]) -> None:
-        vessels: Dict[VesselDesc, VesselVariable] = {vessel_desc : VesselVariable(vessel_desc) for vessel_desc in vessel_descs}
-        self.assignments = Assignments(list(vessels.values()))
-        self.vessel_vars = list(self.assignments.keys())
-        
-        for relation_desc_clause in relation_desc_clauses:
-            clause = RelationClause()
-            for relation_desc in relation_desc_clause.relation_descs:
-                vd1 = relation_desc.vd1
-                vd2 = relation_desc.vd2
-                clause.append(Relation(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
-            self.assignments.register_clause(clause)    
-        
+    def __init__(self, name: str, vessel_vars : List[VesselVariable]) -> None:
+        self.vessel_vars = vessel_vars      
+        self.name = name
        
     @abstractmethod     
     def get_population(self, pop_size) -> List[List[float]]:
         pass
 class RandomInstanceInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
-        super().__init__(vessel_descs, relation_descs)
+    name = 'uniform'
+    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
+        super().__init__(self.name, vessel_vars)
         
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
@@ -48,8 +36,9 @@ class RandomInstanceInitializer(InstanceInitializer):
     
     
 class DeterministicInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
-        super().__init__(vessel_descs, relation_descs)
+    name = 'deterministic'
+    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
+        super().__init__(self.name, vessel_vars)
         
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
@@ -66,8 +55,9 @@ class DeterministicInitializer(InstanceInitializer):
     
 
 class LatinHypercubeInitializer(InstanceInitializer):
-    def __init__(self, vessel_descs : List[VesselDesc], relation_descs : List[RelationDescClause]) -> None:
-        super().__init__(vessel_descs, relation_descs)
+    name = 'lhs'
+    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
+        super().__init__(self.name, vessel_vars)
         
     def lhs_sampling(self, n_samples: int, lower_bounds: List[float], upper_bounds: List[float]) -> np.ndarray:
         """

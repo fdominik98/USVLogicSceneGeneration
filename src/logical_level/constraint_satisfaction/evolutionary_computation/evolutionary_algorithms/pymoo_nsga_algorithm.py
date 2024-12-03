@@ -1,15 +1,15 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Tuple
-from evolutionary_computation.evaluation_data import EvaluationData
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
-from evolutionary_computation.aggregates import Aggregate
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
+from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import Aggregate
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.result import Result
 import matplotlib.pyplot as plt
 import matplotlib
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import EPSILON
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from model.environment.usv_environment_desc import USVEnvironmentDesc
@@ -20,7 +20,7 @@ from pymoo.algorithms.base.genetic import GeneticAlgorithm
 
 # Define the custom multi-objective optimization problem
 class NSGAProblem(ElementwiseProblem):
-    def __init__(self, env : USVEnvironment, eval_data : EvaluationData):
+    def __init__(self, env : LogicalScenario, eval_data : EvaluationData):
         self.aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)           
         super().__init__(n_var=env.config.all_variable_num,  # Number of decision variables
                         n_obj=self.aggregate.obj_num,  # Number of objective functions
@@ -87,7 +87,7 @@ class PyMooNSGAAlgorithm(EvolutionaryAlgorithmBase, ABC):
         super().__init__(measurement_name, algorithm_desc, env_configs,test_config, number_of_runs, warmups, verbose)
         
     @abstractmethod
-    def init_problem(self, env : USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, env : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pass
 
     

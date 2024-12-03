@@ -1,11 +1,11 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class PrimeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, env: USVEnvironment) -> None:
+    def __init__(self, ax: plt.Axes, env: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.p12_vec_graphs: Dict[str, plt.Quiver] = {}
         self.p21_vec_graphs: Dict[str, plt.Quiver] = {}
@@ -30,7 +30,7 @@ class PrimeComponent(PlotComponent):
 
             self.graphs += [p12_vec, p21_vec]
 
-    def do_update(self, new_env: USVEnvironment) -> List[plt.Artist]:
+    def do_update(self, new_env: LogicalScenario) -> List[plt.Artist]:
         for rel in new_env.relations:
             o1 = rel.vessel1
             o2 = rel.vessel2

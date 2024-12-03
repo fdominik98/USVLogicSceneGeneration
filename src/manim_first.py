@@ -167,7 +167,7 @@ class PointsWithVectorsAndRadius(ThreeDScene):
                 
         # Define two points with sufficient distance
         def_trajs = self.trajectories.gen_trajectories()
-        for vessel in self.env.vessels:
+        for vessel in self.env.vessel_vars:
             traj = self.trajectories.trajectories[vessel.id]
             def_traj = def_trajs[vessel.id]
             #rad = SimRadius(vessel, axes_3d, traj, def_traj)

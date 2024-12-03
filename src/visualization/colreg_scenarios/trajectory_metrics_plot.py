@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import *
 from visualization.my_plot import MyPlot
 from visualization.colreg_scenarios.colreg_plot import TrajectoryReceiver
@@ -10,7 +10,7 @@ from trajectory_planning.proximity_evaluator import TrajProximityEvaluator, Traj
 from visualization.colreg_scenarios.plot_components.metric_components.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
 class TrajectoryMetricsPlot(TrajectoryReceiver, MyPlot):  
-    def __init__(self, env : USVEnvironment, 
+    def __init__(self, env : LogicalScenario, 
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
         MyPlot.__init__(self)
         TrajectoryReceiver.__init__(self, env, trajectories)

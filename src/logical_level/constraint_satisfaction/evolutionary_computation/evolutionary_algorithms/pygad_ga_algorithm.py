@@ -2,12 +2,12 @@
 import time
 from typing import List, Tuple
 import numpy as np
-from evolutionary_computation.evaluation_data import EvaluationData
-from evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 import pygad
-from evolutionary_computation.aggregates import Aggregate
+from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import Aggregate
 from model.environment.usv_environment_desc import USVEnvironmentDesc
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_config import EPSILON
 
 class PyGadGAAlgorithm(EvolutionaryAlgorithmBase):
@@ -15,7 +15,7 @@ class PyGadGAAlgorithm(EvolutionaryAlgorithmBase):
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         super().__init__(measurement_name, 'pygad_GA_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
     
-    def init_problem(self,  env: USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
+    def init_problem(self,  env: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
         def fitness_func(cls, solution, solution_idx):
             return Aggregate.factory(env, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         

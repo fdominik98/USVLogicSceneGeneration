@@ -6,11 +6,11 @@ import os
 import random
 from typing import List, Tuple
 import numpy as np
-from evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod
 from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
 from model.environment.usv_config import ASSET_FOLDER
-from model.environment.usv_environment import USVEnvironment
+from model.environment.usv_environment import LogicalScenario
 from model.environment.usv_environment_desc import USVEnvironmentDesc
 
 
@@ -50,7 +50,7 @@ class EvolutionaryAlgorithmBase(ABC):
     def evaluate(self, config : USVEnvironmentDesc, save : bool) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
-            env = USVEnvironment(config, init_method=eval_data.init_method)
+            env = LogicalScenario(config, init_method=eval_data.init_method)
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
             eval_data.config_name = config.name
@@ -86,7 +86,7 @@ class EvolutionaryAlgorithmBase(ABC):
             return eval_data
         
     @abstractmethod   
-    def init_problem(self, env: USVEnvironment, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, env: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pass
     
     @abstractmethod   
