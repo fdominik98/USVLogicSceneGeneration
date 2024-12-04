@@ -2,13 +2,13 @@ from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.legend import Legend
 import numpy as np
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import KNOT_TO_MS_CONVERSION
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import KNOT_TO_MS_CONVERSION
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):
     
-    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.zorder = 0
 

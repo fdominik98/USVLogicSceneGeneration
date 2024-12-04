@@ -1,9 +1,9 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import BOW_ANGLE, MAX_COORD, STERN_ANGLE
-from model.vessel import Vessel
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
+from functional_level.metamodels.vessel_class import Vessel
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 
 
@@ -12,7 +12,7 @@ class AngleCircleComponent(PlotComponent):
     angle_circle_slice_1 = BOW_ANGLE  # 20 degree slice
     angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
     
-    def __init__(self, ax: plt.Axes, env : LogicalScenario, linewidth=0.8, radius_ratio = 10) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario, linewidth=0.8, radius_ratio = 10) -> None:
         super().__init__(ax, env)
         self.circle_graphs : List[plt.Circle] = []
         self.line1_graphs : List[plt.Line2D] = []
@@ -26,7 +26,7 @@ class AngleCircleComponent(PlotComponent):
         self.angle_circle_radius = MAX_COORD / radius_ratio
             
     def do_draw(self):
-        for o in self.env.vessel_vars:
+        for o in self.logical_scenario.vessel_vars:
             self.one_draw(o, self.zorder, light_colors[o.id])
             
     

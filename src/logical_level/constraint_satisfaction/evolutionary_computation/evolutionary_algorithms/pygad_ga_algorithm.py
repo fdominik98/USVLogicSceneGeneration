@@ -6,18 +6,17 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_d
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 import pygad
 from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import Aggregate
-from model.environment.usv_environment_desc import USVEnvironmentDesc
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import EPSILON
+from functional_level.metamodels.functional_scenario import FunctionalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 
 class PyGadGAAlgorithm(EvolutionaryAlgorithmBase):
-    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pygad_GA_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, 'pygad_GA_algorithm', functional_scenarios,test_config, number_of_runs, warmups, verbose)
     
-    def init_problem(self,  env: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData) -> None:
+    def init_problem(self, logical_scenario: LogicalScenario, initial_population: List[List[float]], eval_data: EvaluationData) -> None:
         def fitness_func(cls, solution, solution_idx):
-            return Aggregate.factory(env, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
+            return Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         
         start_time = time.time()
         
@@ -42,8 +41,8 @@ class PyGadGAAlgorithm(EvolutionaryAlgorithmBase):
             num_parents_mating=eval_data.num_parents_mating,
             fitness_func=fitness_func,
             sol_per_pop=eval_data.population_size,
-            num_genes=env.config.all_variable_num,
-            gene_space=[{'low': low, 'high': high} for low, high in zip(env.xl, env.xu)],
+            num_genes=logical_scenario.all_variable_num,
+            gene_space=[{'low': low, 'high': high} for low, high in zip(logical_scenario.xl, logical_scenario.xu)],
             initial_population=initial_population,
             on_generation=on_generation,
             mutation_probability=eval_data.mutate_prob,
@@ -73,7 +72,7 @@ class PyGadGAAlgorithm(EvolutionaryAlgorithmBase):
         #     sorted_indices = np.argsort(population_fitness)[::-1]  # Sort in descending order of fitness
         #     best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
         #     for sol in best_solutions:
-        #         ColregPlot(self.env.update(sol))
+        #         ColregPlot(self.logical_scenario.update(sol))
         return list(solution.flatten()), [abs(solution_fitness)], ga_instance.generations_completed
 
 

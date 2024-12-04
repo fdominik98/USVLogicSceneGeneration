@@ -1,12 +1,12 @@
 import copy
 import itertools
 from typing import Dict, List, Set, Tuple
-from model.environment.functional_models.usv_env_desc_list import TS3, TS4, TS5
-from model.environment.usv_config import OWN_VESSEL_STATES, VARIABLE_NUM
-from model.environment.functional_models.model_utils import _OS, TS1, TS2
-from model.vessel import Vessel, VesselDesc
-from model.relation import Relation, RelationDesc, RelationDescClause
-from model.relation_types import RelationType, crossing_init, head_on_init, overtaking_init
+from functional_level.models.usv_env_desc_list import TS3, TS4, TS5
+from asv_utils import OWN_VESSEL_STATES, VARIABLE_NUM
+from functional_level.models.model_utils import _OS, TS1, TS2
+from functional_level.metamodels.vessel_class import Vessel, VesselClass
+from logical_level.models.relation_constraint import RelationConstr, RelationClass, RelationClassClause
+from logical_level.models.relation_types import RelationType, crossing_init, head_on_init, overtaking_init
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 
 class EqvClassCalculator():
@@ -16,7 +16,7 @@ class EqvClassCalculator():
      
                 
     def get_equivalence_classes(self, data : List[EvaluationData]):
-        clause_desc_set : Dict[RelationDescClause, int] = {}
+        clause_desc_set : Dict[RelationClassClause, int] = {}
         for eval_data in data:
             if eval_data.best_fitness_index > 0.0:
                 continue
@@ -29,10 +29,10 @@ class EqvClassCalculator():
         return clause_desc_set
         
     
-    def get_clause(self, eval_data : EvaluationData) -> Tuple[List[VesselDesc], RelationDescClause]:
+    def get_clause(self, eval_data : EvaluationData) -> Tuple[List[VesselClass], RelationClassClause]:
         states = OWN_VESSEL_STATES + eval_data.best_solution
         vessel_descs = self.vessels_descs[:eval_data.vessel_number]
-        vessels: Dict[VesselDesc, Vessel] = {}
+        vessels: Dict[VesselClass, Vessel] = {}
         for id, vessel_desc in enumerate(vessel_descs):
                 vessel = Vessel(vessel_desc)
                 vessel.update(states[id * VARIABLE_NUM],
@@ -43,19 +43,19 @@ class EqvClassCalculator():
                 vessels[vessel_desc] = vessel
             
         combinations = list(itertools.combinations(vessels.keys(), 2))
-        clause_desc = RelationDescClause([])
+        clause_desc = RelationClassClause([])
         for id1, id2 in combinations:
             if not id1.is_os() and not id2.is_os():
                 continue
             v1 = vessels[id1]
             v2 = vessels[id2]
-            rels : Set[Relation] = set()
+            rels : Set[RelationConstr] = set()
             for rel_types in self.relation_types:
-                rels |= {Relation(v1, copy.deepcopy(rel_types), v2),
-                         Relation(v2, copy.deepcopy(rel_types), v1)}
+                rels |= {RelationConstr(v1, copy.deepcopy(rel_types), v2),
+                         RelationConstr(v2, copy.deepcopy(rel_types), v1)}
             min_rel = min(rels, key=lambda x: x.penalties_sum)
             if min_rel.penalties_sum == 0.0:
-                clause_desc.append(RelationDesc(vd1=min_rel.vessel1.desc,
+                clause_desc.append(RelationClass(vd1=min_rel.vessel1.desc,
                                                 relation_types=min_rel.relation_types,
                                                 vd2=min_rel.vessel2.desc))
         if len(clause_desc.relation_descs) < len(vessels) - 1:

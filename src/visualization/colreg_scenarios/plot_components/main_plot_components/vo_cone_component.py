@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import LogicalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors
 
 
 class VOConeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.other_velocity_graphs : Dict[str, plt.Quiver] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
@@ -16,7 +16,7 @@ class VOConeComponent(PlotComponent):
         self.zorder = -1
             
     def do_draw(self):
-        for rel in self.env.relations:
+        for rel in self.logical_scenario.relations:
             if rel.vessel2.is_OS():
                 o1 = rel.vessel2
                 o2 = rel.vessel1

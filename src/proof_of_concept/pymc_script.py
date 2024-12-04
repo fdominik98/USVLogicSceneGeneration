@@ -1,6 +1,6 @@
 import pymc as pm
 import numpy as np
-from src.proof_of_concept.constraints import Constraints
+from proof_of_concept.constraints import Constraints
 
     
 def norm(x, y):

@@ -2,7 +2,7 @@ import copy
 from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
-from model.environment.usv_environment import LogicalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 TWO_HOURS = 2 * 60 * 60
@@ -28,10 +28,10 @@ class ColregAnimation():
         return f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)} s'
     
     def __init__(self, fig : plt.Figure,
-                 env : LogicalScenario, components : List[PlotComponent],
+                logical_scenario: LogicalScenario, components : List[PlotComponent],
                  trajectories : List[List[float]]) -> None:
         self.fig = fig
-        self.env = env
+        self.logical_scenario = env
         self.components = components
         
         self.real_time_value = ANIM_REAL_TIME
@@ -63,7 +63,7 @@ class ColregAnimation():
             
             
     def init_anim(self):
-        self.dyn_env = copy.deepcopy(self.env)
+        self.dyn_env = copy.deepcopy(self.logical_scenario)
         self.anim_frame_counter = 0
         self.is_anim_paused = True
         return [graph for component in self.components for graph in component.reset()]

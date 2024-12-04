@@ -1,9 +1,9 @@
 from typing import List, Optional, Tuple
 import numpy as np
-from trajectory_planning.path_interpolator import PathInterpolator
-from trajectory_planning.model.rrt_models import CircularObstacle, LineObstacle, Obstacle, PolygonalObstacle, TrajectoryState, Node
+from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
+from concrete_level.models.rrt_models import CircularObstacle, LineObstacle, Obstacle, PolygonalObstacle, TrajectoryState, Node
 import pygame
-from trajectory_planning.model.vessel_order_graph import VesselNode
+from concrete_level.models.vessel_order_graph import VesselNode
 
 class TrajectoryVisualizer():
     def __init__(self, dim : int, scaler : float, sample_area : List[Tuple[float, float]]) -> None:

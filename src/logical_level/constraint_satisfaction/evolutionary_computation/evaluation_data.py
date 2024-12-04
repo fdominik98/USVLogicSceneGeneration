@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 import pprint
 from typing import Optional, List
-from concrete_level.model.concrete_scene import ConcreteScene
+from concrete_level.models.concrete_scene import ConcreteScene
 import jsonpickle
 
 @dataclass()
@@ -51,8 +51,7 @@ class EvaluationData:
         
     @classmethod
     def load_dict_from_json(cls, file_path: str) -> dict:
-        with open(file_path, 'r') as json_file:
-            return json.load(json_file)
+        return asdict(cls.load_from_json(file_path))
 
     def __str__(self) -> str:
         return pprint.pformat(dict(sorted(asdict(self).items())))

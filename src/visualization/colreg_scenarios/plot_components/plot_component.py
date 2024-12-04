@@ -1,16 +1,16 @@
 from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import LogicalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 from abc import ABC, abstractmethod
 
 colors = ['blue', 'red', 'green', 'orange', 'purple', 'grey', 'olive']
 light_colors = ['lightblue', 'salmon', 'lightgreen', 'moccasin', 'thistle', 'lightgrey', 'y']
 
 class PlotComponent(ABC):
-    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         self.ax = ax
-        self.env = env
+        self.logical_scenario = env
         self.graphs : List[plt.Artist] = []
         self.zorder = 0
         
@@ -30,4 +30,4 @@ class PlotComponent(ABC):
         pass        
     
     def reset(self) -> List[plt.Artist]:
-        return self.update(self.env)
+        return self.update(self.logical_scenario)

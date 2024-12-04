@@ -1,7 +1,7 @@
 from typing import Dict, List, Set
-from logical_level.model.values import Values
-from logical_level.model.vessel_variable import VesselVariable
-from model.environment.usv_config import VARIABLE_NUM
+from logical_level.models.values import Values
+from logical_level.models.vessel_variable import VesselVariable
+from asv_utils import VARIABLE_NUM
 
 class Assignments(Dict[VesselVariable, Values]):
     def __init__(self, vessel_variables : List[VesselVariable] = [], *args, **kwargs):
@@ -10,8 +10,8 @@ class Assignments(Dict[VesselVariable, Values]):
         self.clear()
         self.update(sorted_items)
         
-        from model.relation import RelationClause
-        self.registered_clauses : Set[RelationClause] = set()
+        from logical_level.models.relation_constraint import RelationConstrClause
+        self.registered_clauses : Set[RelationConstrClause] = set()
 
     def update_from_population(self, states : List[float]):
         if len(states) != len(self) * VARIABLE_NUM:

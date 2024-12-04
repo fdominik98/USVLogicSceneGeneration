@@ -1,16 +1,16 @@
 import copy
 import numpy as np
-from model.environment.usv_config import N_MILE_TO_M_CONVERSION
-from model.environment.usv_environment import LogicalScenario
-from model.relation import Relation
-from model.relation_types import MayCollide
-from model.vessel import Vessel
+from asv_utils import N_MILE_TO_M_CONVERSION
+from logical_level.models.logical_scenario import LogicalScenario
+from logical_level.models.relation_constraint import RelationConstr
+from logical_level.models.relation_types import MayCollide
+from functional_level.metamodels.vessel_class import Vessel
 
 
 class RiskVector():
-    def __init__(self, env : LogicalScenario) -> None:
+    def __init__(self,logical_scenario: LogicalScenario) -> None:
         self.proximity_vectors = [ProximityRiskIndex(rel) for rel in env.relations if rel.has_os()]
-        self.nav_risk_vector = NavigationRiskIndex(env, env.get_vessel_by_id(0))
+        self.nav_risk_vector = NavigationRiskIndex(logical_scenario, env.get_vessel_by_id(0))
             
         self.max_proximity_index = min(self.proximity_vectors, key=lambda obj: obj.tcpa)
         #self.safe_navigation_area_index = self.nav_risk_vector.find_safe_navigation_area_index()
@@ -25,7 +25,7 @@ class RiskVector():
         
 
 class ProximityRiskIndex():
-    def __init__(self, relation : Relation) -> None:
+    def __init__(self, relation : RelationConstr) -> None:
         self.dist = relation.o_distance
         self.tcpa = relation.tcpa
         self.dcpa = relation.dcpa
@@ -50,17 +50,17 @@ class ProximityRiskIndex():
             self.proximity_index = 0
         
 class NavigationRiskIndex():
-    def __init__(self, env : LogicalScenario, vessel : Vessel) -> None:
-        self.env = env
+    def __init__(self,logical_scenario: LogicalScenario, vessel : Vessel) -> None:
+        self.logical_scenario = env
         self.vessel = vessel
     
     def will_collide(self, heading, speed) -> bool:
         new_vessel = copy.deepcopy(self.vessel)
         new_vessel.update(self.vessel.p[0], self.vessel.p[1], heading, self.vessel.l, speed)
-        for vessel2 in self.env.vessel_vars:
+        for vessel2 in self.logical_scenario.vessel_vars:
             if vessel2.id == new_vessel.id:
                 continue
-            rel = Relation(new_vessel, [MayCollide()], vessel2)
+            rel = RelationConstr(new_vessel, [MayCollide()], vessel2)
             pr_i = ProximityRiskIndex(rel)
             if pr_i.dcpa < rel.safety_dist:
                 return True

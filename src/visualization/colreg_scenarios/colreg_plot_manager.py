@@ -4,8 +4,8 @@ import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import ASSET_FOLDER
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.trajectory_metrics_plot import TrajectoryMetricsPlot
 from visualization.colreg_scenarios.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from visualization.colreg_scenarios.plot_components.plot_component import light_colors
@@ -81,11 +81,11 @@ class Checkbox(StandaloneCheckbox):
         
 
 class ColregPlotManager():
-    def __init__(self, env : LogicalScenario,
+    def __init__(self,logical_scenario: LogicalScenario,
                  trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
-        self.colreg_plot = ColregPlot(env, trajectories)  
+        self.colreg_plot = ColregPlot(logical_scenario, trajectories)  
         self.metrics_plot = None
-        self.env = env
+        self.logical_scenario = env
         self.trajectories = trajectories
         self.root = tk.Tk()
         self.root.resizable(True, True)
@@ -167,7 +167,7 @@ class ColregPlotManager():
         col=self.create_actor_info_col('grey')
         actors_label = tk.Label(master=col, text='Attribute', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.env.vessel_vars:
+        for vessel in self.logical_scenario.vessel_vars:
             col = self.create_actor_info_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -193,7 +193,7 @@ class ColregPlotManager():
         col=self.create_actor_control_col('grey')
         actors_label = tk.Label(master=col, text='Component', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.env.vessel_vars:
+        for vessel in self.logical_scenario.vessel_vars:
             col = self.create_actor_control_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -215,7 +215,7 @@ class ColregPlotManager():
         col=self.create_colreg_control_col('grey')
         rel_label = tk.Label(master=col, text='Component', background='grey')
         rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        self.rels_sorted = sorted(self.env.relations, key=lambda rel: rel.name)
+        self.rels_sorted = sorted(self.logical_scenario.relations, key=lambda rel: rel.name)
         for rel in self.rels_sorted:
             col = self.create_colreg_control_col(light_colors[rel.vessel2.id])
             rel_label = tk.Label(master=col, text=rel.short_name, background=light_colors[rel.vessel2.id])
@@ -235,7 +235,7 @@ class ColregPlotManager():
         
         cb_array = CheckboxArray(self.actor_control_columns[0], text, self.colreg_plot.fig)
         actor_columns = self.actor_control_columns[1:]
-        for o in self.env.vessel_vars:
+        for o in self.logical_scenario.vessel_vars:
             Checkbox(actor_columns[o.id], [cp[o.id] for cp in plot_components], cb_array, light_colors[o.id], init_checked)
             
             
@@ -297,7 +297,7 @@ class ColregPlotManager():
         if not self.root.winfo_exists():
             return
         actor_infos = self.get_actor_infos()
-        for o in self.env.vessel_vars:
+        for o in self.logical_scenario.vessel_vars:
             for i, info in enumerate(actor_infos[o.id]):
                 self.actor_info_labels[o.id][i].config(text=info)
         self.control_frame.after(50, self.update_actor_info_labels) 
@@ -321,7 +321,7 @@ class ColregPlotManager():
         
         
     def to_pdf(self):
-        file_name = f'{self.env.config.name}_{datetime.now().isoformat().replace(":","-")}'
+        file_name = f'{self.logical_scenario.config.name}_{datetime.now().isoformat().replace(":","-")}'
         if not os.path.exists(self.image_folder):
             os.makedirs(self.image_folder)
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
@@ -333,7 +333,7 @@ class ColregPlotManager():
             plot = self.colreg_plot
         elif value == 'Metrics':
             if self.metrics_plot is None:
-                self.metrics_plot = TrajectoryMetricsPlot(self.env, self.trajectories)
+                self.metrics_plot = TrajectoryMetricsPlot(self.logical_scenario, self.trajectories)
             plot = self.metrics_plot
         else:
             raise Exception('Not implemented plot.')
@@ -363,7 +363,7 @@ class ColregPlotManager():
         actor_infos = self.get_actor_infos()
         actor_info_labels = []
         actor_info_columns = self.actor_info_columns[1:]
-        for o in self.env.vessel_vars:
+        for o in self.logical_scenario.vessel_vars:
             actor_info_label_list : List[tk.Label] = []
             actor_info_labels.append(actor_info_label_list)
             for info in actor_infos[o.id]:

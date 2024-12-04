@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import LogicalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
-from model.environment.usv_config import N_MILE_TO_M_CONVERSION
+from asv_utils import N_MILE_TO_M_CONVERSION
 
 
 class DistanceComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.text_graphs : Dict[str, plt.Text] = {}
         self.line_graphs : Dict[str, plt.Line2D] = {}
@@ -14,7 +14,7 @@ class DistanceComponent(PlotComponent):
         self.zorder = -3
             
     def do_draw(self):
-        for rel in self.env.relations:
+        for rel in self.logical_scenario.relations:
             o1 = rel.vessel1
             o2 = rel.vessel2    
             

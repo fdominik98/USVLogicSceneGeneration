@@ -4,7 +4,7 @@ import tkinter as tk
 from typing import Dict, List
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from model.environment.usv_config import ASSET_FOLDER
+from asv_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.algo_evaluation.table_generator import TableGenerator
 from visualization.my_plot import MyPlot

@@ -1,13 +1,13 @@
 from typing import Dict, List, Tuple
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.model.vessel_variable import VesselVariable
-from model.relation import Relation, RelationClause
-from model.vessel import VesselDesc
+from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.relation_constraint import RelationConstr, RelationConstrClause
+from functional_level.metamodels.vessel_class import VesselClass
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
-from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_environment_desc import MSREnvironmentDesc, USVEnvironmentDesc
-from concrete_level.model.concrete_scene import ConcreteScene
+from asv_utils import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from logical_level.models.logical_scenario import LogicalScenario
+from functional_level.metamodels.functional_scenario import MSREnvironmentDesc, FunctionalScenario
+from concrete_level.models.concrete_scene import ConcreteScene
 from evaluation.eqv_class_calculator import EqvClassCalculator
 
 
@@ -15,17 +15,17 @@ class LogicalScenarioBuilder():
     def __init__(self) -> None:
         pass
         
-    def build_from_functional(self, config : USVEnvironmentDesc, init_method=RandomInstanceInitializer.name) -> LogicalScenario:
-        vessels: Dict[VesselDesc, VesselVariable] = {vessel_desc : VesselVariable(vessel_desc) for vessel_desc in config.vessel_descs}
+    def build_from_functional(self, config : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:
+        vessels: Dict[VesselClass, VesselVariable] = {vessel_desc : VesselVariable(vessel_desc) for vessel_desc in config.vessel_descs}
         assignments = Assignments(list(vessels.values()))
         vessel_vars = list(assignments.keys())
         
         for relation_desc_clause in config.relation_desc_clauses:
-            clause = RelationClause()
+            clause = RelationConstrClause()
             for relation_desc in relation_desc_clause.relation_descs:
                 vd1 = relation_desc.vd1
                 vd2 = relation_desc.vd2
-                clause.append(Relation(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
+                clause.append(RelationConstr(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
             assignments.register_clause(clause)    
        
         xl, xu = self.generate_gene_space(vessel_vars)

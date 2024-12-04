@@ -6,7 +6,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_d
 from evaluation.eqv_class_calculator import EqvClassCalculator
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
-from model.environment.functional_models.usv_env_desc_list import MSR_EQUIV_CLASSES
+from functional_level.models.usv_env_desc_list import MSR_EQUIV_CLASSES
 
 class EqvClassPlot(MyPlot):  
     def __init__(self, eval_datas : List[EvaluationData]): 

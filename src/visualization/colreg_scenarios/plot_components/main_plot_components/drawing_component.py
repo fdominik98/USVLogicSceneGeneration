@@ -1,12 +1,12 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
-from model.environment.usv_environment import LogicalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
-from model.environment.usv_config import N_MILE_TO_M_CONVERSION
+from asv_utils import N_MILE_TO_M_CONVERSION
 
 
 class DrawingComponent(PlotComponent):
-    def __init__(self, fig : plt.Figure, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, fig : plt.Figure, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.fig = fig
         self.draw_x : List[List[float]] = []

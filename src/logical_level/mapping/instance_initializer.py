@@ -1,9 +1,9 @@
 import random
 from typing import List
 import numpy as np
-from model.environment.usv_config import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from asv_utils import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 from abc import ABC, abstractmethod
-from logical_level.model.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import VesselVariable
 
 class InstanceInitializer(ABC):    
     def __init__(self, name: str, vessel_vars : List[VesselVariable]) -> None:

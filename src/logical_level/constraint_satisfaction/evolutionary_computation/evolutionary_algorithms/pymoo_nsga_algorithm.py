@@ -9,10 +9,10 @@ from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.result import Result
 import matplotlib.pyplot as plt
 import matplotlib
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import EPSILON
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import EPSILON
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
-from model.environment.usv_environment_desc import USVEnvironmentDesc
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from pymoo.core.callback import Callback
 from pymoo.core.termination import Termination
 import time
@@ -20,13 +20,13 @@ from pymoo.algorithms.base.genetic import GeneticAlgorithm
 
 # Define the custom multi-objective optimization problem
 class NSGAProblem(ElementwiseProblem):
-    def __init__(self, env : LogicalScenario, eval_data : EvaluationData):
-        self.aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)           
-        super().__init__(n_var=env.config.all_variable_num,  # Number of decision variables
+    def __init__(self,logical_scenario: LogicalScenario, eval_data : EvaluationData):
+        self.aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)           
+        super().__init__(n_var=logical_scenario.all_variable_num,  # Number of decision variables
                         n_obj=self.aggregate.obj_num,  # Number of objective functions
                         n_constr=0,  # Number of constraints
-                        xl=env.xl, # Lower bounds for variables
-                        xu=env.xu)  # Upper bounds for variables
+                        xl=logical_scenario.xl, # Lower bounds for variables
+                        xu=logical_scenario.xu)  # Upper bounds for variables
 
     def _evaluate(self, x, out, *args, **kwargs):
         out["F"] = self.aggregate.evaluate(x)
@@ -82,12 +82,12 @@ class BestSolutionCallback(Callback):
 
 class PyMooNSGAAlgorithm(EvolutionaryAlgorithmBase, ABC):
     
-    def __init__(self, measurement_name: str,  algorithm_desc: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, algorithm_desc: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, algorithm_desc, env_configs,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, algorithm_desc, functional_scenarios,test_config, number_of_runs, warmups, verbose)
         
     @abstractmethod
-    def init_problem(self, env : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pass
 
     
@@ -121,7 +121,7 @@ class PyMooNSGAAlgorithm(EvolutionaryAlgorithmBase, ABC):
             fig.show()
 
         # X = res.X.tolist()
-        # X = sorted(X, key=self.env.evaluate)
+        # X = sorted(X, key=self.logical_scenario.evaluate)
         # Extract the decision variables (X) and objective values (F)
         # return X[0], self.aggregate.evaluate(X[0])
         eval_data.num_parents_mating = 2

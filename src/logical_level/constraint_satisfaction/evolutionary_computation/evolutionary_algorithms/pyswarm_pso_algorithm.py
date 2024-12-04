@@ -5,19 +5,18 @@ from logical_level.constraint_satisfaction.evolutionary_computation.aggregates i
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 import pyswarms as ps
-from model.environment.usv_environment_desc import USVEnvironmentDesc
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import EPSILON
+from functional_level.metamodels.functional_scenario import FunctionalScenario
+from logical_level.models.logical_scenario import LogicalScenario
 
 class ObjectiveMonitor():
-    def __init__(self, env: LogicalScenario, eval_data : EvaluationData, start_time, max_time, verbose) -> None:
+    def __init__(self, logical_scenario : LogicalScenario, eval_data : EvaluationData, start_time, max_time, verbose) -> None:
         self.verbose = verbose
         self.max_time = max_time
         self.start_time = start_time
         self.best_solution : np.ndarray = np.array([])
         self.best_fitness : float = np.inf
         self.iter_count = 0
-        self.aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)
+        self.aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
         
     def objective(self, x):
         self.iter_count+=1
@@ -45,21 +44,19 @@ class ObjectiveMonitor():
     
 class PySwarmPSOAlgorithm(EvolutionaryAlgorithmBase):
     
-        
-    
-    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pyswarm_PSO_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, 'pyswarm_PSO_algorithm', functional_scenarios,test_config, number_of_runs, warmups, verbose)
     
-    def init_problem(self, env : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pos = np.array([np.array(ind) for ind in initial_population])
         # Create a PSO instance
         optimizer = ps.single.GlobalBestPSO(options={'c1': eval_data.c_1, 'c2': eval_data.c_2, 'w': eval_data.w},
                                             n_particles=eval_data.population_size, 
-                                            dimensions=env.config.all_variable_num,
-                                            bounds=(np.array(env.xl), np.array(env.xu)),
+                                            dimensions=logical_scenario.config.all_variable_num,
+                                            bounds=(np.array(logical_scenario.xl), np.array(logical_scenario.xu)),
                                             init_pos=pos)
-        monitor = ObjectiveMonitor(env, eval_data, time.time(), eval_data.timeout, self.verbose)
+        monitor = ObjectiveMonitor(logical_scenario, eval_data, time.time(), eval_data.timeout, self.verbose)
         
         return optimizer, monitor
     

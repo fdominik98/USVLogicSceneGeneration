@@ -1,8 +1,8 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import ASSET_FOLDER
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 from scipy.ndimage import rotate
@@ -12,7 +12,7 @@ class ShipImageComponent(PlotComponent):
     ZOOM = 0.36
     img_dir = f'{ASSET_FOLDER}/images'
     
-    def __init__(self, ax: plt.Axes, env : LogicalScenario) -> None:
+    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
         super().__init__(ax, env)
         self.image = mpimg.imread(f'{self.img_dir}/ship2.png')
         self.ship_image_graphs : List[AnnotationBbox] = []
@@ -23,7 +23,7 @@ class ShipImageComponent(PlotComponent):
         self.zorder = -4
         
     def do_draw(self):
-        for o in self.env.vessel_vars:           
+        for o in self.logical_scenario.vessel_vars:           
             (line,) = self.ax.plot(self.xs[o.id], self.ys[o.id], ':', lw=3, color=light_colors[o.id], zorder=self.zorder-10)
             self.traj_line_graphs.append(line)
             

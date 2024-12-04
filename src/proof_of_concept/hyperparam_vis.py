@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pprint import pprint
 from typing import Dict, List
-from model.data_parser import EvalDataParser
+from concrete_level.data_parser import EvalDataParser
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt

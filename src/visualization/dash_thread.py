@@ -4,9 +4,9 @@ from typing import List
 from dash import dcc, html
 import queue
 import threading
-from model.data_parser import EvalDataParser
-from model.environment.functional_models.usv_env_desc_list import USV_ENV_DESC_LIST
-from model.environment.usv_environment import LoadedEnvironment, LogicalScenario
+from concrete_level.data_parser import EvalDataParser
+from functional_level.models.usv_env_desc_list import USV_ENV_DESC_LIST
+from logical_level.models.logical_scenario import LoadedEnvironment, LogicalScenario
 import dash
 from dash import dash_table, html
 from dash.dependencies import Input, Output
@@ -20,7 +20,7 @@ class DashThread(threading.Thread):
         self.dp = EvalDataParser()
         self.dirs : List[str] = []        
         self.df, self.dirs = self.dp.load_dirs_merged(self.dirs)
-        hidden_columns = ['best_solution', 'path', 'risk_vector', 'error_message', 'best_fitness', 'timestamp',
+        hidden_columns = ['best_scene', 'path', 'risk_vector', 'error_message', 'best_fitness', 'timestamp',
                           'vessel_number','aggregate_strat', 'random_seed', 'num_parents_mating', 'init_method',
                           'c_1', 'c_2', 'w', 'crossover_prob', 'crossover_eta', 'mutate_prob', 'mutate_eta']
 
@@ -159,7 +159,7 @@ class DashThread(threading.Thread):
             if selected_rows:
                 selected_index = selected_rows[0]
                 row = self.df.iloc[selected_index]
-                env = LoadedEnvironment(EvaluationData.from_dict(row))
+               logical_scenario= LoadedEnvironment(EvaluationData.from_dict(row))
                 self.data_queue.put(env)
                 return f"Selected Row:\n{pprint.pformat(dict(sorted(row.to_dict().items())))}"
             return "No row selected"

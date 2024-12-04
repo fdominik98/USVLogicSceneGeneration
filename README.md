@@ -69,7 +69,7 @@ USVLogicSceneGeneration
 
   - `proof_of_concept/`: Code that is not directly used for project purposes.
 
-  - `trajectory_planning/`: Implements trajectory generation and interpolation for USV scenarios.
+  - `concrete_level.trajectory_generation/`: Implements trajectory generation and interpolation for USV scenarios.
     - `bidirectional_rrt_star_fnd.py`: Path finding algorithm for trajectory planning.
 
   - `visualization/`: Utilities for generating visualizations and animations.
@@ -136,10 +136,10 @@ python src/eval_vis.py
 python src/annotate_risk_vectors.py
 
 # Executes the RRT* path finding algorithm (not used, only proof of concept)
-python src/trajectory_planning/RRTStarFN.py
+python src/proof_of_concept/RRTStarFN.py
 
 # Executes the bidirectional RRT* algorithm (not used, only proof of concept)
-python src/trajectory_planning/bidirectionalRRTStarFND.py
+python src/proof_of_concept/bidirectionalRRTStarFND.py
 
 # Extracts the evaluation results from the images images/distr.png and images/gradient.png scraped from https://doi.org/10.1016/j.oceaneng.2023.116436. Used to map values to colors and extract distribution from plot.
 python src/wang24_eval.py

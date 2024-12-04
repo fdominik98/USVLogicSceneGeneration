@@ -5,9 +5,9 @@ from logical_level.constraint_satisfaction.evolutionary_computation.aggregates i
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 from scipy.optimize import differential_evolution, OptimizeResult
-from model.environment.usv_environment_desc import USVEnvironmentDesc
-from model.environment.usv_environment import LogicalScenario
-from model.environment.usv_config import EPSILON
+from functional_level.metamodels.functional_scenario import FunctionalScenario
+from logical_level.models.logical_scenario import LogicalScenario
+from asv_utils import EPSILON
 
 class ObjectiveMonitorCallback:
     def __init__(self, aggregate : Aggregate, max_time_sec, verbose : bool):
@@ -39,13 +39,13 @@ class ObjectiveMonitorCallback:
 
 
 class SciPyDEAlgorithm(EvolutionaryAlgorithmBase):
-    def __init__(self, measurement_name: str, env_configs: List[str | USVEnvironmentDesc], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'scipy_DE_algorithm', env_configs,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, 'scipy_DE_algorithm', functional_scenarios,test_config, number_of_runs, warmups, verbose)
         self.current_best_objective = np.inf
     
-    def init_problem(self, env: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
-        aggregate = Aggregate.factory(env, eval_data.aggregate_strat, minimize=True)
+    def init_problem(self, logical_scenario. LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
+        aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
         objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)
         return list(zip(env.xl, env.xu)), objective_monitor, initial_population
     
