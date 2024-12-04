@@ -12,7 +12,7 @@ from functional_level.models.usv_env_desc_list import USV_ENV_DESC_LIST
 from asv_utils import ASSET_FOLDER
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from src.concrete_level.trajectory_generation.scene_builder import SceneBuilder
+from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 
 
 class EvolutionaryAlgorithmBase(ABC):

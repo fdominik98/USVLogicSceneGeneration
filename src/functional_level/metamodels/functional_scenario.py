@@ -28,6 +28,9 @@ class FunctionalScenario():
                     clause.append(RelationClass(vdi, [OutVisOrNoCollide()] , vdj))
         self.relation_desc_clauses
     
+    @property
+    def vessel_num(self) -> int:
+        return len(self.vessel_descs)
                     
 class MSREnvironmentDesc(FunctionalScenario):
     group = 'MSR'

@@ -16,6 +16,10 @@ class LogicalScenario():
     xl : List[float]
     xu : List[float]   
     
+    def __post_init__(self):
+        if self.vessel_num != self.config.vessel_num:
+            raise ValueError(f"Inconsistent vessel numbers: {self.vessel_num} != {self.config.vessel_num}")
+    
     @property
     def vessel_vars(self) -> List[VesselVariable]:
         return list(self.assignments.keys())
