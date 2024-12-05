@@ -1,7 +1,5 @@
 from abc import ABC
-import copy
-import numpy as np
-from asv_utils import EPSILON, KNOT_TO_MS_CONVERSION
+from dataclasses import dataclass
 
 
 class VesselClass(ABC):
@@ -42,4 +40,9 @@ class TS(VesselClass):
     
     def __hash__(self):
         return hash((super().__hash__(), 'TS'))
+    
+    
+@dataclass(frozen=True)
+class FuncObject():
+    id : int
 

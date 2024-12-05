@@ -1,0 +1,10 @@
+from functional_level.metamodels.vessel_class import FuncObject
+
+class ObjectGenerator():
+    def __init__(self) -> None:
+        self.__id_count = 1
+        
+    def new_object(self) -> FuncObject:
+        id = self.__id_count
+        self.__id_count += 1
+        return FuncObject(id)

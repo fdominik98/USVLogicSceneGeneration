@@ -15,12 +15,12 @@ class LogicalScenarioBuilder():
     def __init__(self) -> None:
         pass
         
-    def build_from_functional(self, config : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:
-        vessels: Dict[VesselClass, VesselVariable] = {vessel_desc : VesselVariable(vessel_desc) for vessel_desc in config.vessel_descs}
+    def build_from_functional(self, functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:
+        vessels: Dict[VesselClass, VesselVariable] = {vessel_object : VesselVariable(vessel_object) for vessel_object in functional_scenario.func_objects}
         assignments = Assignments(list(vessels.values()))
         vessel_vars = list(assignments.keys())
         
-        for relation_desc_clause in config.relation_desc_clauses:
+        for relation_desc_clause in functional_scenario.relation_desc_clauses:
             clause = RelationConstrClause()
             for relation_desc in relation_desc_clause.relation_descs:
                 vd1 = relation_desc.vd1
@@ -30,7 +30,7 @@ class LogicalScenarioBuilder():
        
         xl, xu = self.generate_gene_space(vessel_vars)
         
-        return LogicalScenario(config, self.get_initializer(init_method, vessel_vars), assignments, xl, xu)
+        return LogicalScenario(functional_scenario, self.get_initializer(init_method, vessel_vars), assignments, xl, xu)
     
     
         # Attribute generator with different boundaries
@@ -44,8 +44,8 @@ class LogicalScenarioBuilder():
     
     
     def build_from_concrete(self, scene : ConcreteScene, init_method=RandomInstanceInitializer.name):
-        vessel_descs, clause = EqvClassCalculator().get_clause(scene)
-        config = MSREnvironmentDesc(0, vessel_descs, [clause])
+        vessel_objects, clause = EqvClassCalculator().get_clause(scene)
+        config = MSREnvironmentDesc(0, vessel_objects, [clause])
         logical_scenario = self.build_from_functional(config, init_method)
         logical_scenario.do_update(scene.population)
         return logical_scenario

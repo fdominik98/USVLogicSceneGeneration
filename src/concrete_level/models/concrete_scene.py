@@ -26,6 +26,10 @@ class ConcreteScene():
 
     def items(self):
         return self._data.items()
+    
+    @property
+    def sorted_items(self):
+        return sorted(self.items(), key=lambda item: item[0].id)
 
     def get(self, key, default=None):
         return self._data.get(key, default)
@@ -40,14 +44,13 @@ class ConcreteScene():
         return f"{self.__class__.__name__}({self._data})"
     
     @property
-    def population(self) -> List[float]:
-        sorted_items = sorted(self.items(), key=lambda item: item[0].id)
+    def population(self) -> List[float]:        
         population : List[float] = []
-        for vessel, state in sorted_items:
+        for vessel, state in self.sorted_items:
             population += [state.x, state.y, state.heading, vessel.length, state.speed]
         return population
     
     @property
-    def vessel_number(self) -> int:
+    def vessel_num(self) -> int:
         return len(self)
     
