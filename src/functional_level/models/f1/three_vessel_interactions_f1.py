@@ -1,6 +1,6 @@
 from functional_level.metamodels.functional_scenario import F1EnvironmentDesc
 from functional_level.metamodels.relation_class import RelationClass
-from logical_level.models.relation_types import AtVis
+from logical_level.models.constraint_types import AtVis
 from functional_level.models.model_utils import _OS, TS1, TS2
 
 three_vessel_interactions = [

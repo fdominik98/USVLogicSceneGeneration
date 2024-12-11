@@ -10,8 +10,8 @@ class Assignments(Dict[VesselVariable, Values]):
         self.clear()
         self.update(sorted_items)
         
-        from logical_level.models.relation_constraint import RelationConstrClause
-        self.registered_clauses : Set[RelationConstrClause] = set()
+        from logical_level.models.relation_constraint import RelationConstrTerm
+        self.registered_clauses : Set[RelationConstrTerm] = set()
 
     def update_from_population(self, states : List[float]):
         if len(states) != len(self) * VARIABLE_NUM:

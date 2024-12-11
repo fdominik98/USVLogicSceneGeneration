@@ -3,7 +3,7 @@ from itertools import combinations
 from typing import Any, Dict, List, Set, Tuple, Union
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
 from functional_level.metamodels.vessel_class import FuncObject, VesselClass
-from logical_level.models.relation_types import OutVisOrNoCollide
+from logical_level.models.constraint_types import OutVisOrNoCollide
 import copy
 from functional_level.metamodels.interpretation import (
     HeadOnInterpretation, Interpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation)

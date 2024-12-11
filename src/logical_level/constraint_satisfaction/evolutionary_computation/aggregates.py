@@ -7,7 +7,7 @@ class Aggregate(ABC):
     
     def __init__(self,logical_scenario: LogicalScenario, name : str, minimize) -> None:
         super().__init__()
-        self.logical_scenario = env
+        self.logical_scenario = logical_scenario
         self.obj_num = self._get_object_num()
         self.minimize = minimize
         self.sign = 1.0 if minimize else -1.0
@@ -25,7 +25,7 @@ class Aggregate(ABC):
         return self.sign * abs(penalty)
      
     @staticmethod
-    def factory(env : LogicalScenario, name : str, minimize = False):
+    def factory(logical_scenario : LogicalScenario, name : str, minimize = False):
         if name == 'vessel':
             return VesselAggregate(logical_scenario, minimize=minimize, name='vessel')      
         elif name == 'all':

@@ -1,21 +1,21 @@
 import numpy as np
 from typing import List
 from asv_utils import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
-from logical_level.models.relation_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, RelationType
+from logical_level.models.constraint_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, ConstraintType
 from logical_level.models.vessel_variable import VesselVariable
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
 
 
 class RelationConstr():
-    def __init__(self, vessel1 : VesselVariable, relation_types : List[RelationType], vessel2 : VesselVariable) -> None:
+    def __init__(self, vessel1 : VesselVariable, relation_types : List[ConstraintType], vessel2 : VesselVariable) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
-        self.relation_types : List[RelationType] = []
-        self.collision_relations : List[RelationType] = []
-        self.visibility_relations : List[RelationType] = []
-        self.bearing_relations : List[RelationType] = []
+        self.relation_types : List[ConstraintType] = []
+        self.collision_relations : List[ConstraintType] = []
+        self.visibility_relations : List[ConstraintType] = []
+        self.bearing_relations : List[ConstraintType] = []
         
         for r in relation_types:
             r.set_relation(self)
@@ -133,7 +133,7 @@ class RelationConstr():
         return collision_points
 
 
-class RelationConstrClause():
+class RelationConstrTerm():
     def __init__(self) -> None:
         self.relations :  List[RelationConstr] = []
         

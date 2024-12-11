@@ -1,7 +1,7 @@
 from functional_level.models.model_utils import _OS, TS1, TS2, TS3, TS4, TS5
 from functional_level.metamodels.functional_scenario import SBOEnvironmentDesc
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
-from logical_level.models.relation_types import any_colreg_init, overtaking_or_crossing_init
+from logical_level.models.constraint_types import any_colreg_init, overtaking_or_crossing_init
 
 six_vessel_interactions = [
         SBOEnvironmentDesc(1, [_OS, TS1, TS2, TS3, TS4, TS5],

@@ -4,7 +4,7 @@ from functional_level.metamodels.vessel_class import OS, TS
 from functional_level.models import SBO
 from functional_level.models import MSR
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
-from logical_level.models.relation_types import crossing_init, head_on_init, overtaking_init
+from logical_level.models.constraint_types import crossing_init, head_on_init, overtaking_init
 
 # Length/beam ratio (LBR) = WL/B
 # (WL = waterline length; B = maximum beam at the waterline)

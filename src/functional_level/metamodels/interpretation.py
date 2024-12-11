@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Set, Tuple
 
-from src.functional_level.metamodels.vessel_class import FuncObject
+from functional_level.metamodels.vessel_class import FuncObject
 
 @dataclass(frozen=True)
 class Interpretation(ABC):

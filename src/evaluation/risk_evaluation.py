@@ -3,7 +3,7 @@ import numpy as np
 from asv_utils import N_MILE_TO_M_CONVERSION
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.models.relation_constraint import RelationConstr
-from logical_level.models.relation_types import MayCollide
+from logical_level.models.constraint_types import MayCollide
 from functional_level.metamodels.vessel_class import Vessel
 
 

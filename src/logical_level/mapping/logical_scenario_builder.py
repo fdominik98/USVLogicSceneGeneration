@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.vessel_variable import VesselVariable
-from logical_level.models.relation_constraint import RelationConstr, RelationConstrClause
+from logical_level.models.relation_constraint import RelationConstr, RelationConstrTerm
 from functional_level.metamodels.vessel_class import VesselClass
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from asv_utils import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
@@ -21,7 +21,7 @@ class LogicalScenarioBuilder():
         vessel_vars = list(assignments.keys())
         
         for relation_desc_clause in functional_scenario.relation_desc_clauses:
-            clause = RelationConstrClause()
+            clause = RelationConstrTerm()
             for relation_desc in relation_desc_clause.relation_descs:
                 vd1 = relation_desc.vd1
                 vd2 = relation_desc.vd2

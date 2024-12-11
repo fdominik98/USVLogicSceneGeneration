@@ -7,16 +7,16 @@ from functional_level.models.model_utils import _OS, TS1, TS2
 from functional_level.metamodels.vessel_class import VesselClass
 from logical_level.models.relation_constraint import RelationConstr
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
-from logical_level.models.relation_types import RelationType, crossing_init, head_on_init, overtaking_init
+from logical_level.models.constraint_types import ConstraintType, crossing_init, head_on_init, overtaking_init
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from src.concrete_level.models.concrete_scene import ConcreteScene
-from src.logical_level.constraint_satisfaction.assignments import Assignments
-from src.logical_level.models.vessel_variable import VesselVariable
+from concrete_level.models.concrete_scene import ConcreteScene
+from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.models.vessel_variable import VesselVariable
 
 class EqvClassCalculator():
     def __init__(self):        
         self.vessels_descs = [_OS, TS1, TS2, TS3, TS4, TS5]
-        self.relation_types : List[List[RelationType]] = [crossing_init(), overtaking_init(), head_on_init()]
+        self.relation_types : List[List[ConstraintType]] = [crossing_init(), overtaking_init(), head_on_init()]
      
                 
     def get_equivalence_classes(self, scenes : List[ConcreteScene]):

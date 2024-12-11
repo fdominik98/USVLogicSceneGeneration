@@ -1,11 +1,11 @@
 import copy
 from typing import List
 from functional_level.metamodels.vessel_class import OS, VesselClass
-from logical_level.models.relation_types import RelationType
+from logical_level.models.constraint_types import ConstraintType
 
 
 class RelationClass():
-    def __init__(self, vd1 : VesselClass, relation_types : List[RelationType], vd2 : VesselClass) -> None:
+    def __init__(self, vd1 : VesselClass, relation_types : List[ConstraintType], vd2 : VesselClass) -> None:
         self.relation_types = sorted(relation_types, key=lambda x: (str(type(x)), x.negated) )
         if self.all_bidir():
             self.vd1 = min([vd1, vd2], key=lambda x: x.id)

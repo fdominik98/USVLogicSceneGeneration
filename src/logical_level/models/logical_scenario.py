@@ -6,7 +6,7 @@ from functional_level.metamodels.functional_scenario import FunctionalScenario
 from asv_utils import OWN_VESSEL_STATES, VARIABLE_NUM
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.vessel_variable import VesselVariable
-from logical_level.models.relation_constraint import RelationConstr, RelationConstrClause
+from logical_level.models.relation_constraint import RelationConstr, RelationConstrTerm
 
 @dataclass(frozen=True)
 class LogicalScenario():
@@ -33,7 +33,7 @@ class LogicalScenario():
         return VARIABLE_NUM * self.vessel_num - (VARIABLE_NUM - 2)
     
     @property
-    def clauses(self) -> Set[RelationConstrClause]:
+    def clauses(self) -> Set[RelationConstrTerm]:
         return self.assignments.registered_clauses
     
     @property
