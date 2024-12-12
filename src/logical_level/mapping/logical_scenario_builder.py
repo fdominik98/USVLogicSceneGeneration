@@ -1,8 +1,8 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Type
+from functional_level.metamodels.interpretation import BinaryInterpretation, CrossingFromPortInterpretation, HeadOnInterpretation, OvertakingInterpretation
 from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.models.literal import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrComposite, RelationConstrTerm
 from logical_level.models.vessel_variable import VesselVariable
-from logical_level.models.relation_constraint import RelationConstr, RelationConstrTerm
-from functional_level.metamodels.vessel_class import VesselClass
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from asv_utils import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 from logical_level.models.logical_scenario import LogicalScenario
@@ -31,6 +31,17 @@ class LogicalScenarioBuilder():
         xl, xu = self.generate_gene_space(vessel_vars)
         
         return LogicalScenario(functional_scenario, self.get_initializer(init_method, vessel_vars), assignments, xl, xu)
+    
+    
+    def func_to_log_map(self, interpretation_type : Type[BinaryInterpretation], var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrComposite:
+        if interpretation_type is HeadOnInterpretation:
+            return RelationConstrTerm({AtVis(var1, var2), HeadOnBear(var1, var2), MayCollide(var1, var2)})
+        elif interpretation_type is CrossingFromPortInterpretation:
+            return RelationConstrTerm({AtVis(var1, var2), CrossingBear(var1, var2), MayCollide(var1, var2)})
+        elif interpretation_type is OvertakingInterpretation:
+            return RelationConstrTerm({AtVis(var1, var2), OvertakingBear(var1, var2), MayCollide(var1, var2)})
+        else:
+            return RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)})
     
     
         # Attribute generator with different boundaries

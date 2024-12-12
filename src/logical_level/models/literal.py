@@ -1,10 +1,10 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-
+from typing import Set, Type
 import numpy as np
-
 from asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE
+from functional_level.metamodels.interpretation import BinaryInterpretation, HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
 from logical_level.models.penalty import Penalty
@@ -12,19 +12,54 @@ from logical_level.models.vessel_variable import VesselVariable
 
 
 dataclass(frozen=True)
-class Literal(ABC):
+class RelationConstrComposite(ABC):
+    components : Set['RelationConstrComposite'] = field(default_factory=set)
+    
+    @abstractmethod
+    def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
+        pass
+    
+    def evaluate_penalty(self, assignments : Assignments) -> Penalty:
+        cache = EvaluationCache(assignments)
+        return self._evaluate_penalty(cache)
+    
+     
+dataclass(frozen=True)   
+class RelationConstrTerm(RelationConstrComposite):
+    def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
+        return sum([comp._evaluate_penalty(eval_cache) for comp in self.components])
+    
+    def __repr__(self) -> str:
+        return " ∧ ".join(f"({comp})" for comp in self.components)
+    
+    
+dataclass(frozen=True)    
+class RelationConstrClause(RelationConstrComposite):
+    def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
+        return min([comp._evaluate_penalty(eval_cache) for comp in self.components])
+    
+    def __repr__(self) -> str:
+        return " ∨ ".join(f"({comp})" for comp in self.components)
+    
+
+dataclass(frozen=True)
+class Literal(ABC, RelationConstrComposite):
     var1 : VesselVariable
     var2 : VesselVariable
     literal_type : str
     max_value : float
     negated : bool = False
+    components : Set[RelationConstrComposite] = field(default_factory=set, init=False)
     
     @property
     def name(self):
         prefix = "!" if self.negated else ""
         return prefix + self.literal_type
     
-    def evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
+    def __repr__(self) -> str:
+        return f'{self.name}({self.var1}, {self.var2})'
+    
+    def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         return self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
         
     @abstractmethod
@@ -86,6 +121,7 @@ class OutVis(Literal):
         
         
 ############ COLREG RELATIVE BEARING ##################       
+dataclass(frozen=True)
 class CrossingBear(Literal):
     literal_type : str = field(default='CrossingBear', init=False)
     max_value : float = field(default=np.pi, init=False)
@@ -106,7 +142,8 @@ class CrossingBear(Literal):
         return np.dot(rotation_matrix, geo_props.val2.v)
     
     
-
+    
+dataclass(frozen=True)
 class HeadOnBear(Literal):
     literal_type : str = field(default='HeadOnBear', init=False)
     max_value : float = field(default=np.pi, init=False)
@@ -115,14 +152,23 @@ class HeadOnBear(Literal):
         return Penalty([], [self.penalty(geo_props.angle_p21_v2, 0.0, BOW_ANGLE / 2.0)
                             + self.penalty(geo_props.angle_p12_v1, 0.0, BOW_ANGLE / 2.0)], [])
         
-
+dataclass(frozen=True)
 class OvertakingBear(Literal):
     literal_type : str = field(default='OvertakingBear', init=False)
     max_value : float = field(default=np.pi, init=False)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return (self.penalty(geo_props.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
-                + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))
+        return Penalty([], [self.penalty(geo_props.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
+                + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0)], [])
     
     
+    
+############ COLLISION ##################
+dataclass(frozen=True)
+class MayCollide(Literal):
+    literal_type : str = field(default='MayCollide', init=False)
+    max_value : float = field(default=np.pi, init=False)
+    
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+        return Penalty([], [], [self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)])
     
