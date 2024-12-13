@@ -3,7 +3,7 @@ import os
 import random
 from typing import List, Dict
 from asv_utils import ASSET_FOLDER, MAX_COORD
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from concrete_level.models.vessel_order_graph import VesselNode, VesselOrderGraph

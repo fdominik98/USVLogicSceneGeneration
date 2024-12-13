@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Set, Tuple
-
-from functional_level.metamodels.vessel_class import FuncObject
+from functional_level.metamodels.functional_scenario import FuncObject
 
 @dataclass(frozen=True)
 class Interpretation(ABC):
@@ -69,22 +68,23 @@ class VesselInterpretation(UnaryInterpretation, ABC):
 
 @dataclass()
 class OSInterpretation(VesselInterpretation):
-    name : str = 'OS'
+    name : str = field(default='OS', init=False)
 
 @dataclass()
 class TSInterpretation(VesselInterpretation):
-    name : str = 'TS'
+    name : str = field(default='TS', init=False)
 
 @dataclass()
 class HeadOnInterpretation(BinaryInterpretation):
-    name : str = 'HeadOn'
+    name : str = field(default='HeadOn', init=False)
 
 @dataclass()
 class CrossingFromPortInterpretation(BinaryInterpretation):
-    name : str = 'Crossing'
+    name : str = field(default='Crossing', init=False)
 
 @dataclass()
 class OvertakingInterpretation(BinaryInterpretation):
-    name : str = 'Overtaking'
+    name : str = field(default='Overtaking', init=False)
+
 
 

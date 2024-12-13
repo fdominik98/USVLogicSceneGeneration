@@ -1,5 +1,5 @@
 from typing import Dict, List
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 from logical_level.models.relation_constraint import RelationConstr
 
 

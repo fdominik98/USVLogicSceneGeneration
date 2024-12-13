@@ -41,7 +41,7 @@ class ShipMarkingsComponent(PlotComponent):
         
                      
     def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
-        for o in new_env.vessel_vars:
+        for o in new_env.actor_vars:
             self.radius_graphs[o.id].set_center(o.p)
             self.radius_graphs[o.id].set_radius(o.r)            
             self.ship_dot_graphs[o.id].set_offsets([o.p])  

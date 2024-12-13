@@ -1,6 +1,6 @@
 from typing import Dict, List
 from functional_level.metamodels.functional_scenario import MSREnvironmentDesc
-from functional_level.metamodels.vessel_class import OS, TS
+from functional_level.metamodels.functional_scenario import OS, TS
 from functional_level.models import SBO
 from functional_level.models import MSR
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause

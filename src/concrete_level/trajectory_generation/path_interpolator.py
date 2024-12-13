@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 import numpy as np
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 from concrete_level.models.rrt_models import Node
 
 class PathInterpolator():

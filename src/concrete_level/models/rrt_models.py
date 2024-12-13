@@ -4,7 +4,7 @@ import random
 from typing import List, Optional, Tuple
 import numpy as np
 from shapely import Point, Polygon
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 
 
 class TrajectoryState(Enum):

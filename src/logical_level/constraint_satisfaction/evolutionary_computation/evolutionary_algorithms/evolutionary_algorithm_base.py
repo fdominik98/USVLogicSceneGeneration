@@ -6,6 +6,7 @@ import os
 import random
 from typing import List, Tuple
 import numpy as np
+from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod
 from functional_level.models.usv_env_desc_list import USV_ENV_DESC_LIST
@@ -67,7 +68,7 @@ class EvolutionaryAlgorithmBase(ABC):
             eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
             
             best_solution, best_fitness, number_of_generations = self.convert_results(some_results, eval_data)
-            logical_scenario.update(best_solution)
+            Assignments(logical_scenario.actor_vars).update_from_individual(best_solution)
             eval_data.best_scene = SceneBuilder().build_from_assignments(logical_scenario.assignments)
             eval_data.best_fitness = best_fitness
             eval_data.number_of_generations = number_of_generations

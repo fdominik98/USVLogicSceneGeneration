@@ -4,11 +4,11 @@ import numpy as np
 from asv_utils import EPSILON, N_MILE_TO_M_CONVERSION, o2VisibilityByo1
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
-from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import ActorVariable
 
 
 class GeometricProperties():
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, assignments : Assignments):
+    def __init__(self, var1 : ActorVariable, var2 : ActorVariable, assignments : Assignments):
         self.val1 : Values = assignments(var1)
         self.val2 : Values = assignments(var2)
         self.safety_dist = max(self.val1.r, self.val2.r)
@@ -36,12 +36,12 @@ class GeometricProperties():
         self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
         self.dcpa = np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)) 
 
-class EvaluationCache(Dict[Tuple[VesselVariable, VesselVariable], GeometricProperties]):
+class EvaluationCache(Dict[Tuple[ActorVariable, ActorVariable], GeometricProperties]):
     def __init__(self, assignments : Assignments, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.assignments = assignments    
     
-    def get_props(self, var1 : VesselVariable, var2 : VesselVariable):
+    def get_props(self, var1 : ActorVariable, var2 : ActorVariable):
         if (var1, var2) not in self:
             self[(var1, var2)] = GeometricProperties(var1, var2, self.assignments)
         return self.get((var1, var2))

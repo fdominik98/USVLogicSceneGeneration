@@ -7,7 +7,7 @@ from numpy import floating
 from asv_utils import ASSET_FOLDER, MAX_COORD
 from concrete_level.data_parser import EvalDataParser, TrajDataParser
 from logical_level.models.logical_scenario import LoadedEnvironment
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 from visualization.colreg_scenarios.colreg_plot import TrajectoryReceiver
 
 light_colors = [BLUE_A, RED_A, GREEN_A, YELLOW_A, LIGHT_BROWN]

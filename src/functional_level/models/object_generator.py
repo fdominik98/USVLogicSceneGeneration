@@ -1,4 +1,4 @@
-from functional_level.metamodels.vessel_class import FuncObject
+from functional_level.metamodels.functional_scenario import FuncObject
 
 class ObjectGenerator():
     def __init__(self) -> None:

@@ -1,14 +1,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Set, Type
+from typing import Set
 import numpy as np
 from asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE
-from functional_level.metamodels.interpretation import BinaryInterpretation, HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
 from logical_level.models.penalty import Penalty
-from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import ActorVariable
 
 
 dataclass(frozen=True)
@@ -44,8 +43,8 @@ class RelationConstrClause(RelationConstrComposite):
 
 dataclass(frozen=True)
 class Literal(ABC, RelationConstrComposite):
-    var1 : VesselVariable
-    var2 : VesselVariable
+    var1 : ActorVariable
+    var2 : ActorVariable
     literal_type : str
     max_value : float
     negated : bool = False
@@ -95,9 +94,8 @@ class AtVis(Literal):
     max_value : float = field(default=MAX_DISTANCE, init=False)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([self.penalty(geo_props.o_distance,
-                                     geo_props.vis_distance - DIST_DRIFT,
-                                     geo_props.vis_distance + DIST_DRIFT)], [], [])
+        value = self.penalty(geo_props.o_distance, geo_props.vis_distance - DIST_DRIFT, geo_props.vis_distance + DIST_DRIFT)
+        return Penalty([value], [], [], {self.var1 : value, self.var2 : value})
         
 @dataclass(frozen=True)
 class InVis(Literal):
@@ -105,9 +103,8 @@ class InVis(Literal):
     max_value : float = field(default=MAX_DISTANCE, init=False)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([self.penalty(geo_props.o_distance,
-                                     geo_props.safety_dist,
-                                     geo_props.vis_distance)], [], [])
+        value = self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance)
+        return Penalty([value], [], [], {self.var1 : value, self.var2 : value})
         
 @dataclass(frozen=True)
 class OutVis(Literal):
@@ -115,9 +112,8 @@ class OutVis(Literal):
     max_value : float = field(default=MAX_DISTANCE, init=False)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([self.penalty(geo_props.o_distance, 
-                                     max(geo_props.vis_distance, geo_props.safety_dist),
-                                     MAX_DISTANCE)], [], [])
+        value = self.penalty(geo_props.o_distance, max(geo_props.vis_distance, geo_props.safety_dist), MAX_DISTANCE)
+        return Penalty([value], [], [], {self.var1 : value, self.var2 : value})
         
         
 ############ COLREG RELATIVE BEARING ##################       
@@ -127,12 +123,6 @@ class CrossingBear(Literal):
     max_value : float = field(default=np.pi, init=False)
     rotation_angle : float = field(default=(BOW_ANGLE + BEAM_ANGLE) / 2, init=False)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
-                                     geo_props.o_distance / geo_props.val2.sp)
-        return Penalty([], [(self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0)
-                            + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))], [])
-        
     def __rotated_v2(self, geo_props : GeometricProperties):
         rotation_matrix = np.array([
             [np.cos(self.rotation_angle), -np.sin(self.rotation_angle)],
@@ -140,7 +130,12 @@ class CrossingBear(Literal):
         ])
         # Rotate vector
         return np.dot(rotation_matrix, geo_props.val2.v)
-    
+        
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+        angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
+                                     geo_props.o_distance / geo_props.val2.sp)
+        value = (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0) + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))
+        return Penalty([], [value], [], {self.var1 : value, self.var2 : value})
     
     
 dataclass(frozen=True)
@@ -149,8 +144,8 @@ class HeadOnBear(Literal):
     max_value : float = field(default=np.pi, init=False)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([], [self.penalty(geo_props.angle_p21_v2, 0.0, BOW_ANGLE / 2.0)
-                            + self.penalty(geo_props.angle_p12_v1, 0.0, BOW_ANGLE / 2.0)], [])
+        value = self.penalty(geo_props.angle_p21_v2, 0.0, BOW_ANGLE / 2.0) + self.penalty(geo_props.angle_p12_v1, 0.0, BOW_ANGLE / 2.0)
+        return Penalty([], [value], [], {self.var1 : value, self.var2 : value})
         
 dataclass(frozen=True)
 class OvertakingBear(Literal):
@@ -158,8 +153,8 @@ class OvertakingBear(Literal):
     max_value : float = field(default=np.pi, init=False)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([], [self.penalty(geo_props.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi)
-                + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0)], [])
+        value = self.penalty(geo_props.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi) + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0)
+        return Penalty([], [value], [], {self.var1 : value, self.var2 : value})
     
     
     
@@ -170,5 +165,6 @@ class MayCollide(Literal):
     max_value : float = field(default=np.pi, init=False)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        return Penalty([], [], [self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)])
+        value = self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)
+        return Penalty([], [], [value], {self.var1 : value, self.var2 : value})
     

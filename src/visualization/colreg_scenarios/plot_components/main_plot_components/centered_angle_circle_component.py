@@ -53,7 +53,7 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         super().do_draw()
             
     def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
-        for o in new_env.vessel_vars:
+        for o in new_env.actor_vars:
             angle1_masthead = np.degrees(o.heading + MASTHEAD_LIGHT_ANGLE / 2)
             angle2_masthead = np.degrees(o.heading - MASTHEAD_LIGHT_ANGLE / 2)
             

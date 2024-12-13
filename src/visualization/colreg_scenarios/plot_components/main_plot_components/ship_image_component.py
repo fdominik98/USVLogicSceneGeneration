@@ -38,7 +38,7 @@ class ShipImageComponent(PlotComponent):
             self.graphs += [line, ab]
             
     def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
-        for o in new_env.vessel_vars:
+        for o in new_env.actor_vars:
             xs = self.xs[o.id]
             ys = self.ys[o.id]
             if o.p[0] not in xs or o.p[1] not in ys:

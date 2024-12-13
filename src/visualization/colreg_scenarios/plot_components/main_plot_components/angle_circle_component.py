@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.models.logical_scenario import LogicalScenario
 from asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
-from functional_level.metamodels.vessel_class import Vessel
+from functional_level.metamodels.functional_scenario import Vessel
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 
 
@@ -73,7 +73,7 @@ class AngleCircleComponent(PlotComponent):
         return [origin[0], end_point[0]], [origin[1], end_point[1]]
             
     def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
-        for o in new_env.vessel_vars:
+        for o in new_env.actor_vars:
             self.update_one(o)
             
         return self.graphs

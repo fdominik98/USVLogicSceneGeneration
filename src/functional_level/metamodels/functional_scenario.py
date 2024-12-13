@@ -1,43 +1,17 @@
 from dataclasses import dataclass, field
 from itertools import combinations
-from typing import Any, Dict, List, Set, Tuple, Union
-from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
-from functional_level.metamodels.vessel_class import FuncObject, VesselClass
-from logical_level.models.constraint_types import OutVisOrNoCollide
+from typing import Dict, List, Set, Tuple
 import copy
 from functional_level.metamodels.interpretation import (
-    HeadOnInterpretation, Interpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation)
+    HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation)
 
-class FunctionalScenario2():
-    def __init__(self, group : str, id, func_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        self.group = group
-        self.id = id
-        self.func_objects = sorted(func_objects, key=lambda x: x.id)
-        self.name = f'{str(len(func_objects))}vessel_{group}_{id}'
-        if len(relation_desc_clauses) == 0:
-            self.relation_desc_clauses = [RelationClassClause([])]
-        elif isinstance(relation_desc_clauses[0], RelationClass):                   
-            self.relation_desc_clauses = [RelationClassClause(relation_desc_clauses)]
-        else:
-            self.relation_desc_clauses = copy.deepcopy(relation_desc_clauses)
-
-        all_pairs = [(vdi, vdj) for vdi, vdj in combinations(func_objects, 2)]
-        for clause in self.relation_desc_clauses:
-            existing_pairs = [(rel_desc.vd1, rel_desc.vd2) for rel_desc in clause.relation_descs]
-            
-            for vdi, vdj in all_pairs:
-                if (vdi, vdj) not in existing_pairs and (vdj, vdi) not in existing_pairs:
-                    clause.append(RelationClass(vdi, [OutVisOrNoCollide()] , vdj))
-        self.relation_desc_clauses
-    
-    @property
-    def vessel_num(self) -> int:
-        return len(self.func_objects)
-    
+@dataclass(frozen=True)
+class FuncObject():
+    id : int    
 @dataclass(frozen=True)
 class FunctionalScenario():
     group : str
-    id : str
+    id : int
     os_interpretation : OSInterpretation = OSInterpretation()
     ts_interpretation : TSInterpretation = TSInterpretation()
     head_on_interpretations : HeadOnInterpretation = HeadOnInterpretation()
@@ -82,6 +56,12 @@ class FunctionalScenario():
     
     def crossing(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return self.crossing_interpretations.contains((o1, o2))
+    
+    def is_os(self, o : FuncObject) -> bool:
+        return self.os_interpretation.contains(o)
+    
+    def is_ts(self, o : FuncObject) -> bool:
+        return self.ts_interpretation.contains(o)
     
     @property
     def all_object_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
@@ -141,35 +121,12 @@ class FunctionalScenario():
         return hash(frozenset(neighborhoods[hops].values()))
             
     
-                    
+@dataclass(frozen=True)                   
 class MSREnvironmentDesc(FunctionalScenario):
-    group = 'MSR'
-    def __init__(self, id, vessel_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        super().__init__(self.group, id, vessel_objects, relation_desc_clauses)
-        
+    group = field(default='MSR', init=False)
+
+@dataclass(frozen=True)        
 class SBOEnvironmentDesc(FunctionalScenario):
-    group = 'SBO'
-    def __init__(self, id, vessel_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        super().__init__(self.group, id, vessel_objects, relation_desc_clauses)
+    group = field(default='SBO', init=False)
        
        
-       
-        
-class F3EnvironmentDesc(FunctionalScenario):
-    group = 'F3'
-    def __init__(self, id, vessel_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        super().__init__(self.group, id, vessel_objects, relation_desc_clauses)
-        
-        
-class F2EnvironmentDesc(FunctionalScenario):
-    group = 'F2'
-    def __init__(self, id, vessel_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        super().__init__(self.group, id, vessel_objects, relation_desc_clauses)
-        
-        
-class F1EnvironmentDesc(FunctionalScenario):
-    group = 'F1'
-    def __init__(self, id,vessel_objects : List[VesselClass], relation_desc_clauses : Union[List[RelationClassClause], List[RelationClass]]) -> None:
-        super().__init__(self.group, id, vessel_objects, relation_desc_clauses)
-                
-                

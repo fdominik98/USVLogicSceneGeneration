@@ -2,13 +2,13 @@ import numpy as np
 from typing import List
 from asv_utils import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
 from logical_level.models.constraint_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, ConstraintType
-from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import ActorVariable
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
 
 
 class RelationConstr():
-    def __init__(self, vessel1 : VesselVariable, relation_types : List[ConstraintType], vessel2 : VesselVariable) -> None:
+    def __init__(self, vessel1 : ActorVariable, relation_types : List[ConstraintType], vessel2 : ActorVariable) -> None:
         self.vessel1 = vessel1
         self.vessel2 = vessel2
         self.short_name = f'{self.vessel1.id} -> {self.vessel2.id}'
@@ -91,7 +91,7 @@ class RelationConstr():
             print(f'relation: {r.name}, penalty: {r.get_penalty_norm()}')
         print('---------------------------------------------')
         
-    def get_other_vessel(self, v : VesselVariable):
+    def get_other_vessel(self, v : ActorVariable):
         if self.vessel1.id == v.id:
             return self.vessel2
         if self.vessel2.id == v.id:

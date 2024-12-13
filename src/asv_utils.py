@@ -27,10 +27,6 @@ MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
 
 EPSILON=1e-10
 
-VARIABLE_NUM = 5
-
-OWN_VESSEL_STATES = [MAX_COORD / 2, MAX_COORD / 2, np.pi/2]
-
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
         if o2_length < 12:

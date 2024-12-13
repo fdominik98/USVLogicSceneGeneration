@@ -17,7 +17,7 @@ class LegendComponent(PlotComponent):
         self.graphs += [self.legend]
         
     def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
-        for i, o in enumerate(new_env.vessel_vars):
+        for i, o in enumerate(new_env.actor_vars):
             # Plot the positions
             dot_label = f'{o}\; p: ({o.p[0]:.1f}, {o.p[1]:.1f}), r: {o.r:.1f} m'
             angle = f'h: {np.degrees(o.heading):.1f}^\circ'

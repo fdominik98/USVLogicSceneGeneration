@@ -2,7 +2,7 @@ import itertools
 from typing import List, Set
 
 from functional_level.metamodels.functional_scenario import SBOEnvironmentDesc, MSREnvironmentDesc, FunctionalScenario
-from functional_level.metamodels.vessel_class import VesselClass, OS, TS
+from functional_level.metamodels.functional_scenario import VesselClass, OS, TS
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
 from logical_level.models.constraint_types import any_colreg_init, crossing_init, head_on_init, overtaking_init, overtaking_or_crossing_init
 

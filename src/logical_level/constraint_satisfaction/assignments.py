@@ -1,24 +1,24 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Union
+
+import numpy as np
 from logical_level.models.values import Values
-from logical_level.models.vessel_variable import VesselVariable
-from asv_utils import VARIABLE_NUM
+from logical_level.models.vessel_variable import ActorVariable
 
-class Assignments(Dict[VesselVariable, Values]):
-    def __init__(self, vessel_variables : List[VesselVariable] = [], *args, **kwargs):
+class Assignments(Dict[ActorVariable, Values]):
+    def __init__(self, vessel_variables : List[ActorVariable] = [], *args, **kwargs):
         super().__init__({var : None for var in vessel_variables}, *args, **kwargs)
-        sorted_items = sorted(self.items(), key=lambda item: item[0].id)
-        self.clear()
-        self.update(sorted_items)
 
-    def update_from_population(self, states : List[float]):
-        if len(states) != len(self) * VARIABLE_NUM:
+    def update_from_individual(self, states : Union[np.ndarray, List[float]]) -> 'Assignments':
+        if len(states) != sum(len(var) for var in self.keys()):
             raise Exception("the variable number is insufficient.")
         
         for i, var in enumerate(self.keys()):
-            self[var] = Values(x=states[i * VARIABLE_NUM],
-                                y=states[i * VARIABLE_NUM + 1],
-                                h=states[i * VARIABLE_NUM + 2],
-                                l=states[i * VARIABLE_NUM + 3],
-                                sp=states[i * VARIABLE_NUM + 4])   
+            var_len = len(var)
+            self[var] = Values(x=states[i * var_len],
+                                y=states[i * var_len + 1],
+                                h=states[i * var_len + 2],
+                                l=states[i * var_len + 3],
+                                sp=states[i * var_len + 4])   
+        return self
             
         

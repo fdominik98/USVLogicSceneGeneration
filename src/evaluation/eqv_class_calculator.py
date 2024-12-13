@@ -4,14 +4,14 @@ from typing import Dict, List, Set, Tuple
 from functional_level.models.usv_env_desc_list import TS3, TS4, TS5
 from asv_utils import OWN_VESSEL_STATES, VARIABLE_NUM
 from functional_level.models.model_utils import _OS, TS1, TS2
-from functional_level.metamodels.vessel_class import VesselClass
+from functional_level.metamodels.functional_scenario import VesselClass
 from logical_level.models.relation_constraint import RelationConstr
 from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
 from logical_level.models.constraint_types import ConstraintType, crossing_init, head_on_init, overtaking_init
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import ActorVariable
 
 class EqvClassCalculator():
     def __init__(self):        
@@ -38,9 +38,9 @@ class EqvClassCalculator():
     
     def get_clause(self, scene : ConcreteScene) -> Tuple[List[VesselClass], RelationClassClause]:
         vessel_objects = self.vessels_descs[:scene.vessel_num]
-        vessels: Dict[VesselClass, VesselVariable] = {vessel_object : VesselVariable(vessel_object) for vessel_object in vessel_objects}
+        vessels: Dict[VesselClass, ActorVariable] = {vessel_object : ActorVariable(vessel_object) for vessel_object in vessel_objects}
         assignments = Assignments(list(vessels.values()))
-        assignments.update_from_population(scene.population)
+        assignments.update_from_individual(scene.population)
             
         combinations = list(itertools.combinations(vessels.keys(), 2))
         clause_class = RelationClassClause([])

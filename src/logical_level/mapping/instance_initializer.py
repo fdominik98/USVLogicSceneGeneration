@@ -1,62 +1,50 @@
 import random
 from typing import List
 import numpy as np
-from asv_utils import MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 from abc import ABC, abstractmethod
-from logical_level.models.vessel_variable import VesselVariable
+from logical_level.models.vessel_variable import ActorVariable
 
 class InstanceInitializer(ABC):    
-    def __init__(self, name: str, vessel_vars : List[VesselVariable]) -> None:
-        self.vessel_vars = vessel_vars      
+    def __init__(self, name: str, vessel_vars : List[ActorVariable]) -> None:
+        self.actor_vars = vessel_vars      
         self.name = name
        
     @abstractmethod     
-    def get_population(self, pop_size) -> List[List[float]]:
+    def _do_get_population(self) -> List[float]:
         pass
-class RandomInstanceInitializer(InstanceInitializer):
-    name = 'uniform'
-    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
-        super().__init__(self.name, vessel_vars)
-        
+    
     def get_population(self, pop_size) -> List[List[float]]:
         result : List[List[float]] = []
         for i in range(int(pop_size)):
-            population : List[float] = [random.uniform(self.vessel_vars[0].min_length, self.vessel_vars[0].max_length), 
-                                        random.uniform(self.vessel_vars[0].min_speed, self.vessel_vars[0].max_speed)]
-            for vessel_var in self.vessel_vars[1:]:
-                group = [random.uniform(MIN_COORD, MAX_COORD),
-                        random.uniform(MIN_COORD, MAX_COORD),
-                        random.uniform(MIN_HEADING, MAX_HEADING),
-                        random.uniform(vessel_var.min_length, vessel_var.max_length),
-                        random.uniform(vessel_var.min_speed, vessel_var.max_speed)]
-                population.extend(group)
-            result.append(population)
-        return result  
-    
+            result.append(self._do_get_population())
+        return result
+class RandomInstanceInitializer(InstanceInitializer):
+    name = 'uniform'
+    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
+        super().__init__(self.name, vessel_vars)
+        
+    def _do_get_population(self) -> List[float]:
+        population : List[float] = []
+        for vessel_var in self.actor_vars:
+            population += [random.uniform(x, y) for x, y in zip(vessel_var.lower_bounds, vessel_var.upper_bounds)]                
+        return population
     
     
 class DeterministicInitializer(InstanceInitializer):
     name = 'deterministic'
-    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
+    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
         super().__init__(self.name, vessel_vars)
         
-    def get_population(self, pop_size) -> List[List[float]]:
-        result : List[List[float]] = []
-        for i in range(int(pop_size)):
-            population : List[float] = [(self.vessel_vars[0].min_length + self.vessel_vars[0].max_length) / 2.0,
-                                        (self.vessel_vars[0].min_speed + self.vessel_vars[0].max_speed) / 2.0]
-            for vessel_var in self.vessel_vars[1:]:
-                group = [MAX_COORD / 2, MAX_COORD / 2, 0, 
-                         (vessel_var.min_length + vessel_var.max_length) / 2,
-                         (vessel_var.min_speed + vessel_var.max_speed) / 2]
-                population.extend(group)
-            result.append(population)
-        return result 
+    def _do_get_population(self) -> List[float]:
+        population : List[float] = []
+        for vessel_var in self.actor_vars:
+            population += [(x + y) / 2 for x, y in zip(vessel_var.lower_bounds, vessel_var.upper_bounds)]                
+        return population 
     
 
 class LatinHypercubeInitializer(InstanceInitializer):
     name = 'lhs'
-    def __init__(self, vessel_vars : List[VesselVariable]) -> None:
+    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
         super().__init__(self.name, vessel_vars)
         
     def lhs_sampling(self, n_samples: int, lower_bounds: List[float], upper_bounds: List[float]) -> np.ndarray:
@@ -81,30 +69,10 @@ class LatinHypercubeInitializer(InstanceInitializer):
         
         return result
 
-    def get_population(self, pop_size: int) -> List[List[float]]:
-        result: List[List[float]] = []
-        
-        # Prepare bounds for each vessel parameter using LHS
-        for i in range(int(pop_size)):
-            population: List[float] = []
-            
-            # First vessel (speed only)
-            first_length = self.lhs_sampling(1, [self.vessel_vars[0].min_length], [self.vessel_vars[0].max_length])[0]
-            population.extend(first_length)
-            first_speed = self.lhs_sampling(1, [self.vessel_vars[0].min_speed], [self.vessel_vars[0].max_speed])[0]
-            population.extend(first_speed)
-
-            # Subsequent vessels (coordinate, heading, and speed)
-            for vessel_var in self.vessel_vars[1:]:
-                lower_bounds = [MIN_COORD, MIN_COORD, MIN_HEADING, vessel_var.min_length, vessel_var.min_speed]
-                upper_bounds = [MAX_COORD, MAX_COORD, MAX_HEADING, vessel_var.max_length, vessel_var.max_speed]
-                
-                # LHS for this vessel's parameters
-                group = self.lhs_sampling(1, lower_bounds, upper_bounds)[0]
-                population.extend(group)
-
-            result.append(population)
-
-        return result 
+    def _do_get_population(self) -> List[float]:
+        population: List[float] = []
+        for vessel_var in self.actor_vars:
+            population += self.lhs_sampling(1, vessel_var.lower_bounds, vessel_var.upper_bounds)[0]
+        return population
     
     
