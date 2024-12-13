@@ -9,9 +9,6 @@ class Assignments(Dict[VesselVariable, Values]):
         sorted_items = sorted(self.items(), key=lambda item: item[0].id)
         self.clear()
         self.update(sorted_items)
-        
-        from logical_level.models.relation_constraint import RelationConstrTerm
-        self.registered_clauses : Set[RelationConstrTerm] = set()
 
     def update_from_population(self, states : List[float]):
         if len(states) != len(self) * VARIABLE_NUM:
@@ -24,12 +21,4 @@ class Assignments(Dict[VesselVariable, Values]):
                                 l=states[i * VARIABLE_NUM + 3],
                                 sp=states[i * VARIABLE_NUM + 4])   
             
-        for clause in self.registered_clauses:
-            clause.update(self)
-            
-        self.clause = min(self.registered_clauses, key=lambda clause: clause.penalties_sum)
-        self.relations = self.clause.relations  
-            
-    def register_clause(self, clause):
-        self.registered_clauses.add(clause)
         

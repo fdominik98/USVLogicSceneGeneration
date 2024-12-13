@@ -1,5 +1,5 @@
-from typing import Dict, List, Tuple, Type
-from functional_level.metamodels.interpretation import BinaryInterpretation, CrossingFromPortInterpretation, HeadOnInterpretation, OvertakingInterpretation
+from typing import Dict, List, Set, Tuple
+from functional_level.metamodels.vessel_class import FuncObject
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.literal import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrComposite, RelationConstrTerm
 from logical_level.models.vessel_variable import VesselVariable
@@ -16,33 +16,27 @@ class LogicalScenarioBuilder():
         pass
         
     def build_from_functional(self, functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:
-        vessels: Dict[VesselClass, VesselVariable] = {vessel_object : VesselVariable(vessel_object) for vessel_object in functional_scenario.func_objects}
-        assignments = Assignments(list(vessels.values()))
+        object_variable_map: Dict[FuncObject, VesselVariable] = {vessel_object : VesselVariable(vessel_object) for vessel_object in functional_scenario.func_objects}
+        assignments = Assignments(list(object_variable_map.values()))
         vessel_vars = list(assignments.keys())
         
-        for relation_desc_clause in functional_scenario.relation_desc_clauses:
-            clause = RelationConstrTerm()
-            for relation_desc in relation_desc_clause.relation_descs:
-                vd1 = relation_desc.vd1
-                vd2 = relation_desc.vd2
-                clause.append(RelationConstr(vessels[vd1], relation_desc.relation_types, vessels[vd2]))
-            assignments.register_clause(clause)    
+        relation_constr_exprs : Set[RelationConstrTerm] = set()
+        for o1, o2 in functional_scenario.not_in_colreg_pairs:
+            var1, var2 = object_variable_map[o1], object_variable_map[o2]
+            relation_constr_exprs.add(RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)}))
+        for o1, o2 in functional_scenario.head_on_interpretations.get_tuples():
+            var1, var2 = object_variable_map[o1], object_variable_map[o2]
+            relation_constr_exprs.add(RelationConstrTerm({AtVis(var1, var2), HeadOnBear(var1, var2), MayCollide(var1, var2)}))
+        for o1, o2 in functional_scenario.crossing_interpretations.get_tuples():
+            var1, var2 = object_variable_map[o1], object_variable_map[o2]
+            relation_constr_exprs.add(RelationConstrTerm({AtVis(var1, var2), CrossingBear(var1, var2), MayCollide(var1, var2)}))
+        for o1, o2 in functional_scenario.overtaking_interpretations.get_tuples():
+            var1, var2 = object_variable_map[o1], object_variable_map[o2]
+            relation_constr_exprs.add(RelationConstrTerm({AtVis(var1, var2), OvertakingBear(var1, var2), MayCollide(var1, var2)}))
+        relation_constr_term = RelationConstrTerm(relation_constr_exprs)
        
         xl, xu = self.generate_gene_space(vessel_vars)
-        
-        return LogicalScenario(functional_scenario, self.get_initializer(init_method, vessel_vars), assignments, xl, xu)
-    
-    
-    def func_to_log_map(self, interpretation_type : Type[BinaryInterpretation], var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrComposite:
-        if interpretation_type is HeadOnInterpretation:
-            return RelationConstrTerm({AtVis(var1, var2), HeadOnBear(var1, var2), MayCollide(var1, var2)})
-        elif interpretation_type is CrossingFromPortInterpretation:
-            return RelationConstrTerm({AtVis(var1, var2), CrossingBear(var1, var2), MayCollide(var1, var2)})
-        elif interpretation_type is OvertakingInterpretation:
-            return RelationConstrTerm({AtVis(var1, var2), OvertakingBear(var1, var2), MayCollide(var1, var2)})
-        else:
-            return RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)})
-    
+        return LogicalScenario(self.get_initializer(init_method, vessel_vars), assignments, xl, xu)
     
         # Attribute generator with different boundaries
     def generate_gene_space(self, vessel_vars : List[VesselVariable]) -> Tuple[List[float], List[float]]:

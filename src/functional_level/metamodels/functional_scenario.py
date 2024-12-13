@@ -90,7 +90,7 @@ class FunctionalScenario():
     @property
     def not_in_colreg_pairs(self):
         not_in_colreg_pairs : Set[Tuple[FuncObject, FuncObject]] = set()
-        for o1, o2 in self.not_in_colreg_pairs:
+        for o1, o2 in self.all_object_pairs:
             if not self.in_colreg_rel(o1, o2) and (o1, o2) not in not_in_colreg_pairs and (o2, o1) not in not_in_colreg_pairs:
                 not_in_colreg_pairs.add(o1, o2)
         return not_in_colreg_pairs

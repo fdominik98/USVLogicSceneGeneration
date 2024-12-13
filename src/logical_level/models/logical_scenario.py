@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List, Set
 import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
-from functional_level.metamodels.functional_scenario import FunctionalScenario
 from asv_utils import OWN_VESSEL_STATES, VARIABLE_NUM
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.vessel_variable import VesselVariable
@@ -10,15 +9,10 @@ from logical_level.models.relation_constraint import RelationConstr, RelationCon
 
 @dataclass(frozen=True)
 class LogicalScenario():
-    config : FunctionalScenario
     initializer : InstanceInitializer
     assignments : Assignments
     xl : List[float]
     xu : List[float]   
-    
-    def __post_init__(self):
-        if self.vessel_num != self.config.vessel_num:
-            raise ValueError(f"Inconsistent vessel numbers: {self.vessel_num} != {self.config.vessel_num}")
     
     @property
     def vessel_vars(self) -> List[VesselVariable]:
