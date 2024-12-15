@@ -68,8 +68,8 @@ class EvolutionaryAlgorithmBase(ABC):
             eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
             
             best_solution, best_fitness, number_of_generations = self.convert_results(some_results, eval_data)
-            Assignments(logical_scenario.actor_vars).update_from_individual(best_solution)
-            eval_data.best_scene = SceneBuilder().build_from_assignments(logical_scenario.assignments)
+            assignments = Assignments(logical_scenario.actor_vars).update_from_individual(best_solution)
+            eval_data.best_scene = SceneBuilder().build_from_assignments(assignments)
             eval_data.best_fitness = best_fitness
             eval_data.number_of_generations = number_of_generations
             eval_data.best_fitness_index = sum(best_fitness)

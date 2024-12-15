@@ -18,10 +18,12 @@ class ConcreteScene():
     def __getitem__(self, key):
         return self._data[key]
 
-    def keys(self):
+    @property
+    def actors(self):
         return self._data.keys()
 
-    def values(self):
+    @property
+    def actor_states(self):
         return self._data.values()
 
     def items(self):

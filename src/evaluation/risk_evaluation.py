@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from asv_utils import N_MILE_TO_M_CONVERSION
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.models.relation_constraint import RelationConstr
 from logical_level.models.constraint_types import MayCollide
@@ -8,7 +9,7 @@ from functional_level.metamodels.functional_scenario import Vessel
 
 
 class RiskVector():
-    def __init__(self,logical_scenario: LogicalScenario) -> None:
+    def __init__(self, scenario: MultiLevelScenario) -> None:
         self.proximity_vectors = [ProximityRiskIndex(rel) for rel in env.relations if rel.has_os()]
         self.nav_risk_vector = NavigationRiskIndex(logical_scenario, env.get_vessel_by_id(0))
             

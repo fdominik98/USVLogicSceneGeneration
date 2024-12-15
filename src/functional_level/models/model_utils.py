@@ -1,22 +1,21 @@
 import itertools
-from typing import List, Set
+from typing import List
 
-from functional_level.metamodels.functional_scenario import SBOEnvironmentDesc, MSREnvironmentDesc, FunctionalScenario
-from functional_level.metamodels.functional_scenario import VesselClass, OS, TS
-from functional_level.metamodels.relation_class import RelationClass, RelationClassClause
-from logical_level.models.constraint_types import any_colreg_init, crossing_init, head_on_init, overtaking_init, overtaking_or_crossing_init
+from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
+from functional_level.models.object_generator import ObjectGenerator
 
-_OS = OS(id=0)
-TS1 = TS(id=1)
-TS2 = TS(id=2)
-TS3 = TS(id=3)
-TS4 = TS(id=4)
-TS5 = TS(id=5)
-TS6 = TS(id=6)
-TS7 = TS(id=7)
-TS8 = TS(id=8)
-TS9 = TS(id=9)
-TS10 = TS(id=10)
+obj_gen = ObjectGenerator()
+_OS = obj_gen.new_object()
+TS1 = obj_gen.new_object()
+TS2 = obj_gen.new_object()
+TS3 = obj_gen.new_object()
+TS4 = obj_gen.new_object()
+TS5 = obj_gen.new_object()
+TS6 = obj_gen.new_object()
+TS7 = obj_gen.new_object()
+TS8 = obj_gen.new_object()
+TS9 = obj_gen.new_object()
+TS10 = obj_gen.new_object()
 
 def generate_rel_descs(objects : List[VesselClass], relation_type) -> List[FunctionalScenario]:
     truth_table = itertools.product([0, 1], repeat=len(objects))
@@ -37,7 +36,7 @@ def generate_models(config_class : FunctionalScenario.__class__, objects : List[
     rel_descs_list = generate_rel_descs(objects, relation_type)
     return [config_class(i + 1, [_OS] + objects, rel_descs) for i, rel_descs in enumerate(rel_descs_list)]
 
-def generate_abstract_models(objects : List[VesselClass]) -> List[FunctionalScenario]:
+def generate_abstract_models(objects : List[FuncObject]) -> List[FunctionalScenario]:
     if len(objects) < 2:
         raise Exception('Only use for 3+ vessel scenarios')
     overtaking_or_crossing = [overtaking_init, crossing_init]

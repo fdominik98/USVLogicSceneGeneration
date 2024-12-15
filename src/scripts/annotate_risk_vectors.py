@@ -32,13 +32,12 @@ for i, eval_data in enumerate(eval_datas):
         info(eval_data)
         continue
     
-    logical_scenario = LogicalScenarioBuilder().build_from_concrete(eval_data.best_scene, eval_data.init_method)
     if eval_data.best_fitness_index > 0.0:
         eval_data.best_scene.danger_sector = None
         skipped += 1
         print('Not optimal solution, skipped.')
     else:    
-        risk_vector = RiskVector(logical_scenario)
+        risk_vector = RiskVector(eval_data.best_scene)
         eval_data.best_scene.dcpa = risk_vector.risk_vector[0]
         eval_data.best_scene.tcpa = risk_vector.risk_vector[1]
         eval_data.best_scene.danger_sector = risk_vector.risk_vector[2]

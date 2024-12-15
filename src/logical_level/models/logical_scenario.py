@@ -34,9 +34,4 @@ class LogicalScenario():
             new_pop.append(np.array(p))
         return np.array(new_pop)
     
-    def get_vessel_by_id(self, id):
-        vessel_var = next((v for v in self.actor_vars if v.id == id), None)
-        if vessel_var is None:
-            raise Exception(f"No vessel with id {id}")
-        return vessel_var    
-    
+ 

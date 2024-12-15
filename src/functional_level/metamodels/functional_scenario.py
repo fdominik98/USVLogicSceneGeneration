@@ -10,31 +10,29 @@ class FuncObject():
     id : int    
 @dataclass(frozen=True)
 class FunctionalScenario():
-    group : str
-    id : int
     os_interpretation : OSInterpretation = OSInterpretation()
     ts_interpretation : TSInterpretation = TSInterpretation()
-    head_on_interpretations : HeadOnInterpretation = HeadOnInterpretation()
-    overtaking_interpretations : OvertakingInterpretation = OvertakingInterpretation()
-    crossing_interpretations : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
+    head_on_interpretation : HeadOnInterpretation = HeadOnInterpretation()
+    overtaking_interpretation : OvertakingInterpretation = OvertakingInterpretation()
+    crossing_interpretation : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
     
     func_objects : List[FuncObject] = field(init=False)
     
     def __post_init__(self):
         object_set : Set[FuncObject] = set()
-        for interpretations in [self.os_interpretation, self.ts_interpretation, self.head_on_interpretations, self.overtaking_interpretations, self.crossing_interpretations]:
+        for interpretations in [self.os_interpretation, self.ts_interpretation, self.head_on_interpretation, self.overtaking_interpretation, self.crossing_interpretation]:
             for interpretation in interpretations:
                 for func_object in interpretation:
                     object_set.add(func_object)
         object.__setattr__(self, 'func_objects', sorted(list(object_set), key=lambda x: x.id))
-        head_on_interpretation_temp = copy(self.head_on_interpretations)
+        head_on_interpretation_temp = copy(self.head_on_interpretation)
         for tup in head_on_interpretation_temp:
-            self.head_on_interpretations.add(tup)
+            self.head_on_interpretation.add(tup)
         
     
     @property
     def name(self):
-        return f'{str(len(self.func_objects))}vessel_{self.group}_{self.id}'
+        return f'{str(len(self.func_objects))}vessel'
     
     def in_colreg_rel(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return self.colreg_rel(o1, o2) or self.colreg_rel(o2, o1)
@@ -49,13 +47,13 @@ class FunctionalScenario():
         return self.head_on(o1, o2) or self.overtaking(o1, o2) or self.crossing(o1, o2)
     
     def head_on(self, o1 : FuncObject, o2 : FuncObject) -> bool:
-        return self.head_on_interpretations.contains((o1, o2))
+        return self.head_on_interpretation.contains((o1, o2))
     
     def overtaking(self, o1 : FuncObject, o2 : FuncObject) -> bool:
-        return self.overtaking_interpretations.contains((o1, o2))
+        return self.overtaking_interpretation.contains((o1, o2))
     
     def crossing(self, o1 : FuncObject, o2 : FuncObject) -> bool:
-        return self.crossing_interpretations.contains((o1, o2))
+        return self.crossing_interpretation.contains((o1, o2))
     
     def is_os(self, o : FuncObject) -> bool:
         return self.os_interpretation.contains(o)
@@ -75,7 +73,7 @@ class FunctionalScenario():
                 not_in_colreg_pairs.add(o1, o2)
         return not_in_colreg_pairs
     
-    def shape_hash(self, hops: int = 1):
+    def shape_hash(self, hops: int = 1) -> int:
         """
         Compute the hash of the node attributes and their neighborhoods up to the given number of hops.
         
@@ -92,11 +90,11 @@ class FunctionalScenario():
                 attributes.add((OSInterpretation.name, 1))
             if self.ts_interpretation.contains(node):
                 attributes.add((TSInterpretation.name, 1))
-            relation_descs = self.overtaking_interpretations.get_relation_descs(node)
+            relation_descs = self.overtaking_interpretation.get_relation_descs(node)
             attributes.update((rd[0], rd[1], None) for rd in relation_descs)
-            relation_descs = self.head_on_interpretations.get_relation_descs(node)
+            relation_descs = self.head_on_interpretation.get_relation_descs(node)
             attributes.update((rd[0], rd[1], None) for rd in relation_descs)
-            relation_descs = self.crossing_interpretations.get_relation_descs(node)
+            relation_descs = self.crossing_interpretation.get_relation_descs(node)
             attributes.update((rd[0], rd[1], None) for rd in relation_descs)
             neighborhoods[0][node] = (None, frozenset(attributes))
 
@@ -109,24 +107,14 @@ class FunctionalScenario():
                     attributes.add((OSInterpretation.name, 1))
                 if self.ts_interpretation.contains(node):
                     attributes.add((TSInterpretation.name, 1))
-                relation_descs = self.overtaking_interpretations.get_relation_descs(node)
+                relation_descs = self.overtaking_interpretation.get_relation_descs(node)
                 attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
-                relation_descs = self.head_on_interpretations.get_relation_descs(node)
+                relation_descs = self.head_on_interpretation.get_relation_descs(node)
                 attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
-                relation_descs = self.crossing_interpretations.get_relation_descs(node)
+                relation_descs = self.crossing_interpretation.get_relation_descs(node)
                 attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
                 neighborhoods[hop][node] = (neighborhoods[hop - 1][node], frozenset(attributes))
 
         # Return hash of the last neighborhood
         return hash(frozenset(neighborhoods[hops].values()))
             
-    
-@dataclass(frozen=True)                   
-class MSREnvironmentDesc(FunctionalScenario):
-    group = field(default='MSR', init=False)
-
-@dataclass(frozen=True)        
-class SBOEnvironmentDesc(FunctionalScenario):
-    group = field(default='SBO', init=False)
-       
-       
