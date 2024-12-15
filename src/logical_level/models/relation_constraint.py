@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 from asv_utils import EPSILON, o2VisibilityByo1, N_MILE_TO_M_CONVERSION
 from logical_level.models.constraint_types import AtVis, CrossingBear, HeadOnBear, InVis, MayCollide, OutVis, OutVisOrNoCollide, OvertakingBear, ConstraintType
-from logical_level.models.vessel_variable import ActorVariable
+from logical_level.models.actor_variable import ActorVariable
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
 

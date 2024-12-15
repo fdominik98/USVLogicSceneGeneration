@@ -3,7 +3,7 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from evaluation.eqv_class_calculator import EqvClassCalculator
+from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 from functional_level.models.usv_env_desc_list import MSR_EQUIV_CLASSES
@@ -36,7 +36,7 @@ class EqvClassPlot(MyPlot):
             colros = group_colors(len(group_labels))
             
             for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
-                data = EqvClassCalculator().get_equivalence_classes(eval_datas)
+                data = ConcreteSceneAbstractor().get_equivalence_classes(eval_datas)
                 found_length = len(data)
                 for equiv_class in MSR_EQUIV_CLASSES[vessel_num]:
                     ass_clause = equiv_class.get_asymmetric_clause()

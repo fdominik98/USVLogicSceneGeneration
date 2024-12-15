@@ -4,7 +4,7 @@ import numpy as np
 from asv_utils import EPSILON, N_MILE_TO_M_CONVERSION, o2VisibilityByo1
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
-from logical_level.models.vessel_variable import ActorVariable
+from logical_level.models.actor_variable import ActorVariable
 
 
 class GeometricProperties():

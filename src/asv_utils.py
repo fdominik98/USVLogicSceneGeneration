@@ -27,6 +27,9 @@ MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
 
 EPSILON=1e-10
 
+MAX_SPEED_IN_MS = 30 * KNOT_TO_MS_CONVERSION
+MAX_LENGTH = 300
+
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
         if o2_length < 12:

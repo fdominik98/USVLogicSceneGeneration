@@ -2,7 +2,7 @@ import random
 from typing import List
 import numpy as np
 from abc import ABC, abstractmethod
-from logical_level.models.vessel_variable import ActorVariable
+from logical_level.models.actor_variable import ActorVariable
 
 class InstanceInitializer(ABC):    
     def __init__(self, name: str, vessel_vars : List[ActorVariable]) -> None:

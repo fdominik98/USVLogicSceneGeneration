@@ -3,6 +3,7 @@ from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.models.actor_variable import VesselVariable
 
 
 class SceneBuilder(Dict[ConcreteVessel, VesselState]):  
@@ -22,5 +23,9 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
     
     @staticmethod
     def build_from_assignments(assignments : Assignments) -> ConcreteScene:
-        return ConcreteScene({ConcreteVessel(vessel_var.id, values.l, values.r, vessel_var.max_speed) :
-            VesselState(values.x, values.y, values.sp, values.h) for vessel_var, values in assignments.items()})
+        builder = SceneBuilder()
+        for actor_var, values in assignments.items():
+            if isinstance(actor_var, VesselVariable):
+                builder.set_state(ConcreteVessel(actor_var.is_os, actor_var.id, values.l, values.r, actor_var.max_speed),
+                                  VesselState(values.x, values.y, values.sp, values.h))
+        return builder.build()

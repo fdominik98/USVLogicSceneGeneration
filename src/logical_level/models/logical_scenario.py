@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List
 import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
-from logical_level.models.literal import RelationConstrClause
-from logical_level.models.vessel_variable import ActorVariable
+from logical_level.models.relation_constraints import RelationConstrClause
+from logical_level.models.actor_variable import ActorVariable
 
 @dataclass(frozen=True)
 class LogicalScenario():

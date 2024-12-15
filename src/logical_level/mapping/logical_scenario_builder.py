@@ -2,13 +2,13 @@ from itertools import chain
 from typing import Dict, List, Set
 from functional_level.metamodels.functional_scenario import FuncObject
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.models.literal import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrTerm
-from logical_level.models.vessel_variable import ActorVariable, OSVariable, TSVariable
+from logical_level.models.relation_constraints import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrTerm
+from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import MSREnvironmentDesc, FunctionalScenario
 from concrete_level.models.concrete_scene import ConcreteScene
-from evaluation.eqv_class_calculator import EqvClassCalculator
+from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 
 
 class LogicalScenarioBuilder():
@@ -17,6 +17,8 @@ class LogicalScenarioBuilder():
         
     def build_from_functional(self, functional_scenarios : Set[FunctionalScenario], init_method=RandomInstanceInitializer.name) -> LogicalScenario:        
         object_variable_map: Dict[FunctionalScenario, Dict[FuncObject, ActorVariable]] = {scenario: {} for scenario in functional_scenarios}
+        relation_constr_terms : Set[RelationConstrTerm] = set()
+        
         for functional_scenario in functional_scenarios:
             for obj in functional_scenario.func_objects:
                 if functional_scenario.is_os(obj):
@@ -25,10 +27,8 @@ class LogicalScenarioBuilder():
                     var = TSVariable(functional_scenario.id, obj.id)
                 else:
                     raise ValueError('Neither OS or TS.')
-            object_variable_map[functional_scenario][obj] = var
-        
-        relation_constr_terms : Set[RelationConstrTerm] = set()
-        for functional_scenario in functional_scenarios:
+                object_variable_map[functional_scenario][obj] = var
+            
             relation_constr_exprs : Set[RelationConstrTerm] = set()
             for o1, o2 in functional_scenario.not_in_colreg_pairs:
                 var1, var2 = object_variable_map[functional_scenario][o1], object_variable_map[functional_scenario][o2]
@@ -49,7 +49,7 @@ class LogicalScenarioBuilder():
             actor_var
             for inner_map in object_variable_map.values()
             for actor_var in inner_map.values()
-        ], key=lambda x: (x.scope_id, x.id))
+        ], key=lambda x: x.id)
         
         xl = chain.from_iterable([var.lower_bounds for var in actor_variables])
         xu = chain.from_iterable([var.upper_bounds for var in actor_variables])
@@ -57,7 +57,7 @@ class LogicalScenarioBuilder():
         
     
     def build_from_concrete(self, scene : ConcreteScene, init_method=RandomInstanceInitializer.name):
-        vessel_objects, clause = EqvClassCalculator().get_clause(scene)
+        vessel_objects, clause = ConcreteSceneAbstractor().get_clause(scene)
         config = MSREnvironmentDesc(0, vessel_objects, [clause])
         logical_scenario = self.build_from_functional(config, init_method)
         #logical_scenario.update(scene.population)

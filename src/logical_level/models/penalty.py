@@ -1,37 +1,21 @@
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
+from typing import Dict
 
-from logical_level.models.vessel_variable import ActorVariable
+from logical_level.models.actor_variable import ActorVariable
 
 
 @dataclass(frozen=True)
 class Penalty():
-    visibility_penalties : List[float]
-    bearing_penalties : List[float]
-    collision_penalties : List[float]
     actor_penalties : Dict[ActorVariable, float]
+    
+    visibility_penalty : float = 0
+    bearing_penalty : float = 0
+    collision_penalty : float = 0
+    dimension_penalty : float = 0    
     
     @property
     def total_penalty(self) -> float:
-        return sum(penalty for penalty in self.visibility_penalties +
-                                 self.bearing_penalties +
-                                 self.collision_penalties)
-    @property    
-    def total_visibility_penalty(self) -> float:
-        return sum(self.visibility_penalties)
-    
-    @property    
-    def total_collision_penalties(self) -> float:
-        return sum(self.collision_penalties)
-    
-    @property    
-    def total_bearing_penalties(self) -> float:
-        return sum(self.bearing_penalties)
-    
-    @property    
-    def total_categorical_penalties(self) -> Tuple[float, float, float]:
-        return (self.total_visibility_penalty, self.total_bearing_penalties, self.total_collision_penalties)
-        
+        return self.visibility_penalty + self.bearing_penalty + self.collision_penalty + self.dimension_penalty
         
     def __add__(self, other):
         if not isinstance(other, Penalty):
@@ -44,9 +28,10 @@ class Penalty():
             else:
                 new_actor_penalties[var] = value   # Add new key-value pairs
                 
-        return Penalty(self.visibility_penalties + other.visibility_penalties,
-                        self.bearing_penalties + other.bearing_penalties,
-                        self.collision_penalties + other.collision_penalties,
+        return Penalty(self.visibility_penalty + other.visibility_penalty,
+                        self.bearing_penalty + other.bearing_penalty,
+                        self.collision_penalty + other.collision_penalty,
+                        self.dimension_penalty + other.dimension_penalty,
                         new_actor_penalties)
     
     def __eq__(self, other):
@@ -63,4 +48,8 @@ class Penalty():
         return self == other or self < other
 
     def __repr__(self):
-        return f"penalty[{self.visibility_penalties}, {self.bearing_penalties}, {self.collision_penalties}]"
+        return f"penalty[{self.visibility_penalty}, {self.bearing_penalty}, {self.collision_penalty}, {self.dimension_penalty}]"
+    
+    @property
+    def is_zero(self) -> bool:
+        return self.total_penalty == 0

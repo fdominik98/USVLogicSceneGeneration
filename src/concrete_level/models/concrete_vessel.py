@@ -5,6 +5,7 @@ from typing import Optional
 @dataclass(frozen=True)
 class ConcreteVessel:
     id: int
+    is_os : bool
     length: float
     radius: float
     max_speed: float

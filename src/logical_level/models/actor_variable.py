@@ -2,14 +2,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 import numpy as np
-from asv_utils import EPSILON, KNOT_TO_MS_CONVERSION, MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from asv_utils import EPSILON, KNOT_TO_MS_CONVERSION, MAX_COORD, MAX_HEADING, MAX_SPEED_IN_MS, MIN_COORD, MIN_HEADING
 
 
-THIRTY_KNOT_IN_MS = 30 * KNOT_TO_MS_CONVERSION
 TWO_KNOT_IN_MS = 2 * KNOT_TO_MS_CONVERSION
 @dataclass(frozen=True)
 class ActorVariable(ABC):    
-    scope_id : int
     id : int
     
     @abstractmethod
@@ -41,11 +39,11 @@ class ActorVariable(ABC):
 class VesselVariable(ActorVariable, ABC):    
     @property
     def max_speed(self) -> float:
-        return THIRTY_KNOT_IN_MS
+        return MAX_SPEED_IN_MS
     
     @property
     def min_speed(self) -> float:
-        return THIRTY_KNOT_IN_MS
+        return TWO_KNOT_IN_MS
     
     @property
     def max_length(self) -> float:
