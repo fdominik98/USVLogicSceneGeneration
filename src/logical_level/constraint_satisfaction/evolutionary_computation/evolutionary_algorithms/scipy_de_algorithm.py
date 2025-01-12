@@ -7,7 +7,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary
 from scipy.optimize import differential_evolution, OptimizeResult
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import EPSILON
+from utils.asv_utils import EPSILON
 
 class ObjectiveMonitorCallback:
     def __init__(self, aggregate : Aggregate, max_time_sec, verbose : bool):
@@ -44,10 +44,10 @@ class SciPyDEAlgorithm(EvolutionaryAlgorithmBase):
         super().__init__(measurement_name, 'scipy_DE_algorithm', functional_scenarios,test_config, number_of_runs, warmups, verbose)
         self.current_best_objective = np.inf
     
-    def init_problem(self, logical_scenario. LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, logical_scenario : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
         objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)
-        return list(zip(env.xl, env.xu)), objective_monitor, initial_population
+        return list(zip(logical_scenario.xl, logical_scenario.xu)), objective_monitor, initial_population
     
     def do_evaluate(self, some_input : Tuple[List[Tuple[int, int]], ObjectiveMonitorCallback, List[List[float]]], eval_data : EvaluationData):
        bounds, objective_monitor, initial_pop = some_input

@@ -1,11 +1,14 @@
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Set, Type
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
+from logical_level.constraint_satisfaction.assignments import Assignments
+from logical_level.models.actor_variable import VesselVariable
+from logical_level.models.relation_constraints import DoCollide, MayCollide
+from utils.serializable import Serializable
 
 @dataclass(frozen=True)
-class ConcreteScene():   
-    
+class ConcreteScene(Serializable):       
     _data : Dict[ConcreteVessel, VesselState]
     dcpa : Optional[float] = None
     tcpa : Optional[float] = None
@@ -49,6 +52,9 @@ class ConcreteScene():
     def __repr__(self):
         return f"{self.__class__.__name__}({self._data})"
     
+    def as_dict(self) -> Dict[ConcreteVessel, VesselState]:
+        return self._data
+    
     @property
     def individual(self) -> List[float]:        
         individual : List[float] = []
@@ -60,3 +66,52 @@ class ConcreteScene():
     def vessel_num(self) -> int:
         return len(self)
     
+    @property
+    def os(self) -> ConcreteVessel:
+        vessel = next((actor for actor in self.actors if actor.is_os), None)
+        if vessel is None:
+            raise ValueError('No OS in the scene.')
+        return vessel
+    
+    @property
+    def non_os(self) -> Set[ConcreteVessel]:
+        return {actor for actor in self.actors if not actor.is_os}
+    
+    def assignments(self, variables : List[VesselVariable]) -> Assignments:
+        if len(self) != len(variables):
+            raise ValueError('Variable and actor numbers do not match.')
+        for actor, var in zip(self.sorted_keys, variables):
+            if actor.id != var.id:
+                raise ValueError('Insufficient order of actors and variables.')
+        return Assignments(variables).update_from_individual(self.individual)
+    
+    def may_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
+        var1, var2 = actor1.logical_variable, actor2.logical_variable
+        return not MayCollide(var1, var2).evaluate_penalty(self.assignments([var1, var2])).is_zero
+    
+    def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
+        var1, var2 = actor1.logical_variable, actor2.logical_variable
+        return not DoCollide(var1, var2).evaluate_penalty(self.assignments([var1, var2])).is_zero
+    
+    
+    def to_dict(self):
+        result = {}
+        for key, value in self.__dict__.items():
+            if key == '_data':
+                result[key] = [(vessel.to_dict(), state.to_dict())
+                    for vessel, state in self._data.items()]
+            else:  # Handle primitive types
+                result[key] = value
+        return result
+    
+    @classmethod
+    def from_dict(cls: Type['ConcreteScene'], data: Dict[str, Any]) -> 'ConcreteScene':
+        copy_data = data.copy()
+        for attr, value in data.items():
+            if attr == '_data':
+                copy_data[attr] = {
+                        ConcreteVessel.from_dict(vessel):
+                        VesselState.from_dict(state)
+                        for vessel, state in value
+                    }
+        return ConcreteScene(**copy_data)

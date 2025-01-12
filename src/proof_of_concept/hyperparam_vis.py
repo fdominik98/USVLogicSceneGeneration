@@ -16,7 +16,7 @@ eval_datas = dp.load_dirs_merged_as_models()
 organized_dict : Dict[str, Dict[str, Dict[str, List[EvaluationData]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 # Populate the nested dictionary
 for eval_data in eval_datas:
-    organized_dict[eval_data.measurement_name][eval_data.algorithm_desc][eval_data.config_name].append(eval_data)
+    organized_dict[eval_data.measurement_name][eval_data.algorithm_desc][eval_data.scenario_name].append(eval_data)
 
 # Sort each list by best_fitness in ascending order
 for measurement_name, alg_dict in organized_dict.items():

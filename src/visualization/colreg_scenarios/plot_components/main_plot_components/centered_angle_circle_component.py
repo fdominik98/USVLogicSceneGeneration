@@ -2,7 +2,7 @@ from typing import List
 from matplotlib import patches, pyplot as plt
 import numpy as np
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
+from utils.asv_utils import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
 from visualization.colreg_scenarios.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
 
 

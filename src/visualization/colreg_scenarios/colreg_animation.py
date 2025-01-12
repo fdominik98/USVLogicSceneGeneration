@@ -2,6 +2,7 @@ import copy
 from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
+from concrete_level.models.trajectories import Trajectories
 from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
@@ -28,10 +29,9 @@ class ColregAnimation():
         return f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)} s'
     
     def __init__(self, fig : plt.Figure,
-                logical_scenario: LogicalScenario, components : List[PlotComponent],
-                 trajectories : List[List[float]]) -> None:
+                trajectories: Trajectories, components : List[PlotComponent]) -> None:
         self.fig = fig
-        self.logical_scenario = env
+        self.trajectories = trajectories
         self.components = components
         
         self.real_time_value = ANIM_REAL_TIME

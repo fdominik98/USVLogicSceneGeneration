@@ -14,18 +14,19 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
         # Call the parent constructor with the provided data
         super().__init__(existing_dict, *args, **kwargs)
     
-    def set_state(self, vessel : ConcreteVessel, state : VesselState):
+    def set_state(self, vessel : ConcreteVessel, state : VesselState) -> 'SceneBuilder':
        self[vessel] = state
+       return self
        
             
-    def build(self) -> ConcreteScene:
-        return ConcreteScene(self)
+    def build(self, dcpa = None, tcpa = None, danger_sector = None, proximity_index = None) -> ConcreteScene:
+        return ConcreteScene(self, dcpa, tcpa, danger_sector, proximity_index)
     
     @staticmethod
     def build_from_assignments(assignments : Assignments) -> ConcreteScene:
         builder = SceneBuilder()
         for actor_var, values in assignments.items():
             if isinstance(actor_var, VesselVariable):
-                builder.set_state(ConcreteVessel(actor_var.is_os, actor_var.id, values.l, values.r, actor_var.max_speed),
+                builder.set_state(ConcreteVessel(actor_var.id, actor_var.is_os, values.l, values.r, actor_var.max_speed),
                                   VesselState(values.x, values.y, values.sp, values.h))
         return builder.build()

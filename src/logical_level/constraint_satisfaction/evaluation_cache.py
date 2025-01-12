@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 
 import numpy as np
-from asv_utils import EPSILON, N_MILE_TO_M_CONVERSION, o2VisibilityByo1
+from utils.asv_utils import EPSILON, N_MILE_TO_M_CONVERSION, o2VisibilityByo1
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import Values
 from logical_level.models.actor_variable import ActorVariable
@@ -9,8 +9,8 @@ from logical_level.models.actor_variable import ActorVariable
 
 class GeometricProperties():
     def __init__(self, var1 : ActorVariable, var2 : ActorVariable, assignments : Assignments):
-        self.val1 : Values = assignments(var1)
-        self.val2 : Values = assignments(var2)
+        self.val1 : Values = assignments[var1]
+        self.val2 : Values = assignments[var2]
         self.safety_dist = max(self.val1.r, self.val2.r)
         self.p12 = self.val2.p - self.val1.p
         self.p21 = self.val1.p - self.val2.p
@@ -41,7 +41,9 @@ class EvaluationCache(Dict[Tuple[ActorVariable, ActorVariable], GeometricPropert
         super().__init__(*args, **kwargs)
         self.assignments = assignments    
     
-    def get_props(self, var1 : ActorVariable, var2 : ActorVariable):
-        if (var1, var2) not in self:
-            self[(var1, var2)] = GeometricProperties(var1, var2, self.assignments)
-        return self.get((var1, var2))
+    def get_props(self, var1 : ActorVariable, var2 : ActorVariable) -> GeometricProperties:
+        props = self.get((var1, var2), None)
+        if props is None:
+            props = GeometricProperties(var1, var2, self.assignments)
+            self[(var1, var2)] = props
+        return props

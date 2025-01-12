@@ -2,7 +2,8 @@ from datetime import datetime
 import os
 import random
 from typing import List, Dict
-from asv_utils import ASSET_FOLDER, MAX_COORD
+from utils.file_system_utils import ASSET_FOLDER
+from utils.asv_utils import MAX_COORD
 from functional_level.metamodels.functional_scenario import Vessel
 from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
@@ -172,7 +173,7 @@ overall_eval_time = (datetime.now() - start_time).total_seconds()
 timestamp = datetime.now().isoformat()
 
 traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_numbers, algorithm_desc='RRTStar_algo', 
-                        config_name=data.config_name, env_path=data.path, random_seed=seed,
+                        config_name=data.scenario_name, env_path=data.path, random_seed=seed,
                         expand_distances=expand_distances, goal_sample_rate=GOAL_SAMPLE_RATE,
                         timestamp=timestamp, trajectories=interpolator.interpolated_paths,
                         overall_eval_time=overall_eval_time, rrt_evaluation_times=eval_times)

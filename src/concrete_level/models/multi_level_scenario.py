@@ -1,36 +1,26 @@
 
-from dataclasses import dataclass, field
-from typing import Dict, Union
+from typing import Dict, Set, Tuple, Union
 
-from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_vessel import ConcreteVessel
-from concrete_level.models.trajectories import Trajectories
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
-from logical_level.mapping.instance_initializer import RandomInstanceInitializer
+from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.logical_scenario import LogicalScenario
+from logical_level.models.relation_constraints import DoCollide, MayCollide
 
 
-dataclass(frozen=True)
 class MultiLevelScenario():
-    concrete_scene : ConcreteScene
-    logical_scenario : LogicalScenario
-    functional_scenario : FunctionalScenario
-    
-    concrete_actor_map : Dict[int, ConcreteVessel] = field(default_factory=dict, init=False)
-    logical_actor_map : Dict[int, ActorVariable] = field(default_factory=dict, init=False)
-    functional_object_map : Dict[int, FuncObject] = field(default_factory=dict, init=False)
-    
-    evaluation_cache : EvaluationCache = field(default=None, init=False)
-    
-    def __post_init__(self):
-        object.__setattr__(self, 'concrete_actor_map', {actor.id for actor in self.concrete_scene.actors})
-        object.__setattr__(self, 'logical_actor_map', {actor.id for actor in self.logical_scenario.actor_vars})
-        object.__setattr__(self, 'functional_object_map', {obj.id for obj in self.functional_scenario.func_objects})
-        object.__setattr__(self, 'evaluation_cache', {Assignments(self.logical_scenario.actor_vars).update_from_individual(self.concrete_scene.individual)})
+    def __init__(self, concrete_scene : ConcreteScene,
+                 logical_scenario : LogicalScenario,  functional_scenario : FunctionalScenario):
+        self.concrete_scene = concrete_scene
+        self.logical_scenario = logical_scenario
+        self.functional_scenario = functional_scenario
+        
+        self.concrete_actor_map : Dict[int, ConcreteVessel] = {actor.id : actor for actor in self.concrete_scene.actors}
+        self.logical_actor_map : Dict[int, ActorVariable] = {actor.id : actor for actor in self.logical_scenario.actor_vars}
+        self.functional_object_map : Dict[int, FuncObject] = {obj.id : obj for obj in self.functional_scenario.func_objects}
+        self.evaluation_cache = EvaluationCache(self.concrete_scene.assignments(self.logical_scenario.actor_vars))
         
     def to_concrete_vessel(self, actor_or_obj : Union[ActorVariable, FuncObject]) -> ConcreteScene:
         return self.concrete_actor_map[actor_or_obj.id]
@@ -41,7 +31,29 @@ class MultiLevelScenario():
     def to_object(self, actor_or_var : Union[ActorVariable, ConcreteVessel]) -> FuncObject:
         return self.functional_object_map[actor_or_var.id]
     
-    @staticmethod
-    def from_concrete_scene(scene : ConcreteScene, init_method = RandomInstanceInitializer.name) -> 'MultiLevelScenario':
-        logical_scenario, functional_scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene, init_method)
-        return MultiLevelScenario(scene, logical_scenario, functional_scenario)
+    def get_geo_props(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> GeometricProperties:
+        var1, var2 = self.to_variable(actor1), self.to_variable(actor2)
+        return self.evaluation_cache.get_props(var1, var2)
+    
+    def may_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
+        var1, var2 = self.to_variable(actor1), self.to_variable(actor2)
+        may_collide = MayCollide(var1, var2)
+        return may_collide._evaluate_penalty(self.evaluation_cache).is_zero
+    
+    def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
+        var1, var2 = self.to_variable(actor1), self.to_variable(actor2)
+        do_collide = DoCollide(var1, var2)
+        return do_collide._evaluate_penalty(self.evaluation_cache).is_zero
+    
+    def may_collide_anyone(self, actor1 : ConcreteVessel) -> bool:
+        for actor2 in self.concrete_actor_map.values():
+            if actor1 == actor2:
+                continue
+            if self.may_collide(actor1, actor2):
+                return True
+        return False
+    
+    @property
+    def os_non_os_pairs(self) -> Set[Tuple[ConcreteVessel, ConcreteVessel]]:
+        os = self.concrete_scene.os
+        return {(os, actor) for actor in self.concrete_scene.non_os}

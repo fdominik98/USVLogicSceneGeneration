@@ -4,7 +4,8 @@ from manim import *
 from manim.constants import DEFAULT_DOT_RADIUS, ORIGIN
 from manim.utils.color import WHITE
 from numpy import floating
-from asv_utils import ASSET_FOLDER, MAX_COORD
+from utils.file_system_utils import ASSET_FOLDER
+from utils.asv_utils import MAX_COORD
 from concrete_level.data_parser import EvalDataParser, TrajDataParser
 from logical_level.models.logical_scenario import LoadedEnvironment
 from functional_level.metamodels.functional_scenario import Vessel

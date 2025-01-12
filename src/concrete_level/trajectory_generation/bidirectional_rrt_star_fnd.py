@@ -1,7 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 import numpy as np
-from asv_utils import N_MILE_TO_M_CONVERSION
+from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from concrete_level.models.vessel_order_graph import VesselNode
 from concrete_level.models.rrt_models import LineObstacle, Node, Obstacle, RandomPoint, TrajectoryState
 from concrete_level.trajectory_generation.path_interpolator import PathInterpolator

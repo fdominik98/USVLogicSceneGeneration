@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict
-import os
 from typing import List, Tuple
 import pandas as pd
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 import tkfilebrowser
-from asv_utils import ASSET_FOLDER
+from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
 
 class DataParser(ABC):
@@ -28,14 +27,6 @@ class DataParser(ABC):
     @abstractmethod
     def load_dict_from_file(self, file : str) -> dict:
         pass
-
-    def get_all_file_paths(self, directory):
-        file_paths = []
-        for root, _, files in os.walk(directory):
-            for file in files:
-                if '.json' in file:
-                    file_paths.append(os.path.join(root, file))
-        return file_paths
          
     def load_df_from_files(self, files : List[str]) -> pd.DataFrame:        
         data_lines = self.get_data_lines(files)
@@ -56,7 +47,7 @@ class DataParser(ABC):
         if len(dirs) == 0:
             dirs = tkfilebrowser.askopendirnames(initialdir=self.dir)
         for dir in dirs:
-            files += self.get_all_file_paths(dir)
+            files += get_all_file_paths(dir, 'json')
             if len(files) == 0:
                 continue
         return self.load_df_from_files(files), dirs
@@ -77,7 +68,7 @@ class EvalDataParser(DataParser):
     def load_dirs_merged_as_models(self) -> List[EvaluationData]:
         files = []
         for dir in tkfilebrowser.askopendirnames(initialdir=self.dir):
-            files += self.get_all_file_paths(dir)
+            files += get_all_file_paths(dir, 'json')
             if len(files) == 0:
                 continue
         return self.load_data_models_from_files(files)

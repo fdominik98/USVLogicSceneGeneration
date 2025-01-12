@@ -36,7 +36,7 @@ class EqvClassPlot(MyPlot):
             colros = group_colors(len(group_labels))
             
             for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
-                data = ConcreteSceneAbstractor().get_equivalence_classes(eval_datas)
+                data = ConcreteSceneAbstractor.get_equivalence_classes(eval_datas)
                 found_length = len(data)
                 for equiv_class in MSR_EQUIV_CLASSES[vessel_num]:
                     ass_clause = equiv_class.get_asymmetric_clause()

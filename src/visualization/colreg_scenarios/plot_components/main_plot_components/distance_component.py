@@ -2,7 +2,7 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
-from asv_utils import N_MILE_TO_M_CONVERSION
+from utils.asv_utils import N_MILE_TO_M_CONVERSION
 
 
 class DistanceComponent(PlotComponent):

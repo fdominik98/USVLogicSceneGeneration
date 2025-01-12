@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import N_MILE_TO_M_CONVERSION
+from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from evaluation.proximity_evaluator import TrajProximityMetric
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 

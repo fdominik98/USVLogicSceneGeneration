@@ -1,29 +1,36 @@
-from dataclasses import dataclass, asdict, field
-import json
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Type
+
+from logical_level.models.actor_variable import OSVariable, TSVariable, VesselVariable
+from utils.serializable import Serializable
 
 @dataclass(frozen=True)
-class ConcreteVessel:
+class ConcreteVessel(Serializable):
     id: int
     is_os : bool
     length: float
     radius: float
     max_speed: float
     breadth: Optional[float] = None
-    max_turning_angle: float = field(init=False)
-    max_acceleration: float = field(init=False)
     
-    # Based on STANDARDS FOR SHIP MANOEUVRABILITY
-    def __post_init__(self):
-        object.__setattr__(self, 'max_turning_angle', self.max_speed / 2.5 * self.length)
-        object.__setattr__(self, 'max_acceleration', self.max_speed**2 / (2* 15 * self.length))
-
-    def to_json(self) -> str:
-        """Serialize the class instance to a JSON string."""
-        return json.dumps(asdict(self))
-
+    def __repr__(self):
+        return f'ConcreteVessel({self.id})'
+    
+    @property
+    def max_turning_angle(self) -> float:
+        return self.max_speed / 2.5 * self.length
+    
+    @property
+    def max_acceleration(self) -> float:
+        return self.max_speed**2 / (2* 15 * self.length)
+    
+    @property
+    def logical_variable(self) -> VesselVariable:
+        if self.is_os:
+            return OSVariable(self.id)
+        else:
+            return TSVariable(self.id)
+        
     @classmethod
-    def from_json(cls, json_string: str):
-        """Deserialize a JSON string back into an instance of the class."""
-        data = json.loads(json_string)
-        return cls(**data)
+    def from_dict(cls: Type['ConcreteVessel'], data: Dict[str, Any]) -> 'ConcreteVessel':
+        return ConcreteVessel(**data)

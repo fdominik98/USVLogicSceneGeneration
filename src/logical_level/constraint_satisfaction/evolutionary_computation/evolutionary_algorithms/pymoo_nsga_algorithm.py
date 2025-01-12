@@ -10,7 +10,7 @@ from pymoo.core.result import Result
 import matplotlib.pyplot as plt
 import matplotlib
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import EPSILON
+from utils.asv_utils import EPSILON
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from pymoo.core.callback import Callback
@@ -23,7 +23,7 @@ class NSGAProblem(ElementwiseProblem):
     def __init__(self,logical_scenario: LogicalScenario, eval_data : EvaluationData):
         self.aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)           
         super().__init__(n_var=logical_scenario.all_variable_num,  # Number of decision variables
-                        n_obj=self.aggregate.obj_num,  # Number of objective functions
+                        n_obj=self.aggregate.object_num,  # Number of objective functions
                         n_constr=0,  # Number of constraints
                         xl=logical_scenario.xl, # Lower bounds for variables
                         xu=logical_scenario.xu)  # Upper bounds for variables

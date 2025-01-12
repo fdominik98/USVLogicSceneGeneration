@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from matplotlib.legend import Legend
 import numpy as np
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import KNOT_TO_MS_CONVERSION
+from utils.asv_utils import KNOT_TO_MS_CONVERSION
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):

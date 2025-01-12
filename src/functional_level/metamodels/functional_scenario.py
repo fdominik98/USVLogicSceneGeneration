@@ -2,12 +2,10 @@ from dataclasses import dataclass, field
 from itertools import combinations
 from typing import Dict, List, Set, Tuple
 import copy
+from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
     HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation)
-
-@dataclass(frozen=True)
-class FuncObject():
-    id : int    
+   
 @dataclass(frozen=True)
 class FunctionalScenario():
     os_interpretation : OSInterpretation = OSInterpretation()
@@ -25,9 +23,9 @@ class FunctionalScenario():
                 for func_object in interpretation:
                     object_set.add(func_object)
         object.__setattr__(self, 'func_objects', sorted(list(object_set), key=lambda x: x.id))
-        head_on_interpretation_temp = copy(self.head_on_interpretation)
-        for tup in head_on_interpretation_temp:
-            self.head_on_interpretation.add(tup)
+        head_on_interpretation_temp = copy.deepcopy(self.head_on_interpretation)
+        for o1, o2 in head_on_interpretation_temp:
+            self.head_on_interpretation.add(o1, o2)
         
     
     @property
@@ -62,6 +60,15 @@ class FunctionalScenario():
         return self.ts_interpretation.contains(o)
     
     @property
+    def os_object(self) -> FuncObject:
+        return self.os_interpretation.next
+    
+    @property
+    def object_num(self) -> int:
+        return len(self.func_objects)
+        
+    
+    @property
     def all_object_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
         return {(oi, oj) for oi, oj in combinations(self.func_objects, 2)}
     
@@ -70,7 +77,7 @@ class FunctionalScenario():
         not_in_colreg_pairs : Set[Tuple[FuncObject, FuncObject]] = set()
         for o1, o2 in self.all_object_pairs:
             if not self.in_colreg_rel(o1, o2):
-                not_in_colreg_pairs.add(o1, o2)
+                not_in_colreg_pairs.add((o1, o2))
         return not_in_colreg_pairs
     
     def shape_hash(self, hops: int = 1) -> int:

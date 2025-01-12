@@ -1,3 +1,3 @@
-from functional_level.models.model_utils import TS1, TS2, TS3, generate_abstract_models
+from functional_level.models.model_parser import ModelParser
 
-four_vessel_interactions = generate_abstract_models([TS1, TS2, TS3])
+four_vessel_interactions = ModelParser.load_4_vessel_scenarios()

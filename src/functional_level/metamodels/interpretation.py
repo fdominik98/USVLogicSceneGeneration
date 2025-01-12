@@ -6,7 +6,7 @@ from functional_level.metamodels.functional_scenario import FuncObject
 @dataclass(frozen=True)
 class Interpretation(ABC):
     name : str = ''
-    _data : Set[tuple]
+    _data : Set[tuple] = field(default_factory=set)
     
     def __len__(self):
         return len(self._data)
@@ -22,36 +22,44 @@ class Interpretation(ABC):
         pass
 
     @abstractmethod
-    def add(self, objects):
+    def _add(self, objects):
         pass
         
-@dataclass()
+@dataclass(frozen=True)
 class UnaryInterpretation(Interpretation, ABC):
-    _data : Set[Tuple[FuncObject]]
+    _data : Set[Tuple[FuncObject]] = field(default_factory=set)
     
     def contains(self, object : FuncObject) -> bool:
         return (object,) in self._data
     
+    def _add(self, objects : Tuple[FuncObject]):
+        self._data.add(objects) 
+        
     def add(self, object : FuncObject):
-        self._data.add((object,))       
-   
+        self._add((object,))
+        
+    @property
+    def next(self) -> FuncObject:
+        return next(iter(self._data))[0]
     
-@dataclass()
+@dataclass(frozen=True)
 class BinaryInterpretation(Interpretation, ABC):
-    _data : Set[Tuple[FuncObject, FuncObject]]
+    _data : Set[Tuple[FuncObject, FuncObject]] = field(default_factory=set)
     
     def contains(self, objects : Tuple[FuncObject, FuncObject]) -> bool:
         return objects in self._data
     
-    def add(self, objects : Tuple[FuncObject, FuncObject]):
+    def _add(self, objects : Tuple[FuncObject, FuncObject]):
         self._data.add(objects)
         
+    def add(self, o1 : FuncObject, o2 : FuncObject):
+        self._add((o1, o2))
+        
     def get_tuples(self, o1 : Optional[FuncObject] = None, o2 : Optional[FuncObject] = None):
-        tuples : Set[Tuple[FuncObject, FuncObject]] = set()
-        for _o1, _o2 in self._data:
-            if (o1 == _o1 or None) and (o2 == _o2 or None):
-                tuples.add((_o1, _o2))
-        return tuples
+        return {
+            (t1, t2) for t1, t2 in self._data
+            if (o1 is None or o1 == t1) and (o2 is None or o2 == t2)
+        }
     
     def get_relation_descs(self, o : FuncObject) -> Set[Tuple[str, int, FuncObject]]:
         descs : Set[Tuple[str, int, FuncObject]] = set()
@@ -62,27 +70,27 @@ class BinaryInterpretation(Interpretation, ABC):
                 descs.add((self.name, 2, _o1))
         return descs
     
-@dataclass()
+@dataclass(frozen=True)
 class VesselInterpretation(UnaryInterpretation, ABC):
     pass
 
-@dataclass()
+@dataclass(frozen=True)
 class OSInterpretation(VesselInterpretation):
     name : str = field(default='OS', init=False)
 
-@dataclass()
+@dataclass(frozen=True)
 class TSInterpretation(VesselInterpretation):
     name : str = field(default='TS', init=False)
 
-@dataclass()
+@dataclass(frozen=True)
 class HeadOnInterpretation(BinaryInterpretation):
     name : str = field(default='HeadOn', init=False)
 
-@dataclass()
+@dataclass(frozen=True)
 class CrossingFromPortInterpretation(BinaryInterpretation):
     name : str = field(default='Crossing', init=False)
 
-@dataclass()
+@dataclass(frozen=True)
 class OvertakingInterpretation(BinaryInterpretation):
     name : str = field(default='Overtaking', init=False)
 

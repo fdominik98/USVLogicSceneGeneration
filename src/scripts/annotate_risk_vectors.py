@@ -1,6 +1,8 @@
-from typing import Dict, List
+from typing import List
+from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from concrete_level.data_parser import EvalDataParser
-from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilder
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
+from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from evaluation.risk_evaluation import RiskVector
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 
@@ -19,10 +21,11 @@ done = 0
 START_FROM = 0
 
 def info(data : EvaluationData):
-    print(f'''Measurement: {data.measurement_name}, Algorithm: {data.algorithm_desc}, Config name: {data.config_name} 
+    print(f'''Measurement: {data.measurement_name}, Algorithm: {data.algorithm_desc}, Config name: {data.scenario_name} 
             Config Group: {data.config_group}. Done {done}, Skipped: {skipped}, ({done + skipped} / {len(eval_datas)}, {(done + skipped) / len(eval_datas) * 100:.1f} %)''')
 
 for i, eval_data in enumerate(eval_datas):
+    
     if i < START_FROM:
         if eval_data.best_scene.danger_sector is not None:
             done += 1
@@ -33,15 +36,13 @@ for i, eval_data in enumerate(eval_datas):
         continue
     
     if eval_data.best_fitness_index > 0.0:
-        eval_data.best_scene.danger_sector = None
+        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build()
         skipped += 1
         print('Not optimal solution, skipped.')
     else:    
-        risk_vector = RiskVector(eval_data.best_scene)
-        eval_data.best_scene.dcpa = risk_vector.risk_vector[0]
-        eval_data.best_scene.tcpa = risk_vector.risk_vector[1]
-        eval_data.best_scene.danger_sector = risk_vector.risk_vector[2]
-        eval_data.best_scene.proximity_index = risk_vector.risk_vector[3]
+        risk_vector = RiskVector(ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data))
+        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build(risk_vector.dcpa,
+                     risk_vector.tcpa, risk_vector.danger_sector, risk_vector.proximity_index)
         done += 1
     eval_data.save_to_json()
     info(eval_data)

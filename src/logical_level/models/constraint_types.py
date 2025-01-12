@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 import numpy as np
-from asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE
+from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE
 
 class ConstraintType(ABC):
     def __init__(self, name : str, negated : bool, max_value : float) -> None:

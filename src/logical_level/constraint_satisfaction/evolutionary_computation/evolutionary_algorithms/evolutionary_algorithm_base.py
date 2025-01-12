@@ -9,27 +9,19 @@ import numpy as np
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod
-from functional_level.models.usv_env_desc_list import USV_ENV_DESC_LIST
-from asv_utils import ASSET_FOLDER
+from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilder
+from utils.file_system_utils import ASSET_FOLDER
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 
 
 class EvolutionaryAlgorithmBase(ABC):
-    def __init__(self, measurement_name: str, algorithm_desc : str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, algorithm_desc : str, functional_scenarios: List[FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         self.measurement_name = measurement_name
         self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'        
-        
-        self.functional_scenarios : List[FunctionalScenario] = []
-        for config in functional_scenarios:
-            if isinstance(config, str):
-                self.functional_scenarios.append(USV_ENV_DESC_LIST[config])
-            elif isinstance(config, FunctionalScenario):
-                self.functional_scenarios.append(config)
-            else:
-                raise Exception('Unsupported functional scenario type.')
+        self.functional_scenarios : List[FunctionalScenario] = functional_scenarios
         self.test_config = test_config
         self.number_of_runs = number_of_runs
         self.warmups = warmups
@@ -49,15 +41,14 @@ class EvolutionaryAlgorithmBase(ABC):
                 results[-1].append(res)
         return results
          
-    def evaluate(self, config : FunctionalScenario, save : bool) -> EvaluationData:
+    def evaluate(self, functional_scenario : FunctionalScenario, save : bool) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
-            logical_scenario = LogicalScenario(config, init_method=eval_data.init_method)
+            logical_scenario = LogicalScenarioBuilder.build_from_functional(functional_scenario, init_method=eval_data.init_method)
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
-            eval_data.config_name = config.name
-            eval_data.timestamp = datetime.now().isoformat()
-            eval_data.config_group = config.group
+            eval_data.scenario_name = functional_scenario.name
+            eval_data.timestamp = datetime.now().isoformat()            
             
             initial_pop = logical_scenario.get_population(eval_data.population_size)            
             some_input = self.init_problem(logical_scenario, initial_pop, eval_data)
@@ -102,7 +93,7 @@ class EvolutionaryAlgorithmBase(ABC):
         asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
-        file_path=f"{asset_folder}/{eval_data.config_name}_{eval_data.timestamp.replace(':','-')}.json"
+        file_path=f"{asset_folder}/{eval_data.scenario_name}_{eval_data.timestamp.replace(':','-')}.json"
         eval_data.path = file_path
         eval_data.save_to_json()
         

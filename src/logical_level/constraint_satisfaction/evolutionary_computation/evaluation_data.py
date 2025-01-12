@@ -1,13 +1,14 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
+import json
 import pprint
 from typing import Optional, List
 from concrete_level.models.concrete_scene import ConcreteScene
-import jsonpickle
+from utils.serializable import Serializable
 
-@dataclass()
-class EvaluationData:
+@dataclass(frozen=False)
+class EvaluationData(Serializable):
     algorithm_desc: Optional[str] = None
-    config_name: Optional[str] = None
+    scenario_name: Optional[str] = None
     random_seed: Optional[int] = None
     evaluation_time: Optional[float] = None
     number_of_generations: Optional[int] = None
@@ -33,31 +34,31 @@ class EvaluationData:
     best_scene: Optional[ConcreteScene] = None    
 
     def save_to_json(self, path2=None):
-        json_str = jsonpickle.encode(self, indent=1)
         if self.path is None:
             if path2 is None:
                 raise Exception('No path provided')
             with open(path2, "w") as file:
-                file.write(json_str)
+                json.dump(self.to_dict(), file, indent=4) 
         else:
             with open(self.path, 'w') as file:
-                file.write(json_str)
+                dict = self.to_dict()
+                json.dump(dict, file, indent=4) 
 
-    @classmethod
-    def load_from_json(cls, file_path: str):
-        with open(file_path, "r") as file:
-            json_str = file.read()
-            return jsonpickle.decode(json_str)
-        
     @classmethod
     def load_dict_from_json(cls, file_path: str) -> dict:
-        return asdict(cls.load_from_json(file_path))
+        with open(file_path, "r") as file:
+            return json.load(file)
+        
+    @classmethod
+    def load_from_json(cls, file_path: str) -> 'EvaluationData':
+        return cls.from_dict(EvaluationData.load_dict_from_json(file_path))
+        
 
     def __str__(self) -> str:
-        return pprint.pformat(dict(sorted(asdict(self).items())))
+        return pprint.pformat(dict(sorted(self.to_dict().items())))
     
     def __repr__(self) -> str:
-        return pprint.pformat(dict(sorted(asdict(self).items())))
+        return pprint.pformat(dict(sorted(self.to_dict().items())))
 
     
     

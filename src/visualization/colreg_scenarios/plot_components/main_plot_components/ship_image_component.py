@@ -2,7 +2,7 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import ASSET_FOLDER
+from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 from scipy.ndimage import rotate

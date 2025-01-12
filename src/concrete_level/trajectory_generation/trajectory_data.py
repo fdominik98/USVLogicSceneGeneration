@@ -4,6 +4,9 @@ from typing import Optional, Dict
 import jsonpickle
 from concrete_level.models.trajectories import Trajectories
 
+jsonpickle.set_encoder_options('json', sort_keys=True, indent=1)
+jsonpickle.set_decoder_options('json', strict=False)
+
 @dataclass
 class TrajectoryData:
     algorithm_desc: Optional[str] = None
@@ -23,7 +26,7 @@ class TrajectoryData:
     trajectories: Optional[Trajectories] = None
 
     def save_to_json(self, path2=None):
-        json_str = jsonpickle.encode(self, indent=1)
+        json_str = jsonpickle.encode(self)
         if self.path is None:
             if path2 is None:
                 raise Exception('No path provided')

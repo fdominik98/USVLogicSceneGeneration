@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from typing import List
 import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
-from logical_level.models.relation_constraints import RelationConstrClause
+from logical_level.models.relation_constraints import RelationConstrComposite
 from logical_level.models.actor_variable import ActorVariable
 
 @dataclass(frozen=True)
 class LogicalScenario():
     initializer : InstanceInitializer
-    relation_constr_clause : RelationConstrClause
+    relation_constraint : RelationConstrComposite
     xl : List[float]
     xu : List[float]   
     

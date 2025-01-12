@@ -23,10 +23,10 @@ class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
             problem = NSGAProblem(logical_scenario, eval_data)
             initial_population = Population.new("X", initial_population)
             
-            if problem.aggregate.obj_num > eval_data.population_size:
-                eval_data.population_size = problem.aggregate.obj_num
+            if problem.aggregate.object_num > eval_data.population_size:
+                eval_data.population_size = problem.aggregate.object_num
             
-            ref_dirs = get_reference_directions("das-dennis", problem.aggregate.obj_num, n_partitions=1)
+            ref_dirs = get_reference_directions("das-dennis", problem.aggregate.object_num, n_partitions=1)
             # Define the NSGA-III algorithm
             algorithm = NSGA3(ref_dirs, pop_size=eval_data.population_size,
                               crossover=SBX(eta=eval_data.crossover_eta, prob=eval_data.crossover_prob,),

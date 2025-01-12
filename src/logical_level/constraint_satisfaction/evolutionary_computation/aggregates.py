@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import List
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.logical_scenario import LogicalScenario
@@ -6,19 +5,21 @@ from abc import ABC, abstractmethod
 import numpy as np
 from logical_level.models.penalty import Penalty
 
-dataclass(frozen=True)
 class Aggregate(ABC):
-    logical_scenario : LogicalScenario
-    minimize : bool
-    name : str
+    name = 'unspecified'
+    
+    def __init__(self, logical_scenario : LogicalScenario, minimize : bool):
+        super().__init__()
+        self.logical_scenario = logical_scenario
+        self.minimize = minimize
         
     @property
     def sign(self):
         return 1.0 if self.minimize else -1.0
     
-    @abstractmethod
     @property
-    def obj_num(self) -> int:
+    @abstractmethod
+    def object_num(self) -> int:
         pass
         
     @abstractmethod    
@@ -27,7 +28,7 @@ class Aggregate(ABC):
     
     def derive_penalty(self, individual : np.ndarray) -> Penalty :
         assignments = Assignments(self.logical_scenario.actor_vars).update_from_individual(individual)
-        penalty = self.logical_scenario.relation_constr_clause.evaluate_penalty(assignments)
+        penalty = self.logical_scenario.relation_constraint.evaluate_penalty(assignments)
         return penalty
     
     def _signed_penalty(self, penalty) -> float:
@@ -35,8 +36,8 @@ class Aggregate(ABC):
      
     @staticmethod
     def factory(logical_scenario : LogicalScenario, name : str, minimize):
-        if name == VesselAggregate.name:
-            return VesselAggregate(logical_scenario, minimize)      
+        if name == ActorAggregate.name:
+            return ActorAggregate(logical_scenario, minimize)      
         elif name == AggregateAll.name:
             return AggregateAll(logical_scenario, minimize)     
         elif name == AggregateAllSwarm.name:
@@ -46,9 +47,11 @@ class Aggregate(ABC):
         else:
             raise Exception('Unknown aggregate')
 
-@dataclass(frozen=True)    
-class VesselAggregate(Aggregate):
-    name : str = field(default='vessel', init=False)
+class ActorAggregate(Aggregate):
+    name = 'actor'
+    
+    def __init__(self, logical_scenario, minimize):
+        super().__init__(logical_scenario, minimize)
     
     @property
     def object_num(self) -> int:
@@ -56,11 +59,13 @@ class VesselAggregate(Aggregate):
 
     def evaluate(self, individual : np.ndarray):
         penalty = self.derive_penalty(individual)
-        return (penalty.actor_penalties[var] for var in self.logical_scenario.actor_vars) 
+        return tuple((penalty.actor_penalties[var] for var in self.logical_scenario.actor_vars))
     
-@dataclass(frozen=True)
 class AggregateAll(Aggregate):
-    name : str = field(default='all', init=False)
+    name =  'all'
+    
+    def __init__(self, logical_scenario, minimize):
+        super().__init__(logical_scenario, minimize)
         
     @property
     def object_num(self) -> int:
@@ -70,9 +75,11 @@ class AggregateAll(Aggregate):
         fitness = self._signed_penalty(self.derive_penalty(individual).total_penalty)
         return (fitness, )
     
-@dataclass(frozen=True)
 class AggregateAllSwarm(AggregateAll):
-    name : str = field(default='all_swarm', init=False)
+    name = 'all_swarm'
+    
+    def __init__(self, logical_scenario, minimize):
+        super().__init__(logical_scenario, minimize)
         
     def evaluate(self, individual : np.ndarray):
         fitnesses : List[float] = []
@@ -81,15 +88,17 @@ class AggregateAllSwarm(AggregateAll):
         return np.array(fitnesses)
     
     
-@dataclass(frozen=True)
 class CategoryAggregate(Aggregate):
-    name : str = field(default='category', init=False)
+    name = 'category'
+    
+    def __init__(self, logical_scenario, minimize):
+        super().__init__(logical_scenario, minimize)
         
     @property
     def object_num(self) -> int:
-        return 3
+        return Penalty.category_num
 
     def evaluate(self, individual : np.ndarray):
         penalty = self.derive_penalty(individual)
-        return (self._signed_penalty(pen) for pen in penalty.total_categorical_penalties)
+        return tuple((self._signed_penalty(pen) for pen in penalty.categorical_penalties))
    

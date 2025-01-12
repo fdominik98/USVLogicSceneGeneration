@@ -2,7 +2,7 @@ import os
 from PIL import Image
 import numpy as np
 
-from asv_utils import ASSET_FOLDER
+from utils.file_system_utils import ASSET_FOLDER
 
 gradient_image_path = f'{ASSET_FOLDER}/images/gradient.png'
 striped_image_path = f'{ASSET_FOLDER}/images/distr.png'

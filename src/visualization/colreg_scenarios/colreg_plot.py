@@ -1,10 +1,12 @@
-from typing import Dict, List, Optional, Tuple
+from typing import List, Union
 import matplotlib.pyplot as plt
-from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import *
+from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
+from concrete_level.models.concrete_scene import ConcreteScene
+from concrete_level.models.trajectories import Trajectories
+from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
+from utils.asv_utils import *
 from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import AggregateAll
 from visualization.my_plot import MyPlot
-from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.legend_component import LegendComponent
 from visualization.colreg_scenarios.colreg_animation import ColregAnimation
@@ -19,41 +21,35 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone
 from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
 
 class TrajectoryReceiver():
-    def __init__(self,logical_scenario: LogicalScenario, trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None) -> None:
-        self.logical_scenario = env
-        if trajectories is None:
-            self.trajectories = self.gen_trajectories()
+    def __init__(self, trajectories : Union[Trajectories, ConcreteScene]) -> None:
+        
+        if isinstance(trajectories, ConcreteScene):
+            self.trajectories = TrajectoryBuilder.default_trajectory_from_scene(trajectories)
+            self.default_trajectories : Trajectories = self.trajectories
         else:
-            self.trajectories = trajectories            
+            self.trajectories : Trajectories = trajectories            
+            self.default_trajectories = TrajectoryBuilder.default_trajectory_from_scene(self.trajectories.get_scene(0))
             
-    def gen_trajectories(self):
-        interpolator = PathInterpolator()
-        for v in self.logical_scenario.vessel_vars:
-            interpolator.add_path(v, [])
-        return interpolator.interpolated_paths
-    
-    def convert_to_states(self) -> List[List[float]]:
-        return [[element for key in sorted(self.trajectories.keys()) for element in self.trajectories[key][i]]
-                for i in range(len(next(iter(self.trajectories.values()))))
-        ]
+        self.initial_scene = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
+        self.logical_scenario = self.initial_scene.logical_scenario
+        self.functional_scenario = self.initial_scene.functional_scenario
+        self.concrete_scenario = self.initial_scene.concrete_scene
         
-
 class ColregPlot(TrajectoryReceiver, MyPlot):  
-    def __init__(self,logical_scenario: LogicalScenario, 
-                 trajectories : Optional[Dict[int, List[Tuple[float, float, float, float, float]]]] = None): 
+    def __init__(self, trajectories : Union[Trajectories, ConcreteScene]): 
         MyPlot.__init__(self)
-        TrajectoryReceiver.__init__(self, logical_scenario, trajectories)
+        TrajectoryReceiver.__init__(self, trajectories)
         
-        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.logical_scenario)
-        self.drawing_component = DrawingComponent(self.fig, self.ax, self.logical_scenario)
-        self.legend_component = LegendComponent(self.ax, self.logical_scenario)
-        self.vo_cone_component = VOConeComponent(self.ax, self.logical_scenario)
-        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.logical_scenario)
-        self.distance_component = DistanceComponent(self.ax, self.logical_scenario)
-        self.angle_circle_component = AngleCircleComponent(self.ax, self.logical_scenario, linewidth=1.5)
-        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.logical_scenario)          
-        self.prime_component = PrimeComponent(self.ax, self.logical_scenario)
-        self.ship_image_component = ShipImageComponent(self.ax, self.logical_scenario)    
+        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.trajectories)
+        self.drawing_component = DrawingComponent(self.fig, self.ax, self.trajectories)
+        self.legend_component = LegendComponent(self.ax, self.trajectories)
+        self.vo_cone_component = VOConeComponent(self.ax, self.trajectories)
+        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.trajectories)
+        self.distance_component = DistanceComponent(self.ax, self.trajectories)
+        self.angle_circle_component = AngleCircleComponent(self.ax, self.trajectories, linewidth=1.5)
+        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.trajectories)          
+        self.prime_component = PrimeComponent(self.ax, self.trajectories)
+        self.ship_image_component = ShipImageComponent(self.ax, self.trajectories)    
         
         self.components : List[PlotComponent] = [
             self.ship_markings_component,
@@ -70,7 +66,7 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         
         self.draw()  
          
-        self.animation = ColregAnimation(self.fig, self.logical_scenario, self.components, self.convert_to_states())
+        self.animation = ColregAnimation(self.fig, self.trajectories, self.components)
         
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
@@ -88,13 +84,11 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
     def draw(self):
         for component in self.components:
             component.draw()
-        
-        self.title = '\n'.join([rel.name for rel in self.logical_scenario.relations if rel.has_os()])
-        for rel in self.logical_scenario.relations:
-            rel.info() 
+            
+        self.title = '\n'.join([rel.name for rel in self.functional_scenario if rel.has_os()])
             
         aggregate = AggregateAll(env=self.logical_scenario, minimize=True)
-        print(f'Penalty: {aggregate.loose_evaluate()}')                      
+        print(aggregate.derive_penalty(individual=self.concrete_scenario.individual).info)                      
                         
         self.set_layout()    
         

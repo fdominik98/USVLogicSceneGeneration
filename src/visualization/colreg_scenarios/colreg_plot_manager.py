@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import ASSET_FOLDER
+from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.trajectory_metrics_plot import TrajectoryMetricsPlot
 from visualization.colreg_scenarios.colreg_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from visualization.colreg_scenarios.plot_components.plot_component import light_colors

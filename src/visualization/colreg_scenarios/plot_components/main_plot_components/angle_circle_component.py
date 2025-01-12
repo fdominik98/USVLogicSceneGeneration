@@ -2,8 +2,7 @@ from typing import List
 from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.models.logical_scenario import LogicalScenario
-from asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
-from functional_level.metamodels.functional_scenario import Vessel
+from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 
 
@@ -30,7 +29,7 @@ class AngleCircleComponent(PlotComponent):
             self.one_draw(o, self.zorder, light_colors[o.id])
             
     
-    def one_draw(self, o : Vessel,  zorder : int, circle_color):
+    def one_draw(self, o,  zorder : int, circle_color):
         
         # Draw two lines centered on the vector
         circle_line1 = self.draw_line(o.p, o.v_norm(), -self.angle_circle_slice_1 / 2, circle_color, self.angle_circle_radius, zorder)  # Left line
@@ -79,7 +78,7 @@ class AngleCircleComponent(PlotComponent):
         return self.graphs
     
     
-    def update_one(self, o : Vessel):
+    def update_one(self, o):
         self.circle_graphs[o.id].set_center(o.p)
         self.circle_graphs[o.id].set_radius(self.angle_circle_radius)
         

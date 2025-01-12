@@ -9,5 +9,5 @@ colreg_plot_manager : Optional[ColregPlotManager] = None
 
 # Main loop to listen for data and create windows
 while dash_thread.is_alive():
-   logical_scenario= dash_thread.data_queue.get()  # Wait for data with a timeout
-    colreg_plot_manager = ColregPlotManager(env)
+   scenario = dash_thread.data_queue.get()  # Wait for data with a timeout
+   colreg_plot_manager = ColregPlotManager(scenario)
