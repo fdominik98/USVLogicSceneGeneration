@@ -1,13 +1,12 @@
-from typing import Dict, List
+from typing import List
 from matplotlib import pyplot as plt
-from logical_level.models.logical_scenario import LogicalScenario
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
-from utils.asv_utils import N_MILE_TO_M_CONVERSION
-
+from concrete_level.models.concrete_scene import ConcreteScene
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class DrawingComponent(PlotComponent):
-    def __init__(self, fig : plt.Figure, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
-        super().__init__(ax, env)
+    def __init__(self, fig : plt.Figure, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
+        super().__init__(ax, scenario)
         self.fig = fig
         self.draw_x : List[List[float]] = []
         self.draw_y : List[List[float]] = []
@@ -15,7 +14,7 @@ class DrawingComponent(PlotComponent):
     def do_draw(self):
         pass
         
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         return self.graphs 
     
     # Function to handle mouse clicks

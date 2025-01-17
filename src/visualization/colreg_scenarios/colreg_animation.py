@@ -1,9 +1,7 @@
-import copy
 from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from concrete_level.models.trajectories import Trajectories
-from logical_level.models.logical_scenario import LogicalScenario
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 TWO_HOURS = 2 * 60 * 60
@@ -37,7 +35,7 @@ class ColregAnimation():
         self.real_time_value = ANIM_REAL_TIME
         self.sim_time_value = ANIM_SIM_TIME
 
-        self.trajectories = copy.deepcopy(trajectories)
+        self.trajectories = trajectories
         # for id in self.trajectories.keys():
         #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
             
@@ -51,19 +49,17 @@ class ColregAnimation():
         self.init_anim()
         while self.anim_frame_counter < self.anim_max_frames():
             frame_index = int(self.anim_frame_counter * REAL_TIME * self.speed_up_ratio())
-            if frame_index < len(self.trajectories) and not self.is_anim_paused:   
-                self.dyn_env.do_update(self.trajectories[frame_index])
+            if frame_index < self.trajectories.timespan and not self.is_anim_paused:   
+                scene = self.trajectories.get_scene(frame_index)
                 self.anim_frame_counter += 1
-            yield self.dyn_env
+            yield scene
         
-    def update_graphs(self, data):
+    def update_graphs(self, scene):
         #self.auto_scale()
-        new_env = data
-        return [graph for component in self.components for graph in component.update(new_env) if graph.get_visible()]
+        return [graph for component in self.components for graph in component.update(scene) if graph.get_visible()]
             
             
     def init_anim(self):
-        self.dyn_env = copy.deepcopy(self.logical_scenario)
         self.anim_frame_counter = 0
         self.is_anim_paused = True
         return [graph for component in self.components for graph in component.reset()]

@@ -5,7 +5,7 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 
 class RiskMetricComponent(PlotComponent):
     def __init__(self, ax : plt.Axes,logical_scenario: LogicalScenario, metrics : Dict[int, List[float]], y_label : str, x_label : bool, reference_metrics : Optional[Dict[int, List[float]]] = None) -> None:
-        super().__init__(ax, env)
+        super().__init__(ax, scenario)
         self.metrics = metrics
         self.reference_metrics = reference_metrics
         self.line_graphs : Dict[int, plt.Line2D] = {}
@@ -45,5 +45,5 @@ class RiskMetricComponent(PlotComponent):
         self.ax.set_ylim(-0.05, 1.05) 
         self.ax.legend()
         
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         return self.graphs

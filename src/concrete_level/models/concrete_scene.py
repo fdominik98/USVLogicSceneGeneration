@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from itertools import combinations
 from typing import Any, Dict, List, Optional, Set, Type
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.models.actor_variable import VesselVariable
+from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.relation_constraints import DoCollide, MayCollide
 from utils.serializable import Serializable
 
@@ -24,6 +25,10 @@ class ConcreteScene(Serializable):
     @property
     def actors(self):
         return self._data.keys()
+    
+    @property
+    def all_actor_pairs(self):
+        return {(ai, aj) for ai, aj in combinations(self.actors, 2)}
 
     @property
     def actor_states(self):
@@ -77,7 +82,7 @@ class ConcreteScene(Serializable):
     def non_os(self) -> Set[ConcreteVessel]:
         return {actor for actor in self.actors if not actor.is_os}
     
-    def assignments(self, variables : List[VesselVariable]) -> Assignments:
+    def assignments(self, variables : List[ActorVariable]) -> Assignments:
         if len(self) != len(variables):
             raise ValueError('Variable and actor numbers do not match.')
         for actor, var in zip(self.sorted_keys, variables):

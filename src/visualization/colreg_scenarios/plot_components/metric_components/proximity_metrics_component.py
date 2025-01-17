@@ -11,7 +11,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
     dist_treshold = 1 * N_MILE_TO_M_CONVERSION
     
     def __init__(self, ax : plt.Axes,logical_scenario: LogicalScenario, metrics : List[TrajProximityMetric], reference_metrics : Optional[List[TrajProximityMetric]] = None) -> None:
-        super().__init__(ax, env)
+        super().__init__(ax, scenario)
         self.metrics = metrics
         self.reference_metrics = reference_metrics
         self.line_graphs : Dict[str, plt.Line2D] = {}
@@ -89,7 +89,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
         offset = (ymax - ymin) * 0.03  # 5% of the y-axis range
         self.ax.text(metric.len / 2, self.get_threshold2_y() + offset, self.get_threshold2_label(), ha='center', va='center', fontsize=11, horizontalalignment='center')  
         
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         return self.graphs 
 
 class DistanceAxesComponent(ProximityMetricComponent):

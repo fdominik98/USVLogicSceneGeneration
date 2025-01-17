@@ -30,26 +30,26 @@ class TrajectoryReceiver():
             self.trajectories : Trajectories = trajectories            
             self.default_trajectories = TrajectoryBuilder.default_trajectory_from_scene(self.trajectories.get_scene(0))
             
-        self.initial_scene = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
-        self.logical_scenario = self.initial_scene.logical_scenario
-        self.functional_scenario = self.initial_scene.functional_scenario
-        self.concrete_scenario = self.initial_scene.concrete_scene
+        self.scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
+        self.logical_scenario = self.scenario.logical_scenario
+        self.functional_scenario = self.scenario.functional_scenario
+        self.concrete_scenario = self.scenario.concrete_scene
         
 class ColregPlot(TrajectoryReceiver, MyPlot):  
     def __init__(self, trajectories : Union[Trajectories, ConcreteScene]): 
         MyPlot.__init__(self)
         TrajectoryReceiver.__init__(self, trajectories)
         
-        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.trajectories)
-        self.drawing_component = DrawingComponent(self.fig, self.ax, self.trajectories)
-        self.legend_component = LegendComponent(self.ax, self.trajectories)
-        self.vo_cone_component = VOConeComponent(self.ax, self.trajectories)
-        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.trajectories)
-        self.distance_component = DistanceComponent(self.ax, self.trajectories)
-        self.angle_circle_component = AngleCircleComponent(self.ax, self.trajectories, linewidth=1.5)
-        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.trajectories)          
-        self.prime_component = PrimeComponent(self.ax, self.trajectories)
-        self.ship_image_component = ShipImageComponent(self.ax, self.trajectories)    
+        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.scenario)
+        self.drawing_component = DrawingComponent(self.fig, self.ax, self.scenario)
+        self.legend_component = LegendComponent(self.ax, self.scenario)
+        self.vo_cone_component = VOConeComponent(self.ax, self.scenario)
+        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.scenario)
+        self.distance_component = DistanceComponent(self.ax, self.scenario)
+        self.angle_circle_component = AngleCircleComponent(self.ax, self.scenario, linewidth=1.5)
+        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.scenario)          
+        self.prime_component = PrimeComponent(self.ax, self.scenario)
+        self.ship_image_component = ShipImageComponent(self.ax, self.scenario)    
         
         self.components : List[PlotComponent] = [
             self.ship_markings_component,
@@ -85,7 +85,7 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         for component in self.components:
             component.draw()
             
-        self.title = '\n'.join([rel.name for rel in self.functional_scenario if rel.has_os()])
+        #self.title = '\n'.join([rel.name for rel in self.functional_scenario if rel.has_os()])
             
         aggregate = AggregateAll(env=self.logical_scenario, minimize=True)
         print(aggregate.derive_penalty(individual=self.concrete_scenario.individual).info)                      

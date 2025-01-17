@@ -52,6 +52,10 @@ class Trajectories:
         for vessel, states in self.items():
             sb.set_state(vessel, states[t])
         return sb.build()
+    
+    @property
+    def timespan(self) -> int:
+        return 0 if len(self._data) == 0 else len(self._data.values())
    
     @property 
     def initial_scene(self) -> ConcreteScene:

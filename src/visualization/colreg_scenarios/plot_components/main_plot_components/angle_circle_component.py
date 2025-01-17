@@ -12,7 +12,7 @@ class AngleCircleComponent(PlotComponent):
     angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
     
     def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario, linewidth=0.8, radius_ratio = 10) -> None:
-        super().__init__(ax, env)
+        super().__init__(ax, scenario)
         self.circle_graphs : List[plt.Circle] = []
         self.line1_graphs : List[plt.Line2D] = []
         self.line2_graphs : List[plt.Line2D] = []
@@ -71,7 +71,7 @@ class AngleCircleComponent(PlotComponent):
         end_point = origin + length * rotated_direction
         return [origin[0], end_point[0]], [origin[1], end_point[1]]
             
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for o in new_env.actor_vars:
             self.update_one(o)
             

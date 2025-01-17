@@ -6,8 +6,8 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 
 
 class AdditionalVOConeComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
-        super().__init__(ax, env)
+    def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
+        super().__init__(ax, scenario)
         self.circle_graphs : Dict[str, plt.Circle] = {}
         self.line1_graphs : Dict[str, plt.Line2D] = {}
         self.line2_graphs : Dict[str, plt.Line2D] = {}
@@ -46,7 +46,7 @@ class AdditionalVOConeComponent(PlotComponent):
             self.graphs += [vo_circle, line1, line2]
             
             
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for rel in new_env.relations:
             if rel.vessel2.is_OS():
                 o1 = rel.vessel2

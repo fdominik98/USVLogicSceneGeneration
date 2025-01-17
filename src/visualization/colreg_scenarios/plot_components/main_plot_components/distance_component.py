@@ -6,8 +6,8 @@ from utils.asv_utils import N_MILE_TO_M_CONVERSION
 
 
 class DistanceComponent(PlotComponent):
-    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
-        super().__init__(ax, env)
+    def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
+        super().__init__(ax, scenario)
         self.text_graphs : Dict[str, plt.Text] = {}
         self.line_graphs : Dict[str, plt.Line2D] = {}
         self.graphs_by_rels = [self.text_graphs, self.line_graphs]
@@ -27,7 +27,7 @@ class DistanceComponent(PlotComponent):
             
             self.graphs += [text, line]
         
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for rel in new_env.relations:
             o1 = rel.vessel1
             o2 = rel.vessel2   

@@ -6,7 +6,7 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 
 class PrimeComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, logical_scenario : LogicalScenario) -> None:
-        super().__init__(ax, env)
+        super().__init__(ax, scenario)
         self.p12_vec_graphs: Dict[str, plt.Quiver] = {}
         self.p21_vec_graphs: Dict[str, plt.Quiver] = {}
         self.zorder = -15

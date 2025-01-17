@@ -8,7 +8,7 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.angle_c
 
 class CenteredAngleCircleComponent(AngleCircleComponent):
     radius_ratio = 1.7
-    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
+    def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
         super().__init__(ax, logical_scenario, linewidth=2.0, radius_ratio = self.radius_ratio)
         self.wedge_sterns : List[patches.Wedge]  = []
         self.wedge_bows : List[patches.Wedge]  = []
@@ -52,7 +52,7 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
             self.graphs += [wedge_stern, wedge_masthead, wedge_bow]
         super().do_draw()
             
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for o in new_env.actor_vars:
             angle1_masthead = np.degrees(o.heading + MASTHEAD_LIGHT_ANGLE / 2)
             angle2_masthead = np.degrees(o.heading - MASTHEAD_LIGHT_ANGLE / 2)

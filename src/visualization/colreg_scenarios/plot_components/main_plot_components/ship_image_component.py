@@ -12,8 +12,8 @@ class ShipImageComponent(PlotComponent):
     ZOOM = 0.36
     img_dir = f'{ASSET_FOLDER}/images'
     
-    def __init__(self, ax: plt.Axes,logical_scenario: LogicalScenario) -> None:
-        super().__init__(ax, env)
+    def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
+        super().__init__(ax, scenario)
         self.image = mpimg.imread(f'{self.img_dir}/ship2.png')
         self.ship_image_graphs : List[AnnotationBbox] = []
         self.ship_offset_images : List[OffsetImage] = []
@@ -37,7 +37,7 @@ class ShipImageComponent(PlotComponent):
             
             self.graphs += [line, ab]
             
-    def do_update(self, new_env : LogicalScenario) -> List[plt.Artist]:
+    def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for o in new_env.actor_vars:
             xs = self.xs[o.id]
             ys = self.ys[o.id]
