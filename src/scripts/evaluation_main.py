@@ -1,5 +1,6 @@
 from typing import List
 
+from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm, CategoryAggregate
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
@@ -8,7 +9,6 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
-from functional_level.models.MSR.three_vessel_interactions import three_vessel_interactions
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 
 NUMBER_OF_RUNS = {3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
@@ -23,7 +23,7 @@ VERBOSE = False
 START_FROM = [0,0,0]
 
 measurement_names= ['test_3_vessel_scenarios']
-interactions = [three_vessel_interactions]
+interactions = [FunctionalModelManager.get_3_vessel_scenarios()]
 
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
@@ -83,7 +83,7 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         else:
             interactions_to_run = interaction 
         
-        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].object_num] / len(interactions_to_run))
+        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].object_number] / len(interactions_to_run))
         one_interaction = [algo(measurement_name=measurement_name, functional_scenarios=interactions_to_run, test_config=config,
                                 number_of_runs=number_of_runs_per_interaction, warmups=WARMUPS, verbose=VERBOSE)]
         tests += one_interaction

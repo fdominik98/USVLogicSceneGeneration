@@ -45,6 +45,7 @@ class EvolutionaryAlgorithmBase(ABC):
         try:
             eval_data = deepcopy(self.test_config)
             logical_scenario = LogicalScenarioBuilder.build_from_functional(functional_scenario, init_method=eval_data.init_method)
+            eval_data.vessel_number = functional_scenario.object_number
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
             eval_data.scenario_name = functional_scenario.name

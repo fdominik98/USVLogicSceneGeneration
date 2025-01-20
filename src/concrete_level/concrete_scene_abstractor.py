@@ -4,6 +4,7 @@ from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
 from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation
+from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
@@ -80,6 +81,20 @@ class ConcreteSceneAbstractor():
             equivalence_classes[functional_scenario.shape_hash()] = functional_scenario
             
         return set(equivalence_classes.values())
+    
+    @staticmethod            
+    def get_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number) -> Dict[int, Tuple[FunctionalScenario, int]]:
+        equivalence_classes : Dict[int, FunctionalScenario] = {scenario.shape_hash() : (scenario, 0) for scenario in FunctionalModelManager.get_x_vessel_scenarios(vessel_number)}
+        for scene in scenes:
+            scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene).functional_scenario
+            hash = scenario.shape_hash()
+            if hash not in equivalence_classes:
+                print('WARNING: new equivalence class found')
+                equivalence_classes[hash] = (scenario, 0)
+            else:
+                _, count = equivalence_classes[hash]
+                equivalence_classes[hash] = (scenario, count + 1)
+        return equivalence_classes
     
     @staticmethod
     def get_abstractions_from_eval(eval_data : EvaluationData) -> MultiLevelScenario:

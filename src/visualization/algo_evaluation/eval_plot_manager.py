@@ -23,6 +23,7 @@ class PlotWrapper():
         return self.plot
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
+        
         self.eval_datas = sorted(eval_datas, key=lambda x: (x.config_group, x.algorithm_desc, x.aggregate_strat, x.vessel_number))
         generator = TableGenerator(eval_datas)
         generator.generate_runtime_summary_table()

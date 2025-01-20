@@ -44,6 +44,7 @@ class ScenarioAnimation():
         self.reset_anim_frame_counter()
         self.refresh_current_scene(0)
         
+        self.is_anim_paused = True
         self.anim = None
         self.init_anim()
         
@@ -88,8 +89,7 @@ class ScenarioAnimation():
             
     def init_anim(self):
         self.reset_anim_frame_counter()
-        self.refresh_current_scene(0)
-        self.is_anim_paused = True
+        self.refresh_current_scene(0)        
         return [graph for component in self.components for graph in component.reset()]
     
     
@@ -97,11 +97,12 @@ class ScenarioAnimation():
     def toggle_anim(self, event):
         if event.key == 'down':
             self.init_anim()
+            self.is_anim_paused = True
             print('Animation reset')
         elif event.key == 'up':
             if self.is_anim_paused:
-                self.is_anim_paused = False
                 if self.anim == None:
+                    self.is_anim_paused = False
                     self.start()
                 print('Animation started')
             else:

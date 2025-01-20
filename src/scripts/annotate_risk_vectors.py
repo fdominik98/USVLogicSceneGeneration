@@ -27,7 +27,7 @@ def info(data : EvaluationData):
 for i, eval_data in enumerate(eval_datas):
     
     if i < START_FROM:
-        if eval_data.best_scene.danger_sector is not None:
+        if eval_data.best_scene.has_risk_metrics:
             done += 1
         else:
             skipped += 1
@@ -41,8 +41,8 @@ for i, eval_data in enumerate(eval_datas):
         print('Not optimal solution, skipped.')
     else:    
         risk_vector = RiskVector(ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data))
-        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build(risk_vector.dcpa,
-                     risk_vector.tcpa, risk_vector.danger_sector, risk_vector.proximity_index)
+        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build(risk_vector.min_dcpa,
+                     risk_vector.min_tcpa, risk_vector.danger_sector, risk_vector.max_proximity_index)
         done += 1
     eval_data.save_to_json()
     info(eval_data)

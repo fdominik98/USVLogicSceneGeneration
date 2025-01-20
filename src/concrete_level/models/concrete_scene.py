@@ -16,6 +16,10 @@ class ConcreteScene(Serializable):
     danger_sector : Optional[float] = None
     proximity_index : Optional[float] = None
     
+    @property
+    def has_risk_metrics(self):
+        return all(value is not None for value in [self.dcpa, self.tcpa, self.danger_sector, self.proximity_index])
+    
     def __post_init__(self):
         object.__setattr__(self, '_data', dict(self._data))
             
@@ -68,7 +72,7 @@ class ConcreteScene(Serializable):
         return individual
     
     @property
-    def vessel_num(self) -> int:
+    def vessel_number(self) -> int:
         return len(self)
     
     @property

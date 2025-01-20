@@ -16,9 +16,9 @@ class RiskVector():
         #self.safe_navigation_area_index = self.nav_risk_vector.find_safe_navigation_area_index()
         self.danger_sector = self.danger_sectors[scenario.concrete_scene.os]
         
-        self.dcpa = self.max_proximity_index.dcpa
-        self.tcpa = self.max_proximity_index.tcpa
-        self.proximity_index = self.max_proximity_index.proximity_index
+        self.min_dcpa = self.max_proximity_index.dcpa
+        self.min_tcpa = self.max_proximity_index.tcpa
+        self.max_proximity_index = self.max_proximity_index.proximity_index
         
         #self.distance = (pow(np.e, np.linalg.norm(self.risk_vector) / np.sqrt(3)) - 1) / (np.e - 1)
         

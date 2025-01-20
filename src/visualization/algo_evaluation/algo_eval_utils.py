@@ -68,8 +68,8 @@ def config_group_mapper(config_groups : List[str]):
 def group_colors(size):
     # Convert the colors to RGB format
     color1_rgb = np.array((0, 0.5, 1))
-    if size == 1:
-        return color1_rgb
+    # if size == 1:
+    #     return color1_rgb
     color2_rgb = np.array((1, 0.5, 0))
     # Generate a range of colors by linear interpolation
     colors = [color1_rgb + (color2_rgb - color1_rgb) * i / (size - 1) for i in range(size)]

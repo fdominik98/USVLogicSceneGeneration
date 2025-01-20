@@ -26,12 +26,12 @@ class TableGenerator():
         self.success_rate_adjusted  : List[List[float]] = [[], []]
         
         for runtime_group_measurements, success_rate_group_measurements in zip(self.runtimes.values(), self.success_rates.values()): 
-            if len(runtime_group_measurements) != 2:
-                break
             runtime_data = list(runtime_group_measurements.values())
             success_rate_data = list(success_rate_group_measurements.values())
             group_labels = config_group_mapper(list(runtime_group_measurements.keys())) 
             
+            if len(runtime_group_measurements) != 2:
+                break
             mean_msr = np.mean(runtime_data[0])
             mean_sbo = np.mean(runtime_data[1])
             succ_msr = np.mean(success_rate_data[0])
@@ -49,6 +49,8 @@ class TableGenerator():
                 self.stat_sign_success.append(stat_signif_success)
             
     def generate_stat_sign_table(self,):
+        if len(self.average_runtimes[0]) == 0:
+            return
         latex_code = "\\begin{tabular}{ccccc}\n"
         latex_code += "    \\toprule\n"
         latex_code += "    \(K\) & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])
@@ -64,6 +66,8 @@ class TableGenerator():
     
     
     def generate_runtime_summary_table(self):
+        if len(self.average_runtimes[0]) == 0:
+            return
         latex_code = "\\begin{tabular}{ccccc}\n"
         latex_code += "    \\toprule\n"
         latex_code += "    \(K\) & {} & {} & {} & {} \\\\\n".format(*[3, 4, 5, 6])

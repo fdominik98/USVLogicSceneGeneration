@@ -64,7 +64,7 @@ class FunctionalScenario():
         return self.os_interpretation.next
     
     @property
-    def object_num(self) -> int:
+    def object_number(self) -> int:
         return len(self.func_objects)
         
     

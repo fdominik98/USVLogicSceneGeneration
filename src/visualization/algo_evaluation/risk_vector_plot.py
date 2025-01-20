@@ -2,18 +2,24 @@ from collections import defaultdict
 from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
+from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from utils.asv_utils import EPSILON
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
 
 class RiskVectorPlot(MyPlot):  
-    metric_map_index = {
-        'dcpa' : 0,
-        'tcpa' : 1,
-        'ds' : 2,
-        'proximity' : 3,
-    }
+    
+    @staticmethod
+    def metric_map_type(scene: ConcreteScene, metric_type: str):
+        metric_mapping = {
+            'dcpa': scene.dcpa,
+            'tcpa': scene.tcpa,
+            'ds': scene.danger_sector,
+            'proximity': scene.proximity_index,
+        }
+        if metric_type not in metric_mapping:
+            raise ValueError('Unrecognized type.')
+        return metric_mapping[metric_type]
     
     metric_map_title = {
         'dcpa' : r'DCPA of OS to closest TS (s)',
@@ -35,13 +41,15 @@ class RiskVectorPlot(MyPlot):
         self.eval_datas = eval_datas
         self.risk_indices : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
         for eval_data in eval_datas:
+            if eval_data.best_scene is None:
+                continue
             if eval_data.best_fitness_index == 0.0:                
-                if eval_data.risk_vector == None:
+                if not eval_data.best_scene.has_risk_metrics:
                     raise Exception('None vector found among optimal solutions')
-                data = eval_data.risk_vector[self.metric_map_index[metric]]
+                data = self.metric_map_type(eval_data.best_scene, metric)
                 self.risk_indices[eval_data.vessel_number][eval_data.config_group].append(data)
             else: 
-                self.risk_indices[eval_data.vessel_number][eval_data.config_group] = self.risk_indices[eval_data.vessel_number][eval_data.config_group]
+                self.risk_indices[eval_data.vessel_number][eval_data.config_group] = self.risk_indices[eval_data.best_scene.vessel_number][eval_data.config_group]
             
         self.vessel_num_labels = vessel_number_mapper(list(self.risk_indices.keys()))
         MyPlot.__init__(self)

@@ -10,6 +10,7 @@ class EvaluationData(Serializable):
     algorithm_desc: Optional[str] = None
     scenario_name: Optional[str] = None
     random_seed: Optional[int] = None
+    vessel_number: Optional[int] = None
     evaluation_time: Optional[float] = None
     number_of_generations: Optional[int] = None
     population_size: Optional[int] = None
@@ -31,7 +32,7 @@ class EvaluationData(Serializable):
     best_fitness_index: Optional[float] = None  # best_fitness_index
     aggregate_strat: Optional[str] = None  # aggregation strategy
     config_group: Optional[str] = None  # config group
-    best_scene: Optional[ConcreteScene] = None    
+    best_scene: ConcreteScene = None    
 
     def save_to_json(self, path2=None):
         if self.path is None:

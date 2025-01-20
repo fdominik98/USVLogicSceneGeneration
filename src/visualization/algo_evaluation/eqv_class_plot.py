@@ -1,12 +1,11 @@
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
 from visualization.my_plot import MyPlot
-from functional_level.models.usv_env_desc_list import MSR_EQUIV_CLASSES
 
 class EqvClassPlot(MyPlot):  
     def __init__(self, eval_datas : List[EvaluationData]): 
@@ -23,7 +22,7 @@ class EqvClassPlot(MyPlot):
         
     def create_fig(self):
         vessel_num_count = len(self.config_data)
-        fig, axes = plt.subplots(2, vessel_num_count, figsize=(vessel_num_count * 3, 4))
+        fig, axes = plt.subplots(2, 2, figsize=(2 * 3, 4))
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
@@ -33,25 +32,20 @@ class EqvClassPlot(MyPlot):
 
         for i, (vessel_num, group_measurements) in enumerate(self.config_data.items()):
             group_labels = config_group_mapper(list(group_measurements.keys()))            
-            colros = group_colors(len(group_labels))
+            colors = group_colors(len(group_labels))
             
             for j, (meas_label, eval_datas) in enumerate(group_measurements.items()):
-                data = ConcreteSceneAbstractor.get_equivalence_classes(eval_datas)
-                found_length = len(data)
-                for equiv_class in MSR_EQUIV_CLASSES[vessel_num]:
-                    ass_clause = equiv_class.get_asymmetric_clause()
-                    ass_clause.remove_non_ego_ralations()
-                    if ass_clause not in data:
-                        data[ass_clause] = 0
-                data = dict(sorted(data.items(), key=lambda item: item[1], reverse=True))
-                labels = range(1, len(data.keys()) + 1)
-                values = [int(v) for v in data.values()]
+                equivalence_classes = ConcreteSceneAbstractor.get_equivalence_class_distribution([eval_data.best_scene for eval_data in eval_datas], vessel_num)
+                found_length = sum(1 for _, count in equivalence_classes.values() if count > 0)
+                equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
+                labels = range(1, len(equivalence_classes.keys()) + 1)
+                values = [int(count) for _, count in equivalence_classes.values()]
                 
                 if isinstance(axes, np.ndarray):
                     axi : plt.Axes = axes[j][i]
                 else:
                     axi : plt.Axes = axes  
-                bars : plt.BarContainer = axi.bar(labels, values, color=colros[j], edgecolor='black', linewidth=0)
+                bars : plt.BarContainer = axi.bar(labels, values, color=colors[j], edgecolor='black', linewidth=0)
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])
                 if i == 0:
@@ -64,8 +58,8 @@ class EqvClassPlot(MyPlot):
                 xticks = [int(t) for t in xticks] 
                 axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False)             
             
-                coverage_percent = found_length/len(data)*100
-                axi.text(0.98, 0.98, f'covered shapes: {found_length}/{len(data)}\n{coverage_percent:.1f}%', 
+                coverage_percent = found_length/len(equivalence_classes)*100
+                axi.text(0.98, 0.98, f'covered shapes: {found_length}/{len(equivalence_classes)}\n{coverage_percent:.1f}%', 
                 transform=axi.transAxes,  # Use axis coordinates
                 verticalalignment='top', # Align text vertically to the top
                 horizontalalignment='right',
