@@ -29,14 +29,14 @@ class ShipMarkingsComponent(PlotComponent):
             # Plot the positions
             dot_label = f'{vessel}\; p: ({state.p[0]:.1f}, {state.p[1]:.1f}), r: {vessel.radius:.1f} m'
             ship_dot = self.ax.scatter(state.p[0], state.p[1], color=colors[vessel.id], s=self.DYNAMIC_ZOOM, label=rf'${dot_label}$', zorder=self.zorder)
-            self.ship_dot_graphs[vessel](ship_dot)
+            self.ship_dot_graphs[vessel] = ship_dot
             
             angle = f'h: {np.degrees(state.heading):.1f}^\circ'
             speed = f'sp: {(state.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
-            velocity_label =f'{vessel}\; {angle}, {speed}'
+            velocity_label = f'{vessel}\; {angle}, {speed}'
             # Plot the velocity vector with their actual lengths
             ship_vel = self.ax.quiver(state.p[0], state.p[1], state.v[0], state.v[1], angles='xy', scale_units='xy', scale=1, color=colors[vessel.id], label=rf'${velocity_label}$', zorder=self.zorder-10)
-            self.velocity_graphs[vessel] = (ship_vel)
+            self.velocity_graphs[vessel] = ship_vel
             
             
             self.graphs += [radius_circle, ship_vel, ship_dot]

@@ -57,3 +57,6 @@ class MultiLevelScenario():
     def os_non_os_pairs(self) -> Set[Tuple[ConcreteVessel, ConcreteVessel]]:
         os = self.concrete_scene.os
         return {(os, actor) for actor in self.concrete_scene.non_os}
+    
+    def get_vessel_name(self, vessel : ConcreteVessel) -> str:
+        return self.to_variable(vessel).name

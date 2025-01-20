@@ -1,7 +1,9 @@
 from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
-from logical_level.models.logical_scenario import LogicalScenario
+from concrete_level.models.concrete_scene import ConcreteScene
+from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
@@ -15,43 +17,43 @@ class ShipImageComponent(PlotComponent):
     def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
         super().__init__(ax, scenario)
         self.image = mpimg.imread(f'{self.img_dir}/ship2.png')
-        self.ship_image_graphs : List[AnnotationBbox] = []
-        self.ship_offset_images : List[OffsetImage] = []
-        self.traj_line_graphs : List[plt.Line2D] = []
-        self.xs : Dict[int, List[float]] = {o.id : [] for o in env.vessel_vars}
-        self.ys : Dict[int, List[float]] = {o.id : [] for o in env.vessel_vars}
+        self.ship_image_graphs : Dict[ConcreteVessel, AnnotationBbox] = {}
+        self.ship_offset_images : Dict[ConcreteVessel, OffsetImage] = {}
+        self.traj_line_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
+        self.xs : Dict[ConcreteVessel, List[float]] = {vessel : [] for vessel in scenario.concrete_scene.actors}
+        self.ys : Dict[ConcreteVessel, List[float]] = {vessel : [] for vessel in scenario.concrete_scene.actors}
         self.zorder = -4
         
     def do_draw(self):
-        for o in self.logical_scenario.vessel_vars:           
-            (line,) = self.ax.plot(self.xs[o.id], self.ys[o.id], ':', lw=3, color=light_colors[o.id], zorder=self.zorder-10)
-            self.traj_line_graphs.append(line)
+        for vessel, state in self.scenario.concrete_scene.items():         
+            (line,) = self.ax.plot(self.xs[vessel], self.ys[vessel], ':', lw=3, color=light_colors[vessel.id], zorder=self.zorder-10)
+            self.traj_line_graphs[vessel] = line
             
             # Rotate and plot image
-            rotated_image = np.clip(rotate(self.image, np.degrees(o.heading)-90, reshape=True), 0, 1)
+            rotated_image = np.clip(rotate(self.image, np.degrees(state.heading)-90, reshape=True), 0, 1)
             image_box = OffsetImage(rotated_image, zoom = self.ZOOM, alpha=1)
-            ab = AnnotationBbox(image_box, o.p, xybox= o.p, xycoords='data', frameon = False, zorder=self.zorder)
+            ab = AnnotationBbox(image_box, state.p, xybox= state.p, xycoords='data', frameon = False, zorder=self.zorder)
             self.ax.add_artist(ab)
-            self.ship_image_graphs.append(ab)
-            self.ship_offset_images.append(image_box)
+            self.ship_image_graphs[vessel] = ab
+            self.ship_offset_images[vessel] = image_box
             
             self.graphs += [line, ab]
             
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
-        for o in new_env.actor_vars:
-            xs = self.xs[o.id]
-            ys = self.ys[o.id]
-            if o.p[0] not in xs or o.p[1] not in ys:
-                xs.append(o.p[0])
-                ys.append(o.p[1])                
+        for vessel, state in scene.items():
+            xs = self.xs[vessel]
+            ys = self.ys[vessel]
+            if state.x not in xs or state.y not in ys:
+                xs.append(state.x)
+                ys.append(state.y)                
 
-            self.traj_line_graphs[o.id].set_data(xs, xs)
+            self.traj_line_graphs[vessel].set_data(xs, xs)
             
-            rotated_image = np.clip(rotate(self.image, np.degrees(o.heading)-90, reshape=True), 0, 1)
+            rotated_image = np.clip(rotate(self.image, np.degrees(state.heading)-90, reshape=True), 0, 1)
             
-            self.ship_offset_images[o.id].set_data(rotated_image)
-            self.ship_image_graphs[o.id].xybox = (o.p[0], o.p[1])
-            self.ship_image_graphs[o.id].xy = (o.p[0], o.p[1])
+            self.ship_offset_images[vessel].set_data(rotated_image)
+            self.ship_image_graphs[vessel].xybox = (state.x, state.y)
+            self.ship_image_graphs[vessel].xy = (state.x, state.y)
         return self.graphs
     
     

@@ -6,7 +6,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.models.f3 import three_vessel_interactions
 from functional_level.models.MSR.six_vessel_interactions import six_vessel_interactions
-from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 
 de_config = EvaluationData(population_size = 10, mutate_prob = 0.8, crossover_prob=0.5,
                           timeout=10, init_method='uniform', random_seed=22, aggregate_strat='all')

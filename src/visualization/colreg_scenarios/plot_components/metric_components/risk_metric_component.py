@@ -1,16 +1,20 @@
 from typing import Dict, List, Optional
 from matplotlib import pyplot as plt
-from logical_level.models.logical_scenario import LogicalScenario
+from concrete_level.models.concrete_scene import ConcreteScene
+from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
+from evaluation.risk_evaluation import RiskVector
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
 
 class RiskMetricComponent(PlotComponent):
-    def __init__(self, ax : plt.Axes,logical_scenario: LogicalScenario, metrics : Dict[int, List[float]], y_label : str, x_label : bool, reference_metrics : Optional[Dict[int, List[float]]] = None) -> None:
+    def __init__(self, ax : plt.Axes, scenario: MultiLevelScenario, risk_vectors : List[RiskVector], y_label : str, x_label : bool, ref_risk_vectors : Optional[List[RiskVector]] = None) -> None:
         super().__init__(ax, scenario)
-        self.metrics = metrics
-        self.reference_metrics = reference_metrics
-        self.line_graphs : Dict[int, plt.Line2D] = {}
-        self.reference_line_graphs : Dict[int, plt.Line2D] = {}
+        self.risk_vectors = risk_vectors
+        self.ref_risk_vectors = ref_risk_vectors
+        self.line_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
+        self.reference_line_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
         self.ax = ax
+        self.length = len(self.risk_vectors)
         
         #self.ax.set_title('Collision risk evolution')
         if x_label:
@@ -19,29 +23,23 @@ class RiskMetricComponent(PlotComponent):
         self.ax.set_aspect('auto', adjustable='box')      
     
     def do_draw(self):
-        if self.reference_metrics is not None:
-            for id, metric in self.reference_metrics.items():
-                if len(metric) == 0:
-                    continue
-                vessel = self.logical_scenario.get_vessel_by_id(id)
-                x = range(0, len(metric))
-                line, = self.ax.plot(x, metric, color=light_colors[id], linestyle=':', label=f'{vessel.name} no intervention', linewidth=2)
-                self.reference_line_graphs[id] = line
+        x = range(0, self.length)
+        for vessel in self.scenario.concrete_scene.actors:
+            if self.length == 0:
+                break
+            if self.ref_risk_vectors is not None:
+                y = [rv.danger_sectors[vessel] for rv in self.ref_risk_vectors if vessel in rv.danger_sectors]
+                line, = self.ax.plot(x, y, color=light_colors[vessel.id], linestyle=':', label=f'{self.scenario.get_vessel_name(vessel)} no intervention', linewidth=2)
+                self.reference_line_graphs[vessel] = line
                 self.graphs += [line]
-                
-                
-        for id, metric in self.metrics.items():
-            if len(metric) == 0:
-                continue
-            vessel = self.logical_scenario.get_vessel_by_id(id)
-            x = range(0, len(metric))
-            line, = self.ax.plot(x, metric, color=colors[id], linewidth=1.7, label=f'{vessel.name} COLREGS compliant', linestyle='-')
-            self.line_graphs[id] = line
+            
+            y = [rv.danger_sectors[vessel] for rv in self.risk_vectors if vessel in rv.danger_sectors]
+            line, = self.ax.plot(x, y, color=colors[vessel.id], linewidth=1.7, label=f'{self.scenario.get_vessel_name(vessel)} COLREGS compliant', linestyle='-')
+            self.line_graphs[vessel] = line
             self.graphs += [line]   
-           
+            
         self.ax.margins(x=0.2, y=0.2) 
-        longest = max(list(self.metrics.values()), key=len)
-        self.ax.set_xlim(0, len(longest))
+        self.ax.set_xlim(0, self.length)
         self.ax.set_ylim(-0.05, 1.05) 
         self.ax.legend()
         

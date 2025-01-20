@@ -1,15 +1,12 @@
-from typing import List, Union
+from typing import List
 import matplotlib.pyplot as plt
-from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
-from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.trajectories import Trajectories
-from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
+from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.asv_utils import *
 from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import AggregateAll
 from visualization.my_plot import MyPlot
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.legend_component import LegendComponent
-from visualization.colreg_scenarios.colreg_animation import ColregAnimation
+from visualization.colreg_scenarios.scenario_animation import ScenarioAnimation
 from visualization.colreg_scenarios.plot_components.main_plot_components.ship_image_component import ShipImageComponent
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.prime_component import PrimeComponent
@@ -19,37 +16,23 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.angle_c
 from visualization.colreg_scenarios.plot_components.main_plot_components.distance_component import DistanceComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone_component import VOConeComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
-
-class TrajectoryReceiver():
-    def __init__(self, trajectories : Union[Trajectories, ConcreteScene]) -> None:
         
-        if isinstance(trajectories, ConcreteScene):
-            self.trajectories = TrajectoryBuilder.default_trajectory_from_scene(trajectories)
-            self.default_trajectories : Trajectories = self.trajectories
-        else:
-            self.trajectories : Trajectories = trajectories            
-            self.default_trajectories = TrajectoryBuilder.default_trajectory_from_scene(self.trajectories.get_scene(0))
-            
-        self.scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
-        self.logical_scenario = self.scenario.logical_scenario
-        self.functional_scenario = self.scenario.functional_scenario
-        self.concrete_scenario = self.scenario.concrete_scene
-        
-class ColregPlot(TrajectoryReceiver, MyPlot):  
-    def __init__(self, trajectories : Union[Trajectories, ConcreteScene]): 
+class ScenarioPlot(MyPlot):  
+    def __init__(self, trajectory_manager : TrajectoryManager): 
         MyPlot.__init__(self)
-        TrajectoryReceiver.__init__(self, trajectories)
         
-        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.scenario)
-        self.drawing_component = DrawingComponent(self.fig, self.ax, self.scenario)
-        self.legend_component = LegendComponent(self.ax, self.scenario)
-        self.vo_cone_component = VOConeComponent(self.ax, self.scenario)
-        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.scenario)
-        self.distance_component = DistanceComponent(self.ax, self.scenario)
-        self.angle_circle_component = AngleCircleComponent(self.ax, self.scenario, linewidth=1.5)
-        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.scenario)          
-        self.prime_component = PrimeComponent(self.ax, self.scenario)
-        self.ship_image_component = ShipImageComponent(self.ax, self.scenario)    
+        self.trajectory_manager = trajectory_manager
+        
+        self.ship_markings_component = ShipMarkingsComponent(self.ax, self.trajectory_manager.scenario)
+        self.drawing_component = DrawingComponent(self.fig, self.ax, self.trajectory_manager.scenario)
+        self.legend_component = LegendComponent(self.ax, self.trajectory_manager.scenario)
+        self.vo_cone_component = VOConeComponent(self.ax, self.trajectory_manager.scenario)
+        self.add_vo_cone_component = AdditionalVOConeComponent(self.ax, self.trajectory_manager.scenario)
+        self.distance_component = DistanceComponent(self.ax, self.trajectory_manager.scenario)
+        self.angle_circle_component = AngleCircleComponent(self.ax, self.trajectory_manager.scenario, linewidth=1.5)
+        self.centered_angle_circle_component = CenteredAngleCircleComponent(self.ax, self.trajectory_manager.scenario)          
+        self.prime_component = PrimeComponent(self.ax, self.trajectory_manager.scenario)
+        self.ship_image_component = ShipImageComponent(self.ax, self.trajectory_manager.scenario)    
         
         self.components : List[PlotComponent] = [
             self.ship_markings_component,
@@ -66,7 +49,7 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
         
         self.draw()  
          
-        self.animation = ColregAnimation(self.fig, self.trajectories, self.components)
+        self.animation = ScenarioAnimation(self.fig, self.trajectory_manager.trajectories, self.components)
         
         # Connect the key press event to the toggle function
         self.fig.canvas.mpl_connect('key_press_event', lambda e: self.animation.toggle_anim(e))
@@ -86,9 +69,10 @@ class ColregPlot(TrajectoryReceiver, MyPlot):
             component.draw()
             
         #self.title = '\n'.join([rel.name for rel in self.functional_scenario if rel.has_os()])
+        self.title = self.trajectory_manager.functional_scenario.name
             
-        aggregate = AggregateAll(env=self.logical_scenario, minimize=True)
-        print(aggregate.derive_penalty(individual=self.concrete_scenario.individual).info)                      
+        aggregate = AggregateAll(self.trajectory_manager.logical_scenario, minimize=True)
+        print(aggregate.derive_penalty(individual=self.trajectory_manager.concrete_scene.individual).info)                      
                         
         self.set_layout()    
         

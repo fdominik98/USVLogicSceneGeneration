@@ -48,6 +48,8 @@ class Trajectories:
         return cls(**data)
     
     def get_scene(self, t : int) -> ConcreteScene:
+        if t >= self.timespan:
+            raise ValueError('Timespan out of range.')
         sb = SceneBuilder()
         for vessel, states in self.items():
             sb.set_state(vessel, states[t])
@@ -55,7 +57,7 @@ class Trajectories:
     
     @property
     def timespan(self) -> int:
-        return 0 if len(self._data) == 0 else len(self._data.values())
+        return 0 if len(self._data) == 0 else len(list(self._data.values())[0])
    
     @property 
     def initial_scene(self) -> ConcreteScene:

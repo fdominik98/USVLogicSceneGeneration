@@ -1,6 +1,6 @@
 from typing import List
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
 from concrete_level.data_parser import EvalDataParser, TrajDataParser
 from logical_level.models.logical_scenario import LoadedEnvironment
@@ -18,6 +18,6 @@ while(True):
     
     data = eval_data_models[0]
    logical_scenario= LoadedEnvironment(eval_data_models[0])
-    ColregPlotManager(logical_scenario, trajectories=traj_data_models[0].trajectories)
+    ScenarioPlotManager(logical_scenario, trajectories=traj_data_models[0].trajectories)
         
         

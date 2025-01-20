@@ -50,7 +50,7 @@ class Aggregate(ABC):
 class ActorAggregate(Aggregate):
     name = 'actor'
     
-    def __init__(self, logical_scenario, minimize):
+    def __init__(self, logical_scenario : LogicalScenario, minimize):
         super().__init__(logical_scenario, minimize)
     
     @property
@@ -64,7 +64,7 @@ class ActorAggregate(Aggregate):
 class AggregateAll(Aggregate):
     name =  'all'
     
-    def __init__(self, logical_scenario, minimize):
+    def __init__(self, logical_scenario : LogicalScenario, minimize):
         super().__init__(logical_scenario, minimize)
         
     @property
@@ -78,7 +78,7 @@ class AggregateAll(Aggregate):
 class AggregateAllSwarm(AggregateAll):
     name = 'all_swarm'
     
-    def __init__(self, logical_scenario, minimize):
+    def __init__(self, logical_scenario : LogicalScenario, minimize):
         super().__init__(logical_scenario, minimize)
         
     def evaluate(self, individual : np.ndarray):

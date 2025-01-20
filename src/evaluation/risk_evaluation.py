@@ -1,4 +1,6 @@
+from typing import Dict, List, Tuple
 import numpy as np
+from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
@@ -7,12 +9,12 @@ from logical_level.models.actor_variable import VesselVariable
 
 class RiskVector():
     def __init__(self, scenario: MultiLevelScenario) -> None:
-        self.proximity_vectors = [ProximityRiskIndex(scenario, a1, a2) for a1, a2 in scenario.os_non_os_pairs]
-        self.nav_risk_vector = NavigationRiskIndex(scenario, scenario.concrete_scene.os)
+        self.proximity_vectors : Dict[Tuple[ConcreteVessel, ConcreteVessel], ProximityVector] = {(a1, a2) : ProximityVector(scenario, a1, a2) for a1, a2 in scenario.os_non_os_pairs}
+        self.danger_sectors : Dict[ConcreteVessel, float] = {vessel : NavigationRiskIndex(scenario, vessel).find_danger_sector() for vessel in [scenario.concrete_scene.os]}
             
-        self.max_proximity_index = min(self.proximity_vectors, key=lambda obj: obj.tcpa)
+        self.max_proximity_index = min(self.proximity_vectors.values(), key=lambda obj: obj.tcpa)
         #self.safe_navigation_area_index = self.nav_risk_vector.find_safe_navigation_area_index()
-        self.danger_sector = self.nav_risk_vector.find_danger_sector()
+        self.danger_sector = self.danger_sectors[scenario.concrete_scene.os]
         
         self.dcpa = self.max_proximity_index.dcpa
         self.tcpa = self.max_proximity_index.tcpa
@@ -21,12 +23,12 @@ class RiskVector():
         #self.distance = (pow(np.e, np.linalg.norm(self.risk_vector) / np.sqrt(3)) - 1) / (np.e - 1)
         
 
-class ProximityRiskIndex():
+class ProximityVector():
     def __init__(self, scenario : MultiLevelScenario, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> None:
-        props = scenario.get_geo_props(actor1, actor2)
-        self.dist = props.o_distance
-        self.tcpa = props.tcpa
-        self.dcpa = props.dcpa
+        self.props = scenario.get_geo_props(actor1, actor2)
+        self.dist = self.props.o_distance
+        self.tcpa = self.props.tcpa
+        self.dcpa = self.props.dcpa
         
         dr = 1 * N_MILE_TO_M_CONVERSION
         ts = 10 * 60
@@ -35,11 +37,11 @@ class ProximityRiskIndex():
             self.dcpa_norm = 0
             self.tcpa_norm = 0
         else:       
-            if self.dcpa < props.safety_dist:
+            if self.dcpa < self.props.safety_dist:
                 self.dcpa_norm = 1
             else:
                 #self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - relation.safety_dist)) - 1) / (np.e - 1)
-                self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - props.safety_dist)) - 1) / (np.e - 1)
+                self.dcpa_norm = (pow(np.e, (dr - self.dcpa) / (dr - self.props.safety_dist)) - 1) / (np.e - 1)
             #self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
             self.tcpa_norm = (pow(np.e, (ts - self.tcpa) / ts) - 1) / (np.e - 1)
         if self.dcpa_norm * self.tcpa_norm > 0:
@@ -88,3 +90,14 @@ class NavigationRiskIndex():
                         no_collides += 1
         return (pow(np.e, collides / (collides + no_collides)) - 1) / (np.e - 1)
     
+    
+class TrajectoryRiskEvaluator():
+    def __init__(self, trajectory_manager : TrajectoryManager) -> None:
+        self.trajectory_manager = trajectory_manager
+        self.risk_vectors : List[RiskVector] = []
+        last_vector = RiskVector(trajectory_manager.scenario)
+        for t in range(self.trajectory_manager.timespan):
+            if t % 15 == 0:
+                scenario = self.trajectory_manager.get_scenario(t)
+                last_vector = RiskVector(scenario)
+            self.risk_vectors.append(last_vector)

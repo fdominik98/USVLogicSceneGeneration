@@ -1,8 +1,10 @@
 from typing import List
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
+from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.trajectories import Trajectories
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
+import threading
 
 TWO_HOURS = 2 * 60 * 60
 TWO_MINUTES = 2 * 60
@@ -13,7 +15,7 @@ ANIM_SIM_TIME = TWO_MINUTES / 4
 FRAMES_PER_SEC = 25.0
 REAL_TIME = 1.0 / FRAMES_PER_SEC
 
-class ColregAnimation():
+class ScenarioAnimation():
     
     def speed_up_ratio(self):
         return self.real_time_value / self.sim_time_value
@@ -36,11 +38,36 @@ class ColregAnimation():
         self.sim_time_value = ANIM_SIM_TIME
 
         self.trajectories = trajectories
-        # for id in self.trajectories.keys():
-        #     self.trajectories[id] = PathInterpolator.interpolate_headings(self.trajectories[id])
-            
+        
+        self.__frame_counter_lock = threading.Lock()
+        self.__current_scene_lock = threading.Lock()
+        self.reset_anim_frame_counter()
+        self.refresh_current_scene(0)
+        
         self.anim = None
         self.init_anim()
+        
+    def refresh_current_scene(self, frame_index : int):
+        with self.__current_scene_lock:
+            self.__current_scene = self.trajectories.get_scene(frame_index)
+            
+    def increment_anim_frame_counter(self):
+        with self.__frame_counter_lock:
+            self.__anim_frame_counter += 1
+            
+    def reset_anim_frame_counter(self):
+        with self.__frame_counter_lock:
+            self.__anim_frame_counter = 0
+    
+    @property        
+    def anim_frame_counter(self) -> int:
+        with self.__frame_counter_lock:
+            return self.__anim_frame_counter
+    
+    @property        
+    def current_scene(self) -> ConcreteScene:
+        with self.__current_scene_lock:
+            return self.__current_scene
             
     def start(self):
         self.anim = FuncAnimation(self.fig, self.update_graphs, self.update_anim, init_func=self.init_anim, blit=True, interval=int((1 / FRAMES_PER_SEC) * 1000), cache_frame_data=False)
@@ -49,10 +76,10 @@ class ColregAnimation():
         self.init_anim()
         while self.anim_frame_counter < self.anim_max_frames():
             frame_index = int(self.anim_frame_counter * REAL_TIME * self.speed_up_ratio())
-            if frame_index < self.trajectories.timespan and not self.is_anim_paused:   
-                scene = self.trajectories.get_scene(frame_index)
-                self.anim_frame_counter += 1
-            yield scene
+            if frame_index < self.trajectories.timespan and not self.is_anim_paused:  
+                self.refresh_current_scene(frame_index) 
+                self.increment_anim_frame_counter()
+            yield self.current_scene
         
     def update_graphs(self, scene):
         #self.auto_scale()
@@ -60,7 +87,8 @@ class ColregAnimation():
             
             
     def init_anim(self):
-        self.anim_frame_counter = 0
+        self.reset_anim_frame_counter()
+        self.refresh_current_scene(0)
         self.is_anim_paused = True
         return [graph for component in self.components for graph in component.reset()]
     

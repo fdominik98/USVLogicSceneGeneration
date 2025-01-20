@@ -5,7 +5,7 @@ from typing import List, Dict
 from utils.file_system_utils import ASSET_FOLDER
 from utils.asv_utils import MAX_COORD
 from functional_level.metamodels.functional_scenario import Vessel
-from visualization.colreg_scenarios.colreg_plot_manager import ColregPlotManager
+from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from concrete_level.models.vessel_order_graph import VesselNode, VesselOrderGraph
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
@@ -45,7 +45,7 @@ if len(data_models) == 0:
 data = data_models[0]
 
 env = LoadedEnvironment(data)
-ColregPlotManager(env)
+ScenarioPlotManager(env)
 
 def run_traj_generation(v_node : VesselNode, interpolator : PathInterpolator):
     o = v_node.vessel
@@ -187,4 +187,4 @@ file_path=f"{asset_folder}/{traj_data.timestamp.replace(':','-')}.json"
 traj_data.path = file_path
 traj_data.save_to_json(file_path=file_path)
 
-ColregPlotManager(logical_scenario, trajectories=traj_data.trajectories)
+ScenarioPlotManager(logical_scenario, trajectories=traj_data.trajectories)

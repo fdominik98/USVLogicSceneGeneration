@@ -5,9 +5,8 @@ from dash import dcc, html
 import queue
 import threading
 import dash
-from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from concrete_level.data_parser import EvalDataParser
-from concrete_level.models.multi_level_scenario import MultiLevelScenario
+from concrete_level.models.concrete_scene import ConcreteScene
 from dash import dash_table, html
 from dash.dependencies import Input, Output
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -15,7 +14,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_d
 class DashThread(threading.Thread):
     def __init__(self) -> None:
         super().__init__(daemon=True, name='Dash Thread')
-        self.data_queue : queue.Queue[MultiLevelScenario] = queue.Queue()
+        self.data_queue : queue.Queue[ConcreteScene] = queue.Queue()
         self.dp = EvalDataParser()
         self.dirs : List[str] = []        
         self.df, self.dirs = self.dp.load_dirs_merged(self.dirs)
@@ -158,8 +157,8 @@ class DashThread(threading.Thread):
             if selected_rows:
                 selected_index = selected_rows[0]
                 row = self.df.iloc[selected_index]
-                scenario = ConcreteSceneAbstractor.get_abstractions_from_eval(EvaluationData.from_dict(row))
-                self.data_queue.put(scenario)
+                eval_data : EvaluationData = EvaluationData.from_dict(row)
+                self.data_queue.put(eval_data.best_scene)
                 return f"Selected Row:\n{pprint.pformat(dict(sorted(row.to_dict().items())))}"
             return "No row selected"
         

@@ -17,7 +17,7 @@ class GeometricProperties():
         self.v12 = self.val1.v - self.val2.v
         
         # Define the norm of the relative position (distance(p1 p2))
-        self.o_distance = max(np.linalg.norm(self.p12), EPSILON)   
+        self.o_distance = float(max(np.linalg.norm(self.p12), EPSILON))
         
         self.cos_p21_v2_theta = np.clip(np.dot(self.p21, self.val2.v) / self.o_distance / self.val2.sp, -1, 1)
         self.angle_p21_v2 = np.arccos(self.cos_p21_v2_theta)        
@@ -34,7 +34,7 @@ class GeometricProperties():
         #self.angle_v12_p12 = np.arccos(self.cos_p12_v12_theta)
         
         self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
-        self.dcpa = np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)) 
+        self.dcpa = float(np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)))
 
 class EvaluationCache(Dict[Tuple[ActorVariable, ActorVariable], GeometricProperties]):
     def __init__(self, assignments : Assignments, *args, **kwargs):
