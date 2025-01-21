@@ -6,7 +6,7 @@ import cliffs_delta
 from scipy.stats import rankdata
 
 class MannWhitneyUCliffDelta():
-    def __init__(self, samples : Dict[str, List[float]]) -> None:
+    def __init__(self, samples : Dict[str, List[float]] = {}) -> None:
         self.samples = samples
         
         pairs = list(itertools.combinations(samples.items(), 2))

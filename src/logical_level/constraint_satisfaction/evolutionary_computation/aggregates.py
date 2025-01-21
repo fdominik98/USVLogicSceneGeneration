@@ -55,7 +55,7 @@ class ActorAggregate(Aggregate):
     
     @property
     def object_num(self) -> int:
-        return int(self.logical_scenario.actor_num)
+        return int(self.logical_scenario.size)
 
     def evaluate(self, individual : np.ndarray):
         penalty = self.derive_penalty(individual)

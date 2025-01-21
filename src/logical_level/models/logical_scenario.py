@@ -4,9 +4,10 @@ import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
 from logical_level.models.relation_constraints import RelationConstrComposite
 from logical_level.models.actor_variable import ActorVariable
+from utils.scenario import Scenario
 
 @dataclass(frozen=True)
-class LogicalScenario():
+class LogicalScenario(Scenario):
     initializer : InstanceInitializer
     relation_constraint : RelationConstrComposite
     xl : List[float]
@@ -17,12 +18,16 @@ class LogicalScenario():
         return self.initializer.actor_vars
     
     @property
-    def actor_num(self) -> int:
+    def size(self) -> int:
         return len(self.actor_vars)
     
     @property
     def all_variable_num(self) -> int:
         return len(self.xl)
+    
+    @property
+    def name(self) -> str:
+        return f'{str(self.size)}vessel'
     
     def get_population(self, pop_size) -> List[List[float]]:
         population = self.initializer.get_population(pop_size=pop_size)

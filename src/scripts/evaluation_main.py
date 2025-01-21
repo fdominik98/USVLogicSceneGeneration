@@ -10,6 +10,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
+from logical_level.models.logical_model_manager import LogicalModelManager
 
 NUMBER_OF_RUNS = {3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
 NUMBER_OF_RUNS = {3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
@@ -24,6 +25,7 @@ START_FROM = [0,0,0]
 
 measurement_names= ['test_3_vessel_scenarios']
 interactions = [FunctionalModelManager.get_3_vessel_scenarios()]
+interactions = [LogicalModelManager.get_3_vessel_scenarios()]
 
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
@@ -35,7 +37,7 @@ ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
 nsga2_vessel_config = EvaluationData(population_size=20, mutate_eta=15, mutate_prob=0.8,
                             crossover_eta=15, crossover_prob=0.8, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
-                            config_group='MSR')
+                            config_group='SBO')
 nsga2_all_config = EvaluationData(population_size=50, mutate_eta=10, mutate_prob=1.0,
                             crossover_eta=20, crossover_prob=0.8, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
@@ -83,7 +85,7 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         else:
             interactions_to_run = interaction 
         
-        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].object_number] / len(interactions_to_run))
+        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].size] / len(interactions_to_run))
         one_interaction = [algo(measurement_name=measurement_name, functional_scenarios=interactions_to_run, test_config=config,
                                 number_of_runs=number_of_runs_per_interaction, warmups=WARMUPS, verbose=VERBOSE)]
         tests += one_interaction

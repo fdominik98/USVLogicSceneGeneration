@@ -4,7 +4,7 @@ import gc
 import traceback
 import os
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import numpy as np
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -14,14 +14,15 @@ from utils.file_system_utils import ASSET_FOLDER
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
+from utils.scenario import Scenario
 
 
 class EvolutionaryAlgorithmBase(ABC):
-    def __init__(self, measurement_name: str, algorithm_desc : str, functional_scenarios: List[FunctionalScenario], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, algorithm_desc : str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         self.measurement_name = measurement_name
-        self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'        
-        self.functional_scenarios : List[FunctionalScenario] = functional_scenarios
+        self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'
+        self.logical_scenarios = [LogicalScenarioBuilder.build(scenario, test_config.init_method) for scenario in scenarios]
         self.test_config = test_config
         self.number_of_runs = number_of_runs
         self.warmups = warmups
@@ -31,24 +32,23 @@ class EvolutionaryAlgorithmBase(ABC):
         self.set_seed(self.test_config.random_seed)
         
         for i in range(self.warmups):
-            res = self.evaluate(self.functional_scenarios[0], False)
+            res = self.evaluate(self.logical_scenarios[0], False)
         
         results : List[List[EvaluationData]] = []
-        for config in self.functional_scenarios:
+        for scenario in self.logical_scenarios:
             results.append([])
             for i in range(self.number_of_runs):
-                res = self.evaluate(config, True)
+                res = self.evaluate(scenario, True)
                 results[-1].append(res)
         return results
          
-    def evaluate(self, functional_scenario : FunctionalScenario, save : bool) -> EvaluationData:
+    def evaluate(self, logical_scenario : LogicalScenario, save : bool) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
-            logical_scenario = LogicalScenarioBuilder.build_from_functional(functional_scenario, init_method=eval_data.init_method)
-            eval_data.vessel_number = functional_scenario.object_number
+            eval_data.vessel_number = logical_scenario.size
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
-            eval_data.scenario_name = functional_scenario.name
+            eval_data.scenario_name = logical_scenario.name
             eval_data.timestamp = datetime.now().isoformat()            
             
             initial_pop = logical_scenario.get_population(eval_data.population_size)            

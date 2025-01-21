@@ -5,9 +5,10 @@ import copy
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
     HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation)
+from utils.scenario import Scenario
    
 @dataclass(frozen=True)
-class FunctionalScenario():
+class FunctionalScenario(Scenario):
     os_interpretation : OSInterpretation = OSInterpretation()
     ts_interpretation : TSInterpretation = TSInterpretation()
     head_on_interpretation : HeadOnInterpretation = HeadOnInterpretation()
@@ -30,7 +31,7 @@ class FunctionalScenario():
     
     @property
     def name(self):
-        return f'{str(len(self.func_objects))}vessel'
+        return f'{str(self.size)}vessel'
     
     def in_colreg_rel(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return self.colreg_rel(o1, o2) or self.colreg_rel(o2, o1)
@@ -64,7 +65,7 @@ class FunctionalScenario():
         return self.os_interpretation.next
     
     @property
-    def object_number(self) -> int:
+    def size(self) -> int:
         return len(self.func_objects)
         
     

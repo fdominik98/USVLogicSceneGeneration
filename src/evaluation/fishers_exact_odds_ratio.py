@@ -4,7 +4,7 @@ from scipy.stats import fisher_exact
 
 
 class FisherExactOddsRatio():
-    def __init__(self, samples : Dict[str, List[int]]) -> None:
+    def __init__(self, samples : Dict[str, List[int]] = {}) -> None:
         self.samples = samples
         
         pairs = list(itertools.combinations(samples.items(), 2))

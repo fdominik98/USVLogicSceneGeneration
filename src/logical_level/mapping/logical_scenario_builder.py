@@ -1,10 +1,11 @@
 from itertools import chain
-from typing import List
+from typing import List, Tuple, Union
 from logical_level.models.relation_constraints import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrTerm
 from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable, VesselVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
+from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():
     @staticmethod    
@@ -36,10 +37,23 @@ class LogicalScenarioBuilder():
        
         actor_variables : List[ActorVariable] = sorted(object_variable_map.values(), key=lambda x: x.id)
         
+        return LogicalScenario(LogicalScenarioBuilder.get_initializer(init_method, actor_variables),
+                               RelationConstrTerm(relation_constr_exprs), *LogicalScenarioBuilder.get_bounds(actor_variables))
+    
+    @staticmethod
+    def build(scenario : Scenario, init_method : str) -> LogicalScenario:
+        if isinstance(scenario, FunctionalScenario):
+            return LogicalScenarioBuilder.build_from_functional(scenario, init_method) 
+        elif isinstance(scenario, LogicalScenario):
+            return scenario
+        else:
+            raise ValueError('Insufficient scenario type')
+        
+    @staticmethod    
+    def get_bounds(actor_variables : List[ActorVariable]) -> Tuple[List[float], List[float]]:
         xl = list(chain.from_iterable([var.lower_bounds for var in actor_variables]))
         xu = list(chain.from_iterable([var.upper_bounds for var in actor_variables]))
-        return LogicalScenario(LogicalScenarioBuilder.get_initializer(init_method, actor_variables),
-                               RelationConstrTerm(relation_constr_exprs), xl, xu)
+        return xl, xu
     
     @staticmethod    
     def get_initializer(init_method : str, vessel_vars : List[ActorVariable]) -> InstanceInitializer:
@@ -67,3 +81,7 @@ class LogicalScenarioBuilder():
     @staticmethod    
     def get_no_collide_out_vis_clause(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrClause:
         return RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)})
+    
+    def get_at_vis_may_collide_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
+        return RelationConstrTerm({AtVis(var1, var2), MayCollide(var1, var2)})
+    
