@@ -15,19 +15,27 @@ class LogicalModelManager():
     
     @classmethod
     def get_3_vessel_scenarios(cls) -> List[LogicalScenario]:
-        return cls.get_x_vessel_scenarios(3)
+        if cls.__3_vessel_scenarios is None:
+            cls.__3_vessel_scenarios = cls.get_x_vessel_scenarios(3)
+        return cls.__3_vessel_scenarios
     
     @classmethod
     def get_4_vessel_scenarios(cls) -> List[LogicalScenario]:
-        return cls.get_x_vessel_scenarios(4)
+        if cls.__4_vessel_scenarios is None:
+            cls.__4_vessel_scenarios = cls.get_x_vessel_scenarios(4)
+        return cls.__4_vessel_scenarios
     
     @classmethod
     def get_5_vessel_scenarios(cls) -> List[LogicalScenario]:
-        return cls.get_x_vessel_scenarios(5)
+        if cls.__5_vessel_scenarios is None:
+            cls.__5_vessel_scenarios = cls.get_x_vessel_scenarios(5)
+        return cls.__5_vessel_scenarios
     
     @classmethod
     def get_6_vessel_scenarios(cls) -> List[LogicalScenario]:
-        return cls.get_x_vessel_scenarios(6)
+        if cls.__6_vessel_scenarios is None:
+            cls.__6_vessel_scenarios = cls.get_x_vessel_scenarios(6)
+        return cls.__6_vessel_scenarios
         
     @classmethod
     def get_x_vessel_scenarios(cls, vessel_number) -> List[LogicalScenario]:

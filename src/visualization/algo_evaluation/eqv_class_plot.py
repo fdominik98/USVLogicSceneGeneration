@@ -21,7 +21,6 @@ class EqvClassPlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        vessel_num_count = len(self.config_data)
         fig, axes = plt.subplots(2, 2, figsize=(2 * 3, 4))
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes

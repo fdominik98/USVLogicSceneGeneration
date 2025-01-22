@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from visualization.algo_evaluation.statistics_plot import StatisticsPlot
 from visualization.algo_evaluation.table_generator import TableGenerator
 from visualization.my_plot import MyPlot
 from visualization.algo_evaluation.eqv_class_plot import EqvClassPlot
@@ -37,6 +38,7 @@ class EvalPlotManager():
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
+            "Statistics" : PlotWrapper(StatisticsPlot, {'eval_datas': self.eval_datas}),
             # "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
             # "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
             # "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),
