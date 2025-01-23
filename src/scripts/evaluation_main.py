@@ -15,7 +15,7 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 NUMBER_OF_RUNS = {3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
 NUMBER_OF_RUNS = {3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
 NUMBER_OF_RUNS = {3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
-NUMBER_OF_RUNS = {3 : 100 * 50, 4 : 330 * 15, 5 : 50 * 6, 6 : 99 * 4}
+NUMBER_OF_RUNS = {3 : 100 * 50, 4 : 330 * 15, 5 : 800 * 6, 6 : 1200 * 4}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240
@@ -24,9 +24,9 @@ VERBOSE = False
 
 START_FROM = [0,0,0]
 
-measurement_names= ['test_3_vessel_scenarios']
-interactions = [FunctionalModelManager.get_3_vessel_scenarios()]
-interactions = [LogicalModelManager.get_3_vessel_scenarios()]
+measurement_names= ['test_6_vessel_scenarios']
+interactions = [FunctionalModelManager.get_6_vessel_scenarios()]
+interactions = [LogicalModelManager.get_6_vessel_scenarios()]
 
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,

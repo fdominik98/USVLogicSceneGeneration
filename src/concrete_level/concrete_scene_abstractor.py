@@ -90,7 +90,7 @@ class ConcreteSceneAbstractor():
             hash = scenario.shape_hash()
             if hash not in equivalence_classes:
                 print('WARNING: new equivalence class found')
-                equivalence_classes[hash] = (scenario, 0)
+                equivalence_classes[hash] = (scenario, 1)
             else:
                 _, count = equivalence_classes[hash]
                 equivalence_classes[hash] = (scenario, count + 1)
