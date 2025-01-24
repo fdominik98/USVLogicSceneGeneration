@@ -1,6 +1,5 @@
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from typing import Set
 import numpy as np
 from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, MAX_LENGTH, MAX_SPEED_IN_MS
@@ -84,8 +83,6 @@ class Literal(RelationConstrComposite, ABC):
         return dist / (max(lb, self.max_penalty - ub))
     
 class BinaryLiteral(Literal, ABC):
-    var1 : VesselVariable = field(init=True)
-    var2 : VesselVariable = field(init=True)
     def __init__(self, var1 : ActorVariable, var2 : ActorVariable, literal_type, max_penalty, negated):
         super().__init__(literal_type, max_penalty, negated)
         self.var1 = var1
