@@ -1,7 +1,26 @@
 
+class Sea(Object):
+    width: 10000
+    length: 10000
+    height: 0.01
+    position: (0,0,0)
+    color: [150/255,220/255,250/255]
 
-workspace = new Workspace(RectangularRegion((0,0), 3.14/2, 30000, 30000, name='sea'))
-sea = workspace
+class Ship(Object):
+    color : [150/255,0/255,0/255]
 
-ego = new Object on sea with CylinderShape(), with width 2 * 100, with length 2 * 100, with height 1
-ship2 = new Object on sea with CylinderShape(), with width 2 * 100, with length 2 * 100, with height 1
+workspace = Workspace(RectangularRegion(0@0, 0, 10000, 10000))
+
+sea = new Sea
+
+ship_radius = 200
+
+ship1 = new Ship on sea
+ship1_region = CircularRegion(ship1.position, ship_radius)
+ship2 = new Ship on sea
+ship2_region = CircularRegion(ship2.position, ship_radius)
+
+# Add both ships to the scene
+ego = ship1
+require distance from ship1 to ship2 > 1000
+require distance from ship1 to ship2 < 1100 
