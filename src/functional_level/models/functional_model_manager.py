@@ -3,10 +3,17 @@ from functional_level.metamodels.functional_scenario import FunctionalScenario
 from functional_level.models.model_parser import ModelParser
 
 class FunctionalModelManager():
+    __2_vessel_scenarios = None
     __3_vessel_scenarios = None
     __4_vessel_scenarios = None
     __5_vessel_scenarios = None
     __6_vessel_scenarios = None
+    
+    @classmethod
+    def get_2_vessel_scenarios(cls) -> List[FunctionalScenario]:
+        if cls.__2_vessel_scenarios is None:
+            cls.__2_vessel_scenarios = ModelParser.load_2_vessel_scenarios()
+        return cls.__2_vessel_scenarios
     
     @classmethod
     def get_3_vessel_scenarios(cls) -> List[FunctionalScenario]:

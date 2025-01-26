@@ -11,6 +11,7 @@ from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 class ModelParser():
     FUNCTIONAL_MODELS_PATH = f'{ASSET_FOLDER}/functional_models'
     
+    TWO_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/2vessel_scenarios'
     THREE_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/3vessel_scenarios'
     FOUR_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/4vessel_scenarios'
     FIVE_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/5vessel_scenarios'
@@ -64,6 +65,10 @@ class ModelParser():
     @staticmethod   
     def load_functional_scenarios(dir : str) -> List[FunctionalScenario]:
         return [ModelParser.parse_problem(ModelParser.load_problem_from_file(path)) for path in get_all_file_paths(dir, 'problem')]
+    
+    @staticmethod
+    def load_2_vessel_scenarios() -> List[FunctionalScenario]:
+        return ModelParser.load_functional_scenarios(ModelParser.TWO_VESSEL_SCENARIOS_PATH)
     
     @staticmethod
     def load_3_vessel_scenarios() -> List[FunctionalScenario]:

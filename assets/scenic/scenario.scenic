@@ -1,13 +1,16 @@
 import numpy as np
+import itertools
+
+param vessel_num = 2
+param allowCollisions = True
 
 EPSILON=1e-10
-
-param allowCollisions = True
 
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
 BEAM_ANGLE = np.radians(107.5)
 MASTHEAD_LIGHT_ANGLE = np.pi * 2 - STERN_ANGLE
+
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
 N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
@@ -15,6 +18,7 @@ N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
 DIST_DRIFT = 50.0
 
 MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
 MAX_SPEED_IN_MS = 30 * KNOT_TO_MS_CONVERSION
 MIN_SPEED_IN_MS = 2 * KNOT_TO_MS_CONVERSION
 
@@ -55,9 +59,7 @@ def calculate_heading(vx, vy):
 class Ship(Object):
     id : int
     is_vessel = True
-    length : Range(10,100)
     color : [150/255,0/255,0/255]
-    velocity : Range(-MAX_SPEED_IN_MS + 5,MAX_SPEED_IN_MS + 5)@Range(-MAX_SPEED_IN_MS + 5,MAX_SPEED_IN_MS + 5)
     max_speed : MAX_SPEED_IN_MS
     is_os : False
 
@@ -79,9 +81,13 @@ class OwnShip(Ship):
     length : 30
     is_os : True
 
+class DummyShip(Ship):
+    is_vessel = False
+    allowCollisions : True
 
 class GeoProps(Object):
-    is_vessel = False
+    is_vessel : False
+    allowCollisions : True
     val1 : Ship
     val2 : Ship
     def calculate_props(self):
@@ -112,30 +118,77 @@ class GeoProps(Object):
         self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
         self.dcpa = float(np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)))
 
-    
+    def check_sp_and_h_constraints(self) -> bool:
+        return (self.val1.sp_constraint() and
+                self.val2.sp_constraint() and 
+                self.val1.h_constraints() and
+                self.val2.h_constraints())
 
-    def check_constraints(self) -> bool:
+    def check_constraints(self):
+        pass
+
+class AtVisMayCollideProps(GeoProps):
+    def check_constraints(self):
         self.calculate_props()
         return (self.dcpa > 0 and 
-        self.dcpa < self.safety_dist and 
-        self.o_distance > self.vis_distance - DIST_DRIFT and 
-        self.o_distance < self.vis_distance + DIST_DRIFT and
-        self.val1.sp_constraint() and
-        self.val2.sp_constraint() and 
-        self.val1.h_constraints() and
-        self.val2.h_constraints())
+            self.dcpa < self.safety_dist and 
+            self.o_distance > self.vis_distance - DIST_DRIFT and 
+            self.o_distance < self.vis_distance + DIST_DRIFT and
+            self.check_sp_and_h_constraints())
+
+class NoCollideOutVisProps(GeoProps):
+    def check_constraints(self):
+        self.calculate_props()
+        return (self.dcpa > self.safety_dist and 
+            self.o_distance > self.vis_distance - DIST_DRIFT and
+            self.check_sp_and_h_constraints())
 
 
-workspace = Workspace(RectangularRegion(MAX_COORD/2@MAX_COORD/2, 0, MAX_COORD, MAX_COORD))
 
-sea = workspace
 
-ego = new OwnShip on sea, with id 0
-ship2 = new Ship on sea, with id 1
+ego = new OwnShip with id 0, at (MAX_COORD/2,MAX_COORD/2), with velocity (0,Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS))
+region_2 = CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+region_3 = CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+distance_region = region_2.union(region_3).union(region_5).union(region_6)
 
-props = new GeoProps on sea, with val1 ego, with val2 ship2
+sin_half_cone_theta = np.clip(100*4 / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
+# sin_half_cone_theta_3 = np.clip(100*4 / (3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+# angle_half_cone_3 = abs(np.arcsin(sin_half_cone_theta))
+# sin_half_cone_theta_5 = np.clip(100*4 / (5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+# angle_half_cone_5 = abs(np.arcsin(sin_half_cone_theta))
+# sin_half_cone_theta_6 = np.clip(100*4 / (6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+# angle_half_cone_6 = abs(np.arcsin(sin_half_cone_theta))
 
-# Add both ships to the scene
-require props.check_constraints()
+def add_ts(ts_id):
+    ts_point = new Point in distance_region
+    ts_length = Range(10, 100)
+    p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
+    speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
+
+    velocity_point = new Point in speed_region.intersect(SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p12.heading, 2 * angle_half_cone))
+    ts = new Ship with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
+    prop = new AtVisMayCollideProps with val1 ego, with val2 ts
+    return ts, prop
+
+ts1, prop1 = add_ts(1)
+require prop1.check_constraints()
+ts2, prop2 = add_ts(2)
+require prop2.check_constraints()
+# ts3, prop3 = add_ts(3)
+# require prop3.check_constraints()
+# ts4, prop4 = add_ts(4)
+# require prop4.check_constraints()
+
+
+prop_ts_1 = new NoCollideOutVisProps with val1 ts1, with val2 ts2
+require prop_ts_1.check_constraints()
+# prop_ts_2 = new NoCollideOutVisProps with val1 ts1, with val2 ts3
+# require prop_ts_2.check_constraints()
+# prop_ts_3 = new NoCollideOutVisProps with val1 ts2, with val2 ts3
+# require prop_ts_3.check_constraints()
+
 
 

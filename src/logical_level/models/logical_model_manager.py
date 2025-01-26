@@ -8,10 +8,17 @@ from logical_level.models.relation_constraints import RelationConstrTerm
 
 
 class LogicalModelManager():
+    __2_vessel_scenarios = None
     __3_vessel_scenarios = None
     __4_vessel_scenarios = None
     __5_vessel_scenarios = None
     __6_vessel_scenarios = None
+    
+    @classmethod
+    def get_2_vessel_scenarios(cls) -> List[LogicalScenario]:
+        if cls.__2_vessel_scenarios is None:
+            cls.__2_vessel_scenarios = cls.get_x_vessel_scenarios(2)
+        return cls.__2_vessel_scenarios
     
     @classmethod
     def get_3_vessel_scenarios(cls) -> List[LogicalScenario]:

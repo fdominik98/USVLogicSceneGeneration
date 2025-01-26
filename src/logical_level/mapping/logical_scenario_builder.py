@@ -57,7 +57,7 @@ class LogicalScenarioBuilder():
     
     @staticmethod    
     def get_initializer(init_method : str, vessel_vars : List[ActorVariable]) -> InstanceInitializer:
-        if init_method == RandomInstanceInitializer.name: 
+        if init_method == RandomInstanceInitializer.name or init_method == None: 
             return RandomInstanceInitializer(vessel_vars) 
         elif init_method == DeterministicInitializer.name:
             return DeterministicInitializer(vessel_vars) 

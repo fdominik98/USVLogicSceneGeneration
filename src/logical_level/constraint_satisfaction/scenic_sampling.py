@@ -1,3 +1,6 @@
+from datetime import datetime
+import gc
+import os
 import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
@@ -6,19 +9,57 @@ from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
+from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 
-random.seed(12345)
-scenario : Scenario = scenic.scenarioFromFile(f'{ASSET_FOLDER}/scenic/scenario.scenic')
-scenes, numIterations = scenario.generateBatch(1, verbosity=1)
+WARMUPS = 2
+RANDOM_SEED = 1234
+TIMEOUT = 240
+VESSEL_NUM = 3
 
-vessel1 = scenes[0].objects[0]
-vessel2 = scenes[0].objects[1]
-builder = SceneBuilder()
-for obj in scenes[0].objects:
-    if obj.is_vessel:
-        builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.l, obj.r, obj.max_speed),
-                        VesselState(obj.p[0], obj.p[1], obj.sp, obj.h))
+def save_eval_data(eval_data : EvaluationData):
+    asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
+    if not os.path.exists(asset_folder):
+        os.makedirs(asset_folder)
+    file_path=f"{asset_folder}/{eval_data.scenario_name}_{eval_data.timestamp.replace(':','-')}.json"
+    eval_data.path = file_path
+    eval_data.save_to_json()
+    
+def calculate_heading(vx, vy):
+    heading_radians = np.arctan2(vy, vx)
+    return heading_radians
 
-ScenarioPlotManager(TrajectoryManager(builder.build()))
+scenario : Scenario = scenic.scenarioFromFile(f'{ASSET_FOLDER}/scenic/scenario.scenic', params={'vessel_num' : VESSEL_NUM})
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+scenario.resetExternalSampler()
+
+for i in range(100):
+    eval_data = EvaluationData(timeout=TIMEOUT, random_seed=RANDOM_SEED)
+    eval_data.config_group = 'scenic_distribution'
+    eval_data.vessel_number = VESSEL_NUM
+    eval_data.measurement_name = 'test_3_vessel_scenarios'
+    eval_data.algorithm_desc = 'scenic_sampling'
+    eval_data.scenario_name = '3_vessel'
+    eval_data.timestamp = datetime.now().isoformat()   
+    
+    gc.collect()
+    start_time = datetime.now()
+    scenes, numIterations = scenario.generateBatch(1, verbosity=1)
+    
+    eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
+    
+    builder = SceneBuilder()
+    for obj in scenes[0].objects:
+        if obj.is_vessel:
+            builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.length, obj.length*4, obj.max_speed),
+                            VesselState(obj.position[0], obj.position[1], np.linalg.norm(obj.velocity), calculate_heading(obj.velocity[0], obj.velocity[1])))
+    eval_data.best_scene = builder.build()
+    eval_data.best_fitness = (0)
+    eval_data.number_of_generations = numIterations
+    eval_data.best_fitness_index = 0.0
+    
+    save_eval_data(eval_data)
+    
+    #ScenarioPlotManager(TrajectoryManager(builder.build()))

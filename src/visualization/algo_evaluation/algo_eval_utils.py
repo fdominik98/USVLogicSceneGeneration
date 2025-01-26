@@ -15,6 +15,8 @@ def vessel_number_mapper(vessel_nums : List[int]):
             labels.append('4 Vessels')
         elif vessel_num == 3:
             labels.append('3 Vessels')
+        elif vessel_num == 2:
+            labels.append('2 Vessels')
         else:
             raise Exception('Unknown measurement name')
     return labels
@@ -55,6 +57,8 @@ def config_group_mapper(config_groups : List[str]):
             labels.append('SBO')
         elif 'msr' in name.lower():
             labels.append('MSR')
+        elif 'scenic_distribution' in name.lower():
+            labels.append('Scenic')
         elif 'f3' in name.lower():
            labels.append(r'$F_3$')
         elif 'f2' in name.lower():
