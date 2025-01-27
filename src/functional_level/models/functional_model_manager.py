@@ -51,3 +51,30 @@ class FunctionalModelManager():
         if vessel_number not in scenario_map:
             raise ValueError(f"Unsupported vessel number: {vessel_number}")
         return scenario_map[vessel_number]()
+    
+    
+    
+"""
+Ship types:
+tanker, MMSI: 413474690 : 93 x 17 m
+tanker, MMSI: 412377520 : 146 x 21 m
+tanker, MMSI: 413441230 : 82 x 12 m
+tanker, MMSI: 413697340 : 96 x 16 m
+
+container, MMSI: 413146000 : 263 x 32 m
+container, MMSI: 412713000 : 294 x 32 m
+container, MMSI: 212602000 : 259 x 32 m
+
+cargo vessel, MMSI: 413700110 : 159 x 23 m
+cargo vessel, MMSI: 412766340 : 179 x 28 m
+
+High Speed Craft, MMSI: 477937400 : 47 x 12 m
+High Speed Craft, MMSI: 477937500 : 47 x 12 m
+High Speed Craft, MMSI: 477937200 : 47 x 12 m
+High Speed Craft, MMSI: 477525000 : 40 x 15 m
+High Speed Craft, MMSI: 477385000 :	45 x 12 m
+
+Passenger ship, MMSI: 477995974 : 25 x 8 m
+Passenger ship, MMSI: 477995293 : 30 x 8 m
+
+"""

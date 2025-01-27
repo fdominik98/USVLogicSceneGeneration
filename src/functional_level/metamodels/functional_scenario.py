@@ -15,6 +15,7 @@ class FunctionalScenario(Scenario):
     overtaking_interpretation : OvertakingInterpretation = OvertakingInterpretation()
     crossing_interpretation : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
     
+    
     func_objects : List[FuncObject] = field(init=False)
     
     def __post_init__(self):
