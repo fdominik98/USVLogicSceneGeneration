@@ -6,7 +6,7 @@ from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
     HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation,
     VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation,
-    VesselClass5Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation)
+    VesselClass5Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass0Interpretation, VesselInterpretation)
 from utils.scenario import Scenario
    
 @dataclass(frozen=True)
@@ -17,28 +17,15 @@ class FunctionalScenario(Scenario):
     overtaking_interpretation : OvertakingInterpretation = OvertakingInterpretation()
     crossing_interpretation : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
     
+    vessel_class_0_interpretation : VesselClass0Interpretation = VesselClass6Interpretation()
     vessel_class_1_interpretation : VesselClass1Interpretation = VesselClass1Interpretation()
     vessel_class_2_interpretation : VesselClass2Interpretation = VesselClass2Interpretation()
     vessel_class_3_interpretation : VesselClass3Interpretation = VesselClass3Interpretation()
     vessel_class_4_interpretation : VesselClass4Interpretation = VesselClass4Interpretation()
     vessel_class_5_interpretation : VesselClass5Interpretation = VesselClass5Interpretation()
-    vessel_class_6_interpretation : VesselClass6Interpretation = VesselClass6Interpretation()
-    vessel_class_7_interpretation : VesselClass7Interpretation = VesselClass7Interpretation()
-    vessel_class_8_interpretation : VesselClass8Interpretation = VesselClass8Interpretation()
     
     func_objects : List[FuncObject] = field(init=False)
-    class_interpretation_map : Dict[int, VesselInterpretation] = field(init=False)
-    
-    class_interpretation_type_map = {
-            1 : VesselClass1Interpretation,
-            2 : VesselClass2Interpretation,
-            3 : VesselClass3Interpretation,
-            4 : VesselClass4Interpretation,
-            5 : VesselClass5Interpretation,
-            6 : VesselClass6Interpretation,
-            7 : VesselClass7Interpretation,
-            8 : VesselClass8Interpretation,
-        }
+    class_interpretation_list : List[VesselInterpretation] = field(init=False)
     
     def __post_init__(self):
         object_set : Set[FuncObject] = set()
@@ -51,17 +38,11 @@ class FunctionalScenario(Scenario):
         for o1, o2 in head_on_interpretation_temp:
             self.head_on_interpretation.add(o1, o2)
             
-        class_interpretation_map = {
-            1 : self.vessel_class_1_interpretation,
-            2 : self.vessel_class_2_interpretation,
-            3 : self.vessel_class_3_interpretation,
-            4 : self.vessel_class_4_interpretation,
-            5 : self.vessel_class_5_interpretation,
-            6 : self.vessel_class_6_interpretation,
-            7 : self.vessel_class_7_interpretation,
-            8 : self.vessel_class_8_interpretation
-        }
-        object.__setattr__(self, 'class_interpretation_map', class_interpretation_map)
+        class_interpretation_list = [self.vessel_class_0_interpretation, self.vessel_class_1_interpretation,
+                                    self.vessel_class_2_interpretation, self.vessel_class_3_interpretation,
+                                    self.vessel_class_4_interpretation, self.vessel_class_5_interpretation,
+        ]
+        object.__setattr__(self, 'class_interpretation_map', class_interpretation_list)
         
     
     @property
@@ -98,7 +79,7 @@ class FunctionalScenario(Scenario):
     def is_vessel_class_x(self, class_num : int, o: FuncObject):
         if class_num not in range(1, 8):
             raise ValueError('Invalid class.')
-        return self.class_interpretation_map[class_num].contains(o)
+        return self.class_interpretation_list[class_num].contains(o)
     
     @property
     def os_object(self) -> FuncObject:

@@ -4,26 +4,36 @@ import itertools
 param vessel_num = 2
 param allowCollisions = True
 
-EPSILON=1e-10
-
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
 BEAM_ANGLE = np.radians(107.5)
 MASTHEAD_LIGHT_ANGLE = np.pi * 2 - STERN_ANGLE
-
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
 N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
 
 DIST_DRIFT = 50.0
 
-MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
-MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
-MAX_SPEED_IN_MS = 30 * KNOT_TO_MS_CONVERSION
-MIN_SPEED_IN_MS = 2 * KNOT_TO_MS_CONVERSION
+# 6 nautical miles = 11112,066 meters
+# 5 nautical miles = 9260,005 meters
+# 4 nautical miles = 7408,004 meters
+# 3 nautical miles = 5556,003 meters
+# 2 nautical miles = 3704,002 meters
 
 MIN_HEADING = -np.pi
 MAX_HEADING = np.pi
+MIN_COORD = 0.0
+MAX_COORD = 2 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
+
+EPSILON=1e-10
+
+MIN_LENGTH = 10
+MAX_LENGTH = 400
+MIN_BEAM = 2
+MAX_BEAM = 65
+MIN_SPEED_IN_MS = 1 * KNOT_TO_MS_CONVERSION
+MAX_SPEED_IN_MS = 40 * KNOT_TO_MS_CONVERSION
 
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
@@ -48,13 +58,6 @@ def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
 def calculate_heading(vx, vy):
     heading_radians = np.arctan2(vy, vx)
     return heading_radians
-
-# class Sea(Object):
-#     width: MAX_COORD - EPSILON
-#     length: MAX_COORD - EPSILON
-#     height: 0.01
-#     position: (MAX_COORD/2, MAX_COORD/2, 0)
-#     color: [150/255,220/255,250/255]
 
 class Ship(Object):
     id : int
@@ -153,7 +156,7 @@ region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT)
 region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
 distance_region = region_2.union(region_3).union(region_5).union(region_6)
 
-sin_half_cone_theta = np.clip(100*4 / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+sin_half_cone_theta = np.clip(MAX_LENGTH*4 / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
 angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 # sin_half_cone_theta_3 = np.clip(100*4 / (3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
 # angle_half_cone_3 = abs(np.arcsin(sin_half_cone_theta))
@@ -164,7 +167,7 @@ angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 
 def add_ts(ts_id):
     ts_point = new Point in distance_region
-    ts_length = Range(10, 100)
+    ts_length = Range(MIN_LENGTH, MAX_LENGTH)
     p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
     speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
 
@@ -175,16 +178,16 @@ def add_ts(ts_id):
 
 ts1, prop1 = add_ts(1)
 require prop1.check_constraints()
-ts2, prop2 = add_ts(2)
-require prop2.check_constraints()
+# ts2, prop2 = add_ts(2)
+# require prop2.check_constraints()
 # ts3, prop3 = add_ts(3)
 # require prop3.check_constraints()
 # ts4, prop4 = add_ts(4)
 # require prop4.check_constraints()
 
 
-prop_ts_1 = new NoCollideOutVisProps with val1 ts1, with val2 ts2
-require prop_ts_1.check_constraints()
+# prop_ts_1 = new NoCollideOutVisProps with val1 ts1, with val2 ts2
+# require prop_ts_1.check_constraints()
 # prop_ts_2 = new NoCollideOutVisProps with val1 ts1, with val2 ts3
 # require prop_ts_2.check_constraints()
 # prop_ts_3 = new NoCollideOutVisProps with val1 ts2, with val2 ts3

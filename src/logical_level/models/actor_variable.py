@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 import numpy as np
-from utils.asv_utils import EPSILON, KNOT_TO_MS_CONVERSION, MAX_COORD, MAX_HEADING, MAX_LENGTH, MAX_SPEED_IN_MS, MIN_COORD, MIN_HEADING, MIN_LENGTH
+from logical_level.models.vessel_types import PassengerShip, VesselType
+from utils.asv_utils import EPSILON, MAX_BEAM, MAX_COORD, MAX_HEADING, MAX_LENGTH, MAX_SPEED_IN_MS, MIN_BEAM, MIN_COORD, MIN_HEADING, MIN_LENGTH, MIN_SPEED_IN_MS
 
-
-TWO_KNOT_IN_MS = 2 * KNOT_TO_MS_CONVERSION
 @dataclass(frozen=True)
 class ActorVariable(ABC):    
     id : int
@@ -38,32 +37,59 @@ class ActorVariable(ABC):
 @dataclass(frozen=True)    
 class VesselVariable(ActorVariable, ABC):
     
-    min_length : float = MIN_LENGTH
-    max_length : float = MAX_LENGTH
+    vessel_type : Optional[VesselType] = None
+    
+    @property
+    def min_length(self) -> float:
+        if self.vessel_type is None:
+            return MIN_LENGTH
+        return self.vessel_type.min_length
+    
+    @property
+    def max_length(self) -> float:
+        if self.vessel_type is None:
+            return MAX_LENGTH
+        return self.vessel_type.max_length
+    
+    @property
+    def min_beam(self) -> float:
+        if self.vessel_type is None:
+            return MIN_BEAM
+        return self.vessel_type.min_beam
+    
+    @property
+    def max_beam(self) -> float:
+        if self.vessel_type is None:
+            return MAX_BEAM
+        return self.vessel_type.max_beam
         
     @property
-    def max_speed(self) -> float:
-        return MAX_SPEED_IN_MS
-    
-    @property
     def min_speed(self) -> float:
-        return TWO_KNOT_IN_MS
+        if self.vessel_type is None:
+            return MIN_SPEED_IN_MS
+        return self.vessel_type.min_speed
     
     @property
-    def max_heading(self) -> float:
-        return MAX_HEADING
+    def max_speed(self) -> float:
+        if self.vessel_type is None:
+            return MAX_SPEED_IN_MS
+        return self.vessel_type.max_speed
     
     @property
     def min_heading(self) -> float:
         return MIN_HEADING
     
     @property
-    def max_coord(self) -> float:
-        return MAX_COORD
+    def max_heading(self) -> float:
+        return MAX_HEADING
     
     @property
     def min_coord(self) -> float:
         return MIN_COORD
+    
+    @property
+    def max_coord(self) -> float:
+        return MAX_COORD
     
     @property
     @abstractmethod
@@ -85,29 +111,39 @@ class VesselVariable(ActorVariable, ABC):
     
 @dataclass(frozen=True)   
 class OSVariable(VesselVariable):
-    @property
-    def max_length(self) -> float:
-        return 30 + EPSILON
+    vessel_type : Optional[VesselType] = PassengerShip()
     
     @property
     def min_length(self) -> float:
         return 30 - EPSILON
     
     @property
-    def max_heading(self) -> float:
-        return np.pi / 2 + EPSILON
+    def max_length(self) -> float:
+        return 30 + EPSILON
+    
+    @property
+    def min_beam(self) -> float:
+        return 10 - EPSILON
+    
+    @property
+    def max_beam(self) -> float:
+        return 10 + EPSILON
     
     @property
     def min_heading(self) -> float:
         return np.pi / 2 - EPSILON
     
     @property
-    def max_coord(self) -> float:
-        return MAX_COORD / 2 + EPSILON
+    def max_heading(self) -> float:
+        return np.pi / 2 + EPSILON
     
     @property
     def min_coord(self) -> float:
         return MAX_COORD / 2 - EPSILON
+    
+    @property
+    def max_coord(self) -> float:
+        return MAX_COORD / 2 + EPSILON
     
     @property
     def name(self) -> str:

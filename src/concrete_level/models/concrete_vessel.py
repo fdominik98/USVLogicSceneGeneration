@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional, Type
 
 from logical_level.models.actor_variable import OSVariable, TSVariable, VesselVariable
+from logical_level.models.vessel_types import VesselType
 from utils.serializable import Serializable
 
 @dataclass(frozen=True)
@@ -11,7 +12,8 @@ class ConcreteVessel(Serializable):
     length: float
     radius: float
     max_speed: float
-    breadth: Optional[float] = None
+    vessel_type : str
+    beam: Optional[float] = None
     
     def __repr__(self):
         return f'ConcreteVessel({self.id})'
@@ -26,10 +28,11 @@ class ConcreteVessel(Serializable):
     
     @property
     def logical_variable(self) -> VesselVariable:
+        t = VesselType.get_vessel_type_by_name(self.vessel_type)
         if self.is_os:
-            return OSVariable(self.id)
+            return OSVariable(self.id, t)
         else:
-            return TSVariable(self.id)
+            return TSVariable(self.id, t)
         
     @classmethod
     def from_dict(cls: Type['ConcreteVessel'], data: Dict[str, Any]) -> 'ConcreteVessel':

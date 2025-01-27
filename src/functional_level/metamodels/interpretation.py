@@ -123,7 +123,7 @@ class VesselClass7Interpretation(VesselInterpretation):
     name : str = field(default='VesselClass7', init=False)
     
 @dataclass(frozen=True)
-class VesselClass8Interpretation(VesselInterpretation):
+class VesselClass0Interpretation(VesselInterpretation):
     name : str = field(default='VesselClass8', init=False)
 
 

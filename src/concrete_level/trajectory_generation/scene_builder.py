@@ -1,9 +1,11 @@
+import random
 from typing import Dict
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import VesselVariable
+from logical_level.models.vessel_types import ALL_VESSEL_TYPES
 
 
 class SceneBuilder(Dict[ConcreteVessel, VesselState]):  
@@ -27,6 +29,12 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
         builder = SceneBuilder()
         for actor_var, values in assignments.items():
             if isinstance(actor_var, VesselVariable):
-                builder.set_state(ConcreteVessel(actor_var.id, actor_var.is_os, values.l, values.r, actor_var.max_speed),
+                vessel_type = actor_var.vessel_type
+                if vessel_type is None:
+                    valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(values.l, values.sp)]
+                    vessel_type = random.choice(valid_types)
+                builder.set_state(ConcreteVessel(actor_var.id, actor_var.is_os, values.l, values.r, vessel_type.max_speed, vessel_type.name),
                                   VesselState(values.x, values.y, values.sp, values.h))
+            else:
+                raise TypeError('Unsupported Actor')
         return builder.build()

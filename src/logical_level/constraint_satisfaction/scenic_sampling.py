@@ -10,13 +10,14 @@ from concrete_level.models.trajectory_manager import TrajectoryManager
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.models.vessel_types import ALL_VESSEL_TYPES, PassengerShip
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240
-VESSEL_NUM = 3
+VESSEL_NUM = 2
 
 def save_eval_data(eval_data : EvaluationData):
     asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
@@ -35,13 +36,13 @@ random.seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 scenario.resetExternalSampler()
 
-for i in range(100):
+for i in range(1000):
     eval_data = EvaluationData(timeout=TIMEOUT, random_seed=RANDOM_SEED)
     eval_data.config_group = 'scenic_distribution'
     eval_data.vessel_number = VESSEL_NUM
-    eval_data.measurement_name = 'test_3_vessel_scenarios'
+    eval_data.measurement_name = f'test_{VESSEL_NUM}_vessel_scenarios'
     eval_data.algorithm_desc = 'scenic_sampling'
-    eval_data.scenario_name = '3_vessel'
+    eval_data.scenario_name = f'{VESSEL_NUM}vessel'
     eval_data.timestamp = datetime.now().isoformat()   
     
     gc.collect()
@@ -53,8 +54,11 @@ for i in range(100):
     builder = SceneBuilder()
     for obj in scenes[0].objects:
         if obj.is_vessel:
-            builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.length, obj.length*4, obj.max_speed),
-                            VesselState(obj.position[0], obj.position[1], np.linalg.norm(obj.velocity), calculate_heading(obj.velocity[0], obj.velocity[1])))
+            speed = np.linalg.norm(obj.velocity)
+            valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(obj.length, speed)]
+            vessel_type = PassengerShip() if obj.is_os else random.choice(valid_types)
+            builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.length, obj.length*4, obj.max_speed, vessel_type.name),
+                            VesselState(obj.position[0], obj.position[1], speed, calculate_heading(obj.velocity[0], obj.velocity[1])))
     eval_data.best_scene = builder.build()
     eval_data.best_fitness = (0)
     eval_data.number_of_generations = numIterations
