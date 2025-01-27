@@ -1,18 +1,42 @@
 from itertools import chain
 from typing import List, Tuple, Union
+from functional_level.metamodels.functional_object import FuncObject
 from logical_level.models.relation_constraints import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrTerm
 from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable, VesselVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
+from utils.asv_utils import MAX_LENGTH, MIN_LENGTH
 from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():
+    
+    class_length_ranges = [
+        (1, MIN_LENGTH, 50),
+        (2, 50, 100),
+        (3, 100, 150),
+        (4, 150, 200),
+        (5, 200, 250),
+        (6, 250, 300),
+        (7, 300, 350),
+        (8, 350, MAX_LENGTH),
+    ]
+    
     @staticmethod    
-    def build_from_functional(functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:        
+    def build_from_functional(functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:    
+        def class_length_map(obj : FuncObject) -> Tuple[float, float]:
+            min_length = MIN_LENGTH
+            max_length = MAX_LENGTH
+            for cls, cls_min, cls_max in LogicalScenarioBuilder.class_length_ranges:
+                if functional_scenario.is_vessel_class_x(cls, obj):
+                    min_length = min(min_length, cls_min)
+                    max_length = max(max_length, cls_max)
+            
+            return min_length, max_length
+            
         object_variable_map = {
-            obj: OSVariable(obj.id) if functional_scenario.is_os(obj)
-            else TSVariable(obj.id) if functional_scenario.is_ts(obj)
+            obj: OSVariable(obj.id, *class_length_map(obj)) if functional_scenario.is_os(obj)
+            else TSVariable(obj.id, *class_length_map(obj)) if functional_scenario.is_ts(obj)
             else ValueError('Neither OS or TS.')
             for obj in functional_scenario.func_objects
         }

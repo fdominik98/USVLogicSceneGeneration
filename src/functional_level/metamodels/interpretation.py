@@ -93,6 +93,38 @@ class CrossingFromPortInterpretation(BinaryInterpretation):
 @dataclass(frozen=True)
 class OvertakingInterpretation(BinaryInterpretation):
     name : str = field(default='Overtaking', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass1Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass1', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass2Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass2', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass3Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass3', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass4Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass4', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass5Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass5', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass6Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass6', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass7Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass7', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass8Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass8', init=False)
 
 
 

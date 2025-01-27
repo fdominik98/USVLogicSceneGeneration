@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Set, Tuple
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation
+from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -23,7 +23,9 @@ class ConcreteSceneAbstractor():
         ts_interpretation = TSInterpretation()
         head_on_interpretation = HeadOnInterpretation()
         overtaking_interpretation = OvertakingInterpretation()
-        crossing_interpretation = CrossingFromPortInterpretation()        
+        crossing_interpretation = CrossingFromPortInterpretation()    
+        vessel_class_interpretations : List[VesselInterpretation] = [VesselClass1Interpretation(), VesselClass2Interpretation(), VesselClass3Interpretation(), VesselClass4Interpretation(), 
+                                        VesselClass5Interpretation(), VesselClass6Interpretation(), VesselClass7Interpretation(), VesselClass8Interpretation()]
         
         vessel_object_map: Dict[ConcreteVessel, FuncObject] = dict()
         vessel_actor_map: Dict[ConcreteVessel, VesselVariable] = dict()
@@ -36,6 +38,12 @@ class ConcreteSceneAbstractor():
             else:
                 ts_interpretation.add(obj)
                 vessel_actor_map[vessel] = vessel.logical_variable
+            for cls, cls_min, cls_max in LogicalScenarioBuilder.class_length_ranges:
+                if cls_min <= vessel.length < cls_max:
+                    vessel_class_interpretations[cls-1].add(obj)
+            if vessel.length == LogicalScenarioBuilder.class_length_ranges[-1][2]:
+                vessel_class_interpretations[-1].add(obj)
+                
         actor_variables : List[ActorVariable] = list(vessel_actor_map.values())
         
         relation_constr_exprs : Set[RelationConstrComposite] = set()
@@ -64,7 +72,7 @@ class ConcreteSceneAbstractor():
             
         functional_scenario = FunctionalScenario(os_interpretation, ts_interpretation,
                                                  head_on_interpretation, overtaking_interpretation,
-                                                 crossing_interpretation)
+                                                 crossing_interpretation, *vessel_class_interpretations)
         
         xl = list(chain.from_iterable([var.lower_bounds for var in actor_variables]))
         xu = list(chain.from_iterable([var.upper_bounds for var in actor_variables]))
