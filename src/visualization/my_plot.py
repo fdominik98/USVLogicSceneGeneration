@@ -15,3 +15,9 @@ class MyPlot(ABC):
     @abstractmethod
     def create_fig(self):
         pass
+    
+class DummyPlot(MyPlot):
+    def create_fig(self):
+        fig, axes = plt.subplots(1, 1, figsize=(7, 7))
+        self.fig : plt.Figure = fig
+        self.axi : plt.Axes = axes

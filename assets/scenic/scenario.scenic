@@ -178,16 +178,16 @@ def add_ts(ts_id):
 
 ts1, prop1 = add_ts(1)
 require prop1.check_constraints()
-# ts2, prop2 = add_ts(2)
-# require prop2.check_constraints()
+ts2, prop2 = add_ts(2)
+require prop2.check_constraints()
 # ts3, prop3 = add_ts(3)
 # require prop3.check_constraints()
 # ts4, prop4 = add_ts(4)
 # require prop4.check_constraints()
 
 
-# prop_ts_1 = new NoCollideOutVisProps with val1 ts1, with val2 ts2
-# require prop_ts_1.check_constraints()
+prop_ts_1 = new NoCollideOutVisProps with val1 ts1, with val2 ts2
+require prop_ts_1.check_constraints()
 # prop_ts_2 = new NoCollideOutVisProps with val1 ts1, with val2 ts3
 # require prop_ts_2.check_constraints()
 # prop_ts_3 = new NoCollideOutVisProps with val1 ts2, with val2 ts3

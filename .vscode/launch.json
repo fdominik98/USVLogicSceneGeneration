@@ -123,6 +123,17 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
-        },        
+        },  
+        {
+            "name": "COMMON_OCEAN",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/common_ocean_scenario_parser.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+            
+        },       
     ]
 }

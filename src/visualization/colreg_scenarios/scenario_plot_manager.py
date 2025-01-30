@@ -352,6 +352,9 @@ class ScenarioPlotManager():
                 
         
     def create_actor_info_labels(self) -> List[List[tk.Label]]:
+        tk.Label(master=self.actor_info_columns[0], text='Type', background='grey').pack(side=tk.TOP, fill=tk.NONE)
+        tk.Label(master=self.actor_info_columns[0], text='Length (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
+        tk.Label(master=self.actor_info_columns[0], text='Radius (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
         tk.Label(master=self.actor_info_columns[0], text='Position (m)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
         tk.Label(master=self.actor_info_columns[0], text='Heading (rad)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
         tk.Label(master=self.actor_info_columns[0], text='Speed (m/s)', background='grey').pack(side=tk.TOP, fill=tk.NONE)
@@ -369,8 +372,8 @@ class ScenarioPlotManager():
     
     def get_actor_infos(self) -> List[List[str]]:
         actor_infos : List[List[str]] = []
-        for _, state in self.colreg_plot.animation.current_scene.items():
-            actor_infos.append([f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
+        for vessel, state in self.colreg_plot.animation.current_scene.items():
+            actor_infos.append([f'{vessel.vessel_type}', f'{vessel.length:.2f}', f'{vessel.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
         return actor_infos
     
 

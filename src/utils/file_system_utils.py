@@ -3,6 +3,8 @@ import os
 ASSET_FOLDER = f'{os.path.dirname(os.path.abspath(__file__))}/../../assets'
 
 def get_all_file_paths(directory, extension):
+    if not os.path.isdir(directory):
+        raise ValueError('THe path is not a directory or invalid.')
     file_paths = []
     for root, _, files in os.walk(directory):
         for file in files:

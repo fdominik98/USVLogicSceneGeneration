@@ -1,0 +1,82 @@
+class FunctionalModel {
+    contains Vessel[] object
+}
+
+abstract class Vessel {
+    Vessel[0..*] overtaking
+    Vessel[0..*] crossingFromPort
+    Vessel[0..*] headOn opposite headOn
+}
+
+class OS extends Vessel.
+class TS extends Vessel.
+
+
+
+pred giveWay(Vessel v1) <-> overtaking(v1, _);
+                            crossingFromPort(v1, _);
+                            headOn(_, v1).
+
+pred standOn(Vessel v1) <->
+    overtaking(_, v1); crossingFromPort(_, v1).
+
+pred ambiguous(Vessel v) <->
+    giveWay(v), standOn(v).
+
+pred isInSituationWith(Vessel v1, Vessel v2) <->
+    headOn(v2, v1) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
+
+
+error selfRelation(Vessel v) <->
+    overtaking(v, v); crossingFromPort(v, v); headOn(v, v).
+
+
+error doubleRelation(Vessel v1, Vessel v2) <->
+    headOn(v1, v2), crossingFromPort(v1, v2);
+    headOn(v1, v2), overtaking(v1, v2);
+    overtaking(v1, v2), crossingFromPort(v1, v2);
+
+    headOn(v1, v2), crossingFromPort(v2, v1);
+    headOn(v1, v2), overtaking(v2, v1);
+    overtaking(v1, v2), crossingFromPort(v2, v1);
+
+    crossingFromPort(v1, v2), crossingFromPort(v2, v1);
+    overtaking(v1, v2), overtaking(v2, v1).
+
+
+error notInSituationWithOS(Vessel v1) <->
+    !isInSituationWith(v1, v2), TS(v1), OS(v2).
+
+error twoTSInRelation(Vessel v1, Vessel v2) <->
+    TS(v1), TS(v2), isInSituationWith(v1, v2).
+
+error moreThanOneOS(Vessel v1, Vessel v2) <->
+    OS(v1), OS(v2), v1 != v2.
+
+error noOS() <->
+    !OS(_).
+
+atom COLREGSScenario.
+declare OS, TS1, TS2, TS3, TS4.
+!exists(FunctionalModel::new).
+!exists(OS::new).
+!exists(TS::new).
+FunctionalModel(COLREGSScenario).
+OS(OS).
+TS(TS1).
+TS(TS2).
+TS(TS3).
+TS(TS4).
+object(COLREGSScenario, OS).
+object(COLREGSScenario, TS1).
+object(COLREGSScenario, TS2).
+object(COLREGSScenario, TS3).
+object(COLREGSScenario, TS4).
+default !overtaking(*, *).
+overtaking(OS, TS4).
+default !crossingFromPort(*, *).
+crossingFromPort(OS, TS1).
+crossingFromPort(OS, TS2).
+default !headOn(*, *).
+headOn(OS, TS3).
+headOn(TS3, OS).

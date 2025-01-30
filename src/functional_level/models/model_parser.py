@@ -9,13 +9,24 @@ from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 
 
 class ModelParser():
-    FUNCTIONAL_MODELS_PATH = f'{ASSET_FOLDER}/functional_models'
+    FUNCTIONAL_MODELS_PATH_ALL = f'{ASSET_FOLDER}/functional_models/all'
+    FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{ASSET_FOLDER}/functional_models/ambiguous'
     
-    TWO_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/2vessel_scenarios'
-    THREE_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/3vessel_scenarios'
-    FOUR_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/4vessel_scenarios'
-    FIVE_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/5vessel_scenarios'
-    SIX_VESSEL_SCENARIOS_PATH = f'{FUNCTIONAL_MODELS_PATH}/6vessel_scenarios'
+    scenario_path_map = {
+        2 : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_scenarios',
+        3 : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_scenarios',
+        4 : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_scenarios',
+        5 : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_scenarios',
+        6 : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_scenarios'
+    }
+    
+    ambiguous_scenario_path_map = {
+        2 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_scenarios',
+        3 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_scenarios',
+        4 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_scenarios',
+        5 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_scenarios',
+        6 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_scenarios'
+    }
     
     @staticmethod
     def parse_problem(problem : str) -> FunctionalScenario:
@@ -63,25 +74,15 @@ class ModelParser():
             return file.read()
      
     @staticmethod   
-    def load_functional_scenarios(dir : str) -> List[FunctionalScenario]:
+    def __load_functional_scenarios(dir : str) -> List[FunctionalScenario]:
         return [ModelParser.parse_problem(ModelParser.load_problem_from_file(path)) for path in get_all_file_paths(dir, 'problem')]
     
     @staticmethod
-    def load_2_vessel_scenarios() -> List[FunctionalScenario]:
-        return ModelParser.load_functional_scenarios(ModelParser.TWO_VESSEL_SCENARIOS_PATH)
+    def load_functional_scenarios(vessel_num : int) -> List[FunctionalScenario]:
+        return ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[vessel_num])
     
     @staticmethod
-    def load_3_vessel_scenarios() -> List[FunctionalScenario]:
-        return ModelParser.load_functional_scenarios(ModelParser.THREE_VESSEL_SCENARIOS_PATH)
+    def load_ambiguous_functional_scenarios(vessel_num : int) -> List[FunctionalScenario]:
+        return ModelParser.__load_functional_scenarios(ModelParser.ambiguous_scenario_path_map[vessel_num])
     
-    @staticmethod
-    def load_4_vessel_scenarios() -> List[FunctionalScenario]:
-        return ModelParser.load_functional_scenarios(ModelParser.FOUR_VESSEL_SCENARIOS_PATH)
-    
-    @staticmethod
-    def load_5_vessel_scenarios() -> List[FunctionalScenario]:
-        return ModelParser.load_functional_scenarios(ModelParser.FIVE_VESSEL_SCENARIOS_PATH)
-    
-    @staticmethod
-    def load_6_vessel_scenarios() -> List[FunctionalScenario]:
-        return ModelParser.load_functional_scenarios(ModelParser.SIX_VESSEL_SCENARIOS_PATH)
+  

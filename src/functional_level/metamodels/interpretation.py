@@ -46,8 +46,10 @@ class UnaryInterpretation(Interpretation, ABC):
 class BinaryInterpretation(Interpretation, ABC):
     _data : Set[Tuple[FuncObject, FuncObject]] = field(default_factory=set)
     
-    def contains(self, objects : Tuple[FuncObject, FuncObject]) -> bool:
-        return objects in self._data
+    def contains(self, objects : Tuple[Optional[FuncObject], Optional[FuncObject]]) -> bool:
+        if objects[0] == None and objects[1] == None:
+            return False
+        return len(self.get_tuples(*objects)) > 0
     
     def _add(self, objects : Tuple[FuncObject, FuncObject]):
         self._data.add(objects)
@@ -95,6 +97,10 @@ class OvertakingInterpretation(BinaryInterpretation):
     name : str = field(default='Overtaking', init=False)
     
 @dataclass(frozen=True)
+class VesselClass0Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass0', init=False)
+    
+@dataclass(frozen=True)
 class VesselClass1Interpretation(VesselInterpretation):
     name : str = field(default='VesselClass1', init=False)
     
@@ -114,17 +120,7 @@ class VesselClass4Interpretation(VesselInterpretation):
 class VesselClass5Interpretation(VesselInterpretation):
     name : str = field(default='VesselClass5', init=False)
     
-@dataclass(frozen=True)
-class VesselClass6Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass6', init=False)
     
-@dataclass(frozen=True)
-class VesselClass7Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass7', init=False)
-    
-@dataclass(frozen=True)
-class VesselClass0Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass8', init=False)
 
 
 

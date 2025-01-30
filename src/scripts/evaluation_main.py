@@ -15,7 +15,7 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
 NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
 NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
-NUMBER_OF_RUNS = {2 : 9000, 3 : 100 * 50, 4 : 330 * 15, 5 : 800 * 6, 6 : 1200 * 4}
+NUMBER_OF_RUNS = {2 : 1000, 3 : 100 * 50, 4 : 330 * 15, 5 : 800 * 6, 6 : 1200 * 4}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240
@@ -24,9 +24,9 @@ VERBOSE = False
 
 START_FROM = [0,0,0]
 
-measurement_names= ['test_2_vessel_scenarios']
-interactions = [FunctionalModelManager.get_2_vessel_scenarios()]
-interactions = [LogicalModelManager.get_2_vessel_scenarios()]
+measurement_names= ['test_3_vessel_scenarios']
+interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
+interactions = [LogicalModelManager.get_x_vessel_scenarios(3)]
 
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
@@ -35,8 +35,8 @@ ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
                         random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
 
 
-nsga2_vessel_config = EvaluationData(population_size=20, mutate_eta=15, mutate_prob=0.8,
-                            crossover_eta=15, crossover_prob=0.8, timeout=TIMEOUT,
+nsga2_vessel_config = EvaluationData(population_size=10, mutate_eta=15, mutate_prob=0.8,
+                            crossover_eta=20, crossover_prob=1, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
                             config_group='SBO')
 nsga2_all_config = EvaluationData(population_size=50, mutate_eta=10, mutate_prob=1.0,
@@ -47,8 +47,8 @@ nsga2_category_config = EvaluationData(population_size=4, mutate_eta=5, mutate_p
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=CategoryAggregate.name)
 
 
-nsga3_vessel_config = EvaluationData(population_size=6, mutate_eta=10, mutate_prob=1.0,
-                            crossover_eta=5, crossover_prob=1.0, timeout=TIMEOUT,
+nsga3_vessel_config = EvaluationData(population_size=6, mutate_eta=15, mutate_prob=1.0,
+                            crossover_eta=10, crossover_prob=0.8, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name)
 nsga3_all_config = EvaluationData(population_size=20, mutate_eta=1, mutate_prob=0.8,
                             crossover_eta=1, crossover_prob=1.0, timeout=TIMEOUT,

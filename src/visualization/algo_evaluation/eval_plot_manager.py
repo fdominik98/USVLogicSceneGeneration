@@ -8,8 +8,8 @@ from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.algo_evaluation.statistics_plot import StatisticsPlot
 from visualization.algo_evaluation.table_generator import TableGenerator
-from visualization.my_plot import MyPlot
-from visualization.algo_evaluation.eqv_class_plot import EqvClassPlot
+from visualization.my_plot import DummyPlot, MyPlot
+from visualization.algo_evaluation.diversity_plot import AmbiguousDiversityPlot, DiversityPlot, UnspecifiedDiversityPlot
 from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
 from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
@@ -30,7 +30,11 @@ class EvalPlotManager():
         generator.generate_runtime_summary_table()
         generator.generate_stat_sign_table()
         self.plots : Dict[str, PlotWrapper] = {
-            "Approach Diversity" : PlotWrapper(EqvClassPlot, {'eval_datas': self.eval_datas}),
+            "Home" : PlotWrapper(DummyPlot, {}),
+            "Statistics" : PlotWrapper(StatisticsPlot, {'eval_datas': self.eval_datas}),
+            "Approach Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
+            "Approach Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),
+            "Approach Unspecified Diversity" : PlotWrapper(UnspecifiedDiversityPlot, {'eval_datas': self.eval_datas}),
             "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'config'}),
             "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'config'}),
             "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'config'}),
@@ -38,7 +42,6 @@ class EvalPlotManager():
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
-            "Statistics" : PlotWrapper(StatisticsPlot, {'eval_datas': self.eval_datas}),
             # "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
             # "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
             # "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),

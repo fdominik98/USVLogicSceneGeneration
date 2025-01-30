@@ -102,8 +102,8 @@ class ScenarioAnimation():
         elif event.key == 'up':
             if self.is_anim_paused:
                 if self.anim == None:
-                    self.is_anim_paused = False
                     self.start()
+                self.is_anim_paused = False
                 print('Animation started')
             else:
                 self.is_anim_paused = True

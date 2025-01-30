@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from itertools import combinations
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 import copy
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
     HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation,
     VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation,
-    VesselClass5Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass0Interpretation, VesselInterpretation)
+    VesselClass5Interpretation, VesselClass0Interpretation, VesselInterpretation)
 from utils.scenario import Scenario
    
 @dataclass(frozen=True)
@@ -17,7 +17,7 @@ class FunctionalScenario(Scenario):
     overtaking_interpretation : OvertakingInterpretation = OvertakingInterpretation()
     crossing_interpretation : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
     
-    vessel_class_0_interpretation : VesselClass0Interpretation = VesselClass6Interpretation()
+    vessel_class_0_interpretation : VesselClass0Interpretation = VesselClass0Interpretation()
     vessel_class_1_interpretation : VesselClass1Interpretation = VesselClass1Interpretation()
     vessel_class_2_interpretation : VesselClass2Interpretation = VesselClass2Interpretation()
     vessel_class_3_interpretation : VesselClass3Interpretation = VesselClass3Interpretation()
@@ -42,32 +42,32 @@ class FunctionalScenario(Scenario):
                                     self.vessel_class_2_interpretation, self.vessel_class_3_interpretation,
                                     self.vessel_class_4_interpretation, self.vessel_class_5_interpretation,
         ]
-        object.__setattr__(self, 'class_interpretation_map', class_interpretation_list)
+        object.__setattr__(self, 'class_interpretation_list', class_interpretation_list)
         
     
     @property
     def name(self):
         return f'{str(self.size)}vessel'
     
-    def in_colreg_rel(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def in_colreg_rel(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.colreg_rel(o1, o2) or self.colreg_rel(o2, o1)
     
-    def in_overtaking(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def in_overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.overtaking(o1, o2) or self.overtaking(o2, o1)
     
-    def in_crossing(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def in_crossing(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.crossing(o1, o2) or self.crossing(o2, o1)
     
-    def colreg_rel(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def colreg_rel(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.head_on(o1, o2) or self.overtaking(o1, o2) or self.crossing(o1, o2)
     
-    def head_on(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def head_on(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.head_on_interpretation.contains((o1, o2))
     
-    def overtaking(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.overtaking_interpretation.contains((o1, o2))
     
-    def crossing(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def crossing(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.crossing_interpretation.contains((o1, o2))
     
     def is_os(self, o : FuncObject) -> bool:
@@ -77,7 +77,7 @@ class FunctionalScenario(Scenario):
         return self.ts_interpretation.contains(o)
     
     def is_vessel_class_x(self, class_num : int, o: FuncObject):
-        if class_num not in range(1, 8):
+        if class_num not in range(8):
             raise ValueError('Invalid class.')
         return self.class_interpretation_list[class_num].contains(o)
     

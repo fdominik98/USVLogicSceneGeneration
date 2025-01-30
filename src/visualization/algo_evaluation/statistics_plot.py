@@ -4,6 +4,7 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
+from evaluation.vessel_type_sampler import VesselTypeSampler
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
@@ -15,39 +16,44 @@ class StatisticsPlot(MyPlot):
         self.measurements : Dict[int, List[FunctionalScenario]] = defaultdict(lambda : [])
         for eval_data in eval_datas:
             if eval_data.best_fitness_index == 0:    
-                self.measurements[eval_data.vessel_number].append(eval_data)  
+                self.measurements[eval_data.config_group].append(eval_data)  
                 
-        self.vessel_num_labels = vessel_number_mapper(list(self.measurements.keys()))       
+        self.sample_size = 4000
+        self.colors = group_colors(3)
+        self.distribution = {'OtherType' : 51.1, 'CargoShip' : 31.1,
+                            'Tanker' : 6.2, 'ContainerShip' : 7.4,
+                            'PassengerShip' : 0.7, 'FishingShip' : 3.5}
+
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, 2, figsize=(1 * 3, 4))
+        fig, axes = plt.subplots(1, 3, figsize=(1 * 10, 4))
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
-        fig.subplots_adjust(wspace=0.5)
         
-        fig.text(0.5, 0.5, 'MSR', ha='center', va='center', fontsize=12, fontweight='bold')
-        fig.text(0.5, 0.05, 'SBO', ha='center', va='center', fontsize=12, fontweight='bold')
-
-        for i, (vessel_num, eval_datas) in enumerate(self.measurements.items()):
-            functional_models = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data).functional_scenario for eval_data in eval_datas]
-            colors = group_colors(3)
-            labels = ['Head-on', 'Crossing', 'Overtaking']
-            values = [sum(len(model.head_on_interpretation)/2 for model in functional_models), 
-                      sum(len(model.crossing_interpretation) for model in functional_models),
-                      sum(len(model.overtaking_interpretation) for model in functional_models)]
-            
-            if isinstance(axes, np.ndarray):
-                axi : plt.Axes = axes[i]
-            else:
-                axi : plt.Axes = axes  
-            bars : plt.BarContainer = axi.bar(labels, values, color=colors[i], edgecolor='black', linewidth=0)
+        def configure_axi(i : int, group_label, color, values):
+            axi : plt.Axes = axes[i]
+            bars : plt.BarContainer = axi.bar(labels, values, color=color, edgecolor='black', linewidth=0)
+            axi.set_title(group_label)
             if i == 0:
-                axi.set_title(self.vessel_num_labels[i])
                 axi.set_ylabel('Samples')
             axi.set_aspect('auto', adjustable='box')
-            yticks = np.linspace(0, max(values), 6)
+            yticks = np.linspace(0, max(values)*1.1, 6)
             yticks = [int(t) for t in yticks] 
             axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False) 
+            
+            for i, bar in enumerate(bars):
+                axi.text(bar.get_x() + bar.get_width() / 2, values[i] * 1.02, 
+                f'{(values[i] / sum(values) * 100):.1f}%', ha='center', va='bottom', fontsize=10)
 
+
+        labels = ['Overtaking', 'Head-on', 'Crossing']
+        for i, (config_group, eval_datas) in enumerate(self.measurements.items()):
+            group_label = config_group_mapper([config_group])
+            scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in eval_datas]
+            values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
+            configure_axi(i, group_label[0], self.colors[i], values)
+            
+        configure_axi(2, 'Zhu et al.', self.colors[-1], [56952*0.131, 56952*0.002, 56952*0.867])
+            
         fig.tight_layout(rect=[0, 0.04, 1, 1])
