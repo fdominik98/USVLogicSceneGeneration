@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Set, Tuple
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselInterpretation
+from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -27,7 +27,9 @@ class ConcreteSceneAbstractor():
         crossing_interpretation = CrossingFromPortInterpretation()    
         vessel_class_interpretations : List[VesselInterpretation] = [VesselClass0Interpretation(), VesselClass1Interpretation(),
                                                                      VesselClass2Interpretation(), VesselClass3Interpretation(),
-                                                                     VesselClass4Interpretation(), VesselClass5Interpretation()]
+                                                                     VesselClass4Interpretation(), VesselClass5Interpretation(),
+                                                                     VesselClass6Interpretation(), VesselClass7Interpretation(),
+                                                                     VesselClass8Interpretation()]
         
         vessel_object_map: Dict[ConcreteVessel, FuncObject] = dict()
         vessel_actor_map: Dict[ConcreteVessel, VesselVariable] = dict()
@@ -54,15 +56,15 @@ class ConcreteSceneAbstractor():
             var1, var2 = vessel_actor_map[v1], vessel_actor_map[v2]
             
             # Define terms and their corresponding actions
-            exprs_and_assertions : List[Tuple[RelationConstrComposite, Any]] = [
+            exprs_and_assertions : List[Tuple[RelationConstrComposite, RelationConstrComposite, Any]] = [
                 #(LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2), None),
-                (LogicalScenarioBuilder.get_crossing_term(var1, var2), lambda: crossing_interpretation.add(obj1, obj2)),
-                (LogicalScenarioBuilder.get_overtaking_term(var1, var2), lambda: overtaking_interpretation.add(obj1, obj2)),
-                (LogicalScenarioBuilder.get_head_on_term(var1, var2), lambda: head_on_interpretation.add(obj1, obj2)),
+                (LogicalScenarioBuilder.get_crossing_term_soft(var1, var2), LogicalScenarioBuilder.get_crossing_term(var1, var2), lambda: crossing_interpretation.add(obj1, obj2)),
+                (LogicalScenarioBuilder.get_overtaking_term_soft(var1, var2), LogicalScenarioBuilder.get_overtaking_term(var1, var2), lambda: overtaking_interpretation.add(obj1, obj2)),
+                (LogicalScenarioBuilder.get_head_on_term_soft(var1, var2), LogicalScenarioBuilder.get_head_on_term(var1, var2), lambda: head_on_interpretation.add(obj1, obj2)),
             ]
             eval_cache = EvaluationCache(assignments)
-            for expr, assertion in exprs_and_assertions:
-                penalty = expr._evaluate_penalty(eval_cache)
+            for soft_distance_expr, expr, assertion in exprs_and_assertions:
+                penalty = soft_distance_expr._evaluate_penalty(eval_cache)
                 if penalty.is_zero:
                     relation_constr_exprs.add(expr)
                     assertion()

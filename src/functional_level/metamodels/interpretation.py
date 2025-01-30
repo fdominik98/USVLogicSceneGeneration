@@ -120,6 +120,18 @@ class VesselClass4Interpretation(VesselInterpretation):
 class VesselClass5Interpretation(VesselInterpretation):
     name : str = field(default='VesselClass5', init=False)
     
+@dataclass(frozen=True)
+class VesselClass6Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass6', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass7Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass7', init=False)
+    
+@dataclass(frozen=True)
+class VesselClass8Interpretation(VesselInterpretation):
+    name : str = field(default='VesselClass8', init=False)
+    
     
 
 

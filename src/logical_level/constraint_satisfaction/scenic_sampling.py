@@ -80,14 +80,6 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
     scene = scenario._makeSceneFromSample(sample)
     return scene, iterations, datetime.now() - start_time
 
-
-def save_eval_data(eval_data : EvaluationData):
-    asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
-    if not os.path.exists(asset_folder):
-        os.makedirs(asset_folder)
-    file_path=f"{asset_folder}/{eval_data.scenario_name}_{eval_data.timestamp.replace(':','-')}.json"
-    eval_data.path = file_path
-    eval_data.save_to_json()
     
 def calculate_heading(vx, vy):
     heading_radians = np.arctan2(vy, vx)
@@ -122,13 +114,13 @@ for i in range(1000):
                 speed = np.linalg.norm(obj.velocity)
                 valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(obj.length, speed)]
                 vessel_type = PassengerShip() if obj.is_os else random.choice(valid_types)
-                builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.length, obj.length*4, obj.max_speed, vessel_type.name),
+                builder.set_state(ConcreteVessel(obj.id, obj.is_os, obj.length, obj.length*4, vessel_type.max_speed, vessel_type.name),
                                 VesselState(obj.position[0], obj.position[1], speed, calculate_heading(obj.velocity[0], obj.velocity[1])))
         eval_data.best_scene = builder.build()
         eval_data.best_fitness_index = 0.0
         eval_data.best_fitness = (0.0)
     eval_data.number_of_generations = num_iterations
     
-    save_eval_data(eval_data)
+    eval_data.save_as_measurement()
     
     #ScenarioPlotManager(TrajectoryManager(builder.build()))

@@ -19,7 +19,7 @@ class StatisticsPlot(MyPlot):
                 self.measurements[eval_data.config_group].append(eval_data)  
                 
         self.sample_size = 4000
-        self.colors = group_colors(3)
+        self.colors = group_colors(4)
         self.distribution = {'OtherType' : 51.1, 'CargoShip' : 31.1,
                             'Tanker' : 6.2, 'ContainerShip' : 7.4,
                             'PassengerShip' : 0.7, 'FishingShip' : 3.5}
@@ -27,7 +27,7 @@ class StatisticsPlot(MyPlot):
         MyPlot.__init__(self)
         
     def create_fig(self):
-        fig, axes = plt.subplots(1, 3, figsize=(1 * 10, 4))
+        fig, axes = plt.subplots(1, 4, figsize=(1 * 12, 4))
         self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         
@@ -54,6 +54,6 @@ class StatisticsPlot(MyPlot):
             values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
             configure_axi(i, group_label[0], self.colors[i], values)
             
-        configure_axi(2, 'Zhu et al.', self.colors[-1], [56952*0.131, 56952*0.002, 56952*0.867])
+        configure_axi(3, 'Zhu et al.', self.colors[-1], [56952*0.131, 56952*0.002, 56952*0.867])
             
         fig.tight_layout(rect=[0, 0.04, 1, 1])

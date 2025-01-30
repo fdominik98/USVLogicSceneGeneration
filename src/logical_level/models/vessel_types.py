@@ -106,4 +106,28 @@ class FishingShip(VesselType):
     min_beam = 2
     max_beam = 20
     
-ALL_VESSEL_TYPES : List[VesselType] = [OtherType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip()]
+class MotorVessel(VesselType):
+    name : str = 'MotorVessel'
+    min_length = 10
+    max_length = 200
+    max_speed = 30 * KNOT_TO_MS_CONVERSION
+    min_beam = 3
+    max_beam = 25
+    
+class SailingVessel(VesselType):
+    name : str = 'SailingVessel'
+    min_length = 5
+    max_length = 60
+    max_speed = 20 * KNOT_TO_MS_CONVERSION
+    min_beam = 2
+    max_beam = 12
+    
+class MilitaryVessel(VesselType):
+    name : str = 'MotorVessel'
+    min_length = 20
+    max_length = 300
+    max_speed = 50 * KNOT_TO_MS_CONVERSION
+    min_beam = 5
+    max_beam = 40
+    
+ALL_VESSEL_TYPES : List[VesselType] = [OtherType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]

@@ -75,7 +75,7 @@ class EvolutionaryAlgorithmBase(ABC):
             print(eval_data.error_message)
         finally:
             if save:
-                self.save_eval_data(eval_data)
+                eval_data.save_as_measurement()
             return eval_data
         
     @abstractmethod   
@@ -89,14 +89,6 @@ class EvolutionaryAlgorithmBase(ABC):
     @abstractmethod   
     def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
         pass
-    
-    def save_eval_data(self, eval_data : EvaluationData):
-        asset_folder = f'{ASSET_FOLDER}/gen_data/{eval_data.measurement_name}/{eval_data.config_group}/{eval_data.algorithm_desc}'
-        if not os.path.exists(asset_folder):
-            os.makedirs(asset_folder)
-        file_path=f"{asset_folder}/{eval_data.scenario_name}_{eval_data.timestamp.replace(':','-')}.json"
-        eval_data.path = file_path
-        eval_data.save_to_json()
         
     def set_seed(self, seed):
         random.seed(seed)

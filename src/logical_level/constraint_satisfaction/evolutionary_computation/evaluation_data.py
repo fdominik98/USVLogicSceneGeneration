@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 import json
+import os
 import pprint
 from typing import Optional, List
 from concrete_level.models.concrete_scene import ConcreteScene
+from utils.file_system_utils import ASSET_FOLDER
 from utils.serializable import Serializable
 
 @dataclass(frozen=False)
@@ -60,6 +62,14 @@ class EvaluationData(Serializable):
     
     def __repr__(self) -> str:
         return pprint.pformat(dict(sorted(self.to_dict().items())))
+    
+    def save_as_measurement(self):
+        asset_folder = f'{ASSET_FOLDER}/gen_data/{self.measurement_name}/{self.config_group}/{self.algorithm_desc}'
+        if not os.path.exists(asset_folder):
+            os.makedirs(asset_folder)
+        file_path=f"{asset_folder}/{self.scenario_name}_{self.timestamp.replace(':','-')}.json"
+        self.path = file_path
+        self.save_to_json()
 
     
     

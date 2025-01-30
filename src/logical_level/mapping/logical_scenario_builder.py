@@ -87,9 +87,22 @@ class LogicalScenarioBuilder():
         return RelationConstrTerm({AtVis(var1, var2), CrossingBear(var1, var2), MayCollide(var1, var2)})
     
     @staticmethod    
+    def get_head_on_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
+        return RelationConstrTerm({HeadOnBear(var1, var2)})
+    
+    @staticmethod    
+    def get_overtaking_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
+        return RelationConstrTerm({OvertakingBear(var1, var2)})
+    
+    @staticmethod    
+    def get_crossing_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
+        return RelationConstrTerm({CrossingBear(var1, var2)})
+    
+    @staticmethod    
     def get_no_collide_out_vis_clause(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrClause:
         return RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)})
     
+    @staticmethod
     def get_at_vis_may_collide_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
         return RelationConstrTerm({AtVis(var1, var2), MayCollide(var1, var2)})
     

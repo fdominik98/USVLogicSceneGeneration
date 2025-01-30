@@ -29,8 +29,13 @@ MAX_LENGTH = 400
 MIN_BEAM = 2
 MAX_BEAM = 65
 MIN_SPEED_IN_MS = 1 * KNOT_TO_MS_CONVERSION
-MAX_SPEED_IN_MS = 40 * KNOT_TO_MS_CONVERSION
+MAX_SPEED_IN_MS = 50 * KNOT_TO_MS_CONVERSION
 
+EGO_LENGTH = 30
+EGO_BEAM = 10
+
+def vessel_radius(length : float) -> float:
+    return length * 4
 
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:

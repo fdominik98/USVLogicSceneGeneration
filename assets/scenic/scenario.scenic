@@ -35,6 +35,12 @@ MAX_BEAM = 65
 MIN_SPEED_IN_MS = 1 * KNOT_TO_MS_CONVERSION
 MAX_SPEED_IN_MS = 40 * KNOT_TO_MS_CONVERSION
 
+EGO_LENGTH = 30
+EGO_BEAM = 10
+
+def vessel_radius(length : float) -> float:
+    return length * 4
+
 def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
     if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
         if o2_length < 12:
@@ -68,7 +74,7 @@ class Ship(Object):
 
     def set_geometry(self):
         self.l = self.length
-        self.r = self.l * 4
+        self.r = vessel_radius(self.l)
         self.p = self.position
         self.v = self.velocity
         self.sp = np.linalg.norm(self.v)
@@ -81,7 +87,8 @@ class Ship(Object):
         return self.h > MIN_HEADING and self.h < MAX_HEADING
 
 class OwnShip(Ship):
-    length : 30
+    length : EGO_LENGTH
+    beam : EGO_BEAM
     is_os : True
 
 class DummyShip(Ship):

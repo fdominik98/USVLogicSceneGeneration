@@ -59,6 +59,8 @@ def config_group_mapper(config_groups : List[str]):
             labels.append('MSR')
         elif 'scenic_distribution' in name.lower():
             labels.append('Scenic')
+        elif 'common_ocean_benchmark':
+            labels.append('Common')
         elif 'f3' in name.lower():
            labels.append(r'$F_3$')
         elif 'f2' in name.lower():

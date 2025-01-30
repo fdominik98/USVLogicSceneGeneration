@@ -28,7 +28,7 @@ class ConcreteScene(Serializable):
 
     @property
     def actors(self):
-        return self._data.keys()
+        return [actor for actor, _ in self.sorted_items]
     
     @property
     def all_actor_pairs(self):
