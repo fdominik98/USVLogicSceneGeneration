@@ -1,39 +1,27 @@
 from collections import defaultdict
 import pprint
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from utils.asv_utils import EPSILON
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
-from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
-from visualization.my_plot import MyPlot
+from visualization.plotting_utils import EvalPlot
 
-class EvalTimePlot(MyPlot):  
+class EvalTimePlot(EvalPlot):  
     def __init__(self, eval_datas : List[EvaluationData], all=False, mode='algo'): 
         self.mode = mode
         self.all = all
-        self.eval_datas = eval_datas
-        self.runtimes : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
-        for eval_data in eval_datas:
-            if self.mode == 'algo':
-                group_key = eval_data.algorithm_desc
-            elif self.mode == 'config':
-                group_key = eval_data.config_group
-            else:
-                raise Exception('Unknown grouping mode')
-            if eval_data.best_fitness_index == 0.0 or all:     
-                self.runtimes[eval_data.vessel_number][group_key].append(eval_data.evaluation_time)
-            else: 
-                self.runtimes[eval_data.vessel_number][group_key] = self.runtimes[eval_data.vessel_number][group_key]
             
-        self.vessel_num_labels = vessel_number_mapper(list(self.runtimes.keys()))
-        MyPlot.__init__(self)
+        EvalPlot.__init__(self, eval_datas)
+    
+    @property
+    def algos(self) -> List[Tuple[str, str]]:
+        return [('nsga2', 'all'), ('nsga2', 'vessel'), ('nsga2', 'category'), ('nsga3', 'all'), ('nsga3', 'vessel'), ('nsga3', 'category'), ('ga', 'all'), ('de', 'all'), ('pso', 'all_swarm')]
         
     def create_fig(self):
         figsize = (10, 4) if self.mode == 'algo' else (6, 3)
         fig, axes = plt.subplots(1, len(self.runtimes), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.runtimes)})
-        self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
@@ -78,8 +66,7 @@ class EvalTimePlot(MyPlot):
             # Annotate each box with the number of samples
             for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(i, maxy*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
-                    
-            
-
+                axi.text(i, maxy*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')  
+                                 
         fig.tight_layout()
+        return fig

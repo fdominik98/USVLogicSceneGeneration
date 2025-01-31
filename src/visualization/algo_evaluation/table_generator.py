@@ -7,7 +7,6 @@ import numpy as np
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
-from visualization.algo_evaluation.algo_eval_utils import config_group_mapper
 
 
 class TableGenerator():
@@ -30,7 +29,7 @@ class TableGenerator():
         for i, (runtime_group_measurements, success_rate_group_measurements) in enumerate(zip(self.runtimes.values(), self.success_rates.values())): 
             runtime_data = list(runtime_group_measurements.values())
             success_rate_data = list(success_rate_group_measurements.values())
-            group_labels = config_group_mapper(list(runtime_group_measurements.keys())) 
+            group_labels = list(runtime_group_measurements.keys())
             
             if len(runtime_group_measurements) != 2:
                 break

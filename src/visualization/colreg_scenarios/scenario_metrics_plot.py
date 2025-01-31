@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from evaluation.risk_evaluation import TrajectoryRiskEvaluator
 from utils.asv_utils import *
-from visualization.my_plot import MyPlot
+from visualization.plotting_utils import PlotBase
 from visualization.colreg_scenarios.plot_components.metric_components.risk_metric_component import RiskMetricComponent
 from visualization.colreg_scenarios.plot_components.metric_components.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent
 
-class ScenarioMetricsPlot(MyPlot):  
+class ScenarioMetricsPlot(PlotBase):  
     def __init__(self, trajectory_manager : TrajectoryManager): 
-        MyPlot.__init__(self)
+        PlotBase.__init__(self)
         
         self.trajectory_manager = trajectory_manager
         
@@ -26,20 +26,21 @@ class ScenarioMetricsPlot(MyPlot):
         self.fig.tight_layout()
         
         
-    def create_fig(self):
-        self.fig : plt.Figure = plt.figure(figsize=(12, 3))
+    def create_fig(self) -> plt.Figure:
+        fig : plt.Figure = plt.figure(figsize=(12, 3))
         # Create a GridSpec with 2 rows and 2 columns
         gs = gridspec.GridSpec(2, 3, height_ratios=[1,1], width_ratios=[1, 1, 1])
 
-        ax4 = self.fig.add_subplot(gs[0, 2])
+        ax4 = fig.add_subplot(gs[0, 2])
         # Create axes for the first column (occupying both rows)
-        ax1 = self.fig.add_subplot(gs[1, 0])
-        ax2 = self.fig.add_subplot(gs[1, 1])
-        ax3 = self.fig.add_subplot(gs[1, 2])
+        ax1 = fig.add_subplot(gs[1, 0])
+        ax2 = fig.add_subplot(gs[1, 1])
+        ax3 = fig.add_subplot(gs[1, 2])
 
         #ax5 = self.fig.add_subplot(gs[1, 3])
         
-        self.fig.subplots_adjust(wspace=0.5)
+        fig.subplots_adjust(wspace=0.5)
         
         self.axes : List[plt.Axes] = [ax1, ax2, ax3, ax4]
+        return fig
         

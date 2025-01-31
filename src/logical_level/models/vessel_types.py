@@ -64,70 +64,73 @@ class OtherType(VesselType):
 @dataclass(frozen=True, repr=False)
 class CargoShip(VesselType):
     name : str = 'CargoShip'
-    min_length = 50
-    max_length = 400
-    max_speed = 25 * KNOT_TO_MS_CONVERSION
-    min_beam = 10
-    max_beam = 60
+    min_length : float = 50
+    max_length : float = 400
+    max_speed : float = 25 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 10
+    max_beam : float = 60
     
 @dataclass(frozen=True, repr=False)
 class Tanker(VesselType):
     name : str = 'Tanker'
-    min_length = 60
-    max_length = 350
-    max_speed = 20 * KNOT_TO_MS_CONVERSION
-    min_beam = 10
-    max_beam = 60
+    min_length : float = 60
+    max_length : float = 350
+    max_speed : float = 20 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 10
+    max_beam : float = 60
     
 @dataclass(frozen=True, repr=False)
 class ContainerShip(VesselType):
     name : str = 'ContainerShip'
-    min_length = 100
-    max_length = 400
-    max_speed = 25 * KNOT_TO_MS_CONVERSION
-    min_beam = 15
-    max_beam = 65
+    min_length : float = 100
+    max_length : float = 400
+    max_speed : float = 25 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 15
+    max_beam : float = 65
     
 @dataclass(frozen=True, repr=False)
 class PassengerShip(VesselType):
     name : str = 'PassengerShip'
-    min_length = 20
-    max_length = 350
-    max_speed = 40 * KNOT_TO_MS_CONVERSION
-    min_beam = 5
-    max_beam = 50
+    min_length : float = 20
+    max_length : float = 350
+    max_speed : float = 40 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 5
+    max_beam : float = 50
     
 @dataclass(frozen=True, repr=False)
 class FishingShip(VesselType):
     name : str = 'FishingShip'
-    min_length = 2
-    max_length = 100
-    max_speed = 15 * KNOT_TO_MS_CONVERSION
-    min_beam = 2
-    max_beam = 20
-    
+    min_length : float = 2
+    max_length : float = 100
+    max_speed : float = 15 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 2
+    max_beam : float = 20
+ 
+@dataclass(frozen=True, repr=False)   
 class MotorVessel(VesselType):
     name : str = 'MotorVessel'
-    min_length = 10
-    max_length = 200
-    max_speed = 30 * KNOT_TO_MS_CONVERSION
-    min_beam = 3
-    max_beam = 25
+    min_length : float = 10
+    max_length : float = 370
+    max_speed : float = 30 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 3
+    max_beam : float = 80
     
+@dataclass(frozen=True, repr=False)
 class SailingVessel(VesselType):
     name : str = 'SailingVessel'
-    min_length = 5
-    max_length = 60
-    max_speed = 20 * KNOT_TO_MS_CONVERSION
-    min_beam = 2
-    max_beam = 12
+    min_length : float = 5
+    max_length : float = 60
+    max_speed : float = 20 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 2
+    max_beam : float = 12
     
+@dataclass(frozen=True, repr=False)
 class MilitaryVessel(VesselType):
-    name : str = 'MotorVessel'
-    min_length = 20
-    max_length = 300
-    max_speed = 50 * KNOT_TO_MS_CONVERSION
-    min_beam = 5
-    max_beam = 40
+    name : str = 'MilitaryVessel'
+    min_length : float = 20
+    max_length : float = 300
+    max_speed : float = 50 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 5
+    max_beam : float = 40
     
 ALL_VESSEL_TYPES : List[VesselType] = [OtherType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]

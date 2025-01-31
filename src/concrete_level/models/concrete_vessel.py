@@ -29,6 +29,8 @@ class ConcreteVessel(Serializable):
     @property
     def logical_variable(self) -> VesselVariable:
         t = VesselType.get_vessel_type_by_name(self.vessel_type)
+        if t is None :
+            raise TypeError('Vessel type is not found')
         if self.is_os:
             return OSVariable(self.id, t)
         else:

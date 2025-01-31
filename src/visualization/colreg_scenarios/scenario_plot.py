@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.asv_utils import *
 from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import AggregateAll
-from visualization.my_plot import MyPlot
+from visualization.plotting_utils import PlotBase
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.legend_component import LegendComponent
 from visualization.colreg_scenarios.scenario_animation import ScenarioAnimation
@@ -17,9 +17,9 @@ from visualization.colreg_scenarios.plot_components.main_plot_components.distanc
 from visualization.colreg_scenarios.plot_components.main_plot_components.vo_cone_component import VOConeComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.additional_vo_cone_component import AdditionalVOConeComponent
         
-class ScenarioPlot(MyPlot):  
+class ScenarioPlot(PlotBase):  
     def __init__(self, trajectory_manager : TrajectoryManager): 
-        MyPlot.__init__(self)
+        PlotBase.__init__(self)
         
         self.trajectory_manager = trajectory_manager
         
@@ -58,10 +58,10 @@ class ScenarioPlot(MyPlot):
         self.fig.canvas.mpl_connect('motion_notify_event', self.drawing_component.on_move)
         
         
-    def create_fig(self):
+    def create_fig(self) -> plt.Figure:
         fig, ax = plt.subplots(1, 1, gridspec_kw={'width_ratios': [1]})
-        self.fig : plt.Figure = fig
-        self.ax : plt.Axes = ax     
+        self.ax : plt.Axes = ax   
+        return fig  
 
         
     def draw(self):

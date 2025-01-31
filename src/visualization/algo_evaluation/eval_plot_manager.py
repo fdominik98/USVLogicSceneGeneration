@@ -8,7 +8,7 @@ from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.algo_evaluation.statistics_plot import StatisticsPlot
 from visualization.algo_evaluation.table_generator import TableGenerator
-from visualization.my_plot import DummyPlot, MyPlot
+from visualization.plotting_utils import DummyEvalPlot, EvalPlot
 from visualization.algo_evaluation.diversity_plot import AmbiguousDiversityPlot, DiversityPlot, UnspecifiedDiversityPlot
 from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
 from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
@@ -18,19 +18,19 @@ class PlotWrapper():
         self.plot_class = plot_class
         self.args = args
         self.plot = None
-    def get(self) -> MyPlot:
+    def get(self) -> EvalPlot:
         if self.plot is None:
             self.plot = self.plot_class(**self.args)
         return self.plot
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
         
-        self.eval_datas = sorted(eval_datas, key=lambda x: (x.config_group, x.algorithm_desc, x.aggregate_strat, x.vessel_number))
+        self.eval_datas = eval_datas
         generator = TableGenerator(eval_datas)
         generator.generate_runtime_summary_table()
         generator.generate_stat_sign_table()
         self.plots : Dict[str, PlotWrapper] = {
-            "Home" : PlotWrapper(DummyPlot, {}),
+            "Home" : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "Statistics" : PlotWrapper(StatisticsPlot, {'eval_datas': self.eval_datas}),
             "Approach Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
             "Approach Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),

@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from visualization.algo_evaluation.algo_eval_utils import config_group_mapper, vessel_number_mapper, group_colors
-from visualization.my_plot import MyPlot
+from visualization.plotting_utils import EvalPlot
 
-class RiskVectorPlot(MyPlot):  
+class RiskVectorPlot(EvalPlot):  
     
     @staticmethod
     def metric_map_type(scene: ConcreteScene, metric_type: str):
@@ -38,7 +37,6 @@ class RiskVectorPlot(MyPlot):
     
     def __init__(self, eval_datas : List[EvaluationData], metric = 'dcpa'): 
         self.metric = metric
-        self.eval_datas = eval_datas
         self.risk_indices : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
         for eval_data in eval_datas:
             if eval_data.best_scene is None:
@@ -51,19 +49,16 @@ class RiskVectorPlot(MyPlot):
             else: 
                 self.risk_indices[eval_data.vessel_number][eval_data.config_group] = self.risk_indices[eval_data.best_scene.vessel_number][eval_data.config_group]
             
-        self.vessel_num_labels = vessel_number_mapper(list(self.risk_indices.keys()))
-        MyPlot.__init__(self)
+        EvalPlot.__init__(self, eval_datas)
         
         
-    def create_fig(self):
+    def create_fig(self) -> plt.Figure:
         figsize = (6, 3)
         fig, axes = plt.subplots(1, len(self.risk_indices), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.risk_indices)})
-        self.fig : plt.Figure = fig
         self.axes : List[plt.Axes] = axes
         fig.subplots_adjust(wspace=0.5)
 
         for i, (vessel_num, group_measurements) in enumerate(self.risk_indices.items()):
-            group_labels = config_group_mapper(list(group_measurements.keys()))
             data = list(group_measurements.values())
             
             if isinstance(axes, np.ndarray):
@@ -78,10 +73,10 @@ class RiskVectorPlot(MyPlot):
                 axi.set_yticks([])
             axi.set_aspect('auto', adjustable='box')
             #axi.set_yticks(range(max([max(d) for d in data])))
-            axi.set_xticks(range(1, len(group_labels)+1), group_labels)
-            axi.set_xticklabels(group_labels, rotation=0, ha='right', fontweight='bold')            
+            axi.set_xticks(range(1, self.group_count+1), self.group_labels)
+            axi.set_xticklabels(self.group_labels, rotation=0, ha='right', fontweight='bold')            
             
-            for patch, color in zip(violinplot['bodies'], group_colors(len(group_labels))):
+            for patch, color in zip(violinplot['bodies'], self.colors):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)   
             
@@ -98,5 +93,5 @@ class RiskVectorPlot(MyPlot):
                 sample_size = len(group)
                 axi.text(i, self.metric_map_max[self.metric]*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
                     
-
         fig.tight_layout()
+        return fig

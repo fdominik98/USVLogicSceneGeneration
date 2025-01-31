@@ -1,35 +1,30 @@
-from collections import defaultdict
-import pprint
-from typing import Dict, List
+from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from evaluation.vessel_type_sampler import VesselTypeSampler
-from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from visualization.algo_evaluation.algo_eval_utils import algo_mapper, config_group_mapper, vessel_number_mapper, group_colors
-from visualization.my_plot import MyPlot
+from visualization.plotting_utils import EvalPlot
 
-class StatisticsPlot(MyPlot):  
-    def __init__(self, eval_datas : List[EvaluationData]): 
-        self.eval_datas = eval_datas
-        self.measurements : Dict[int, List[FunctionalScenario]] = defaultdict(lambda : [])
-        for eval_data in eval_datas:
-            if eval_data.best_fitness_index == 0:    
-                self.measurements[eval_data.config_group].append(eval_data)  
-                
+class StatisticsPlot(EvalPlot):  
+    def __init__(self, eval_datas : List[EvaluationData]):                
         self.sample_size = 4000
-        self.colors = group_colors(4)
         self.distribution = {'OtherType' : 51.1, 'CargoShip' : 31.1,
                             'Tanker' : 6.2, 'ContainerShip' : 7.4,
                             'PassengerShip' : 0.7, 'FishingShip' : 3.5}
-
-        MyPlot.__init__(self)
+        super().__init__(eval_datas)
         
-    def create_fig(self):
-        fig, axes = plt.subplots(1, 4, figsize=(1 * 12, 4))
-        self.fig : plt.Figure = fig
-        self.axes : List[plt.Axes] = axes
+    @property   
+    def config_groups(self) -> List[str]:
+        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark', 'zhu_et_al']
+    
+    @property
+    def vessel_numbers(self) -> List[int]:
+        return [2]
+        
+    def create_fig(self) -> plt.Figure:
+        fig, axes = plt.subplots(self.vessel_num_count, self.group_count, figsize=(1 * 12, 4))
+        axes = np.atleast_1d(axes)
         
         def configure_axi(i : int, group_label, color, values):
             axi : plt.Axes = axes[i]
@@ -48,12 +43,15 @@ class StatisticsPlot(MyPlot):
 
 
         labels = ['Overtaking', 'Head-on', 'Crossing']
-        for i, (config_group, eval_datas) in enumerate(self.measurements.items()):
-            group_label = config_group_mapper([config_group])
-            scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in eval_datas]
-            values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
-            configure_axi(i, group_label[0], self.colors[i], values)
+        for i, vessel_number in enumerate(self.vessel_numbers):
+            for j, config_group in enumerate(self.config_groups):
+                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in self.measurements[vessel_number][config_group]]
+                values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
+                if sum(values) == 0:
+                    continue
+                configure_axi(j, self.group_labels[j], self.colors[j], values)
             
-        configure_axi(3, 'Zhu et al.', self.colors[-1], [56952*0.131, 56952*0.002, 56952*0.867])
+        configure_axi(3, self.group_labels[3], self.colors[3], [56952*0.131, 56952*0.002, 56952*0.867])
             
         fig.tight_layout(rect=[0, 0.04, 1, 1])
+        return fig
