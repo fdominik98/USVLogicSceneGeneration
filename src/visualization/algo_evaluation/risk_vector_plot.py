@@ -1,5 +1,5 @@
-from collections import defaultdict
-from typing import Dict, List
+from itertools import chain
+from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
@@ -18,6 +18,8 @@ class RiskVectorPlot(EvalPlot):
         }
         if metric_type not in metric_mapping:
             raise ValueError('Unrecognized type.')
+        if metric_mapping[metric_type] is None:
+            raise ValueError('None vector found among optimal solutions')
         return metric_mapping[metric_type]
     
     metric_map_title = {
@@ -34,64 +36,62 @@ class RiskVectorPlot(EvalPlot):
         'proximity' : 1.0,
     }
     
+    @property   
+    def config_groups(self) -> List[str]:
+        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
+    
+    @property
+    def vessel_numbers(self) -> List[int]:
+        return [2, 3, 4, 5, 6]
+    
     
     def __init__(self, eval_datas : List[EvaluationData], metric = 'dcpa'): 
         self.metric = metric
-        self.risk_indices : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))
-        for eval_data in eval_datas:
-            if eval_data.best_scene is None:
-                continue
-            if eval_data.best_fitness_index == 0.0:                
-                if not eval_data.best_scene.has_risk_metrics:
-                    raise Exception('None vector found among optimal solutions')
-                data = self.metric_map_type(eval_data.best_scene, metric)
-                self.risk_indices[eval_data.vessel_number][eval_data.config_group].append(data)
-            else: 
-                self.risk_indices[eval_data.vessel_number][eval_data.config_group] = self.risk_indices[eval_data.best_scene.vessel_number][eval_data.config_group]
-            
-        EvalPlot.__init__(self, eval_datas)
-        
+        EvalPlot.__init__(self, eval_datas, is_all=False)
         
     def create_fig(self) -> plt.Figure:
-        figsize = (6, 3)
-        fig, axes = plt.subplots(1, len(self.risk_indices), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.risk_indices)})
-        self.axes : List[plt.Axes] = axes
+        fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.vessel_num_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
+        axes = np.atleast_1d(axes)
         fig.subplots_adjust(wspace=0.5)
 
-        for i, (vessel_num, group_measurements) in enumerate(self.risk_indices.items()):
-            data = list(group_measurements.values())
-            
-            if isinstance(axes, np.ndarray):
-                axi : plt.Axes = axes[i]
-            else:
-                axi : plt.Axes = axes     
-            violinplot = axi.violinplot(data, widths=0.7, showmeans=True, showmedians=True)
+        for i, vessel_number in enumerate(self.vessel_numbers):
+            axi : plt.Axes = axes[i]
             axi.set_title(self.vessel_num_labels[i])
-            if i == 0:
-                axi.set_ylabel(self.metric_map_title[self.metric], fontsize=11)
-            if i != 0:
-                axi.set_yticks([])
-            axi.set_aspect('auto', adjustable='box')
-            #axi.set_yticks(range(max([max(d) for d in data])))
-            axi.set_xticks(range(1, self.group_count+1), self.group_labels)
-            axi.set_xticklabels(self.group_labels, rotation=0, ha='right', fontweight='bold')            
+            self.init_axi(i, axi, self.metric_map_title[self.metric])
             
-            for patch, color in zip(violinplot['bodies'], self.colors):
+            data = []
+            new_group_labels = []
+            for measurement, label in zip(self.measurements[vessel_number].values(), self.group_labels):
+                values = [self.metric_map_type(eval_data.best_scene, self.metric) for eval_data in measurement]
+                if len(values) != 0:
+                    data.append(values)
+                    new_group_labels.append(label)
+            
+            if len(data) == 0:
+                continue
+    
+            violin_plot = axi.violinplot(data, widths=0.7, showmeans=True, showmedians=True)
+
+            #axi.set_yticks(range(max([max(d) for d in data])))
+            axi.set_xticks(range(1, len(new_group_labels)+1), new_group_labels)
+            axi.set_xticklabels(new_group_labels, rotation=0, ha='right', fontweight='bold')  
+            self.set_yticks(axi, range(round(max([max(d) for d in data]))))          
+            
+            for patch, color in zip(violin_plot['bodies'], self.colors):
                 patch.set_facecolor(color)           # Set fill color
                 patch.set_linewidth(1.5)   
             
-            violinplot['cmeans'].set_color('black')
-            violinplot['cmeans'].set_linewidth(2)
-            violinplot['cmedians'].set_color('grey')
-            violinplot['cmedians'].set_linewidth(2)
-            violinplot['cmedians'].set_linestyle(':')
+            violin_plot['cmeans'].set_color('black')
+            violin_plot['cmeans'].set_linewidth(2)
+            violin_plot['cmedians'].set_color('grey')
+            violin_plot['cmedians'].set_linewidth(2)
+            violin_plot['cmedians'].set_linestyle(':')
             
             axi.set_ylim(0, self.metric_map_max[self.metric] * 1.15)
                     
             # Annotate each box with the number of samples
-            for i, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
+            for j, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(i, self.metric_map_max[self.metric]*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
+                axi.text(j, self.metric_map_max[self.metric]*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
                     
-        fig.tight_layout()
         return fig

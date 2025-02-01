@@ -12,10 +12,10 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 from logical_level.models.logical_model_manager import LogicalModelManager
 
-NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
-NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
-NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
-NUMBER_OF_RUNS = {2 : 1000, 3 : 100 * 50, 4 : 330 * 15, 5 : 800 * 6, 6 : 1200 * 4}
+# NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
+# NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
+# NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
+NUMBER_OF_RUNS = {2 : 1000, 3 : 1000, 4 : 1000, 5 : 1000, 6 : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240
@@ -24,9 +24,12 @@ VERBOSE = False
 
 START_FROM = [0,0,0]
 
-measurement_names= ['test_3_vessel_scenarios']
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
-interactions = [LogicalModelManager.get_x_vessel_scenarios(3)]
+measurement_names= ['test_2_vessel_scenarios', 'test_3_vessel_scenarios', 'test_4_vessel_scenarios',
+                    'test_5_vessel_scenarios', 'test_6_vessel_scenarios']
+#interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
+interactions = [LogicalModelManager.get_x_vessel_scenarios(2), LogicalModelManager.get_x_vessel_scenarios(3),
+                LogicalModelManager.get_x_vessel_scenarios(4), LogicalModelManager.get_x_vessel_scenarios(5),
+                LogicalModelManager.get_x_vessel_scenarios(6)]
 
 
 ga_config = EvaluationData(population_size=4, num_parents_mating = 4,

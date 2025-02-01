@@ -1,65 +1,58 @@
-from collections import defaultdict
-import pprint
-from typing import Dict, List
+from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from utils.asv_utils import EPSILON
 from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
 from visualization.plotting_utils import EvalPlot
 
 class SuccessRatePlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], mode='algo'): 
-        self.mode = mode
-        self.success_rates : Dict[int, Dict[str, List[int]]] = defaultdict(lambda : defaultdict(lambda : []))
-        for eval_data in eval_datas:
-            if self.mode == 'algo':
-                group_key = eval_data.algorithm_desc
-            elif self.mode == 'config':
-                group_key = eval_data.config_group
-            else:
-                raise Exception('Unknown grouping mode')
-            self.success_rates[eval_data.vessel_number][group_key].append(0 if eval_data.best_fitness_index > 0.0 else 1)
-            
-        EvalPlot.__init__(self, eval_datas)
+    def __init__(self, eval_datas : List[EvaluationData], is_algo=False): 
+        EvalPlot.__init__(self, eval_datas, is_algo=is_algo, is_all=True)
+        
+    @property
+    def algos(self) -> List[Tuple[str, str]]:
+        return [('nsga2', 'all'), ('nsga2', 'vessel'), ('nsga2', 'category'), ('nsga3', 'all'), ('nsga3', 'vessel'), ('nsga3', 'category'), ('ga', 'all'), ('de', 'all'), ('pso', 'all_swarm')]
+        
+    @property   
+    def config_groups(self) -> List[str]:
+        return ['SBO', 'scenic_distribution']
+    
+    @property
+    def vessel_numbers(self) -> List[int]:
+        return [2, 3, 4, 5, 6]
         
     def create_fig(self) -> plt.Figure:
-        figsize = (10, 4) if self.mode == 'algo' else (6, 3)
-        fig, axes = plt.subplots(1, len(self.success_rates), figsize=figsize, gridspec_kw={'width_ratios': [1]*len(self.success_rates)})
-        self.axes : List[plt.Axes] = axes
+        fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.comparison_group_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
+        axes = np.atleast_1d(axes)
         fig.subplots_adjust(wspace=0.5)
 
-        for i, (vessel_num, group_measurements) in enumerate(self.success_rates.items()):
-            if self.mode == 'algo':
-                labels = self.algo_labels
-                colors = self.algo_colors
-            elif self.mode == 'config':
-                labels = self.group_labels
-                colors = self.algo_colors
-            else:
-                raise Exception('Unknown grouping mode')
-            
-            percentages = [np.mean(data) * 100 for data in group_measurements.values()]
-            
-            if isinstance(axes, np.ndarray):
-                axi : plt.Axes = axes[i]
-            else:
-                axi : plt.Axes = axes  
-            bars : plt.BarContainer = axi.bar(labels, percentages, color=colors, edgecolor='black', linewidth=2)
+        for i, vessel_number in enumerate(self.vessel_numbers):
+            axi : plt.Axes = axes[i]
             axi.set_title(self.vessel_num_labels[i])
-            if i == 0:
-                axi.set_ylabel('Success rate (%)')
             axi.set_aspect('auto', adjustable='box')
-            axi.set_xticks(range(len(labels))) 
-            axi.set_xticklabels(labels, rotation=0, ha='right', fontweight='bold')
-            if i != 0:
-                axi.set_yticks([])
+            self.init_axi(i, axi, 'Success rate (%)')
+            
+            data = []
+            new_group_labels = []
+            for measurement, label in zip(self.measurements[vessel_number].values(), self.group_labels):
+                values = [0 if eval_data.best_fitness_index > 0.0 else 1 for eval_data in measurement]
+                if len(values) != 0:
+                    data.append(values)
+                    new_group_labels.append(label)
+            if len(data) == 0:
+                continue
+            
+            percentages = [np.mean(value) * 100 for value in data]
+            
+            bars : plt.BarContainer = axi.bar(new_group_labels, percentages, color=self.colors, edgecolor='black', linewidth=2)
+            axi.set_xticks(range(len(new_group_labels)), new_group_labels)
+            axi.set_xticklabels(new_group_labels, rotation=0, ha='right', fontweight='bold')            
+            self.set_yticks(axi, range(101))
             axi.set_ylim(0, 115)
             
-            for i, bar in enumerate(bars):
+            for j, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, 102, 
-                f'{len(list(group_measurements.values())[i])}', ha='center', va='bottom', fontsize=10)
+                f'{len(data[j])}', ha='center', va='bottom', fontsize=10)
 
-        fig.tight_layout()
         return fig
         

@@ -12,6 +12,8 @@ class StatisticsPlot(EvalPlot):
         self.distribution = {'OtherType' : 51.1, 'CargoShip' : 31.1,
                             'Tanker' : 6.2, 'ContainerShip' : 7.4,
                             'PassengerShip' : 0.7, 'FishingShip' : 3.5}
+        
+        self.labels = ['Overtaking', 'Head-on', 'Crossing']
         super().__init__(eval_datas)
         
     @property   
@@ -23,35 +25,35 @@ class StatisticsPlot(EvalPlot):
         return [2]
         
     def create_fig(self) -> plt.Figure:
-        fig, axes = plt.subplots(self.vessel_num_count, self.group_count, figsize=(1 * 12, 4))
-        axes = np.atleast_1d(axes)
+        fig, axes = plt.subplots(self.vessel_num_count, self.comparison_group_count, figsize=(1 * 12, 4), constrained_layout=True)
+        axes = np.atleast_2d(axes)
+        fig.subplots_adjust(wspace=0.5)
         
-        def configure_axi(i : int, group_label, color, values):
-            axi : plt.Axes = axes[i]
-            bars : plt.BarContainer = axi.bar(labels, values, color=color, edgecolor='black', linewidth=0)
+        def configure_axi(i : int, j : int, group_label, color, values):
+            axi : plt.Axes = axes[i][j]
+            if j == 0:
+                axi.set_title(self.vessel_num_labels[i])
+            self.init_axi(j, axi, 'Samples')
+            if sum(values) == 0:
+                return
+            
+            bars : plt.BarContainer = axi.bar(self.labels, values, color=color, edgecolor='black', linewidth=0)
             axi.set_title(group_label)
-            if i == 0:
-                axi.set_ylabel('Samples')
-            axi.set_aspect('auto', adjustable='box')
-            yticks = np.linspace(0, max(values)*1.1, 6)
-            yticks = [int(t) for t in yticks] 
-            axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False) 
+            self.set_yticks(axi, values)
+            axi.set_xticks([0,1,2], self.labels)
+            axi.set_xticklabels(self.labels, rotation=0, ha='right', fontweight='bold')  
             
             for i, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, values[i] * 1.02, 
                 f'{(values[i] / sum(values) * 100):.1f}%', ha='center', va='bottom', fontsize=10)
 
 
-        labels = ['Overtaking', 'Head-on', 'Crossing']
         for i, vessel_number in enumerate(self.vessel_numbers):
             for j, config_group in enumerate(self.config_groups):
                 scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in self.measurements[vessel_number][config_group]]
                 values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
-                if sum(values) == 0:
-                    continue
-                configure_axi(j, self.group_labels[j], self.colors[j], values)
+                configure_axi(i, j, self.group_labels[j], self.colors[j], values)
             
-        configure_axi(3, self.group_labels[3], self.colors[3], [56952*0.131, 56952*0.002, 56952*0.867])
+        configure_axi(i, 3, self.group_labels[3], self.colors[3], [56952*0.131, 56952*0.002, 56952*0.867])
             
-        fig.tight_layout(rect=[0, 0.04, 1, 1])
         return fig

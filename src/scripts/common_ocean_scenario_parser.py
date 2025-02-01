@@ -1,25 +1,13 @@
 from datetime import datetime
-import random
-from typing import Dict, List, Optional, Set
-import matplotlib.pyplot as plt
-import imageio
-
-# Ignoring warnings for the educational purpose of this tutorial
-import warnings
-
-import numpy as np
-
-from commonocean.planning.planning_problem import PlanningProblem
+from typing import Dict, List
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_vessel import ConcreteVessel
-from concrete_level.models.trajectory_manager import TrajectoryManager
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.models.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
 from utils.asv_utils import EGO_BEAM, EGO_LENGTH, vessel_radius
 from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
-from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 from commonroad.geometry.shape import Rectangle
 from commonocean.common.file_reader import CommonOceanFileReader
 from commonocean.scenario.obstacle import ObstacleType

@@ -35,16 +35,13 @@ class EvalPlotManager():
             "Approach Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
             "Approach Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),
             "Approach Unspecified Diversity" : PlotWrapper(UnspecifiedDiversityPlot, {'eval_datas': self.eval_datas}),
-            "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'config'}),
-            "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'config'}),
-            "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'config'}),
+            "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
+            "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
+            "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
             "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
-            # "Algo. Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'mode': 'algo'}),
-            # "Algo. Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': False, 'mode': 'algo'}),
-            # "Algo. Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'all': True, 'mode': 'algo'}),
         }
         
         self.root = tk.Tk()
@@ -98,7 +95,6 @@ class EvalPlotManager():
         
         self.root.wait_window()
         
-       
         
     def sort_dict(self, dicts : List[Dict[str, plt.Artist]]) -> List[List[plt.Artist]]:
         artists = []
