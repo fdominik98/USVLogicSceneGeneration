@@ -50,25 +50,21 @@ class ProximityVector():
             self.proximity_index = 0
         
 class NavigationRiskIndex():
-    def __init__(self, scenario: MultiLevelScenario, actor : ConcreteVessel) -> None:
+    def __init__(self, scenario: MultiLevelScenario, vessel : ConcreteVessel) -> None:
         self.scenario = scenario
         self.scene = scenario.concrete_scene
-        self.initial_state = self.scene[actor]
-        self.actor = actor
-        self.variable : VesselVariable = scenario.to_variable(self.actor)
+        self.initial_state = self.scene[vessel]
+        self.vessel = vessel
+        self.variable : VesselVariable = scenario.to_variable(self.vessel)
     
     def find_danger_sector(self) -> float:
         for i in range(91):
-            new_state = self.initial_state.modify_copy(heading=self.initial_state.heading + np.radians(i))
-            new_scene = SceneBuilder(self.scene.as_dict()).set_state(self.actor, new_state).build()
-            scenario = MultiLevelScenario(new_scene, self.scenario.logical_scenario, self.scenario.functional_scenario)
-            if not scenario.may_collide_anyone(self.actor):
+            new_scenario = self.scenario.modify_copy(self.vessel, heading=self.initial_state.heading + np.radians(i))
+            if not new_scenario.may_collide_anyone(self.vessel):
                 break
         for j in range(91):
-            new_state = self.initial_state.modify_copy(heading=self.initial_state.heading - np.radians(i))
-            new_scene = SceneBuilder(self.scene.as_dict()).set_state(self.actor, new_state).build()
-            scenario = MultiLevelScenario(new_scene, self.scenario.logical_scenario, self.scenario.functional_scenario)
-            if not scenario.may_collide_anyone(self.actor):
+            new_scenario = self.scenario.modify_copy(self.vessel, heading=self.initial_state.heading - np.radians(i))
+            if not new_scenario.may_collide_anyone(self.vessel):
                 break
         return pow((i + j) / 180, 0.33)
             
@@ -82,9 +78,9 @@ class NavigationRiskIndex():
             for i in range(0, 180):
                 for direction in [-1, 1]:  # -1 for counterclockwise, 1 for clockwise
                     new_state = self.initial_state.modify_copy(heading=self.initial_state.heading + direction * np.radians(i), speed=speed)
-                    new_scene = SceneBuilder(self.scene.as_dict()).set_state(self.actor, new_state)
+                    new_scene = SceneBuilder(self.scene.as_dict()).set_state(self.vessel, new_state)
                     scenario = MultiLevelScenario(new_scene, self.scenario.logical_scenario, self.scenario.functional_scenario)
-                    if scenario.may_collide_anyone(self.actor):
+                    if scenario.may_collide_anyone(self.vessel):
                         collides += 1
                     else:
                         no_collides += 1

@@ -1,8 +1,10 @@
 
-from typing import Dict, Set, Tuple, Union
+from typing import Dict, Optional, Set, Tuple, Union
 
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.vessel_state import VesselState
+from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
 from logical_level.models.actor_variable import ActorVariable
@@ -60,3 +62,9 @@ class MultiLevelScenario():
     
     def get_vessel_name(self, vessel : ConcreteVessel) -> str:
         return self.to_variable(vessel).name
+    
+    def modify_copy(self, vessel: ConcreteVessel, x : Optional[float] = None, y : Optional[float] = None,
+        speed : Optional[float] = None, heading : Optional[float] = None) -> 'MultiLevelScenario':
+        new_state = self.concrete_scene[vessel].modify_copy(x=x, y=y, speed=speed, heading=heading)
+        new_scene = SceneBuilder(self.concrete_scene.as_dict()).set_state(vessel, new_state).build()
+        return MultiLevelScenario(new_scene, self.logical_scenario, self.functional_scenario)

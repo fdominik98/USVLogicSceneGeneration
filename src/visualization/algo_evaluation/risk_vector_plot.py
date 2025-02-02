@@ -75,7 +75,7 @@ class RiskVectorPlot(EvalPlot):
             #axi.set_yticks(range(max([max(d) for d in data])))
             axi.set_xticks(range(1, len(new_group_labels)+1), new_group_labels)
             axi.set_xticklabels(new_group_labels, rotation=0, ha='right', fontweight='bold')  
-            self.set_yticks(axi, range(round(max([max(d) for d in data]))))          
+            self.set_yticks(axi, range(int(np.ceil(self.metric_map_max[self.metric]) + 1)))          
             
             for patch, color in zip(violin_plot['bodies'], self.colors):
                 patch.set_facecolor(color)           # Set fill color
