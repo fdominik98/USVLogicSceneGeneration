@@ -3,12 +3,11 @@ from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.trajectories import Trajectories
-
-ONE_HOUR_IN_SEC = 60 * 60
+from utils.asv_utils import ONE_HOUR_IN_SEC
 
 class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):  
-    def __init__(self, existing_dict={}, *args, **kwargs):
-        super().__init__(existing_dict, *args, **kwargs)
+    def __init__(self, existing_dict : Dict[ConcreteVessel, List[VesselState]]={}, *args, **kwargs):
+        super().__init__(existing_dict.copy(), *args, **kwargs)
     
     def add_state(self, vessel : ConcreteVessel, state : VesselState):
         if vessel not in self:
@@ -26,8 +25,23 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):
     @staticmethod
     def default_trajectory_from_scene(scene : ConcreteScene, length : int = ONE_HOUR_IN_SEC) -> Trajectories:
         builder = TrajectoryBuilder()
-        for vessel, state in scene.items():
-            for i in range(length + 1):
-                new_p = state.p + state.v * i
-                builder.add_state(vessel, state.modify_copy(x=new_p[0], y=new_p[1]))
+        builder.add_scene(scene)
+        builder.extend(length)
         return builder.build()
+    
+    def extend(self, length : int = ONE_HOUR_IN_SEC):
+        for vessel in self.values():       
+            self[vessel] = self.extend_trajectory(self[vessel], length)
+            
+    def even_lengths(self):
+        self.extend(max(len(states) for states in self.values()))        
+    
+                
+    def extend_trajectory(self, trajectory : List[VesselState], length : int = ONE_HOUR_IN_SEC) -> List[VesselState]:
+        new_trajectory = trajectory.copy()
+        while len(new_trajectory) < length:
+            turned_state = trajectory[-1].modify_copy(heading=trajectory[0].heading)
+            new_p = turned_state.p + turned_state.v
+            new_trajectory.append(turned_state.modify_copy(x=new_p[0], y=new_p[1]))
+        return new_trajectory
+        

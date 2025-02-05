@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from concrete_level.models.vessel_order_graph import VesselNode
-from concrete_level.models.rrt_models import LineObstacle, Node, Obstacle, RandomPoint, TrajectoryState
+from concrete_level.models.rrt_models import LineObstacle, RRTNode, Obstacle, RandomPoint, TrajectoryState
 from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
 
 DIM = 1000
@@ -21,8 +21,8 @@ class BidirectionalRRTStarFND():
         self.vessel = v_node.vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
-        self.start = Node(start)
-        self.goal = Node(goal)
+        self.start = RRTNode(start)
+        self.goal = RRTNode(goal)
         self.min_go_around_line = min_go_around_line
         self.go_around_split_line = go_around_split_line
         self.delta_pos_start_end = self.goal.p - self.start.p
@@ -42,7 +42,7 @@ class BidirectionalRRTStarFND():
             self.trajectory_visualizer.set_caption(v_node, interpolator)
             
 
-    def do_plan(self) -> Optional[List[Node]]:
+    def do_plan(self) -> Optional[List[RRTNode]]:
         while not self.stop:
             if self.current_i % 100 == 0:
                 print(self.current_i)
@@ -98,7 +98,7 @@ class BidirectionalRRTStarFND():
             self.node_list.pop(ind)
         
 
-    def plan_trajectory(self) -> List[Node]:
+    def plan_trajectory(self) -> List[RRTNode]:
         """
         plan_trajectory
         animation: flag for animation on or off
@@ -126,7 +126,7 @@ class BidirectionalRRTStarFND():
             self.remove_branch(ix)
         self.node_list.pop(nodeInd)
 
-    def choose_parent(self, new_node : Node, nearest_indexes):
+    def choose_parent(self, new_node : RRTNode, nearest_indexes):
         if len(nearest_indexes) == 0:
             return False
 
@@ -154,7 +154,7 @@ class BidirectionalRRTStarFND():
         delta_pos = rnd.p - nearest_node.p
         theta = np.arctan2(delta_pos[1], delta_pos[0])        
         new_point = nearest_node.p + np.array([np.cos(theta), np.sin(theta)]) * self.expand_dist
-        new_node = Node(new_point)
+        new_node = RRTNode(new_point)
         
         # # Apply the condition for adjusting theta
         # abs_theta = abs(theta)  # Work with absolute value of theta for comparison
@@ -164,7 +164,7 @@ class BidirectionalRRTStarFND():
         # elif abs_theta > np.radians(60):
         #     theta = np.sign(theta) * np.radians(60)  # Cap at 60 degrees with the same sign
         
-        s_dist, s_fraction = Node.calc_cost(self.vessel, self.expand_dist)
+        s_dist, s_fraction = RRTNode.calc_cost(self.vessel, self.expand_dist)
         new_node.set_cost(nearest_node.distance_cost + self.expand_dist, nearest_node.time_cost + s_dist, s_fraction)
         new_node.parent = nearest_index
         return new_node
@@ -184,7 +184,7 @@ class BidirectionalRRTStarFND():
         min_cost_index = min(near_goal_indexes, key=lambda i: self.node_list[i].distance_cost)
         return min_cost_index
 
-    def gen_final_course(self, goal_index : int) -> List[Node]:
+    def gen_final_course(self, goal_index : int) -> List[RRTNode]:
         path = [self.goal]
         while self.node_list[goal_index].parent is not None:
             node = self.node_list[goal_index]
@@ -194,7 +194,7 @@ class BidirectionalRRTStarFND():
         return path
 
 
-    def find_near_nodes(self, newNode: Node, value):
+    def find_near_nodes(self, newNode: RRTNode, value):
         r_squared = (self.expand_dist * value) ** 2  # Compute the squared distance threshold once
 
         new_p = newNode.p
@@ -210,7 +210,7 @@ class BidirectionalRRTStarFND():
         return nearest_indexes
     
 
-    def rewire(self, new_node_index : int, new_node : Node, near_indexes : List[int]):
+    def rewire(self, new_node_index : int, new_node : RRTNode, near_indexes : List[int]):
         for i in near_indexes:
             near_node = self.node_list[i]
 
@@ -222,7 +222,7 @@ class BidirectionalRRTStarFND():
                 if no_coll:
                     self.node_list[near_node.parent].children.discard(i)
                     near_node.parent = new_node_index
-                    s_d, s_fraction = Node.calc_cost(self.vessel, d)
+                    s_d, s_fraction = RRTNode.calc_cost(self.vessel, d)
                     near_node.set_cost(new_cost, s_d + new_node.time_cost, s_fraction)
                     new_node.children.add(i)
                     
@@ -242,7 +242,7 @@ class BidirectionalRRTStarFND():
         return min_index
     
 
-    def check_no_collision_extend(self, parent_node : Node, node : Node) -> Tuple[bool, float]:
+    def check_no_collision_extend(self, parent_node : RRTNode, node : RRTNode) -> Tuple[bool, float]:
         delta_pos = node.p - parent_node.p
         dist = float(np.linalg.norm(delta_pos))
         if parent_node.parent is not None:
@@ -257,8 +257,8 @@ class BidirectionalRRTStarFND():
              if not (np.radians(0) <= angle_start_end <= np.radians(0.1)):
                  return False, dist
         
-        tmpNode = Node(np.array([parent_node.p[0], parent_node.p[1]]))
-        s_d, s_fraction = Node.calc_cost(self.vessel, dist)
+        tmpNode = RRTNode(np.array([parent_node.p[0], parent_node.p[1]]))
+        s_d, s_fraction = RRTNode.calc_cost(self.vessel, dist)
         s_d = s_d - np.ceil(s_fraction)
         
         for s in range(int(s_d)):
@@ -270,7 +270,7 @@ class BidirectionalRRTStarFND():
         return True, dist
 
 
-    def check_no_collision(self, node : Node, obstacleList : List[Obstacle]):
+    def check_no_collision(self, node : RRTNode, obstacleList : List[Obstacle]):
         for obs in obstacleList:
             if not obs.check_no_collision(node):
                 #print(f'Hit obstacle {obs} at {node.p}')

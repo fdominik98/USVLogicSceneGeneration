@@ -1,6 +1,10 @@
+from collections import defaultdict
 from dataclasses import dataclass, asdict
+from itertools import combinations
 import json
-from typing import Dict, List
+from typing import Dict, List, Tuple
+
+import numpy as np
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
@@ -11,7 +15,7 @@ class Trajectories:
     _data : Dict[ConcreteVessel, List[VesselState]]
     
     def __post_init__(self):
-        object.__setattr__(self, '_data', dict(self._data))
+        object.__setattr__(self, '_data', dict(self._data).copy())
             
     def __getitem__(self, key):
         return self._data[key]
@@ -57,9 +61,21 @@ class Trajectories:
     
     @property
     def timespan(self) -> int:
-        return 0 if len(self._data) == 0 else len(list(self._data.values())[0])
+        return 0 if len(self._data) == 0 else min(len(states) for states in self._data.values())
    
     @property 
     def initial_scene(self) -> ConcreteScene:
         return self.get_scene(0)
+    
+    @property
+    def collision_points(self) -> Dict[Tuple[ConcreteScene, ConcreteScene], List[np.ndarray]]:
+        collision_points : Dict[Tuple[ConcreteScene, ConcreteScene], List[np.ndarray]] = defaultdict(list)
+        for t in range(self.timespan):
+            scene = self.get_scene(t)
+            for vessel1, vessel2 in combinations(self.keys(), 2):
+                if scene.do_collide(vessel1, vessel2):
+                    collision_points[(vessel1, vessel2)] += [scene[vessel1].p, scene[vessel2].p]
+        return collision_points
+            
+        
     

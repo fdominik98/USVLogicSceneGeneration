@@ -58,11 +58,13 @@ class BinaryInterpretation(Interpretation, ABC):
         self._add((o1, o2))
         
     def get_tuples(self, o1 : Optional[FuncObject] = None, o2 : Optional[FuncObject] = None):
+        if o1 is None and o2 is None:
+            return self._data
         return {
             (t1, t2) for t1, t2 in self._data
             if (o1 is None or o1 == t1) and (o2 is None or o2 == t2)
         }
-    
+        
     def get_relation_descs(self, o : FuncObject) -> Set[Tuple[str, int, FuncObject]]:
         descs : Set[Tuple[str, int, FuncObject]] = set()
         for _o1, _o2 in self._data:

@@ -86,6 +86,12 @@ class FunctionalScenario(Scenario):
         return self.class_interpretation_list[class_num].contains(o)
     
     @property
+    def binary_interpretation_tuples(self) -> List[Tuple[FuncObject, FuncObject]]:
+        return (list(self.overtaking_interpretation.get_tuples()) +
+                list(self.head_on_interpretation.get_tuples()) + 
+                list(self.crossing_interpretation.get_tuples()))
+    
+    @property
     def os_object(self) -> FuncObject:
         return self.os_interpretation.next
     

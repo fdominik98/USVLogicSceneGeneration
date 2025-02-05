@@ -1,47 +1,41 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 import numpy as np
-from functional_level.metamodels.functional_scenario import Vessel
-from concrete_level.models.rrt_models import Node
+from concrete_level.models.concrete_scene import ConcreteScene
+from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.multi_level_scenario import MultiLevelScenario
+from concrete_level.models.rrt_models import RRTNode
+from concrete_level.models.trajectories import Trajectories
+from concrete_level.models.vessel_state import VesselState
+from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
+from functional_level.metamodels.functional_object import FuncObject
 
 class PathInterpolator():
-    def __init__(self) -> None:
-        self.interpolated_paths : Dict[int, List[Tuple[float, float, float, float, float]]] = {}
-        self.vessels : Dict[int, Vessel] = {}
+    def __init__(self, scenario : MultiLevelScenario) -> None:
+        self.trajectory_builder = TrajectoryBuilder()
+        self.vessels : Set[ConcreteVessel] = set()
+        self.scenario : MultiLevelScenario = scenario
         self.path_length = 45 * 60
 
-    def add_path(self, vessel : Vessel, path : List[Node]):
-        if vessel.id in self.interpolated_paths:
+    def add_path(self, vessel : ConcreteVessel, path : List[RRTNode]):
+        vessel_state = self.scenario.concrete_scene[vessel]
+        if vessel in self.trajectory_builder:
             raise Exception("Cannot add two path for one vessel")
         if len(path) == 0:
-            self.interpolated_paths[vessel.id] = [(vessel.p[0], vessel.p[1], vessel.heading, vessel.l, vessel.speed)]
+            self.trajectory_builder[vessel] = [vessel_state]
         else:
-            self.interpolated_paths[vessel.id] = self.interpolate_path(vessel, path)
-        self.vessels[vessel.id] = vessel
-        self.extend_paths_to_path_length()       
+            self.trajectory_builder[vessel] = self.interpolate_path(vessel_state, path)
+        self.vessels.add(vessel)
+        self.trajectory_builder.extend(self.path_length)       
     
-    
-    def extend_paths_to_path_length(self):
-        for id, path in self.interpolated_paths.items():
-            vessel = self.vessels[id]
-            while len(path) < self.path_length:
-                # Lengthen path
-                last_state = path[-1]
-                path.append((
-                    last_state[0] + vessel.v[0],
-                    last_state[1] + vessel.v[1],
-                    vessel.heading,
-                    vessel.l,
-                    vessel.speed
-                ))
                 
-    def get_positions_by_second(self, second) -> List[Tuple[Vessel, np.ndarray]]:
+    def get_positions_by_second(self, second : int) -> ConcreteScene:
         if second >= self.path_length:
             self.path_length = self.path_length + (second - self.path_length) + 60
-            self.extend_paths_to_path_length()
-        return [(self.vessels[id], path[second][:2]) for id, path in self.interpolated_paths.items()]
+            self.trajectory_builder.extend(self.path_length)
+        return self.trajectory_builder.build().get_scene(second)
                 
 
-    def interpolate_path(self, vessel: Vessel, path : List[Node]) -> List[Tuple[float, float, float, float, float]]:
+    def interpolate_path(self, vessel_state: VesselState, path : List[RRTNode]) -> List[VesselState]:
         """
         Interpolates the given path to have positions at one-second intervals
         and calculates the heading based on the direction of movement.
@@ -71,24 +65,22 @@ class PathInterpolator():
                 new_p = node_start.p + delta_pos * fraction
                 interpolated_positions.append(new_p)
                 interpolated_headings.append(heading)
-                interpolated_speeds.append(vessel.speed)                
+                interpolated_speeds.append(vessel_state.speed)                
             if node_end.s_fraction > 0.0001: # Bigger than some small value
-                speed = vessel.speed * node_end.s_fraction
+                speed = vessel_state.speed * node_end.s_fraction
                 interpolated_speeds[-1] = speed 
         
         # Append the final position and heading
         interpolated_positions.append(path[-1].p)
-        interpolated_headings.append(vessel.heading)
-        interpolated_speeds.append(vessel.speed)
+        interpolated_headings.append(vessel_state.heading)
+        interpolated_speeds.append(vessel_state.speed)
         
-        result : List[Tuple[float, float, float, float, float]] = []
+        return [VesselState(interpolated_positions[i][0], interpolated_positions[i][1],
+                            interpolated_speeds[i], heading) for i, heading in interpolated_headings]
         
-        for i, heading in enumerate(interpolated_headings):
-            pos = interpolated_positions[i]
-            speed = interpolated_speeds[i]
-            result.append((pos[0], pos[1], heading, vessel.l, speed))
-        
-        return result
+    @property    
+    def trajectories(self) -> Trajectories:
+        return self.trajectory_builder.build()
     
     @staticmethod
     def interpolate_headings(trajectory : List[Tuple[float, float, float, float, float]])  -> List[Tuple[float, float, float, float, float]]:

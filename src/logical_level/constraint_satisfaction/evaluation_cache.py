@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 from utils.asv_utils import EPSILON, N_MILE_TO_M_CONVERSION, o2VisibilityByo1
@@ -35,6 +35,41 @@ class GeometricProperties():
         
         self.tcpa = self.dot_p12_v12 / self.v12_norm_stable**2
         self.dcpa = float(np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)))
+        
+    def get_collision_points(self, time_limit=np.inf) -> List[np.ndarray]:
+        # Relative position and velocity
+        v_21 = self.val2.v - self.val1.v
+
+        # Coefficients for the quadratic equation
+        a = np.dot(v_21, v_21)
+        b = 2 * np.dot(self.p12, v_21)
+        c = np.dot(self.p12, self.p12) - self.safety_dist**2
+
+        # Calculate discriminant
+        discriminant = b**2 - 4*a*c
+
+        collision_points = []
+
+        # Check for real solutions (collision possible)
+        if discriminant >= 0:
+            sqrt_discriminant = np.sqrt(discriminant)
+
+            # Find times of collision
+            t1 = (-b + sqrt_discriminant) / (2 * a)
+            t2 = (-b - sqrt_discriminant) / (2 * a)
+
+            # Check if times are within the time limit and positive
+            for t in [t1, t2]:
+                if 0 <= t <= time_limit:
+                    # Compute the collision points
+                    collision_point_vessel1 = self.val1.p + self.val1.v * t
+                    collision_point_vessel2 = self.val2.p + self.val2.v * t
+                    collision_points.append(collision_point_vessel1)
+                    collision_points.append(collision_point_vessel2)
+        
+        # Return the list of collision points as standard list of np.ndarray
+        return collision_points
+
 
 class EvaluationCache(Dict[Tuple[ActorVariable, ActorVariable], GeometricProperties]):
     def __init__(self, assignments : Assignments, *args, **kwargs):
@@ -47,3 +82,6 @@ class EvaluationCache(Dict[Tuple[ActorVariable, ActorVariable], GeometricPropert
             props = GeometricProperties(var1, var2, self.assignments)
             self[(var1, var2)] = props
         return props
+    
+    def get_collision_points(self, var1 : ActorVariable, var2 : ActorVariable, time_limit=np.inf) -> List[np.ndarray]:
+        return self.get_props(var1, var2).get_collision_points(time_limit)

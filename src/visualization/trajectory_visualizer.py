@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 import numpy as np
 from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
-from concrete_level.models.rrt_models import CircularObstacle, LineObstacle, Obstacle, PolygonalObstacle, TrajectoryState, Node
+from concrete_level.models.rrt_models import CircularObstacle, LineObstacle, Obstacle, PolygonalObstacle, TrajectoryState, RRTNode
 import pygame
 from concrete_level.models.vessel_order_graph import VesselNode
 
@@ -48,7 +48,7 @@ class TrajectoryVisualizer():
         pygame.draw.line(self.screen, color, start, end, width-1)
         pygame.draw.circle(self.screen,(23,231,5), self.reverse_coord(line.shifted_point), width) 
         
-    def draw_branches(self, start : Node, end : Node, node_list : dict[int, Node], last_index : Optional[int], gen_final_course):
+    def draw_branches(self, start : RRTNode, end : RRTNode, node_list : dict[int, RRTNode], last_index : Optional[int], gen_final_course):
         pygame.draw.circle(self.screen, (0,0,255), self.reverse_coord(start.p), 7)
         pygame.draw.circle(self.screen, (0,255,255), self.reverse_coord(end.p), 7)
         # Branches        
@@ -61,7 +61,7 @@ class TrajectoryVisualizer():
                 
         # Final path
         if last_index is not None:
-            path : List[Node] = gen_final_course(last_index)
+            path : List[RRTNode] = gen_final_course(last_index)
 
             ind = len(path)
             while ind > 1:  
@@ -70,14 +70,14 @@ class TrajectoryVisualizer():
                 ind-=1
 
     def update(self, obstacle_list : List[Obstacle], collision_points : List[np.ndarray], min_go_around_line : LineObstacle, go_around_split_line : LineObstacle,
-               start : Node, end : Node, node_list : dict[int, Node], last_index : Optional[int], gen_final_course):
+               start : RRTNode, end : RRTNode, node_list : dict[int, RRTNode], last_index : Optional[int], gen_final_course):
         self.screen.fill((255, 255, 255))
         self.draw_obstacles(obstacle_list, collision_points, min_go_around_line, go_around_split_line)
         self.draw_branches(start, end, node_list, last_index, gen_final_course)
         pygame.display.update()
         
         
-    def handle_user_input(self, end : Node, obstacle_list : List[Obstacle], path_validation) -> bool:
+    def handle_user_input(self, end : RRTNode, obstacle_list : List[Obstacle], path_validation) -> bool:
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
                 if e.button == 1:

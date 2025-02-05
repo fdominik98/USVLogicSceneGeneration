@@ -1,12 +1,11 @@
-from typing import Dict, List
-from functional_level.metamodels.functional_scenario import Vessel
-from logical_level.models.relation_constraint import RelationConstr
-
+from typing import Dict, List, Tuple
+from functional_level.metamodels.functional_object import FuncObject
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 
 class VesselNode():
-    def __init__(self, vessel: Vessel) -> None:
+    def __init__(self, vessel: FuncObject) -> None:
         self.vessel = vessel
-        self.relations : List[RelationConstr] = []  
+        self.relations : List[Tuple[FuncObject, FuncObject]] = []  
         self.in_degree = 0
         self.out_degree = 0      
     
@@ -15,40 +14,36 @@ class VesselNode():
             self.vessel.id == value.vessel.id)
         
     def __repr__(self) -> str:
-        return self.vessel.name
+        return self.vessel.__repr__()
 
         
 class VesselOrderGraph():
-    def __init__(self, relations : List[RelationConstr]):
+    def __init__(self, functional_scenario : FunctionalScenario):
         self.nodes : Dict[int, VesselNode] = {}
         self.in_degree : Dict[VesselNode, int] = {}
         self.out_degree : Dict[VesselNode, int] = {}
+        
+        relations = functional_scenario.binary_interpretation_tuples
         
         for rel in relations:
             self.add_nodes(rel)
         for rel in relations:
             self.add_edge(rel)
             
-    def add_nodes(self, rel : RelationConstr):
-        node1 = VesselNode(rel.vessel1)
-        if rel.vessel1.id not in self.nodes:
-            self.nodes[rel.vessel1.id] = node1
-        node2 = VesselNode(rel.vessel2)
-        if rel.vessel2.id not in self.nodes:
-            self.nodes[rel.vessel2.id] = node2
+    def add_nodes(self, rel : Tuple[FuncObject, FuncObject]):
+        node1 = VesselNode(rel[0])
+        if rel[0] not in self.nodes:
+            self.nodes[rel[0]] = node1
+        node2 = VesselNode(rel[1])
+        if rel[1] not in self.nodes:
+            self.nodes[rel[1]] = node2
 
-    def add_edge(self, rel : RelationConstr):
-        if not rel.no_colreg():
-            return
-        node1 = self.nodes[rel.vessel1.id]
-        node2 = self.nodes[rel.vessel2.id]
+    def add_edge(self, rel : Tuple[FuncObject, FuncObject]):
+        node1 = self.nodes[rel[0]]
+        node2 = self.nodes[rel[1].id]
         node1.relations.append(rel)
         node1.out_degree += 1
         node2.in_degree += 1
-        if rel.has_head_on():
-            node2.relations.append(rel)
-            node2.out_degree += 1
-            node1.in_degree += 1
             
             
     def sort(self)-> list[VesselNode]:

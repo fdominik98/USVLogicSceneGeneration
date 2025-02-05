@@ -26,7 +26,7 @@ class RandomPoint():
     def get(sample_area : List[Tuple[float, float]]):
         return RandomPoint(np.array([random.uniform(*sample_area[0]), random.uniform(*sample_area[1])]), False)
 
-class Node():
+class RRTNode():
     """
     RRT Node
     """
@@ -60,7 +60,7 @@ class Obstacle(ABC):
         self.p = np.array([x, y])
         
     @abstractmethod    
-    def check_no_collision(self, node : Node) -> bool:
+    def check_no_collision(self, node : RRTNode) -> bool:
         pass
   
     
@@ -69,7 +69,7 @@ class CircularObstacle(Obstacle):
         super().__init__(p[0], p[1])
         self.radius = radius
         
-    def check_no_collision(self, node : Node) -> bool:
+    def check_no_collision(self, node : RRTNode) -> bool:
         d = np.linalg.norm(node.p - self.p)
         if d <= self.radius + self.radius * self.MARGIN:
             return False  # collision
@@ -85,7 +85,7 @@ class PolygonalObstacle(Obstacle):
         # Create a Polygon object
         self.polygon_shape = Polygon(self.polygon)
 
-    def check_no_collision(self, node : Node) -> bool:
+    def check_no_collision(self, node : RRTNode) -> bool:
         point = Point(node.p[0], node.p[1])
         return not self.polygon_shape.contains(point)
     
@@ -117,7 +117,7 @@ class LineObstacle(Obstacle):
         return f'Line {"above" if self.above_initial_point else "below"} initial'
 
         
-    def check_no_collision(self, node : Node) -> bool:
+    def check_no_collision(self, node : RRTNode) -> bool:
         # Compute the cross product to determine the position relative to the shifted line
         # Line equation is implicit: (P - shifted_point) dotted with the perpendicular vector should be checked
         position_value = np.dot(self.perpendicular, node.p - self.shifted_point)

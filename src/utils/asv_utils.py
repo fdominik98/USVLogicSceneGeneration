@@ -34,6 +34,8 @@ MAX_SPEED_IN_MS = 50 * KNOT_TO_MS_CONVERSION
 EGO_LENGTH = 30
 EGO_BEAM = 10
 
+ONE_HOUR_IN_SEC = 60 * 60
+
 def vessel_radius(length : float) -> float:
     return length * 4
 
