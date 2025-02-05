@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Tuple
+from typing import List, Set, Tuple
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_vessel import ConcreteVessel
@@ -7,7 +7,6 @@ from concrete_level.models.rrt_models import RRTNode
 from concrete_level.models.trajectories import Trajectories
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
-from functional_level.metamodels.functional_object import FuncObject
 
 class PathInterpolator():
     def __init__(self, scenario : MultiLevelScenario) -> None:
@@ -28,7 +27,7 @@ class PathInterpolator():
         self.trajectory_builder.extend(self.path_length)       
     
                 
-    def get_positions_by_second(self, second : int) -> ConcreteScene:
+    def get_scene_by_second(self, second : int) -> ConcreteScene:
         if second >= self.path_length:
             self.path_length = self.path_length + (second - self.path_length) + 60
             self.trajectory_builder.extend(self.path_length)

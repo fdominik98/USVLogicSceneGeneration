@@ -20,7 +20,7 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):
             self.add_state(vessel, state)
             
     def build(self):
-        return Trajectories(self)
+        return Trajectories(self.even_lengths())
     
     @staticmethod
     def default_trajectory_from_scene(scene : ConcreteScene, length : int = ONE_HOUR_IN_SEC) -> Trajectories:
@@ -29,12 +29,13 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):
         builder.extend(length)
         return builder.build()
     
-    def extend(self, length : int = ONE_HOUR_IN_SEC):
-        for vessel in self.values():       
+    def extend(self, length : int = ONE_HOUR_IN_SEC) -> 'TrajectoryBuilder':
+        for vessel in self.keys():       
             self[vessel] = self.extend_trajectory(self[vessel], length)
+        return self
             
-    def even_lengths(self):
-        self.extend(max(len(states) for states in self.values()))        
+    def even_lengths(self) -> 'TrajectoryBuilder':
+        return self.extend(max(len(states) for states in self.values()))        
     
                 
     def extend_trajectory(self, trajectory : List[VesselState], length : int = ONE_HOUR_IN_SEC) -> List[VesselState]:

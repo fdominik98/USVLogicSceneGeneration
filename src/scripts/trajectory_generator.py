@@ -3,17 +3,14 @@ from itertools import chain
 import os
 import random
 from typing import List, Dict
-from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from concrete_level.models.concrete_vessel import ConcreteVessel
-from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from concrete_level.models.trajectories import Trajectories
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
 from utils.file_system_utils import ASSET_FOLDER
 from utils.asv_utils import MAX_COORD
 from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
-from concrete_level.models.vessel_order_graph import VesselNode, VesselOrderGraph
+from concrete_level.models.vessel_order_graph import VesselOrderGraph
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
 from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
 from concrete_level.data_parser import EvalDataParser
@@ -60,20 +57,18 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     if len(v_node.relations) == 0:
         return [], 0, expand_distance
     
-    obstacle_list : List[Obstacle] = []
-    collision_points : List[np.ndarray] = []
+    # collision_points : List[np.ndarray] = []
     
-    for obj1, obj2 in v_node.relations:
-        print(f'Collision points for static colreg ({obj1}, {obj2})')
-        var1 = scenario.to_variable(obj1)
-        var2 = scenario.to_variable(obj2)
-        colreg_collision_points = scenario.evaluation_cache.get_collision_points(var1, var2)
-        collision_points += [p for p in colreg_collision_points]
+    # for v1, v2 in v_node.relations:
+    #     print(f'Collision points for static colreg ({v1}, {v2})')
+    #     var1 = scenario.to_variable(v1)
+    #     var2 = scenario.to_variable(v2)
+    #     collision_points += scenario.evaluation_cache.get_collision_points(var1, var2)
     
     new_trajectory_builder = TrajectoryBuilder(interpolator.trajectory_builder)    
     new_trajectory_builder.add_state(vessel, vessel_state)
-    new_trajectory_builder.even_lengths()
-    collision_points += chain.from_iterable(new_trajectory_builder.build().collision_points)
+    trajectory_collision_points = new_trajectory_builder.build().collision_points(vessel)
+    collision_points = list(chain.from_iterable(list(trajectory_collision_points.values())))
         
     furthest_collision_point = max(collision_points, key=lambda p: np.linalg.norm(p - vessel_state.p))
     
@@ -85,9 +80,9 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     start_coll_center_dist = np.linalg.norm(vessel_state.p - collision_center)
     start_furthest_point_dist = np.linalg.norm(vessel_state.p - furthest_collision_point)
     start_goal_dist = start_coll_center_dist * 2
-    goal_vector = vessel_state.v_norm * start_goal_dist
-    goal = vessel_state.p + goal_vector
-    max_sized_vessel = max(interpolator.trajectory_builder.keys(), key=lambda v: v.radius)
+    goal_pos = vessel_state.v_norm * start_goal_dist + vessel_state.p
+    goal_state = vessel_state.modify_copy(x=goal_pos[0], y=goal_pos[1])
+    max_sized_vessel = max(trajectory_collision_points.keys(), key=lambda v: v.radius)
     min_go_around_dist = (max_sized_vessel.radius + vessel.radius) * 2
     
     poly_p1 = vessel_state.p + vessel_state.v_norm * start_coll_center_dist / 3
@@ -95,19 +90,20 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     poly_p3 = poly_p2 + vessel_state.v_norm_perp * min_go_around_dist
     poly_p4 = poly_p1 + vessel_state.v_norm_perp * min_go_around_dist
         
+    obstacle_list : List[Obstacle] = []
     obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]    
-    obstacle_list += [CircularObstacle(p, v.r) for p in collision_points]
+    obstacle_list += [CircularObstacle(p, vessel.radius) for vessel, points in trajectory_collision_points.items() for p in points]
     
     # Define the bounding lines
-    min_go_around_line = LineObstacle(vessel.p[0], vessel.p[1], vessel.v_norm(), False, min_go_around_dist)
-    go_around_split_line = LineObstacle(collision_center[0], collision_center[1], vessel.v_norm_perp(), False, 0)
+    min_go_around_line = LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist)
+    go_around_split_line = LineObstacle(collision_center[0], collision_center[1], vessel_state.v_norm_perp, False, 0)
     
     bounding_lines = [
-        LineObstacle(vessel.p[0], vessel.p[1], vessel.v_norm(), True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal[0], goal[1], vessel.v_norm(), False, min_go_around_dist * 5), # Right bounding line
-        LineObstacle(vessel.p[0], vessel.p[1], vessel.v_norm(), False, min_go_around_dist * 5), # Right bounding line
-        LineObstacle(vessel.p[0], vessel.p[1], vessel.v_norm_perp(), False, DIRECTION_THRESHOLD), # Behind bounding line
-        LineObstacle(goal[0], goal[1], vessel.v_norm_perp(), True, DIRECTION_THRESHOLD),  # Front bounding line        
+        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, True, DIRECTION_THRESHOLD),   # Left bounding line
+        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, min_go_around_dist * 5), # Right bounding line
+        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist * 5), # Right bounding line
+        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm_perp, False, DIRECTION_THRESHOLD), # Behind bounding line
+        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm_perp, True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
 
     # Add circular obstacle and bounding lines to obstacle list
@@ -125,8 +121,8 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     # Set Initial parameters
     rrt = BidirectionalRRTStarFND(
                     v_node=v_node,
-                    start=vessel.p,
-                    goal=goal,
+                    start_state=vessel_state,
+                    goal_state=goal_state,
                     min_go_around_line=min_go_around_line,
                     go_around_split_line=go_around_split_line,
                     sample_area=[X_DIST, Y_DIST],
@@ -143,9 +139,9 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     return path, rrt.current_i, expand_distance
     
 
-interpolator = PathInterpolator()
+interpolator = PathInterpolator(scenario)
 
-ordered_vessels = VesselOrderGraph(scenario.functional_scenario).sort()
+ordered_vessels = VesselOrderGraph(scenario).sort()
         
 # give_way_vessels_precedence = sorted(
 #     list(give_way_vessels.values()),
@@ -160,9 +156,8 @@ expand_distances : Dict[int, float] = {}
 for v_node in ordered_vessels:
     o_start_time = datetime.now()
     
-    vessel = scenario.to_concrete_vessel(v_node.vessel)
-    path, iter_number, expand_distance = run_trajectory_generation(vessel, interpolator)  
-    interpolator.add_path(vessel, path)
+    path, iter_number, expand_distance = run_trajectory_generation(v_node.vessel, interpolator)  
+    interpolator.add_path(v_node.vessel, path)
     
     o_eval_time = (datetime.now() - o_start_time).total_seconds()
     eval_times[v_node.vessel.id] = o_eval_time

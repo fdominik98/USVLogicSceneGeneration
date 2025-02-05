@@ -4,8 +4,8 @@ import random
 from typing import List, Optional, Tuple
 import numpy as np
 from shapely import Point, Polygon
-from functional_level.metamodels.functional_scenario import Vessel
 
+from concrete_level.models.vessel_state import VesselState
 
 class TrajectoryState(Enum):
     START = auto()
@@ -39,13 +39,13 @@ class RRTNode():
         self.children : set[int] = set()
         
     @staticmethod
-    def calc_cost(vessel : Vessel, d : float) -> Tuple[int, float]:
+    def calc_cost(vessel_state : VesselState, d : float) -> Tuple[int, float]:
         # Calculate the distance and heading between the points
-        s_dist = int(d // vessel.speed)
+        s_dist = int(d // vessel_state.speed)
         # Calculate the number of seconds required to cover the distance
-        s_fraction = d / vessel.speed - s_dist
+        s_fraction = d / vessel_state.speed - s_dist
         if s_fraction > 0.0001:
-            return s_dist + 1, d / vessel.speed - s_dist 
+            return s_dist + 1, d / vessel_state.speed - s_dist 
         return s_dist, 0.0
     
     def set_cost(self, d : float, time : int, fraction : bool):

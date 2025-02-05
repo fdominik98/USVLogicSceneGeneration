@@ -1,9 +1,10 @@
 import random
 from typing import List, Optional, Tuple
 import numpy as np
+from concrete_level.models.vessel_state import VesselState
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from concrete_level.models.vessel_order_graph import VesselNode
-from concrete_level.models.rrt_models import LineObstacle, RRTNode, Obstacle, RandomPoint, TrajectoryState
+from concrete_level.models.rrt_models import LineObstacle, RRTNode, Obstacle, RandomPoint
 from concrete_level.trajectory_generation.path_interpolator import PathInterpolator
 
 DIM = 1000
@@ -13,7 +14,7 @@ class BidirectionalRRTStarFND():
     """
     Class for RRT Planning
     """
-    def __init__(self, v_node : VesselNode, start : np.ndarray, goal : np.ndarray,
+    def __init__(self, v_node : VesselNode, start_state : VesselState, goal_state : VesselState,
                  min_go_around_line : LineObstacle, go_around_split_line : LineObstacle,
                  obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,
@@ -21,8 +22,8 @@ class BidirectionalRRTStarFND():
         self.vessel = v_node.vessel
         self.collision_points = collision_points
         self.interpolator = interpolator
-        self.start = RRTNode(start)
-        self.goal = RRTNode(goal)
+        self.start = RRTNode(start_state.p)
+        self.goal = RRTNode(goal_state.p)
         self.min_go_around_line = min_go_around_line
         self.go_around_split_line = go_around_split_line
         self.delta_pos_start_end = self.goal.p - self.start.p
@@ -35,6 +36,7 @@ class BidirectionalRRTStarFND():
         self.stop = False
         self.scaler = scaler
         self.max_nodes = max_nodes
+        self.start_state = start_state
         
         if show_animation:
             from visualization.trajectory_visualizer import TrajectoryVisualizer
@@ -164,7 +166,7 @@ class BidirectionalRRTStarFND():
         # elif abs_theta > np.radians(60):
         #     theta = np.sign(theta) * np.radians(60)  # Cap at 60 degrees with the same sign
         
-        s_dist, s_fraction = RRTNode.calc_cost(self.vessel, self.expand_dist)
+        s_dist, s_fraction = RRTNode.calc_cost(self.start_state, self.expand_dist)
         new_node.set_cost(nearest_node.distance_cost + self.expand_dist, nearest_node.time_cost + s_dist, s_fraction)
         new_node.parent = nearest_index
         return new_node
@@ -222,7 +224,7 @@ class BidirectionalRRTStarFND():
                 if no_coll:
                     self.node_list[near_node.parent].children.discard(i)
                     near_node.parent = new_node_index
-                    s_d, s_fraction = RRTNode.calc_cost(self.vessel, d)
+                    s_d, s_fraction = RRTNode.calc_cost(self.start_state, d)
                     near_node.set_cost(new_cost, s_d + new_node.time_cost, s_fraction)
                     new_node.children.add(i)
                     
@@ -258,7 +260,7 @@ class BidirectionalRRTStarFND():
                  return False, dist
         
         tmpNode = RRTNode(np.array([parent_node.p[0], parent_node.p[1]]))
-        s_d, s_fraction = RRTNode.calc_cost(self.vessel, dist)
+        s_d, s_fraction = RRTNode.calc_cost(self.start_state, dist)
         s_d = s_d - np.ceil(s_fraction)
         
         for s in range(int(s_d)):
@@ -277,9 +279,10 @@ class BidirectionalRRTStarFND():
                 return False
             
         # The two trajectories will collide at the specific second
-        for obs_vessel, pos in self.interpolator.get_positions_by_second(node.time_cost):
-            if np.linalg.norm(node.p - pos) <= max(self.vessel.r, obs_vessel.r):
-                print(f'Hit trajectory of {obs_vessel} at {pos}.')
+        scene = self.interpolator.get_scene_by_second(node.time_cost)
+        for vessel2, vessel2_state in scene.items():
+            if np.linalg.norm(node.p - vessel2_state.p) <= max(self.vessel.radius, vessel2.radius):
+                print(f'Hit trajectory of {vessel2} at {vessel2_state.p}.')
                 return False
         return True  # safe
     

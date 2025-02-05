@@ -95,12 +95,15 @@ class ConcreteScene(Serializable):
         return Assignments(variables).update_from_individual(self.individual)
     
     def may_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
-        var1, var2 = actor1.logical_variable, actor2.logical_variable
-        return not MayCollide(var1, var2).evaluate_penalty(self.assignments([var1, var2])).is_zero
+        vars = sorted([actor1.logical_variable, actor2.logical_variable], key=lambda v: v.id)
+        return not MayCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
     
     def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
-        var1, var2 = actor1.logical_variable, actor2.logical_variable
-        return not DoCollide(var1, var2).evaluate_penalty(self.assignments([var1, var2])).is_zero
+        vars = sorted([actor1.logical_variable, actor2.logical_variable], key=lambda v: v.id)
+        return not DoCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
+    
+    def others_than(self, vessel : ConcreteVessel) -> List[ConcreteVessel]:
+        return [v for v in self.actors if v is not vessel]
     
     
     def to_dict(self):
@@ -124,3 +127,4 @@ class ConcreteScene(Serializable):
                         for vessel, state in value
                     }
         return ConcreteScene(**copy_data)
+    
