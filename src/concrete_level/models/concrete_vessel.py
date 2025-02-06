@@ -15,8 +15,12 @@ class ConcreteVessel(Serializable):
     vessel_type : str
     beam: Optional[float] = None
     
+    @property
+    def name(self) -> str:
+        return f'OS_{self.id}' if self.is_os else f'TS_{self.id}'
+    
     def __repr__(self):
-        return f'ConcreteVessel({self.id})'
+        return self.name
     
     @property
     def max_turning_angle(self) -> float:

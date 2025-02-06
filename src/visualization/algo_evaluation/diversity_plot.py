@@ -22,18 +22,13 @@ class DiversityPlot(EvalPlot):
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(3 * 4, 5), constrained_layout=True)
         axes = np.atleast_2d(axes)
-        fig.subplots_adjust(wspace=0.5)
-        fig.subplots_adjust(hspace=0.5)
         
-        for i, label in enumerate(reversed(self.group_labels)):
-            fig.text(0.5, 0.05 + i * 0.3, label, ha='center', va='center', fontsize=12, fontweight='bold')
-
         for i, vessel_number in enumerate(self.vessel_numbers):
             for j, config_group in enumerate(self.config_groups):
                 axi : plt.Axes = axes[j][i]
                 if j == 0:
-                    axi.set_title(self.vessel_num_labels[i])
-                self.init_axi(i, axi, 'Samples')
+                    axi.set_title(self.vessel_num_labels[i])                    
+                self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$" + ' samples')
                 
                 equivalence_classes = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[vessel_number][config_group]], vessel_number)
                 if len(equivalence_classes) == 0:

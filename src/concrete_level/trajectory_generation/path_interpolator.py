@@ -75,7 +75,7 @@ class PathInterpolator():
         interpolated_speeds.append(vessel_state.speed)
         
         return [VesselState(interpolated_positions[i][0], interpolated_positions[i][1],
-                            interpolated_speeds[i], heading) for i, heading in interpolated_headings]
+                            interpolated_speeds[i], heading) for i, heading in enumerate(interpolated_headings)]
         
     @property    
     def trajectories(self) -> Trajectories:

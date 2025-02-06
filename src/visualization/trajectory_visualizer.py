@@ -18,11 +18,11 @@ class TrajectoryVisualizer():
     def set_caption(self, v_node : VesselNode, interpolator : PathInterpolator):
         conf_rels = ""
         for rel in v_node.relations:           
-            conf_rels = rel.name if not conf_rels else f'{conf_rels}, {rel.name}'
+            conf_rels = str(rel) if not conf_rels else f'{conf_rels}, {str(rel)}'
         
         conf_trajs = ""
-        for obs_vessel in interpolator.vessels.values():
-             conf_trajs = obs_vessel.name if not conf_trajs else f'{conf_trajs}, {obs_vessel.name}'
+        for vessel in interpolator.vessels:
+             conf_trajs = vessel.name if not conf_trajs else f'{conf_trajs}, {vessel.name}'
             
         pygame.display.set_caption(f'{conf_rels}, Conflicting trajectories: {conf_trajs}')
         

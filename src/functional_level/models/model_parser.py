@@ -62,10 +62,11 @@ class ModelParser():
             for o1, o2 in re.findall(rel_pattern, cropped_problem):
                 if o1 in objects and o2 in objects:
                     assertion(objects[o1], objects[o2])
-
-        return FunctionalScenario(os_interpretation, ts_interpretation,
+        scenario = FunctionalScenario(os_interpretation, ts_interpretation,
                                   head_on_interpretation, overtaking_interpretation,
                                   crossing_interpretation)
+
+        return scenario
     
     
     @staticmethod

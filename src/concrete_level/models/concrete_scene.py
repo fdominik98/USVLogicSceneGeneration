@@ -96,11 +96,11 @@ class ConcreteScene(Serializable):
     
     def may_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
         vars = sorted([actor1.logical_variable, actor2.logical_variable], key=lambda v: v.id)
-        return not MayCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
+        return MayCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
     
     def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
         vars = sorted([actor1.logical_variable, actor2.logical_variable], key=lambda v: v.id)
-        return not DoCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
+        return DoCollide(*vars).evaluate_penalty(self.assignments(vars)).is_zero
     
     def others_than(self, vessel : ConcreteVessel) -> List[ConcreteVessel]:
         return [v for v in self.actors if v is not vessel]
@@ -127,4 +127,8 @@ class ConcreteScene(Serializable):
                         for vessel, state in value
                     }
         return ConcreteScene(**copy_data)
+    
+    @staticmethod
+    def is_os_ts_pair(v1 : ConcreteVessel, v2 : ConcreteVessel) -> bool:
+        return (v1.is_os and not v2.is_os) or (v2.is_os and not v1.is_os)
     

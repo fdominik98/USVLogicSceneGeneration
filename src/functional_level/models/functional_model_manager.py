@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from functional_level.models.model_parser import ModelParser
 

@@ -1,10 +1,11 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 from itertools import combinations
 from typing import Dict, List, Optional, Set, Tuple
 import copy
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
-    HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation,
+    BinaryInterpretation, HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation,
     VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation,
     VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation,
     VesselClass8Interpretation, VesselInterpretation)
@@ -119,8 +120,23 @@ class FunctionalScenario(Scenario):
         :param hops: Number of hops to consider in the neighborhood.
         :return: Hash of the neighborhood information.
         """
+        
+            
+        
         # Initialize a dictionary to store neighborhoods for all hop levels
-        neighborhoods: Dict[int, Dict[FuncObject, Tuple]] = {0: {}}
+        neighborhoods: Dict[int, Dict[FuncObject, tuple]] = defaultdict(dict)
+        neighborhood_counter : Dict[int, Dict[FuncObject, Dict[tuple, int]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        
+        def generate_tuples(hop : int, interpretation : BinaryInterpretation, node : FuncObject) -> Set[tuple]:
+            relation_descs = interpretation.get_relation_descs(node)
+            tuples : set[tuple] = set()
+            for rd in relation_descs:
+                nbh = None if hop == 0 else neighborhoods[hop - 1][rd[2]]
+                t = (rd[0], rd[1], nbh)
+                neighborhood_counter[hop][node][t] += 1
+                tuples.add((*t, neighborhood_counter[hop][node][t]))
+            return tuples
+                    
         
         # Initialize base (0-hop) attributes
         for node in self.func_objects:
@@ -129,12 +145,11 @@ class FunctionalScenario(Scenario):
                 attributes.add((OSInterpretation.name, 1))
             if self.ts_interpretation.contains(node):
                 attributes.add((TSInterpretation.name, 1))
-            relation_descs = self.overtaking_interpretation.get_relation_descs(node)
-            attributes.update((rd[0], rd[1], None) for rd in relation_descs)
-            relation_descs = self.head_on_interpretation.get_relation_descs(node)
-            attributes.update((rd[0], rd[1], None) for rd in relation_descs)
-            relation_descs = self.crossing_interpretation.get_relation_descs(node)
-            attributes.update((rd[0], rd[1], None) for rd in relation_descs)
+            
+            attributes.update(generate_tuples(0, self.overtaking_interpretation, node))
+            attributes.update(generate_tuples(0, self.head_on_interpretation, node))
+            attributes.update(generate_tuples(0, self.crossing_interpretation, node))
+            
             neighborhoods[0][node] = (None, frozenset(attributes))
 
         # Build neighborhoods iteratively for each hop
@@ -146,14 +161,14 @@ class FunctionalScenario(Scenario):
                     attributes.add((OSInterpretation.name, 1))
                 if self.ts_interpretation.contains(node):
                     attributes.add((TSInterpretation.name, 1))
-                relation_descs = self.overtaking_interpretation.get_relation_descs(node)
-                attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
-                relation_descs = self.head_on_interpretation.get_relation_descs(node)
-                attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
-                relation_descs = self.crossing_interpretation.get_relation_descs(node)
-                attributes.update((rd[0], rd[1], neighborhoods[hop - 1][rd[2]]) for rd in relation_descs)
+                    
+                attributes.update(generate_tuples(hop, self.overtaking_interpretation, node))
+                attributes.update(generate_tuples(hop, self.head_on_interpretation, node))
+                attributes.update(generate_tuples(hop, self.crossing_interpretation, node))
+                
                 neighborhoods[hop][node] = (neighborhoods[hop - 1][node], frozenset(attributes))
 
         # Return hash of the last neighborhood
-        return hash(frozenset(neighborhoods[hops].values()))
+        shape = frozenset(neighborhoods[hops].values())
+        return hash(shape)
             

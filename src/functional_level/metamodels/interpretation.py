@@ -68,9 +68,9 @@ class BinaryInterpretation(Interpretation, ABC):
     def get_relation_descs(self, o : FuncObject) -> Set[Tuple[str, int, FuncObject]]:
         descs : Set[Tuple[str, int, FuncObject]] = set()
         for _o1, _o2 in self._data:
-            if _o1 == o:
+            if _o1 is o:
                 descs.add((self.name, 1, _o2))
-            elif _o2 == o:
+            elif _o2 is o:
                 descs.add((self.name, 2, _o1))
         return descs
     

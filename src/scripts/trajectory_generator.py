@@ -73,7 +73,7 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     furthest_collision_point = max(collision_points, key=lambda p: np.linalg.norm(p - vessel_state.p))
     
     if len(collision_points) != 0:
-        collision_center, _ = find_center_and_radius(collision_points)
+        collision_center, collision_center_radius = find_center_and_radius(collision_points)
     else:
         collision_center = vessel_state.p + vessel_state.v * interpolator.path_length / 2
     
@@ -91,8 +91,9 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     poly_p4 = poly_p1 + vessel_state.v_norm_perp * min_go_around_dist
         
     obstacle_list : List[Obstacle] = []
-    obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]    
-    obstacle_list += [CircularObstacle(p, vessel.radius) for vessel, points in trajectory_collision_points.items() for p in points]
+    #obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]    
+    #obstacle_list += [CircularObstacle(p, max(v.radius, vessel.radius)) for v, points in trajectory_collision_points.items() for p in points]
+    obstacle_list.append(CircularObstacle(collision_center, collision_center_radius))
     
     # Define the bounding lines
     min_go_around_line = LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist)
@@ -100,8 +101,8 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     
     bounding_lines = [
         LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, min_go_around_dist * 5), # Right bounding line
-        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist * 5), # Right bounding line
+        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, min_go_around_dist + 1000), # Right bounding line
+        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist + 1000), # Right bounding line
         LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm_perp, False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm_perp, True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]

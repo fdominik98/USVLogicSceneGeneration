@@ -41,7 +41,7 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):
     def extend_trajectory(self, trajectory : List[VesselState], length : int = ONE_HOUR_IN_SEC) -> List[VesselState]:
         new_trajectory = trajectory.copy()
         while len(new_trajectory) < length:
-            turned_state = trajectory[-1].modify_copy(heading=trajectory[0].heading)
+            turned_state = new_trajectory[-1].modify_copy(heading=new_trajectory[0].heading)
             new_p = turned_state.p + turned_state.v
             new_trajectory.append(turned_state.modify_copy(x=new_p[0], y=new_p[1]))
         return new_trajectory
