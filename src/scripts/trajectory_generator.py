@@ -1,13 +1,11 @@
 from datetime import datetime
 from itertools import chain
-import os
 import random
 from typing import List, Dict
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
-from utils.file_system_utils import ASSET_FOLDER
-from utils.asv_utils import MAX_COORD
+from utils.asv_utils import MAX_COORD, TWO_N_MILE
 from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from concrete_level.models.vessel_order_graph import VesselOrderGraph
@@ -21,9 +19,6 @@ SCALER = 1 / MAX_COORD / 1.5  * DIM
 
 DIRECTION_THRESHOLD = 100 # meter
 GOAL_SAMPLE_RATE = 5.0 #%
-
-measurement_name = 'test'
-measurement_id = f"{measurement_name} - {datetime.now().isoformat().replace(':','-')}"
 
 seed = 1234
 random.seed(seed)
@@ -82,13 +77,11 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     start_goal_dist = start_coll_center_dist * 2
     goal_pos = vessel_state.v_norm * start_goal_dist + vessel_state.p
     goal_state = vessel_state.modify_copy(x=goal_pos[0], y=goal_pos[1])
-    max_sized_vessel = max(trajectory_collision_points.keys(), key=lambda v: v.radius)
-    min_go_around_dist = (max_sized_vessel.radius + vessel.radius) * 2
     
     poly_p1 = vessel_state.p + vessel_state.v_norm * start_coll_center_dist / 3
     poly_p2 = vessel_state.p + vessel_state.v_norm * start_furthest_point_dist
-    poly_p3 = poly_p2 + vessel_state.v_norm_perp * min_go_around_dist
-    poly_p4 = poly_p1 + vessel_state.v_norm_perp * min_go_around_dist
+    poly_p3 = poly_p2 + vessel_state.v_norm_perp * collision_center_radius
+    poly_p4 = poly_p1 + vessel_state.v_norm_perp * collision_center_radius
         
     obstacle_list : List[Obstacle] = []
     #obstacle_list += [PolygonalObstacle(p1=poly_p1, p2=poly_p2, p3=poly_p3, p4=poly_p4)]    
@@ -96,13 +89,13 @@ def run_trajectory_generation(vessel : ConcreteVessel, interpolator : PathInterp
     obstacle_list.append(CircularObstacle(collision_center, collision_center_radius))
     
     # Define the bounding lines
-    min_go_around_line = LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist)
+    min_go_around_line = LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, collision_center_radius)
     go_around_split_line = LineObstacle(collision_center[0], collision_center[1], vessel_state.v_norm_perp, False, 0)
     
     bounding_lines = [
         LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, True, DIRECTION_THRESHOLD),   # Left bounding line
-        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, min_go_around_dist + 1000), # Right bounding line
-        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, min_go_around_dist + 1000), # Right bounding line
+        LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, collision_center_radius + TWO_N_MILE), # Right bounding line
+        LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, collision_center_radius + TWO_N_MILE), # Right bounding line
         LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm_perp, False, DIRECTION_THRESHOLD), # Behind bounding line
         LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm_perp, True, DIRECTION_THRESHOLD),  # Front bounding line        
     ]
@@ -168,19 +161,13 @@ for v_node in ordered_vessels:
 overall_eval_time = (datetime.now() - start_time).total_seconds()
 timestamp = datetime.now().isoformat()
 
-traj_data = TrajectoryData(measurement_name=measurement_name, iter_numbers=iter_numbers, algorithm_desc='RRTStar_algo', 
-                        config_name=eval_data.scenario_name, env_path=eval_data.path, random_seed=seed,
+trajectories = interpolator.trajectories
+traj_data = TrajectoryData(measurement_name='test', iter_numbers=iter_numbers, algorithm_desc='RRTStar_algo', 
+                        config_name=eval_data.scenario_name, scene_path=eval_data.path, random_seed=seed,
                         expand_distances=expand_distances, goal_sample_rate=GOAL_SAMPLE_RATE,
-                        timestamp=timestamp, trajectories=interpolator.trajectories,
+                        timestamp=timestamp, trajectories=trajectories,
                         overall_eval_time=overall_eval_time, rrt_evaluation_times=eval_times)
 
+traj_data.save_as_measurement()
 
-
-asset_folder = f'{ASSET_FOLDER}/gen_data/{traj_data.algorithm_desc}/{traj_data.config_name}/{measurement_id}'
-if not os.path.exists(asset_folder):
-    os.makedirs(asset_folder)
-file_path=f"{asset_folder}/{traj_data.timestamp.replace(':','-')}.json"
-traj_data.path = file_path
-traj_data.save_to_json(file_path=file_path)
-
-ScenarioPlotManager(TrajectoryManager())
+ScenarioPlotManager(TrajectoryManager(trajectories))

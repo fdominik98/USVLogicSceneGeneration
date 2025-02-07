@@ -1,15 +1,16 @@
 from collections import defaultdict
 from dataclasses import dataclass, asdict
 import json
-from typing import Dict, List
+from typing import Any, Dict, List, Type
 import numpy as np
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from concrete_level.models.concrete_scene import ConcreteScene
+from utils.serializable import Serializable
 
 @dataclass(frozen=True)
-class Trajectories:  
+class Trajectories(Serializable):  
     _data : Dict[ConcreteVessel, List[VesselState]]
     
     def __post_init__(self):
@@ -38,16 +39,6 @@ class Trajectories:
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self._data})" 
-
-    def to_json(self) -> str:
-        """Serialize the class instance to a JSON string."""
-        return json.dumps(asdict(self))
-
-    @classmethod
-    def from_json(cls, json_string: str):
-        """Deserialize a JSON string back into an instance of the class."""
-        data = json.loads(json_string)
-        return cls(**data)
     
     def get_scene(self, t : int) -> ConcreteScene:
         if t >= self.timespan:
@@ -75,5 +66,27 @@ class Trajectories:
                     collision_points[vessel2] += [scene[vessel].p, scene[vessel2].p]
         return collision_points
             
+            
+    def to_dict(self):
+        result = {}
+        for key, value in self.__dict__.items():
+            if key == '_data':
+                result[key] = [(vessel.to_dict(), [state.to_dict() for state in states])
+                    for vessel, states in self._data.items()]
+            else:  # Handle primitive types
+                result[key] = value
+        return result
+    
+    @classmethod
+    def from_dict(cls: Type['Trajectories'], data: Dict[str, Any]) -> 'Trajectories':
+        copy_data = data.copy()
+        for attr, value in data.items():
+            if attr == '_data':
+                copy_data[attr] = {
+                        ConcreteVessel.from_dict(vessel):
+                        [VesselState.from_dict(state) for state in states]
+                        for vessel, states in value
+                    }
+        return Trajectories(**copy_data)
         
     

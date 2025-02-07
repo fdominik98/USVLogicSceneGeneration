@@ -35,6 +35,7 @@ EGO_LENGTH = 30
 EGO_BEAM = 10
 
 ONE_HOUR_IN_SEC = 60 * 60
+TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
 def vessel_radius(length : float) -> float:
     return length * 4
