@@ -85,7 +85,7 @@ class EvalPlotManager():
         
         self.to_pdf_button = tk.Button(self.toolbar_frame, text="PDF", command=self.to_pdf)
         self.to_pdf_button.pack(side=tk.LEFT, padx=5)
-        
+        self.root.bind('<e>', lambda event: self.to_pdf())
         
         ## EXIT BUTTONS
         exit_button = tk.Button(self.toolbar_frame, text="Exit", command=self.exit_application)

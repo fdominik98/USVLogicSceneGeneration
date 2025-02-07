@@ -48,7 +48,7 @@ class SuccessRatePlot(EvalPlot):
             axi.set_xticks(range(len(new_group_labels)), new_group_labels)
             axi.set_xticklabels(new_group_labels, rotation=0, ha='right', fontweight='bold')            
             self.set_yticks(axi, range(101))
-            axi.set_ylim(0, 115)
+            axi.set_ylim(0, 110)
             
             for j, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, 102, 

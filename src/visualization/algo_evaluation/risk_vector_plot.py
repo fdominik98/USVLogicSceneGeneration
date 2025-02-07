@@ -52,7 +52,6 @@ class RiskVectorPlot(EvalPlot):
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.vessel_num_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
         axes = np.atleast_1d(axes)
-        fig.subplots_adjust(wspace=0.5)
 
         for i, vessel_number in enumerate(self.vessel_numbers):
             axi : plt.Axes = axes[i]
@@ -92,6 +91,6 @@ class RiskVectorPlot(EvalPlot):
             # Annotate each box with the number of samples
             for j, group in enumerate(data, 1):  # '1' because boxplot groups start at 1
                 sample_size = len(group)
-                axi.text(j, self.metric_map_max[self.metric]*1.05, f'{sample_size}', ha='center', va='center', fontsize=10, horizontalalignment='center')                   
+                axi.text(j, self.metric_map_max[self.metric]*1.05, f'{sample_size}', ha='left', va='center', fontsize=10, horizontalalignment='left')                   
                     
         return fig

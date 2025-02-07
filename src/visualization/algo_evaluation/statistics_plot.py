@@ -43,6 +43,8 @@ class StatisticsPlot(EvalPlot):
             axi.set_xticks([0,1,2], self.labels)
             axi.set_xticklabels(self.labels, rotation=0, ha='right', fontweight='bold')  
             
+            axi.set_ylim(0, max(values) * 1.1)
+            
             for i, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, values[i] * 1.02, 
                 f'{(values[i] / sum(values) * 100):.1f}%', ha='center', va='bottom', fontsize=10)

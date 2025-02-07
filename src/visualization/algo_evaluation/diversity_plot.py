@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -55,10 +55,11 @@ class DiversityPlot(EvalPlot):
 
         return fig
         
-    def get_shape_coverage_text(self, equivalence_classes : dict) -> str:
+    def get_shape_coverage_text(self, equivalence_classes : Dict[int, tuple]) -> str:
         found_length = sum(1 for _, count in equivalence_classes.values() if count > 0)
+        sample_num = sum(count for _, count in equivalence_classes.values())
         coverage_percent = found_length/len(equivalence_classes)*100 if len(equivalence_classes) != 0 else 0
-        return f'covered shapes: {found_length}/{len(equivalence_classes)}\n{coverage_percent:.1f}%'
+        return f'total samples: {sample_num}\ncovered shapes: {found_length}/{len(equivalence_classes)}\n{coverage_percent:.1f}%'
         
 class AmbiguousDiversityPlot(DiversityPlot):
     def __init__(self, eval_datas):
@@ -68,6 +69,7 @@ class UnspecifiedDiversityPlot(DiversityPlot):
     def __init__(self, eval_datas):
         super().__init__(eval_datas, ConcreteSceneAbstractor.get_unspecified_equivalence_class_distribution)
         
-    def get_shape_coverage_text(self, equivalence_classes : dict) -> str:
+    def get_shape_coverage_text(self, equivalence_classes : Dict[int, tuple]) -> str:
         found_length = sum(1 for _, count in equivalence_classes.values() if count > 0)
-        return f'covered shapes: {found_length}/?'
+        sample_num = sum(count for _, count in equivalence_classes.values())
+        return f'total samples: {sample_num}\ncovered shapes: {found_length}/?'
