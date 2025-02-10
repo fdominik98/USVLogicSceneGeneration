@@ -6,13 +6,14 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from visualization.algo_evaluation.statistics_plot import StatisticsPlot
-from visualization.algo_evaluation.table_generator import TableGenerator
+from visualization.evaluation_plots.diversity_statistics_table import DiversityStatisticsTable
+from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
+from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
 from visualization.plotting_utils import DummyEvalPlot, EvalPlot
-from visualization.algo_evaluation.diversity_plot import AmbiguousDiversityPlot, DiversityPlot, UnspecifiedDiversityPlot
-from visualization.algo_evaluation.risk_vector_plot import RiskVectorPlot
-from visualization.algo_evaluation.eval_time_plot import EvalTimePlot
-from visualization.algo_evaluation.success_rate_plot import SuccessRatePlot
+from visualization.evaluation_plots.diversity_plot import AmbiguousDiversityPlot, DiversityPlot, UnspecifiedDiversityPlot
+from visualization.evaluation_plots.risk_vector_plot import RiskVectorPlot
+from visualization.evaluation_plots.runtime_plot import RuntimePlot
+from visualization.evaluation_plots.success_rate_plot import SuccessRatePlot
 class PlotWrapper():
     def __init__(self, plot_class, args):
         self.plot_class = plot_class
@@ -22,26 +23,25 @@ class PlotWrapper():
         if self.plot is None:
             self.plot = self.plot_class(**self.args)
         return self.plot
+    
 class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
-        
         self.eval_datas = eval_datas
-        generator = TableGenerator(eval_datas)
-        generator.generate_runtime_summary_table()
-        generator.generate_stat_sign_table()
         self.plots : Dict[str, PlotWrapper] = {
             "Home" : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
-            "Statistics" : PlotWrapper(StatisticsPlot, {'eval_datas': self.eval_datas}),
-            "Approach Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
-            "Approach Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),
-            "Approach Unspecified Diversity" : PlotWrapper(UnspecifiedDiversityPlot, {'eval_datas': self.eval_datas}),
-            "Approach Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
-            "Approach Eval Time (successful)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
-            "Approach Eval Time (all)" : PlotWrapper(EvalTimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            "Scenario Type Statistics" : PlotWrapper(ScenarioTypeStatisticsPlot, {'eval_datas': self.eval_datas}),
+            "Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
+            "Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),
+            "Unspecified Diversity" : PlotWrapper(UnspecifiedDiversityPlot, {'eval_datas': self.eval_datas}),
+            "Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
+            "Runtime (successful)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
+            "Runtime (all)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
             "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
+            "Diversity Evenness Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas}),
+            "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
         }
         
         self.root = tk.Tk()

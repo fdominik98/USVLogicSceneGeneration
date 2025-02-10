@@ -2,10 +2,9 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from visualization.plotting_utils import EvalPlot
 
-class EvalTimePlot(EvalPlot):  
+class RuntimePlot(EvalPlot):  
     def __init__(self, eval_datas : List[EvaluationData], is_all=False, is_algo=False): 
         EvalPlot.__init__(self, eval_datas, is_algo=is_algo, is_all=is_all)
     
@@ -24,8 +23,7 @@ class EvalTimePlot(EvalPlot):
     def create_fig(self):
         fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.vessel_num_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
         axes = np.atleast_1d(axes)
-        fig.subplots_adjust(wspace=0.5)
-
+        
         for i, vessel_number in enumerate(self.vessel_numbers):
             axi : plt.Axes = axes[i]
             axi.set_title(self.vessel_num_labels[i])

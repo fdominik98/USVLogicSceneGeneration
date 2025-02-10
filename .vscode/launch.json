@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [   
         {
-            "name": "trajectory_viewer",
+            "name": "View Trajectories",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/trajectory_viewer.py",
@@ -15,7 +15,7 @@
             }
         }, 
         {
-            "name": "test algorithm",
+            "name": "Test Algorithm",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/test_algorithm.py",
@@ -25,17 +25,17 @@
             }
         },
         {
-            "name": "trajectory_generator",
+            "name": "Generate Trajectories",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/scripts/trajectory_generator.py",
+            "program": "src/scripts/generate_trajectories.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
         }, 
         {
-            "name": "hyperparam_test",
+            "name": "Test Hyper-parameters",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/hyperparam_test.py",
@@ -45,7 +45,7 @@
             }
         },
         {
-            "name": "EVALUATION",
+            "name": "Search-based Evaluation",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/evaluation_main.py",
@@ -55,7 +55,7 @@
             }
         },
         {
-            "name": "TABLE BROWSER",
+            "name": "Table Browser",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/table_browser.py",
@@ -65,7 +65,7 @@
             }
         },
         {
-            "name": "EVAL VIS",
+            "name": "Evaluation Plots",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/eval_vis.py",
@@ -75,7 +75,17 @@
             }
         },
         {
-            "name": "annotate_risk_vectors",
+            "name": "Generate Statistics Table",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/generate_statistics_table.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": "Annotate Risk Vectors",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/annotate_risk_vectors.py",
@@ -85,7 +95,7 @@
             }
         },   
         {
-            "name": "scenic",
+            "name": "Scenic Evaluation",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/scenic_script.py",
@@ -115,7 +125,7 @@
             }
         },
         {
-            "name": "wang24 eval",
+            "name": "Wang24 Plot",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/wang24_eval.py",
@@ -125,7 +135,7 @@
             }
         },  
         {
-            "name": "COMMON_OCEAN",
+            "name": "Parse CommonOcean Scenarios",
             "type": "debugpy",
             "request": "launch",
             "program": "src/scripts/common_ocean_scenario_parser.py",

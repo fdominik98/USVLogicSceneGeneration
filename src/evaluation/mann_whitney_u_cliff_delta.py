@@ -1,34 +1,24 @@
-import itertools
-from typing import Dict, List, Tuple
+from typing import List
 import numpy as np
 from scipy.stats import mannwhitneyu, ttest_ind
 import cliffs_delta
 from scipy.stats import rankdata
 
 class MannWhitneyUCliffDelta():
-    def __init__(self, samples : Dict[str, List[float]] = {}) -> None:
-        self.samples = samples
+    def __init__(self, samples1 : List[float], samples2 : List[float]) -> None:
+        samples1 = np.array(samples1, dtype=float)
+        samples2 = np.array(samples2, dtype=float)
+        stat, p_value = mannwhitneyu(samples1, samples2)
+        self.p_value_mann_w = p_value
         
-        pairs = list(itertools.combinations(samples.items(), 2))
+        stat, p_value = ttest_ind(samples1, samples2)
+        self.p_value_ttest = p_value
         
-        self.effect_sizes_cliff : Dict[Tuple[str, str], Tuple[float, str]] = {}
-        self.effect_sizes_A12 : Dict[Tuple[str, str], float] = {}
-        self.effect_sizes_cohens_d : Dict[Tuple[str, str], float] = {}
-        self.p_values_mann_w : Dict[Tuple[str, str], float] = {}
-        self.p_values_ttest : Dict[Tuple[str, str], float] = {}
+        delta, interpretation = cliffs_delta.cliffs_delta(samples1, samples2)
+        self.effect_size_cliff = (delta, interpretation)
         
-        for algo1, algo2 in pairs:     
-            stat, p_value = mannwhitneyu(algo1[1], algo2[1])
-            self.p_values_mann_w[(algo1[0], algo2[0])] = p_value
-            
-            stat, p_value = ttest_ind(algo1[1], algo2[1])
-            self.p_values_ttest[(algo1[0], algo2[0])] = p_value
-            
-            delta, interpretation = cliffs_delta.cliffs_delta(algo1[1], algo2[1])
-            self.effect_sizes_cliff[(algo1[0], algo2[0])] = (delta, interpretation)
-            
-            self.effect_sizes_A12[(algo1[0], algo2[0])] = self.A12(algo1[1], algo2[1])
-            self.effect_sizes_cohens_d[(algo1[0], algo2[0])] = self.cohens_d(algo1[1], algo2[1])
+        self.effect_size_A12 = self.A12(samples1, samples2)
+        self.effect_size_cohens_d = self.cohens_d(samples1, samples2)
             
     def A12(self, x, y):
         """

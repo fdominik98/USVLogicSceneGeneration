@@ -1,5 +1,4 @@
 from collections import defaultdict
-import pprint
 from typing import Dict, List
 
 import numpy as np
@@ -9,7 +8,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_d
 from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
 
 
-class TableGenerator():
+class StatisticsTableGenerator():
     def __init__(self, eval_datas : List[EvaluationData]) -> None:
         self.eval_datas = eval_datas
         self.runtimes : Dict[int, Dict[str, List[float]]] = defaultdict(lambda : defaultdict(lambda : []))

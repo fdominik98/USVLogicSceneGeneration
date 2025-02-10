@@ -24,7 +24,7 @@ class DiversityPlot(EvalPlot):
         axes = np.atleast_2d(axes)
         
         for i, vessel_number in enumerate(self.vessel_numbers):
-            for j, config_group in enumerate(self.config_groups):
+            for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])                    
@@ -41,7 +41,7 @@ class DiversityPlot(EvalPlot):
                 labels = range(1, len(equivalence_classes.keys()) + 1)
                 bars : plt.BarContainer = axi.bar(labels, values, color=self.colors[j], edgecolor='black', linewidth=0)
                 
-                xticks = np.linspace(labels[0], labels[-1], 6)
+                xticks = list(np.linspace(labels[0], labels[-1], 6))
                 xticks = [int(t) for t in xticks] 
                 axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
                 self.set_yticks(axi, values)

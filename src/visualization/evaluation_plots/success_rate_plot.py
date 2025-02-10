@@ -2,7 +2,6 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from evaluation.fishers_exact_odds_ratio import FisherExactOddsRatio
 from visualization.plotting_utils import EvalPlot
 
 class SuccessRatePlot(EvalPlot):  
@@ -24,7 +23,6 @@ class SuccessRatePlot(EvalPlot):
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.comparison_group_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
         axes = np.atleast_1d(axes)
-        fig.subplots_adjust(wspace=0.5)
 
         for i, vessel_number in enumerate(self.vessel_numbers):
             axi : plt.Axes = axes[i]

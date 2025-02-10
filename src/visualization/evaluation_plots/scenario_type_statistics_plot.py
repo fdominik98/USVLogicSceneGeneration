@@ -6,7 +6,7 @@ from evaluation.vessel_type_sampler import VesselTypeSampler
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from visualization.plotting_utils import EvalPlot
 
-class StatisticsPlot(EvalPlot):  
+class ScenarioTypeStatisticsPlot(EvalPlot):  
     def __init__(self, eval_datas : List[EvaluationData]):                
         self.sample_size = 4000
         self.distribution = {'OtherType' : 51.1, 'CargoShip' : 31.1,
@@ -51,8 +51,8 @@ class StatisticsPlot(EvalPlot):
 
 
         for i, vessel_number in enumerate(self.vessel_numbers):
-            for j, config_group in enumerate(self.config_groups):
-                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in self.measurements[vessel_number][config_group]]
+            for j, comparison_group in enumerate(self.comparison_groups):
+                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data) for eval_data in self.measurements[vessel_number][comparison_group]]
                 values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
                 configure_axi(i, j, self.group_labels[j], self.colors[j], values)
             
