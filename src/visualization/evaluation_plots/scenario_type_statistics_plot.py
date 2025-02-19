@@ -25,29 +25,34 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
         return [2]
         
     def create_fig(self) -> plt.Figure:
-        fig, axes = plt.subplots(self.vessel_num_count, self.comparison_group_count, figsize=(1 * 12, 4), constrained_layout=True)
+        fig, axes = plt.subplots(self.vessel_num_count, self.comparison_group_count, figsize=(1 * 12, 2), constrained_layout=True)
         axes = np.atleast_2d(axes)
-        fig.subplots_adjust(wspace=0.5)
         
         def configure_axi(i : int, j : int, group_label, color, values):
             axi : plt.Axes = axes[i][j]
-            if j == 0:
-                axi.set_title(self.vessel_num_labels[i])
-            self.init_axi(j, axi, 'Samples')
+            self.init_axi(j, axi, '2-vessel samples')
             if sum(values) == 0:
                 return
             
             bars : plt.BarContainer = axi.bar(self.labels, values, color=color, edgecolor='black', linewidth=0)
-            axi.set_title(group_label)
+            axi.set_title(group_label, fontdict={'fontsize': 12, 'fontweight': 'bold'})
             self.set_yticks(axi, values)
             axi.set_xticks([0,1,2], self.labels)
-            axi.set_xticklabels(self.labels, rotation=0, ha='right', fontweight='bold')  
+            axi.set_xticklabels(self.labels, rotation=0, ha='right')  
             
-            axi.set_ylim(0, max(values) * 1.1)
+            axi.set_ylim(0, max(values) * 1.15)
             
             for i, bar in enumerate(bars):
                 axi.text(bar.get_x() + bar.get_width() / 2, values[i] * 1.02, 
                 f'{(values[i] / sum(values) * 100):.1f}%', ha='center', va='bottom', fontsize=10)
+                
+                
+            axi.text(0.5, 0.92, f'total: {int(sum(values))}', 
+                transform=axi.transAxes,  # Use axis coordinates
+                verticalalignment='top', # Align text vertically to the top
+                horizontalalignment='center',
+                fontsize=11,
+                fontweight='bold')
 
 
         for i, vessel_number in enumerate(self.vessel_numbers):
