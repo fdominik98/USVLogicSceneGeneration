@@ -36,6 +36,7 @@ class RuntimePlot(EvalPlot):
                 if len(values) != 0:
                     data.append(values)
                     new_group_labels.append(label)
+                    print(f'{vessel_number} vessels, {label}: median: {np.median(values)} , mean: {np.mean(values)}')
             
             if len(data) == 0:
                 continue
@@ -58,6 +59,7 @@ class RuntimePlot(EvalPlot):
             
             maxy = axi.get_ylim()[1]
             axi.set_ylim(0, maxy*1.1)
+            
                     
             # Annotate each box with the number of samples
             for j, group in enumerate(data, 1):  # '1' because boxplot groups start at 1

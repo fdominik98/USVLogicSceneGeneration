@@ -70,7 +70,7 @@ for file_path in file_paths:
         eval_data = EvaluationData()
         eval_data.config_group = 'common_ocean_benchmark'
         eval_data.vessel_number = scene.vessel_number
-        eval_data.measurement_name = f'test_{scene.vessel_number}_vessel_scenarios'
+        eval_data.measurement_name = f'test_{scene.vessel_number}_vessel_scenarios_long'
         eval_data.algorithm_desc = 'ais_source'
         eval_data.scenario_name = f'{scene.vessel_number}vessel'
         eval_data.timestamp = datetime.now().isoformat()   

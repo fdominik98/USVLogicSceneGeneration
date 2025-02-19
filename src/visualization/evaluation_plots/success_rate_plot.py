@@ -31,16 +31,17 @@ class SuccessRatePlot(EvalPlot):
             self.init_axi(i, axi, 'Success rate (%)')
             
             data = []
+            percentages = []
             new_group_labels = []
             for measurement, label in zip(self.measurements[vessel_number].values(), self.group_labels):
                 values = [0 if eval_data.best_fitness_index > 0.0 else 1 for eval_data in measurement]
                 if len(values) != 0:
                     data.append(values)
+                    percentages.append(np.mean(values) * 100)
+                    print(f'{vessel_number} vessels, {label}: success rate: {percentages[-1]}')
                     new_group_labels.append(label)
             if len(data) == 0:
                 continue
-            
-            percentages = [np.mean(value) * 100 for value in data]
             
             bars : plt.BarContainer = axi.bar(new_group_labels, percentages, color=self.colors, edgecolor='black', linewidth=2)
             axi.set_xticks(range(len(new_group_labels)), new_group_labels)
