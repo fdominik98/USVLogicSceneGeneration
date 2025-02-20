@@ -19,11 +19,12 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {'sbo' : 'SBO',
+    config_group_map = {'sbo' : 'SB',
                         'msr' : 'MSR',
                         'scenic_distribution' : 'Scenic',
                         'common_ocean_benchmark' : 'Common',
-                        'zhu_et_al' : 'Zhu et al.'}
+                        'zhu_et_al' : 'Zhu',
+                        'base_reference' : 'BaseRef'}
     
     vessel_number_map = {
         2 : '2 Vessels', 3 : '3 Vessels', 4 : '4 Vessels', 5 : '5 Vessels', 6 : '6 Vessels', 

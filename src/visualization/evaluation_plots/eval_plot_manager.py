@@ -9,6 +9,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_d
 from visualization.evaluation_plots.diversity_statistics_table import DiversityStatisticsTable
 from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
 from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
+from visualization.evaluation_plots.scenario_type_statistics_table import ScenarioTypeStatisticsTable
 from visualization.plotting_utils import DummyEvalPlot, EvalPlot
 from visualization.evaluation_plots.diversity_plot import AmbiguousDiversityPlot, DiversityPlot, UnspecifiedDiversityPlot
 from visualization.evaluation_plots.risk_vector_plot import RiskVectorPlot
@@ -42,6 +43,7 @@ class EvalPlotManager():
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
             "Diversity Evenness Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas}),
             "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
+            'Scenario Type Statistical Test' : PlotWrapper(ScenarioTypeStatisticsTable, {'eval_datas': self.eval_datas}),
         }
         
         self.root = tk.Tk()
