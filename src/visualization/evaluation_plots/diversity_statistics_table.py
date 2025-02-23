@@ -1,5 +1,7 @@
+import itertools
 from typing import List
 import matplotlib.pyplot as plt
+from evaluation.chi_square_kl_div import ChiSquareKLDiv
 from evaluation.permutation_evenness_test import PermutationEvennessTest
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
@@ -32,9 +34,11 @@ class DiversityStatisticsTable(DummyEvalPlot):
                 if sum(values1) == 0 or sum(values2) == 0:
                     continue
                 
-                evenness_test = PermutationEvennessTest(values1, values2)
-                print(f'{vessel_number} vessels, {group1} - {group2}: p-value:{evenness_test.p_value}, effect-size:{evenness_test.observed_diff}')
+                #evenness_test = PermutationEvennessTest(values1, values2)
+                #print(f'{vessel_number} vessels, {group1} - {group2}: {group1} evenness={evenness_test.evenness_1}, {group2} evenness={evenness_test.evenness_2}, p-value:{evenness_test.p_value}, effect-size:{evenness_test.observed_diff}')
                 
+                test = ChiSquareKLDiv(values1, values2)
+                print(f'{vessel_number} vessels, {group1} - {group2}: {group1} p-value:{test.p_value}, KL Divergence::{test.kl_div}')
 
         return DummyEvalPlot.create_fig(self)
         

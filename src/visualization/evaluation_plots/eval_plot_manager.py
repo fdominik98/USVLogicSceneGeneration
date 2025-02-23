@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from visualization.evaluation_plots.diversity_statistics_table import DiversityStatisticsTable
+from visualization.evaluation_plots.diversity_statistics_table import AmbiguousDiversityStatisticsTable, DiversityStatisticsTable
 from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
 from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
 from visualization.evaluation_plots.scenario_type_statistics_table import ScenarioTypeStatisticsTable
@@ -41,7 +41,8 @@ class EvalPlotManager():
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
-            "Diversity Evenness Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas}),
+            "Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas}),
+            "Ambiguous Diversity Statistics Test" : PlotWrapper(AmbiguousDiversityStatisticsTable, {'eval_datas': self.eval_datas}),
             "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
             'Scenario Type Statistical Test' : PlotWrapper(ScenarioTypeStatisticsTable, {'eval_datas': self.eval_datas}),
         }

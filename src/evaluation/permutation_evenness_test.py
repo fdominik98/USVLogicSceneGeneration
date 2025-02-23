@@ -5,9 +5,9 @@ from scipy.stats import entropy, ks_2samp, chisquare, permutation_test
 class PermutationEvennessTest:
     def __init__(self, dist1 : List[int], dist2 : List[int], num_permutations=10000):
         """Perform a permutation test on Shannon Evenness Index"""
-        evenness_1 = self.shannon_evenness(dist1)
-        evenness_2 = self.shannon_evenness(dist2)
-        self.observed_diff = evenness_1 - evenness_2
+        self.evenness_1 = self.shannon_evenness(dist1)
+        self.evenness_2 = self.shannon_evenness(dist2)
+        self.observed_diff = self.evenness_1 - self.evenness_2
 
         def statistic(x, y):
             return self.shannon_evenness(x) - self.shannon_evenness(y)

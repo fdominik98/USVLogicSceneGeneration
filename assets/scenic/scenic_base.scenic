@@ -161,7 +161,7 @@ def create_scenario(ts_num):
     region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
     distance_region = region_2.union(region_3).union(region_5).union(region_6)
 
-    sin_half_cone_theta = np.clip(MAX_LENGTH*4 / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+    sin_half_cone_theta = np.clip(vessel_radius(MAX_LENGTH) / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
     angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
     # sin_half_cone_theta_3 = np.clip(100*4 / (3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
     # angle_half_cone_3 = abs(np.arcsin(sin_half_cone_theta))
@@ -173,9 +173,9 @@ def create_scenario(ts_num):
     def add_ts(ts_id):
         ts_point = new Point in distance_region
         ts_length = Range(MIN_LENGTH, MAX_LENGTH)
-        p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
-        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
 
+        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
+        p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
         velocity_point = new Point in speed_region.intersect(SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p12.heading, 2 * angle_half_cone))
         ts = new Ship with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
         prop = new AtVisMayCollideProps with val1 ego, with val2 ts
