@@ -2,6 +2,8 @@ import os
 
 ASSET_FOLDER = f'{os.path.dirname(os.path.abspath(__file__))}/../../assets'
 
+ROOT_FOLDER = f'{os.path.dirname(os.path.abspath(__file__))}/../..'
+
 def get_all_file_paths(directory, extension):
     if not os.path.isdir(directory):
         raise ValueError('THe path is not a directory or invalid.')
