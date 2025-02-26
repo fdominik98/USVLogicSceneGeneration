@@ -23,7 +23,7 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
     
     @property
     def vessel_numbers(self) -> List[int]:
-        return [2]
+        return [2, 3, 4, 5, 6]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.vessel_num_count, self.comparison_group_count, figsize=(1 * 14, 2*self.vessel_num_count), constrained_layout=True)

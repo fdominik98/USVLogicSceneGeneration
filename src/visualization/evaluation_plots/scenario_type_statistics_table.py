@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 from evaluation.chi_square_kl_div import ChiSquareKLDiv
+from evaluation.permutation_evenness_test import PermutationEvennessTest
 from evaluation.vessel_type_sampler import VesselTypeSampler
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
@@ -42,6 +43,9 @@ class ScenarioTypeStatisticsTable(DummyEvalPlot):
                 samples2 = samples[vessel_number][group2]
                 test = ChiSquareKLDiv(samples1, samples2)
                 print(f'{vessel_number} vessels, {group1} - {group2}: {group1} p-value:{test.p_value}, KL Divergence::{test.kl_div}')
+                
+                # evenness_test = PermutationEvennessTest(samples1, samples2)
+                # print(f'{vessel_number} vessels, {group1} - {group2}: {group1} evenness={evenness_test.evenness_1}, {group2} evenness={evenness_test.evenness_2}, p-value:{evenness_test.p_value}, effect-size:{evenness_test.observed_diff}')
         
         return DummyEvalPlot.create_fig(self)
         
