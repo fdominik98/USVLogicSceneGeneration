@@ -1,5 +1,5 @@
 from itertools import chain, permutations
-from typing import Any, Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 from concrete_level.models.concrete_vessel import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
@@ -55,25 +55,30 @@ class ConcreteSceneAbstractor():
         
         vessel_pairs = list(permutations(scene.actors, 2))
         for v1, v2 in vessel_pairs:
-            if not ConcreteScene.is_os_ts_pair(v1, v2):
-                continue
             obj1, obj2 = vessel_object_map[v1], vessel_object_map[v2]
             var1, var2 = vessel_actor_map[v1], vessel_actor_map[v2]
             
-            # Define terms and their corresponding actions
-            exprs_and_assertions : List[Tuple[RelationConstrComposite, RelationConstrComposite, Any]] = [
-                #(LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2), None),
-                (LogicalScenarioBuilder.get_crossing_term_soft(var1, var2), LogicalScenarioBuilder.get_crossing_term(var1, var2), lambda: crossing_interpretation.add(obj1, obj2)),
-                (LogicalScenarioBuilder.get_overtaking_term_soft(var1, var2), LogicalScenarioBuilder.get_overtaking_term(var1, var2), lambda: overtaking_interpretation.add(obj1, obj2)),
-                (LogicalScenarioBuilder.get_head_on_term_soft(var1, var2), LogicalScenarioBuilder.get_head_on_term(var1, var2), lambda: head_on_interpretation.add(obj1, obj2)),
-            ]
+            if not ConcreteScene.is_os_ts_pair(v1, v2):
+                continue
+
             eval_cache = EvaluationCache(assignments)
-            for soft_distance_expr, expr, assertion in exprs_and_assertions:
-                penalty = soft_distance_expr._evaluate_penalty(eval_cache)
-                if penalty.is_zero:
-                    relation_constr_exprs.add(expr)
-                    assertion()
-                    break
+            
+            if LogicalScenarioBuilder.get_head_on_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+                head_on_interpretation.add(obj1, obj2)
+                relation_constr_exprs.add(LogicalScenarioBuilder.get_head_on_term(var1, var2))
+                continue
+            if LogicalScenarioBuilder.get_overtaking_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+                overtaking_interpretation.add(obj1, obj2)
+                relation_constr_exprs.add(LogicalScenarioBuilder.get_overtaking_term(var1, var2))
+                continue
+            
+            
+            if LogicalScenarioBuilder.get_crossing_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+                crossing_interpretation.add(obj1, obj2)
+                relation_constr_exprs.add(LogicalScenarioBuilder.get_crossing_term(var1, var2))
+                continue
+            
+            
             
         functional_scenario = FunctionalScenario(os_interpretation, ts_interpretation,
                                                  head_on_interpretation, overtaking_interpretation,

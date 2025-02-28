@@ -21,7 +21,7 @@ class PlotBase(ABC):
 class EvalPlot(PlotBase, ABC):    
     config_group_map = {'sbo' : 'SB',
                         'msr' : 'MSR',
-                        'scenic_distribution' : 'Scen',
+                        'scenic_distribution' : 'RS',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
