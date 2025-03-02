@@ -58,25 +58,26 @@ class ConcreteSceneAbstractor():
             obj1, obj2 = vessel_object_map[v1], vessel_object_map[v2]
             var1, var2 = vessel_actor_map[v1], vessel_actor_map[v2]
             
-            if not ConcreteScene.is_os_ts_pair(v1, v2):
-                continue
-
             eval_cache = EvaluationCache(assignments)
             
             if LogicalScenarioBuilder.get_head_on_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
                 head_on_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_head_on_term(var1, var2))
                 continue
+            
             if LogicalScenarioBuilder.get_overtaking_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
                 overtaking_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_overtaking_term(var1, var2))
                 continue
             
-            
             if LogicalScenarioBuilder.get_crossing_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
                 crossing_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_crossing_term(var1, var2))
                 continue
+            
+            if LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+                relation_constr_exprs.add(LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2))
+                continue # Be careful atvis has drift tolerance and is overlapping with outvis.
             
             
             

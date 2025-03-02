@@ -148,7 +148,7 @@ class CrossingBear(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'CrossingBear', np.pi, negated)
         
-    rotation_angle : float = (BOW_ANGLE + BEAM_ANGLE) / 2
+    rotation_angle : float = BEAM_ANGLE / 2
         
     def __rotated_v2(self, geo_props : GeometricProperties):
         rotation_matrix = np.array([

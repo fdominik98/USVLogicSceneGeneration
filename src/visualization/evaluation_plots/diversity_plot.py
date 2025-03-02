@@ -14,7 +14,7 @@ class DiversityPlot(EvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution']
+        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:

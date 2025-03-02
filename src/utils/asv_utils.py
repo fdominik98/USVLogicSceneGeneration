@@ -2,7 +2,7 @@ import numpy as np
 
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
-BEAM_ANGLE = np.radians(107.5)
+BEAM_ANGLE = np.radians(112.5)
 MASTHEAD_LIGHT_ANGLE = np.pi * 2 - STERN_ANGLE
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
