@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict
 from typing import List, Tuple
 import pandas as pd
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 import tkfilebrowser
 from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
@@ -14,7 +14,7 @@ class DataParser(ABC):
     
     TRAJ_COLUMN_NAMES = ['trajectories', 'config_name', 'measurement_name', 'rrt_evaluation_times',
                          'iter_numbers', 'overall_eval_time', 'path', 'env_path', 'expand_distance',
-                         'goal_sample_rate', 'random_seed']
+                         'goal_sample_rate', 'random_seed', ]
     
     
     def __init__(self, column_names : List[str], dir : str) -> None:

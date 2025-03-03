@@ -1,1 +1,1 @@
-from logical_level.constraint_satisfaction import scenic_sampling
+from logical_level.constraint_satisfaction.rejection_sampling import scenic_sampling

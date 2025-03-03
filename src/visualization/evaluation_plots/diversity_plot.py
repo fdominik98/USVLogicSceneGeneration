@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import EvalPlot
 
@@ -14,7 +14,7 @@ class DiversityPlot(EvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
+        return ['SBO', 'RS', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:

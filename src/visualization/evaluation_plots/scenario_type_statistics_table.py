@@ -5,7 +5,7 @@ from evaluation.chi_square_kl_div import ChiSquareKLDiv
 from evaluation.permutation_evenness_test import PermutationEvennessTest
 from evaluation.vessel_type_sampler import VesselTypeSampler
 from functional_level.models.functional_model_manager import FunctionalModelManager
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import DummyEvalPlot
 from itertools import combinations
@@ -17,7 +17,7 @@ class ScenarioTypeStatisticsTable(DummyEvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
+        return ['SBO', 'RS', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
     def vessel_numbers(self) -> List[int]:

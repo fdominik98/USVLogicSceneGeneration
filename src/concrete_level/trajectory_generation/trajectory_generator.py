@@ -4,7 +4,7 @@ import random
 from typing import List, Dict
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from utils.asv_utils import MAX_COORD, TWO_N_MILE
 from utils.math_utils import find_center_and_radius
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle

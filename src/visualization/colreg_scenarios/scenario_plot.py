@@ -2,7 +2,7 @@ from typing import List
 import matplotlib.pyplot as plt
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.asv_utils import *
-from logical_level.constraint_satisfaction.evolutionary_computation.aggregates import AggregateAll
+from logical_level.constraint_satisfaction.aggregates import AggregateAll
 from visualization.plotting_utils import PlotBase
 from visualization.colreg_scenarios.plot_components.main_plot_components.drawing_component import DrawingComponent
 from visualization.colreg_scenarios.plot_components.main_plot_components.legend_component import LegendComponent

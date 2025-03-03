@@ -129,7 +129,7 @@ class InVis(BinaryLiteral):
         super().__init__(var1, var2, 'InVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        penalty = self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance)
+        penalty = self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance - DIST_DRIFT)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, visibility_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
         
@@ -138,7 +138,7 @@ class OutVis(BinaryLiteral):
         super().__init__(var1, var2, 'OutVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        penalty = self.penalty(geo_props.o_distance, max(geo_props.vis_distance, geo_props.safety_dist), MAX_DISTANCE)
+        penalty = self.penalty(geo_props.o_distance, max(geo_props.vis_distance + DIST_DRIFT, geo_props.safety_dist), MAX_DISTANCE)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, visibility_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
         

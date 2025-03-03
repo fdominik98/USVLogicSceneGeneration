@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Any, Dict, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 
 class PlotBase(ABC):
     plt.rcParams['font.family'] = 'serif'
@@ -21,7 +21,7 @@ class PlotBase(ABC):
 class EvalPlot(PlotBase, ABC):    
     config_group_map = {'sbo' : 'SB',
                         'msr' : 'MSR',
-                        'scenic_distribution' : 'RS',
+                        'rs' : 'RS',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
@@ -102,7 +102,7 @@ class DummyEvalPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
+        return ['SBO', 'RS', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:

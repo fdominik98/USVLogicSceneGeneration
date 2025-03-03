@@ -39,9 +39,9 @@ TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
 def vessel_radius(length : float) -> float:
     return length * 4
-
-def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
-    if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
+        
+def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
+    if o1_sees_o2_stern:
         if o2_length < 12:
             return 2
         elif o2_length < 20:

@@ -40,8 +40,8 @@ EGO_BEAM = 10
 def vessel_radius(length : float) -> float:
     return length * 4
 
-def o2VisibilityByo1(o2RelativeBearingToo1 : float, o2_length):
-    if o2RelativeBearingToo1 >= MASTHEAD_LIGHT_ANGLE / 2:
+def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
+    if o1_sees_o2_stern:
         if o2_length < 12:
             return 2
         elif o2_length < 20:
@@ -115,8 +115,8 @@ class GeoProps(Object):
         self.cos_p12_v1_theta = np.clip(np.dot(self.p12, self.val1.v) / self.o_distance / self.val1.sp, -1, 1)
         self.angle_p12_v1 = np.arccos(self.cos_p12_v1_theta)
         
-        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1, self.val1.l),
-                           o2VisibilityByo1(self.angle_p21_v2, self.val2.l)) *  N_MILE_TO_M_CONVERSION
+        self.vis_distance = min(o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l),
+                           o2VisibilityByo1(self.angle_p21_v2 >= MASTHEAD_LIGHT_ANGLE / 2, self.val2.l)) *  N_MILE_TO_M_CONVERSION
         # angle between the relative velocity and the relative position vector
         
         self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
@@ -148,21 +148,21 @@ class AtVisMayCollideProps(GeoProps):
 class NoCollideOutVisProps(GeoProps):
     def check_constraints(self):
         self.calculate_props()
-        return (self.dcpa > self.safety_dist and 
-            self.o_distance > self.vis_distance - DIST_DRIFT and
+        return ((self.dcpa > self.safety_dist or 
+            self.o_distance > self.vis_distance + DIST_DRIFT) and
             self.check_sp_and_h_constraints())
 
 
 def create_scenario(ts_num):
     ego = new OwnShip with id 0, at (MAX_COORD/2,MAX_COORD/2), with velocity (0,Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS))
-    region_2 = CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    region_3 = CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    distance_region = region_2.union(region_3).union(region_5).union(region_6)
+    # region_2 = CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+    # region_3 = CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+    # region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+    # region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
+    #distance_region = region_2.union(region_3).union(region_5).union(region_6)
 
-    sin_half_cone_theta = np.clip(vessel_radius(MAX_LENGTH) / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
-    angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
+    # sin_half_cone_theta = np.clip(vessel_radius(MAX_LENGTH) / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
+    # angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
     # sin_half_cone_theta_3 = np.clip(100*4 / (3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
     # angle_half_cone_3 = abs(np.arcsin(sin_half_cone_theta))
     # sin_half_cone_theta_5 = np.clip(100*4 / (5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
@@ -171,8 +171,13 @@ def create_scenario(ts_num):
     # angle_half_cone_6 = abs(np.arcsin(sin_half_cone_theta))
 
     def add_ts(ts_id):
+        visibility_dist = vis_distance_map[(0, ts_id)]
+        distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT))
         ts_point = new Point in distance_region
-        ts_length = Range(MIN_LENGTH, MAX_LENGTH)
+        ts_length = length_map[ts_id]
+
+        sin_half_cone_theta = np.clip(max(ego.length, ts_length) / visibility_dist, -1, 1)
+        angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 
         speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
         p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position

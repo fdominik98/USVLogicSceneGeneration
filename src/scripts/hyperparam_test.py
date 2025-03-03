@@ -3,13 +3,13 @@ import time
 import itertools
 from typing import Any, List, Tuple
 from functional_level.models.functional_model_manager import FunctionalModelManager
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pygad_ga_algorithm import PyGadGAAlgorithm
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.scipy_de_algorithm import SciPyDEAlgorithm
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.evolutionary_algorithm_base import EvolutionaryAlgorithmBase
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.evolutionary_computation.evolutionary_algorithms.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.pygad_ga_algorithm import PyGadGAAlgorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.scipy_de_algorithm import SciPyDEAlgorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
+from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 
 NUMBER_OF_RUNS = 1
 WARMUPS = 0
@@ -100,7 +100,7 @@ random.shuffle(combination_DE)
 functional_scenarios = [FunctionalModelManager.get_6_vessel_scenarios()[0]]
 
 
-tests : List[Tuple[Any, EvolutionaryAlgorithmBase]]= [
+tests : List[Tuple[Any, SolverBase]]= [
     # (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
     #                                     functional_scenarios=functional_scenarios,
     #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,

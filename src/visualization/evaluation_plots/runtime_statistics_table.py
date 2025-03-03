@@ -1,6 +1,6 @@
 from itertools import combinations
 from typing import List
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from visualization.plotting_utils import DummyEvalPlot
 
@@ -10,7 +10,7 @@ class RuntimeStatisticsTable(DummyEvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution']
+        return ['SBO', 'RS']
     
     @property
     def vessel_numbers(self) -> List[int]:

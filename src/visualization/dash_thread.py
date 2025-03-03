@@ -9,7 +9,7 @@ from concrete_level.data_parser import EvalDataParser
 from concrete_level.models.concrete_scene import ConcreteScene
 from dash import dash_table, html
 from dash.dependencies import Input, Output
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 
 class DashThread(threading.Thread):
     def __init__(self) -> None:

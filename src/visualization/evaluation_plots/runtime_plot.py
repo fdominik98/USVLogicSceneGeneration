@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from visualization.plotting_utils import EvalPlot
 
 class RuntimePlot(EvalPlot):  
@@ -14,7 +14,7 @@ class RuntimePlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution'] 
+        return ['SBO', 'RS'] 
     
     @property
     def vessel_numbers(self) -> List[int]:

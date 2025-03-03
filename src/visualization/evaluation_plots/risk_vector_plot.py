@@ -3,7 +3,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from visualization.plotting_utils import EvalPlot
 
@@ -39,7 +39,7 @@ class RiskVectorPlot(EvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
+        return ['SBO', 'RS', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:

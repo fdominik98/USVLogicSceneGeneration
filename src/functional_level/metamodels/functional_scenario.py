@@ -92,6 +92,11 @@ class FunctionalScenario(Scenario):
                 list(self.head_on_interpretation.get_tuples()) + 
                 list(self.crossing_interpretation.get_tuples()))
     
+    
+    @property
+    def ts_objects(self) -> Set[FuncObject]:
+        return {obj for obj in self.func_objects if self.is_ts(obj)}
+    
     @property
     def os_object(self) -> FuncObject:
         return self.os_interpretation.next
@@ -104,6 +109,11 @@ class FunctionalScenario(Scenario):
     @property
     def all_object_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
         return {(oi, oj) for oi, oj in combinations(self.func_objects, 2)}
+    
+    @property
+    def os_ts_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
+        os = self.os_object
+        return {(os, obj) for obj in self.ts_objects}
     
     @property
     def not_in_colreg_pairs(self):

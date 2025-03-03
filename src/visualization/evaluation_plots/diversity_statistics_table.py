@@ -3,7 +3,7 @@ from typing import List
 import matplotlib.pyplot as plt
 from evaluation.chi_square_kl_div import ChiSquareKLDiv
 from evaluation.permutation_evenness_test import PermutationEvennessTest
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import DummyEvalPlot
 from itertools import combinations
@@ -15,7 +15,7 @@ class DiversityStatisticsTable(DummyEvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'scenic_distribution', 'common_ocean_benchmark']
+        return ['SBO', 'RS', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:
