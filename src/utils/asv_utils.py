@@ -1,9 +1,10 @@
+import os
 import numpy as np
 
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
 BEAM_ANGLE = np.radians(112.5)
-MASTHEAD_LIGHT_ANGLE = np.pi * 2 - STERN_ANGLE
+MASTHEAD_LIGHT_ANGLE = 2 * BEAM_ANGLE
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
 N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
@@ -39,6 +40,10 @@ TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
 def vessel_radius(length : float) -> float:
     return length * 4
+
+def calculate_heading(vx : float, vy : float):
+    heading_radians = np.arctan2(vy, vx)
+    return heading_radians
         
 def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
     if o1_sees_o2_stern:

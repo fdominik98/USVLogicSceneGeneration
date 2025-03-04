@@ -149,14 +149,14 @@ class CrossingBear(BinaryLiteral):
         super().__init__(var1, var2, 'CrossingBear', np.pi, negated)
         
     rotation_angle : float = BEAM_ANGLE / 2
+    rotation_matrix = np.array([
+        [np.cos(rotation_angle), -np.sin(rotation_angle)],
+        [np.sin(rotation_angle), np.cos(rotation_angle)]
+    ])
         
     def __rotated_v2(self, geo_props : GeometricProperties):
-        rotation_matrix = np.array([
-            [np.cos(self.rotation_angle), -np.sin(self.rotation_angle)],
-            [np.sin(self.rotation_angle), np.cos(self.rotation_angle)]
-        ])
         # Rotate vector
-        return np.dot(rotation_matrix, geo_props.val2.v)
+        return np.dot(self.rotation_matrix, geo_props.val2.v)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
         angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /

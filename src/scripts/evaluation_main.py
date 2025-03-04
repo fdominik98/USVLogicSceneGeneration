@@ -19,7 +19,7 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 NUMBER_OF_RUNS = {2 : 1000, 3 : 1000, 4 : 1000, 5 : 1000, 6 : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
-TIMEOUT = 240
+TIMEOUT = 20
 INIT_METHOD = RandomInstanceInitializer.name
 VERBOSE = False
 
@@ -31,8 +31,8 @@ START_FROM = [0,0,0]
 #                 LogicalModelManager.get_x_vessel_scenarios(4), LogicalModelManager.get_x_vessel_scenarios(5),
 #                 LogicalModelManager.get_x_vessel_scenarios(6)]
 
-measurement_names= ['test_4_vessel_scenarios', ]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(4)]
+measurement_names= ['test_6_vessel_scenarios', ]
+interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
 
 
 scenic_config = EvaluationData(population_size=1, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name,

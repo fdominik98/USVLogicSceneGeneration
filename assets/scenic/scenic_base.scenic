@@ -1,12 +1,12 @@
-import numpy as np
 import itertools
-
-param allowCollisions = True
+import sys
+import os
+import numpy as np
 
 BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
 BEAM_ANGLE = np.radians(112.5)
-MASTHEAD_LIGHT_ANGLE = np.pi * 2 - STERN_ANGLE
+MASTHEAD_LIGHT_ANGLE = 2 * BEAM_ANGLE
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
 N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres
@@ -37,9 +37,16 @@ MAX_SPEED_IN_MS = 50 * KNOT_TO_MS_CONVERSION
 EGO_LENGTH = 30
 EGO_BEAM = 10
 
+ONE_HOUR_IN_SEC = 60 * 60
+TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
+
 def vessel_radius(length : float) -> float:
     return length * 4
 
+def calculate_heading(vx : float, vy : float):
+    heading_radians = np.arctan2(vy, vx)
+    return heading_radians
+        
 def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
     if o1_sees_o2_stern:
         if o2_length < 12:
@@ -60,9 +67,7 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
         else:
             return 6
 
-def calculate_heading(vx, vy):
-    heading_radians = np.arctan2(vy, vx)
-    return heading_radians
+param allowCollisions = True
 
 class Ship(Object):
     id : int
@@ -154,7 +159,7 @@ class NoCollideOutVisProps(GeoProps):
 
 
 def create_scenario(ts_num):
-    ego = new OwnShip with id 0, at (MAX_COORD/2,MAX_COORD/2), with velocity (0,Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS))
+    ego = new OwnShip with id 0, at (MAX_COORD/2, MAX_COORD/2), with velocity (0, Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS)), facing toward (MAX_COORD/2, MAX_COORD)
     # region_2 = CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
     # region_3 = CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
     # region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
@@ -172,16 +177,28 @@ def create_scenario(ts_num):
 
     def add_ts(ts_id):
         visibility_dist = vis_distance_map[(0, ts_id)]
-        distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT))
-        ts_point = new Point in distance_region
         ts_length = length_map[ts_id]
+        heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map[(0, ts_id)]
+        
+        distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT))
+        bearing_region_ego_to_ts = SectorRegion(ego.position, MAX_DISTANCE, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts)
+        ts_point = new Point in distance_region.intersect(bearing_region_ego_to_ts)
 
         sin_half_cone_theta = np.clip(max(ego.length, ts_length) / visibility_dist, -1, 1)
         angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 
-        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
+        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS)).intersect(CircularRegion((0,0), 1))
+        try:
+            point = uniformPointIn(speed_region)
+            print("Region has area")
+        except ValueError:
+            print("Region has no area")
+
         p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
-        velocity_point = new Point in speed_region.intersect(SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p12.heading, 2 * angle_half_cone))
+        bearing_region_ts_to_ego = SectorRegion(ts_point.position, MAX_DISTANCE, heading_ts_to_ego + p12.heading, bearing_angle_ts_to_ego)
+
+        voc_region = SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p12.heading, 2 * angle_half_cone)
+        velocity_point = new Point in speed_region.intersect(voc_region).intersect(bearing_region_ts_to_ego)
         ts = new Ship with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
         prop = new AtVisMayCollideProps with val1 ego, with val2 ts
         return ts, prop
