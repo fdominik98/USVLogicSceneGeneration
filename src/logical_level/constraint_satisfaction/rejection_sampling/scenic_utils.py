@@ -26,6 +26,7 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
     rejection = True
     iterations = 0
     start_time = datetime.now()
+    empty_region = False
     while rejection is not None:
         if iterations > 0:  # rejected the last sample
             if verbosity >= 2:
@@ -34,7 +35,7 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
                 feedback = scenario.externalSampler.rejectionFeedback
         if (datetime.now() - start_time).total_seconds() >= timeout:
             print(f"Sampling reached timeout.")
-            return None, iterations, datetime.now() - start_time
+            return None, iterations, datetime.now() - start_time, empty_region
         iterations += 1
         try:
             if scenario.externalSampler is not None:
@@ -43,6 +44,8 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
         except RejectionException as e:
             optionallyDebugRejection(e)
             rejection = e
+            if rejection.args[0] == 'sampling empty Region':
+                empty_region = True
             continue
         rejection = None
 
@@ -63,7 +66,7 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
 
     # obtained a valid sample; assemble a scene from it
     scene = scenario._makeSceneFromSample(sample)
-    return scene, iterations, datetime.now() - start_time
+    return scene, iterations, datetime.now() - start_time, empty_region
     
 
 SCENIC_SCENARIOS : Dict[int, str] = {

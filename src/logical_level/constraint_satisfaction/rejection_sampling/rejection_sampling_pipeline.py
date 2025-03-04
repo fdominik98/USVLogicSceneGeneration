@@ -8,7 +8,6 @@ from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import generate_scene, scenic_scenario
 from logical_level.constraint_satisfaction.solver_base import SolverBase
-from logical_level.models.logical_model_manager import LogicalModelManager
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.models.relation_constraints import CrossingBear
 from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, MASTHEAD_LIGHT_ANGLE, N_MILE_TO_M_CONVERSION, STERN_ANGLE, o2VisibilityByo1, calculate_heading
@@ -21,10 +20,10 @@ class RejectionSamplingPipeline(SolverBase):
         self.scenario_map = {logical_scenario : functional_scenarios[i] for i, logical_scenario in enumerate(self.logical_scenarios)}
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
-        initial_population = initial_population[0]
+        population = initial_population[0]
         functional_scenario = self.scenario_map[logical_scenario]
         object_map = {obj : var for var, obj in zip(logical_scenario.actor_vars, functional_scenario.func_objects)}
-        assignments = Assignments(logical_scenario.actor_vars).update_from_individual(initial_population)
+        assignments = Assignments(logical_scenario.actor_vars).update_from_individual(population)
         
         length_map = {}
         vis_distance_map = {}
@@ -52,21 +51,22 @@ class RejectionSamplingPipeline(SolverBase):
             
         scenario = scenic_scenario(eval_data.vessel_number, vis_distance_map = vis_distance_map, length_map = length_map, bearing_map=bearing_map)
         
-        return scenario, logical_scenario, initial_population
+        return scenario, logical_scenario, population
     
     def do_evaluate(self, some_input : Tuple[Any, LogicalScenario, List[float]], eval_data : EvaluationData):
-        scenario, logicalScenario, initial_population = some_input
-        scene, num_iterations, runtime = generate_scene(scenario, eval_data.timeout, 0)
-        return scene, num_iterations, logicalScenario, initial_population       
+        scenario, logicalScenario, population = some_input
+        scene, num_iterations, runtime, empty_region = generate_scene(scenario, eval_data.timeout, np.inf if self.verbose else 0)
+        return scene, num_iterations, logicalScenario, population       
     
     def convert_results(self, some_results : Tuple[Any, int, LogicalScenario, List[float]], eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
-        scene, num_iterations, logicalScenario, initial_population = some_results
+        scene, num_iterations, logicalScenario, population = some_results
         if scene is None:
-            solution = initial_population
+            solution = population
         else:            
             objects = sorted([obj for obj in scene.objects if obj.is_vessel], key=lambda obj: obj.id)
             solution = list(chain.from_iterable([[obj.position[0], obj.position[1],
                                                     calculate_heading(obj.velocity[0], obj.velocity[1]), obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
         penalty = Aggregate.factory(logicalScenario, eval_data.aggregate_strat, minimize=True).derive_penalty(solution)
-        print(penalty.info)
+        if self.verbose:
+            print(penalty.info)
         return solution, [penalty.total_penalty], num_iterations

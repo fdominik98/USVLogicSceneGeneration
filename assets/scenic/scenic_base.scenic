@@ -144,19 +144,29 @@ class GeoProps(Object):
 class AtVisMayCollideProps(GeoProps):
     def check_constraints(self):
         self.calculate_props()
-        return (self.dcpa > 0 and 
-            self.dcpa < self.safety_dist and 
-            self.o_distance > self.vis_distance - DIST_DRIFT and 
-            self.o_distance < self.vis_distance + DIST_DRIFT and
-            self.check_sp_and_h_constraints())
+        collision_pred = self.dcpa > 0 and self.dcpa < self.safety_dist
+        distance_pred = self.o_distance > self.vis_distance - DIST_DRIFT and self.o_distance < self.vis_distance + DIST_DRIFT
+        sp_h_violation = self.check_sp_and_h_constraints()
+        pred = collision_pred and distance_pred and sp_h_violation
+        if not pred:
+            print('AtVisMayCollideProps violation')
+            if not collision_pred:
+                print('Collision violation')
+            if not distance_pred:
+                print(f'Distance violation: real:{self.o_distance/N_MILE_TO_M_CONVERSION}, vis:{self.vis_distance/N_MILE_TO_M_CONVERSION} ({self.val1.id, self.val2.id})')
+            if not sp_h_violation:
+                print('sp, h violation')
+        return pred
 
 class NoCollideOutVisProps(GeoProps):
     def check_constraints(self):
         self.calculate_props()
-        return ((self.dcpa > self.safety_dist or 
+        pred = ((self.dcpa > self.safety_dist or 
             self.o_distance > self.vis_distance + DIST_DRIFT) and
             self.check_sp_and_h_constraints())
-
+        if not pred:
+            print('NoCollideOutVisProps violation')
+        return pred
 
 def create_scenario(ts_num):
     ego = new OwnShip with id 0, at (MAX_COORD/2, MAX_COORD/2), with velocity (0, Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS)), facing toward (MAX_COORD/2, MAX_COORD)
@@ -182,25 +192,21 @@ def create_scenario(ts_num):
         
         distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT))
         bearing_region_ego_to_ts = SectorRegion(ego.position, MAX_DISTANCE, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts)
-        ts_point = new Point in distance_region.intersect(bearing_region_ego_to_ts)
+        ts_point_region = distance_region.intersect(bearing_region_ego_to_ts)
 
-        sin_half_cone_theta = np.clip(max(ego.length, ts_length) / visibility_dist, -1, 1)
+        ts_point = new Point in ts_point_region
+
+        sin_half_cone_theta = np.clip(max(vessel_radius(ts_length), vessel_radius(ego.length)) / visibility_dist, -1, 1)
         angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 
-        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS)).intersect(CircularRegion((0,0), 1))
-        try:
-            point = uniformPointIn(speed_region)
-            print("Region has area")
-        except ValueError:
-            print("Region has no area")
+        speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS))
+        p21 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
+        bearing_region_ts_to_ego = SectorRegion(ts_point.position, MAX_DISTANCE, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego)
+        voc_region = SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p21.heading, 2 * angle_half_cone)
+        ts_velocity_region = speed_region.intersect(voc_region).intersect(bearing_region_ts_to_ego)
 
-        p12 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
-        bearing_region_ts_to_ego = SectorRegion(ts_point.position, MAX_DISTANCE, heading_ts_to_ego + p12.heading, bearing_angle_ts_to_ego)
-
-        voc_region = SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p12.heading, 2 * angle_half_cone)
-        velocity_point = new Point in speed_region.intersect(voc_region).intersect(bearing_region_ts_to_ego)
+        velocity_point = new Point in ts_velocity_region
         ts = new Ship with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
         prop = new AtVisMayCollideProps with val1 ego, with val2 ts
         return ts, prop
-
     return [add_ts(i+1) for i in range(ts_num)]

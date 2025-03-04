@@ -21,7 +21,7 @@ WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 20
 INIT_METHOD = RandomInstanceInitializer.name
-VERBOSE = False
+VERBOSE = True
 
 START_FROM = [0,0,0]
 
