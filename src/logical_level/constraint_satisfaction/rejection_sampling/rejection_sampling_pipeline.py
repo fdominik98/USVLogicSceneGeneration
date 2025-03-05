@@ -45,7 +45,7 @@ class RejectionSamplingPipeline(SolverBase):
             if functional_scenario.crossing(ts, os):
                 bearing_map[(os.id, ts.id)] = (CrossingBear.rotation_angle, BEAM_ANGLE, 0, MASTHEAD_LIGHT_ANGLE)
             if functional_scenario.overtaking(os, ts):
-                bearing_map[(os.id, ts.id)] = (0.0, MASTHEAD_LIGHT_ANGLE, -np.pi, MASTHEAD_LIGHT_ANGLE)
+                bearing_map[(os.id, ts.id)] = (0.0, MASTHEAD_LIGHT_ANGLE, -np.pi, STERN_ANGLE)
             if functional_scenario.overtaking(ts, os):
                 bearing_map[(os.id, ts.id)] = (-np.pi, STERN_ANGLE, 0, MASTHEAD_LIGHT_ANGLE)
             

@@ -60,17 +60,18 @@ class ConcreteSceneAbstractor():
             
             eval_cache = EvaluationCache(assignments)
             
-            if LogicalScenarioBuilder.get_head_on_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if LogicalScenarioBuilder.get_head_on_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
                 head_on_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_head_on_term(var1, var2))
                 continue
             
-            if LogicalScenarioBuilder.get_overtaking_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if LogicalScenarioBuilder.get_overtaking_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
                 overtaking_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_overtaking_term(var1, var2))
                 continue
             
-            if LogicalScenarioBuilder.get_crossing_term_soft(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if LogicalScenarioBuilder.get_crossing_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+                #if (obj2, obj1) not in crossing_interpretation: # filter double crossing
                 crossing_interpretation.add(obj1, obj2)
                 relation_constr_exprs.add(LogicalScenarioBuilder.get_crossing_term(var1, var2))
                 continue

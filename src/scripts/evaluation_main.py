@@ -16,7 +16,7 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 # NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 17, 4 : 21 * 5, 5 : 50 * 2, 6 : 99 * 1}
 # NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 34, 4 : 21 * 10, 5 : 50 * 4, 6 : 99 * 3}
 # NUMBER_OF_RUNS = {2 : 150, 3 : 6 * 50, 4 : 21 * 15, 5 : 50 * 6, 6 : 99 * 4}
-NUMBER_OF_RUNS = {2 : 1000, 3 : 1000, 4 : 1000, 5 : 1000, 6 : 1000}
+NUMBER_OF_RUNS = {2 : 100, 3 : 1000, 4 : 1000, 5 : 1000, 6 : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 20
@@ -31,8 +31,8 @@ START_FROM = [0,0,0]
 #                 LogicalModelManager.get_x_vessel_scenarios(4), LogicalModelManager.get_x_vessel_scenarios(5),
 #                 LogicalModelManager.get_x_vessel_scenarios(6)]
 
-measurement_names= ['test_3_vessel_scenarios', ]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
+measurement_names= ['test_6_vessel_scenarios', ]
+interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
 
 
 scenic_config = EvaluationData(population_size=1, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name,
@@ -74,11 +74,11 @@ pso_config = EvaluationData(population_size=30, c_1=2.5, c_2=1.0, w=0.4, timeout
 de_config = EvaluationData(population_size=15, mutate_prob=0.5, crossover_prob=0.5,
                           timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
 
-# algos = [PyMooNSGA2Algorithm]
-# configs = [nsga2_vessel_config]
 
 algos = [RejectionSamplingPipeline]
 configs = [scenic_config]
+algos = [PyMooNSGA2Algorithm]
+configs = [nsga2_vessel_config]
 
 
 meas_start = START_FROM[0]
