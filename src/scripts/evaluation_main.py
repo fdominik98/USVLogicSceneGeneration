@@ -31,8 +31,8 @@ START_FROM = [0,0,0]
 #                 LogicalModelManager.get_x_vessel_scenarios(4), LogicalModelManager.get_x_vessel_scenarios(5),
 #                 LogicalModelManager.get_x_vessel_scenarios(6)]
 
-measurement_names= ['test_6_vessel_scenarios', ]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
+measurement_names= ['test_3_vessel_scenarios', ]
+interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
 
 
 scenic_config = EvaluationData(population_size=1, timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name,

@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 BOW_ANGLE = np.radians(10.0)
@@ -50,21 +49,20 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
         if o2_length < 12:
             return 2
         elif o2_length < 20:
-            return 2
-        elif o2_length < 50:
-            return 2
-        else:
-            return 3
-    else:
-        if o2_length < 12:
-            return 2
-        elif o2_length < 20:
             return 3
         elif o2_length < 50:
             return 5
         else:
             return 6
-        
+    else:
+        if o2_length < 12:
+            return 2
+        elif o2_length < 20:
+            return 2
+        elif o2_length < 50:
+            return 2
+        else:
+            return 3        
 
 # FOR FUTURE WORK
 # Table 1: Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.
