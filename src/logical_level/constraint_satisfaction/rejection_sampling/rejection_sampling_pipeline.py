@@ -64,8 +64,10 @@ class RejectionSamplingPipeline(SolverBase):
             solution = population
         else:            
             objects = sorted([obj for obj in scene.objects if obj.is_vessel], key=lambda obj: obj.id)
-            solution = list(chain.from_iterable([[obj.position[0], obj.position[1],
-                                                    calculate_heading(obj.velocity[0], obj.velocity[1]), obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
+            solution = list(chain.from_iterable([[obj.position[0],
+                                                  obj.position[1],
+                                                  calculate_heading(obj.velocity[0], obj.velocity[1]),
+                                                  obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
         penalty = Aggregate.factory(logicalScenario, eval_data.aggregate_strat, minimize=True).derive_penalty(solution)
         if self.verbose:
             print(penalty.info)

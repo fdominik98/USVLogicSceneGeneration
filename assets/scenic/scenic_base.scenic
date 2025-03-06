@@ -191,7 +191,7 @@ def create_scenario(ts_num):
         heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map[(0, ts_id)]
         
         distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT + EPSILON))
-        bearing_region_ego_to_ts = SectorRegion(ego.position, MAX_DISTANCE, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts - EPSILON)
+        bearing_region_ego_to_ts = SectorRegion(ego.position, np.inf, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts - EPSILON)
         ts_point_region = distance_region.intersect(bearing_region_ego_to_ts)
 
         ts_point = new Point in ts_point_region
@@ -201,8 +201,8 @@ def create_scenario(ts_num):
 
         speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS - EPSILON).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS + EPSILON))
         p21 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
-        bearing_region_ts_to_ego = SectorRegion(ts_point.position, MAX_DISTANCE, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego - EPSILON)
-        voc_region = SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE, p21.heading, 2 * angle_half_cone)
+        bearing_region_ts_to_ego = SectorRegion(ts_point.position, np.inf, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego - EPSILON)
+        voc_region = SectorRegion(ts_point.position + ego.velocity, np.inf, p21.heading, 2 * angle_half_cone)
         ts_velocity_region = speed_region.intersect(voc_region).intersect(bearing_region_ts_to_ego)
 
         velocity_point = new Point in ts_velocity_region
