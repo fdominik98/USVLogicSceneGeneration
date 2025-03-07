@@ -11,10 +11,11 @@ from functional_level.metamodels.functional_scenario import FunctionalScenario
 import time
 
 class PyMooNSGA2Algorithm(PyMooNSGAAlgorithm):
+    algorithm_desc = 'pymoo_NSGA2_algorithm'
     
     def __init__(self, measurement_name: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pymoo_NSGA2_algorithm', functional_scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, functional_scenarios,test_config, number_of_runs, warmups, verbose)
         
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):

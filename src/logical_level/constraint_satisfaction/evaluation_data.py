@@ -64,7 +64,7 @@ class EvaluationData(Serializable):
         return pprint.pformat(dict(sorted(self.to_dict().items())))
     
     def save_as_measurement(self):
-        asset_folder = f'{ASSET_FOLDER}/gen_data/{self.measurement_name}/{self.config_group}/{self.algorithm_desc}'
+        asset_folder = f'{ASSET_FOLDER}/gen_data/{self.measurement_name}/{self.config_group}/{self.algorithm_desc}_{self.aggregate_strat}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         file_path=f"{asset_folder}/{self.scenario_name}_{self.timestamp.replace(':','-')}.json"

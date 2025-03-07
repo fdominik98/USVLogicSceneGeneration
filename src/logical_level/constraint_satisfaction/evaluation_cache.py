@@ -25,7 +25,7 @@ class GeometricProperties():
         self.angle_p12_v1 = np.arccos(self.cos_p12_v1_theta)
         
         self.vis_distance = min(o2VisibilityByo1(self.angle_p21_v2 >= MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
-                                o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)) *  N_MILE_TO_M_CONVERSION
+                                o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l))
         # angle between the relative velocity and the relative position vector
         
         self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)

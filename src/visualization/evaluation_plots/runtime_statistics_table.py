@@ -10,7 +10,7 @@ class RuntimeStatisticsTable(DummyEvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'RS']
+        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr']
     
     @property
     def vessel_numbers(self) -> List[int]:

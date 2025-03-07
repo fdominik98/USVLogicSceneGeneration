@@ -19,9 +19,10 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {'sbo' : 'SB',
-                        'msr' : 'MSR',
-                        'rs' : 'RS',
+    config_group_map = {'sb-o' : 'SB-O',
+                        'sb-msr' : 'SB-MSR',
+                        'rs-o' : 'RS-O',
+                        'rs-msr' : 'RS-MSR',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
@@ -30,8 +31,8 @@ class EvalPlot(PlotBase, ABC):
         2 : '2 Vessels', 3 : '3 Vessels', 4 : '4 Vessels', 5 : '5 Vessels', 6 : '6 Vessels', 
     }
     
-    algo_map = {'nsga2' : 'N2', 'nsga3' : 'N3', 'ga' : 'GA', 'de' : 'DE', 'pso' : 'PSO'}
-    aggregate_map = {'all' : 'A', 'vessel' : 'V', 'category' : 'C', 'all_swarm' : 'A'}
+    algo_map = {'nsga2' : 'N2', 'nsga3' : 'N3', 'ga' : 'GA', 'de' : 'DE', 'pso' : 'PSO', 'scenic' : 'Scenic'}
+    aggregate_map = {'all' : r'$\sum{}$', 'actor' : 'A', 'category' : 'C', 'all_swarm' : r'$\sum{s}$'}
        
     def __init__(self, eval_datas : List[EvaluationData], is_algo=False, is_all=False) -> None:
         self.comparison_groups : List[Any] = self.algos if is_algo else self.config_groups
@@ -48,7 +49,7 @@ class EvalPlot(PlotBase, ABC):
         
         self.eval_datas = eval_datas
         for eval_data in eval_datas:
-            comparison_group = (eval_data.algorithm_desc, eval_data.aggregate_strat) if is_algo else eval_data.config_group    
+            comparison_group = (eval_data.algorithm_desc.lower(), eval_data.aggregate_strat.lower()) if is_algo else eval_data.config_group.lower()    
             if (not is_all and eval_data.best_fitness_index != 0) or comparison_group not in self.comparison_groups or eval_data.vessel_number not in self.vessel_numbers:
                 continue
             self.measurements[eval_data.vessel_number][comparison_group].append(eval_data) 
@@ -102,7 +103,7 @@ class DummyEvalPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'RS', 'common_ocean_benchmark']
+        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
     
     @property
     def vessel_numbers(self) -> List[int]:

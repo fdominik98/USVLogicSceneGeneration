@@ -49,11 +49,11 @@ class LogicalScenarioBuilder():
                                RelationConstrTerm(relation_constr_exprs), *LogicalScenarioBuilder.get_bounds(actor_variables))
     
     @staticmethod
-    def build(scenario : Scenario, init_method : str) -> LogicalScenario:
+    def build(scenario : Scenario, init_method : str) -> Tuple[LogicalScenario, Optional[FunctionalScenario]]:
         if isinstance(scenario, FunctionalScenario):
-            return LogicalScenarioBuilder.build_from_functional(scenario, init_method) 
+            return (LogicalScenarioBuilder.build_from_functional(scenario, init_method), scenario)
         elif isinstance(scenario, LogicalScenario):
-            return scenario
+            return (scenario, None)
         else:
             raise ValueError('Insufficient scenario type')
         

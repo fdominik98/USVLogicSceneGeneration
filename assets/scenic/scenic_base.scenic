@@ -47,25 +47,31 @@ def calculate_heading(vx : float, vy : float):
     heading_radians = np.arctan2(vy, vx)
     return heading_radians
         
-def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
+
+VISIBILITY_DIST_2 = 2 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_3 = 3 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_5 = 5 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
+
+def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
     if o1_sees_o2_stern:
         if o2_length < 12:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 20:
-            return 3
+            return VISIBILITY_DIST_3
         elif o2_length < 50:
-            return 5
+            return VISIBILITY_DIST_5
         else:
-            return 6
+            return VISIBILITY_DIST_6
     else:
         if o2_length < 12:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 20:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 50:
-            return 2
+            return VISIBILITY_DIST_2
         else:
-            return 3   
+            return VISIBILITY_DIST_3 
 
 param allowCollisions = True
 
@@ -121,7 +127,7 @@ class GeoProps(Object):
         self.angle_p12_v1 = np.arccos(self.cos_p12_v1_theta)
         
         self.vis_distance = min(o2VisibilityByo1(self.angle_p21_v2 >= MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
-                                o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)) *  N_MILE_TO_M_CONVERSION
+                                o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l))
         # angle between the relative velocity and the relative position vector
         
         self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
@@ -170,43 +176,39 @@ class NoCollideOutVisProps(GeoProps):
 
 def create_scenario(ts_num):
     ego = new OwnShip with id 0, at (MAX_COORD/2, MAX_COORD/2), with velocity (0, Range(MIN_SPEED_IN_MS, MAX_SPEED_IN_MS)), facing toward (MAX_COORD/2, MAX_COORD)
-    # region_2 = CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    # region_3 = CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    # region_5 = CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    # region_6 = CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION + DIST_DRIFT).difference(CircularRegion(ego.position, 6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT))
-    #distance_region = region_2.union(region_3).union(region_5).union(region_6)
+    
+    region_2 = CircularRegion(ego.position, VISIBILITY_DIST_2 + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, VISIBILITY_DIST_2 - DIST_DRIFT + EPSILON))
+    region_3 = CircularRegion(ego.position, VISIBILITY_DIST_3 + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, VISIBILITY_DIST_3 - DIST_DRIFT + EPSILON))
+    region_5 = CircularRegion(ego.position, VISIBILITY_DIST_5 + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, VISIBILITY_DIST_5 - DIST_DRIFT + EPSILON))
+    region_6 = CircularRegion(ego.position, VISIBILITY_DIST_6 + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, VISIBILITY_DIST_6 - DIST_DRIFT + EPSILON))
+    distance_region = region_2.union(region_3).union(region_5).union(region_6)
+    distance = VISIBILITY_DIST_2
 
-    # sin_half_cone_theta = np.clip(vessel_radius(MAX_LENGTH) / (2 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
-    # angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
-    # sin_half_cone_theta_3 = np.clip(100*4 / (3 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
-    # angle_half_cone_3 = abs(np.arcsin(sin_half_cone_theta))
-    # sin_half_cone_theta_5 = np.clip(100*4 / (5 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
-    # angle_half_cone_5 = abs(np.arcsin(sin_half_cone_theta))
-    # sin_half_cone_theta_6 = np.clip(100*4 / (6 * N_MILE_TO_M_CONVERSION - DIST_DRIFT), -1, 1)
-    # angle_half_cone_6 = abs(np.arcsin(sin_half_cone_theta))
-
-    def add_ts(ts_id):
-        visibility_dist = vis_distance_map[(0, ts_id)]
+    def add_ts(ts_id, distance_region, distance):
+        visibility_dist = vis_distance_map.get((0, ts_id), None)
         ts_length = length_map[ts_id]
-        heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map[(0, ts_id)]
+        heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map.get((0, ts_id), (0, 2*np.pi, 0, 2*np.pi))
         
-        distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT + EPSILON))
-        bearing_region_ego_to_ts = SectorRegion(ego.position, np.inf, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts - EPSILON)
+        if visibility_dist is not None:
+            distance_region = CircularRegion(ego.position, visibility_dist + DIST_DRIFT - EPSILON).difference(CircularRegion(ego.position, visibility_dist - DIST_DRIFT + EPSILON))
+            distance = visibility_dist
+
+        bearing_region_ego_to_ts = SectorRegion(ego.position, MAX_DISTANCE*3, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts - EPSILON)
         ts_point_region = distance_region.intersect(bearing_region_ego_to_ts)
 
         ts_point = new Point in ts_point_region
 
-        sin_half_cone_theta = np.clip(max(vessel_radius(ts_length), vessel_radius(ego.length)) / visibility_dist, -1, 1)
+        sin_half_cone_theta = np.clip(max(vessel_radius(ts_length), vessel_radius(ego.length)) / distance, -1, 1)
         angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
 
         speed_region = CircularRegion(ts_point.position, MAX_SPEED_IN_MS - EPSILON).difference(CircularRegion(ts_point.position, MIN_SPEED_IN_MS + EPSILON))
         p21 = new DummyShip with id 1000, facing toward ego.position - ts_point.position
-        bearing_region_ts_to_ego = SectorRegion(ts_point.position, np.inf, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego - EPSILON)
-        voc_region = SectorRegion(ts_point.position + ego.velocity, np.inf, p21.heading, 2 * angle_half_cone)
+        bearing_region_ts_to_ego = SectorRegion(ts_point.position, MAX_DISTANCE*3, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego - EPSILON)
+        voc_region = SectorRegion(ts_point.position + ego.velocity, MAX_DISTANCE*3, p21.heading, 2 * angle_half_cone)
         ts_velocity_region = speed_region.intersect(voc_region).intersect(bearing_region_ts_to_ego)
 
         velocity_point = new Point in ts_velocity_region
         ts = new Ship with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
         prop = new AtVisMayCollideProps with val1 ego, with val2 ts
         return ts, prop
-    return [add_ts(i+1) for i in range(ts_num)]
+    return [add_ts(i+1, distance_region, distance) for i in range(ts_num)]

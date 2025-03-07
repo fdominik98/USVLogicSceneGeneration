@@ -43,10 +43,11 @@ class ObjectiveMonitor():
             print(f'Iter count: {self.iter_count}')
     
 class PySwarmPSOAlgorithm(SolverBase):
+    algorithm_desc = 'pyswarm_PSO_algorithm'
     
     def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pyswarm_PSO_algorithm', scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pos = np.array([np.array(ind) for ind in initial_population])

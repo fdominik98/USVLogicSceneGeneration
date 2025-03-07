@@ -3,9 +3,9 @@ from datetime import datetime
 import gc
 import traceback
 import random
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 import numpy as np
-from logical_level.constraint_satisfaction.aggregates import Aggregate
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod
@@ -16,11 +16,12 @@ from utils.scenario import Scenario
 
 
 class SolverBase(ABC):
-    def __init__(self, measurement_name: str, algorithm_desc : str, scenarios: List[Scenario], test_config : EvaluationData,
+    algorithm_desc = 'unspecified'
+    
+    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
         self.measurement_name = measurement_name
-        self.algorithm_desc = f'{algorithm_desc}_{test_config.aggregate_strat}'
-        self.logical_scenarios = [LogicalScenarioBuilder.build(scenario, test_config.init_method) for scenario in scenarios]
+        self.scenarios : Dict[LogicalScenario, Optional[FunctionalScenario]] = dict([LogicalScenarioBuilder.build(scenario, test_config.init_method) for scenario in scenarios])
         self.test_config = test_config
         self.number_of_runs = number_of_runs
         self.warmups = warmups
@@ -30,13 +31,14 @@ class SolverBase(ABC):
         self.set_seed(self.test_config.random_seed)
         
         for i in range(self.warmups):
-            res = self.evaluate(self.logical_scenarios[0], False)
+            logical_scenario = list(self.scenarios.keys())[0]
+            res = self.evaluate(logical_scenario, False)
         
         results : List[List[EvaluationData]] = []
-        for scenario in self.logical_scenarios:
+        for logical_scenario in self.scenarios.keys():
             results.append([])
             for i in range(self.number_of_runs):
-                res = self.evaluate(scenario, True)
+                res = self.evaluate(logical_scenario, True)
                 results[-1].append(res)
         return results
          
@@ -91,4 +93,5 @@ class SolverBase(ABC):
     def set_seed(self, seed):
         random.seed(seed)
         np.random.seed(seed)
+        
     

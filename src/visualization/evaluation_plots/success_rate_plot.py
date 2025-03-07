@@ -10,11 +10,11 @@ class SuccessRatePlot(EvalPlot):
         
     @property
     def algos(self) -> List[Tuple[str, str]]:
-        return [('nsga2', 'all'), ('nsga2', 'vessel'), ('nsga2', 'category'), ('nsga3', 'all'), ('nsga3', 'vessel'), ('nsga3', 'category'), ('ga', 'all'), ('de', 'all'), ('pso', 'all_swarm')]
+        return [('nsga2', 'all'), ('nsga2', 'vessel'), ('nsga2', 'category'), ('nsga3', 'all'), ('nsga3', 'vessel'), ('nsga3', 'category'), ('ga', 'all'), ('de', 'all'), ('pso', 'all_swarm'), ('scenic', 'all')]
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'RS']
+        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr']
     
     @property
     def vessel_numbers(self) -> List[int]:

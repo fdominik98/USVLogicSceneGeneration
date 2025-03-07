@@ -13,10 +13,11 @@ import time
 from utils.scenario import Scenario
 
 class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
+    algorithm_desc = 'pymoo_NSGA3_algorithm'
     
     def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'pymoo_NSGA3_algorithm', scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
         
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):

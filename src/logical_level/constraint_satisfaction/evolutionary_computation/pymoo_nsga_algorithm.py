@@ -81,9 +81,9 @@ class BestSolutionCallback(Callback):
 
 class PyMooNSGAAlgorithm(SolverBase, ABC):
     
-    def __init__(self, measurement_name: str, algorithm_desc: str, scenarios: List[Scenario], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, algorithm_desc, scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
         
     @abstractmethod
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
@@ -103,7 +103,7 @@ class PyMooNSGAAlgorithm(SolverBase, ABC):
     
     def convert_results(self, some_results : Tuple[Result, BestSolutionCallback], eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
         res, callback = some_results
-        if self.verbose:
+        if self.verbose and False:
             # Plot the convergence
             n_evals = []  # corresponding number of function evaluations
             opt = []      # the optima for each evaluation

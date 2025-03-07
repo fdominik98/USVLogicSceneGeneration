@@ -44,25 +44,31 @@ def calculate_heading(vx : float, vy : float):
     heading_radians = np.arctan2(vy, vx)
     return heading_radians
         
-def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float):
+
+VISIBILITY_DIST_2 = 2 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_3 = 3 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_5 = 5 * N_MILE_TO_M_CONVERSION
+VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
+
+def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
     if o1_sees_o2_stern:
         if o2_length < 12:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 20:
-            return 3
+            return VISIBILITY_DIST_3
         elif o2_length < 50:
-            return 5
+            return VISIBILITY_DIST_5
         else:
-            return 6
+            return VISIBILITY_DIST_6
     else:
         if o2_length < 12:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 20:
-            return 2
+            return VISIBILITY_DIST_2
         elif o2_length < 50:
-            return 2
+            return VISIBILITY_DIST_2
         else:
-            return 3        
+            return VISIBILITY_DIST_3        
 
 # FOR FUTURE WORK
 # Table 1: Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.

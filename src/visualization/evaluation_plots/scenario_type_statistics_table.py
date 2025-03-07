@@ -17,7 +17,7 @@ class ScenarioTypeStatisticsTable(DummyEvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'RS', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
+        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
     def vessel_numbers(self) -> List[int]:

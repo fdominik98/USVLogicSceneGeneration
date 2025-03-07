@@ -1,9 +1,15 @@
 from datetime import datetime
+from itertools import chain
 import os
-from typing import Dict
+from typing import Any, Dict, List, Tuple
 import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
+from logical_level.constraint_satisfaction.aggregates import Aggregate
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from logical_level.models.logical_scenario import LogicalScenario
+from logical_level.models.penalty import Penalty
+from utils.asv_utils import calculate_heading
 from utils.file_system_utils import ASSET_FOLDER
 
 import scenic
@@ -79,7 +85,7 @@ SCENIC_SCENARIOS : Dict[int, str] = {
     6 : f'{ASSET_FOLDER}/scenic/6vessel_scenario.scenic'
 }
 
-def scenic_scenario(vessel_number, vis_distance_map = {}, length_map = {}, bearing_map={}) -> Scenario:
+def scenic_scenario(vessel_number, length_map, vis_distance_map = {}, bearing_map={}) -> Scenario:
     base_path = f'{ASSET_FOLDER}/scenic/scenic_base.scenic'
     if not os.path.exists(base_path):
         raise FileNotFoundError(base_path)
@@ -95,3 +101,15 @@ def scenic_scenario(vessel_number, vis_distance_map = {}, length_map = {}, beari
     content = f'vis_distance_map = {str(vis_distance_map)}\nlength_map = {str(length_map)}\nbearing_map = {str(bearing_map)}\n{base}\n{scenario_path}' 
     return scenic.scenarioFromString(content)
     
+    
+def calculate_solution_and_penalty(population: List[float], scene: Any, logicalScenario: LogicalScenario, eval_data: EvaluationData) -> Tuple[List[float], Penalty]:
+    if scene is None:
+        solution = population
+    else:            
+        objects = sorted([obj for obj in scene.objects if obj.is_vessel], key=lambda obj: obj.id)
+        solution = list(chain.from_iterable([[obj.position[0],
+                        obj.position[1],
+                        calculate_heading(obj.velocity[0], obj.velocity[1]),
+                        obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
+    penalty = Aggregate.factory(logicalScenario, eval_data.aggregate_strat, minimize=True).derive_penalty(solution)
+    return solution, penalty

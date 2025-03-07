@@ -19,7 +19,7 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['SBO', 'RS', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
+        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
     def vessel_numbers(self) -> List[int]:
@@ -63,8 +63,8 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
                 configure_axi(i, j, self.group_labels[j], self.colors[j], values)
             
             if self.vessel_numbers[i] == 2:
-                configure_axi(i, 3, self.group_labels[3], self.colors[3], [56952*0.131, 56952*0.002, 56952*0.867])
-            configure_axi(i, 4, self.group_labels[4], self.colors[4],
+                configure_axi(i, len(self.group_labels)-2, self.group_labels[-2], self.colors[-2], [56952*0.131, 56952*0.002, 56952*0.867])
+            configure_axi(i, len(self.group_labels)-1, self.group_labels[-1], self.colors[-1],
                           VesselTypeSampler.sample(FunctionalModelManager.get_x_vessel_scenarios(vessel_number), self.sample_size, {}))
         
         return fig
