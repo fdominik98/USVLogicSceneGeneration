@@ -111,6 +111,9 @@ class ConcreteSceneAbstractor():
                 else:
                     _, count = extra_scenarios[hash]
                     extra_scenarios[hash] = (scenario.functional_scenario, count + 1)
+                # from concrete_level.models.trajectory_manager import TrajectoryManager
+                # from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
+                # ScenarioPlotManager(TrajectoryManager(scenario))
             else:
                 _, count = equivalence_classes[hash]
                 equivalence_classes[hash] = (scenario.functional_scenario, count + 1)

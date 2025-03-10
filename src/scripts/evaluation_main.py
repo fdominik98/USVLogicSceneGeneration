@@ -19,7 +19,13 @@ measurement_names= ['test_3_vessel_scenarios']
 interactions = [LogicalModelManager.get_x_vessel_scenarios(3)]
 interactions = [FunctionalModelManager.get_x_vessel_scenarios(3)]
 
+measurement_names= ['test_2_vessel_scenarios']
+interactions = [LogicalModelManager.get_x_vessel_scenarios(2)]
+interactions = [FunctionalModelManager.get_x_vessel_scenarios(2)]
+
 configs = [nsga2_vessel_sb_o_config]
+configs = [nsga2_vessel_sb_msr_config]
+configs = [scenic_rs_msr_config]
 configs = [nsga2_vessel_sb_o_config, scenic_rs_o_config]
 configs = [nsga2_vessel_sb_msr_config, scenic_rs_msr_config]
 

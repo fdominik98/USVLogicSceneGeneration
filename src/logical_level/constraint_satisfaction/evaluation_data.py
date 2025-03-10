@@ -70,6 +70,10 @@ class EvaluationData(Serializable):
         file_path=f"{asset_folder}/{self.scenario_name}_{self.timestamp.replace(':','-')}.json"
         self.path = file_path
         self.save_to_json()
+        
+    @property
+    def is_valid(self) -> bool:
+        return self.best_scene is not None and self.best_fitness_index == 0.0
 
     
     

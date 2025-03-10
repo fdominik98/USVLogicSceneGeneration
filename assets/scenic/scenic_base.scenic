@@ -58,20 +58,20 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
         if o2_length < 12:
             return VISIBILITY_DIST_2
         elif o2_length < 20:
+            return VISIBILITY_DIST_2
+        elif o2_length < 50:
+            return VISIBILITY_DIST_2
+        else:
+            return VISIBILITY_DIST_3        
+    else:
+        if o2_length < 12:
+            return VISIBILITY_DIST_2
+        elif o2_length < 20:
             return VISIBILITY_DIST_3
         elif o2_length < 50:
             return VISIBILITY_DIST_5
         else:
             return VISIBILITY_DIST_6
-    else:
-        if o2_length < 12:
-            return VISIBILITY_DIST_2
-        elif o2_length < 20:
-            return VISIBILITY_DIST_2
-        elif o2_length < 50:
-            return VISIBILITY_DIST_2
-        else:
-            return VISIBILITY_DIST_3 
 
 param allowCollisions = True
 
@@ -118,7 +118,7 @@ class GeoProps(Object):
         self.p21 = self.val1.p - self.val2.p
         self.v12 = self.val1.v - self.val2.v
         
-                # Define the norm of the relative position (distance(p1 p2))
+        # Define the norm of the relative position (distance(p1 p2))
         self.o_distance = float(max(np.linalg.norm(self.p12), EPSILON))
         
         self.cos_p21_v2_theta = np.clip(np.dot(self.p21, self.val2.v) / self.o_distance / self.val2.sp, -1, 1)
@@ -151,7 +151,7 @@ class AtVisMayCollideProps(GeoProps):
     def check_constraints(self):
         self.calculate_props()
         collision_pred = self.dcpa > 0 and self.dcpa < self.safety_dist
-        distance_pred = self.o_distance > self.vis_distance - DIST_DRIFT and self.o_distance < self.vis_distance + DIST_DRIFT
+        distance_pred = (self.o_distance > self.vis_distance - DIST_DRIFT and self.o_distance < self.vis_distance + DIST_DRIFT)
         sp_h_violation = self.check_sp_and_h_constraints()
         pred = collision_pred and distance_pred and sp_h_violation
         if not pred:

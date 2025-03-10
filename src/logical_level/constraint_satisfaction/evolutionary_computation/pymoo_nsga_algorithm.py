@@ -101,7 +101,7 @@ class PyMooNSGAAlgorithm(SolverBase, ABC):
                   callback=callback)
         return res, callback
     
-    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback], eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback], eval_data : EvaluationData) -> Tuple[List[float], int]:
         res, callback = some_results
         if self.verbose and False:
             # Plot the convergence
@@ -124,7 +124,7 @@ class PyMooNSGAAlgorithm(SolverBase, ABC):
         # Extract the decision variables (X) and objective values (F)
         # return X[0], self.aggregate.evaluate(X[0])
         eval_data.num_parents_mating = 2
-        return (list(callback.best_solution), list(callback.best_objective), callback.number_of_generations)
+        return (list(callback.best_solution), callback.number_of_generations)
 
 
 

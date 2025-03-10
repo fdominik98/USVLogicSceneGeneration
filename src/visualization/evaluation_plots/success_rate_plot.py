@@ -34,7 +34,7 @@ class SuccessRatePlot(EvalPlot):
             percentages = []
             new_group_labels = []
             for measurement, label in zip(self.measurements[vessel_number].values(), self.group_labels):
-                values = [0 if eval_data.best_fitness_index > 0.0 else 1 for eval_data in measurement]
+                values = [0 if not eval_data.is_valid else 1 for eval_data in measurement]
                 if len(values) != 0:
                     data.append(values)
                     percentages.append(np.mean(values) * 100)

@@ -71,8 +71,8 @@ class PySwarmPSOAlgorithm(SolverBase):
             return monitor
        
     
-    def convert_results(self, some_results : ObjectiveMonitor, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results : ObjectiveMonitor, eval_data : EvaluationData) -> Tuple[List[float], int]:
         some_results.print()
-        return some_results.best_solution.tolist(), [some_results.best_fitness,], some_results.iter_count
+        return some_results.best_solution.tolist(), some_results.iter_count
        
 

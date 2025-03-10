@@ -8,14 +8,16 @@ from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBu
 
 
 class TrajectoryManager():
-    def __init__(self, trajectories : Union[Trajectories, ConcreteScene]) -> None:
+    def __init__(self, trajectories : Union[Trajectories, ConcreteScene, MultiLevelScenario]) -> None:
         
-        if isinstance(trajectories, ConcreteScene):
+        if isinstance(trajectories, MultiLevelScenario):
+            self.trajectories = TrajectoryBuilder.default_trajectory_from_scene(trajectories.concrete_scene)
+        elif isinstance(trajectories, ConcreteScene):
             self.trajectories = TrajectoryBuilder.default_trajectory_from_scene(trajectories)
         elif isinstance(trajectories, Trajectories):
             self.trajectories : Trajectories = trajectories            
         else:
-            raise ValueError('The passed parameter has incorrect type.')
+            raise ValueError(f'The passed parameter has incorrect type: {type(trajectories)}')
             
         self.scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
         self.logical_scenario = self.scenario.logical_scenario

@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from utils.file_system_utils import ASSET_FOLDER
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from visualization.evaluation_plots.coverage_evolution_plot import AmbiguousCoverageEvolutionPlot, CoverageEvolutionPlot
 from visualization.evaluation_plots.diversity_statistics_table import AmbiguousDiversityStatisticsTable, DiversityStatisticsTable
 from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
 from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
@@ -45,6 +46,8 @@ class EvalPlotManager():
             "Ambiguous Diversity Statistics Test" : PlotWrapper(AmbiguousDiversityStatisticsTable, {'eval_datas': self.eval_datas}),
             "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
             'Scenario Type Statistical Test' : PlotWrapper(ScenarioTypeStatisticsTable, {'eval_datas': self.eval_datas}),
+            'Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas}),
+            'Ambiguous Coverage Evolution' : PlotWrapper(AmbiguousCoverageEvolutionPlot, {'eval_datas': self.eval_datas}),
         }
         
         self.root = tk.Tk()

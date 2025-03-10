@@ -63,7 +63,7 @@ class PyGadGAAlgorithm(SolverBase):
         finally:
             return some_input
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], int]:
         ga_instance : pygad.GA= some_results
         # After the GA run, print the best solution found
         solution, solution_fitness, solution_idx = ga_instance.best_solution()
@@ -75,7 +75,7 @@ class PyGadGAAlgorithm(SolverBase):
         #     best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
         #     for sol in best_solutions:
         #         ColregPlot(self.logical_scenario.update(sol))
-        return list(solution.flatten()), [abs(solution_fitness)], ga_instance.generations_completed
+        return list(solution.flatten()), ga_instance.generations_completed
 
 
 

@@ -62,13 +62,13 @@ class SciPyDEAlgorithm(SolverBase):
                                     disp=self.verbose,
                                     init=initial_pop)
     
-    def convert_results(self, some_results : OptimizeResult, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results : OptimizeResult, eval_data : EvaluationData) -> Tuple[List[float], int]:
         if self.verbose:
             print(some_results)
         iter_num = some_results['nit']
         X : np.ndarray = some_results['x']
-        F : np.ndarray = np.array([some_results['fun']])
-        return X.tolist(), F.tolist(), iter_num
+        #F : np.ndarray = np.array([some_results['fun']])
+        return X.tolist(), iter_num
 
 
 

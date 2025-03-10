@@ -35,7 +35,7 @@ class Aggregate(ABC):
         return self.sign * abs(penalty)
      
     @staticmethod
-    def factory(logical_scenario : LogicalScenario, name : str, minimize):
+    def factory(logical_scenario : LogicalScenario, name : str, minimize) -> 'Aggregate':
         if name == ActorAggregate.name:
             return ActorAggregate(logical_scenario, minimize)      
         elif name == AggregateAll.name:

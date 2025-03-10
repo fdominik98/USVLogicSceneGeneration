@@ -47,10 +47,10 @@ class EvalPlot(PlotBase, ABC):
             for comparison_group in self.comparison_groups:
                 self.measurements[vessel_number][comparison_group] = []   
         
-        self.eval_datas = eval_datas
-        for eval_data in eval_datas:
+        self.eval_datas : List[EvaluationData] = sorted(eval_datas, key=lambda eval_data: eval_data.timestamp)
+        for eval_data in self.eval_datas:
             comparison_group = (eval_data.algorithm_desc.lower(), eval_data.aggregate_strat.lower()) if is_algo else eval_data.config_group.lower()    
-            if (not is_all and eval_data.best_fitness_index != 0) or comparison_group not in self.comparison_groups or eval_data.vessel_number not in self.vessel_numbers:
+            if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or eval_data.vessel_number not in self.vessel_numbers:
                 continue
             self.measurements[eval_data.vessel_number][comparison_group].append(eval_data) 
         super().__init__()                

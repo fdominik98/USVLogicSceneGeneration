@@ -55,20 +55,21 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
         if o2_length < 12:
             return VISIBILITY_DIST_2
         elif o2_length < 20:
-            return VISIBILITY_DIST_3
-        elif o2_length < 50:
-            return VISIBILITY_DIST_5
-        else:
-            return VISIBILITY_DIST_6
-    else:
-        if o2_length < 12:
-            return VISIBILITY_DIST_2
-        elif o2_length < 20:
             return VISIBILITY_DIST_2
         elif o2_length < 50:
             return VISIBILITY_DIST_2
         else:
             return VISIBILITY_DIST_3        
+    else:
+        if o2_length < 12:
+            return VISIBILITY_DIST_2
+        elif o2_length < 20:
+            return VISIBILITY_DIST_3
+        elif o2_length < 50:
+            return VISIBILITY_DIST_5
+        else:
+            return VISIBILITY_DIST_6
+        
 
 # FOR FUTURE WORK
 # Table 1: Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.

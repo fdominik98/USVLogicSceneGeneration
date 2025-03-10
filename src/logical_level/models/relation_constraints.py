@@ -153,15 +153,25 @@ class CrossingBear(BinaryLiteral):
         [np.cos(rotation_angle), -np.sin(rotation_angle)],
         [np.sin(rotation_angle), np.cos(rotation_angle)]
     ])
+    rotation_matrix_backwards = np.array([
+        [np.cos(-rotation_angle), -np.sin(-rotation_angle)],
+        [np.sin(-rotation_angle), np.cos(-rotation_angle)]
+    ])
         
     def __rotated_v2(self, geo_props : GeometricProperties):
         # Rotate vector
         return np.dot(self.rotation_matrix, geo_props.val2.v)
+    
+    def __rotated_v1(self, geo_props : GeometricProperties):
+        # Rotate vector
+        return np.dot(self.rotation_matrix_backwards, geo_props.val1.v)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
         angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
                                      geo_props.o_distance / geo_props.val2.sp)
-        penalty = (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0) + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0))
+        angle_p12_v1_rot = np.arccos(np.dot(geo_props.p12, self.__rotated_v1(geo_props)) /
+                                     geo_props.o_distance / geo_props.val1.sp)
+        penalty = (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0) + self.penalty(angle_p12_v1_rot, 0.0, BEAM_ANGLE / 2.0))
         return Penalty({self.var1 : penalty, self.var2 : penalty}, bearing_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
     
@@ -170,7 +180,12 @@ class HeadOnBear(BinaryLiteral):
         super().__init__(var1, var2, 'HeadOnBear', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
-        penalty = self.penalty(geo_props.angle_p21_v2, 0.0, BOW_ANGLE / 2.0) + self.penalty(geo_props.angle_p12_v1, 0.0, BOW_ANGLE / 2.0)
+        sin_half_cone_p12_theta = np.clip(geo_props.val2.r / geo_props.o_distance, -1, 1)
+        angle_half_cone_p12 = abs(np.arcsin(sin_half_cone_p12_theta))
+        sin_half_cone_p21_theta = np.clip(geo_props.val1.r / geo_props.o_distance, -1, 1)
+        angle_half_cone_p21 = abs(np.arcsin(sin_half_cone_p21_theta))
+        penalty = (self.penalty(geo_props.angle_p12_v1, 0.0, max(angle_half_cone_p12, BOW_ANGLE)) + 
+        self.penalty(geo_props.angle_p21_v2, 0.0, max(angle_half_cone_p21, BOW_ANGLE)))
         return Penalty({self.var1 : penalty, self.var2 : penalty}, bearing_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
     

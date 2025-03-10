@@ -35,9 +35,11 @@ class DiversityPlot(EvalPlot):
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                 
-                irrelevant_classes = [int(count) for e_class, count in equivalence_classes.values() if (len(e_class.overtaking_interpretation) + len(e_class.crossing_interpretation) + len(e_class.head_on_interpretation) / 2) < vessel_number-1]
-                print(f'{vessel_number} vessels, {config_group}: irrelevant classes: {sum(irrelevant_classes)}')
-                
+                irrelevant_classes = [(int(count), scenario) for scenario, count 
+                                      in equivalence_classes.values() if (len(scenario.overtaking_interpretation) +
+                                                                        len(scenario.crossing_interpretation) +
+                                                                        len(scenario.head_on_interpretation) / 2) < vessel_number-1]
+                print(f'{vessel_number} vessels, {config_group}: irrelevant classes: {sum([count for count, _ in irrelevant_classes])}')
                 
                 axi.text(0.98, 0.98, self.get_shape_coverage_text(values), 
                 transform=axi.transAxes,  # Use axis coordinates

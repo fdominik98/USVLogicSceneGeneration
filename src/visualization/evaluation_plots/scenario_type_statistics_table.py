@@ -11,8 +11,7 @@ from visualization.plotting_utils import DummyEvalPlot
 from itertools import combinations
 
 class ScenarioTypeStatisticsTable(DummyEvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], get_equivalence_class_distribution=ConcreteSceneAbstractor.get_equivalence_class_distribution): 
-        self.get_equivalence_class_distribution = get_equivalence_class_distribution
+    def __init__(self, eval_datas : List[EvaluationData]): 
         super().__init__(eval_datas)
         
     @property   

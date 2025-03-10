@@ -6,6 +6,7 @@ import random
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 from functional_level.metamodels.functional_scenario import FunctionalScenario
+from logical_level.constraint_satisfaction.aggregates import Aggregate, AggregateAll
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod
@@ -59,16 +60,20 @@ class SolverBase(ABC):
             some_results = self.do_evaluate(some_input, eval_data)
             eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
             
-            best_solution, best_fitness, number_of_generations = self.convert_results(some_results, eval_data)
+            best_solution, number_of_generations = self.convert_results(some_results, eval_data)
             assignments = Assignments(logical_scenario.actor_vars).update_from_individual(best_solution)
             eval_data.best_scene = SceneBuilder().build_from_assignments(assignments)
-            eval_data.best_fitness = best_fitness
             eval_data.number_of_generations = number_of_generations
-            eval_data.best_fitness_index = sum(best_fitness)
+            
+            aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
+            penalty = aggregate.derive_penalty(best_solution)
+            eval_data.best_fitness = aggregate.evaluate(best_solution)
+            eval_data.best_fitness_index = penalty.total_penalty
             
             if self.verbose:
+                print(penalty.info)            
                 print("Best individual is:", best_solution)
-                print("Best individual fitness is:", best_fitness)
+                print("Best individual fitness is:", eval_data.best_fitness)
                 
         except Exception as e:
             eval_data.error_message = f'{str(e)}\n{traceback.format_exc()}'
@@ -87,7 +92,7 @@ class SolverBase(ABC):
         pass
     
     @abstractmethod   
-    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], List[float], int]:
+    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], int]:
         pass
         
     def set_seed(self, seed):

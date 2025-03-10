@@ -102,7 +102,7 @@ def scenic_scenario(vessel_number, length_map, vis_distance_map = {}, bearing_ma
     return scenic.scenarioFromString(content)
     
     
-def calculate_solution_and_penalty(population: List[float], scene: Any, logicalScenario: LogicalScenario, eval_data: EvaluationData) -> Tuple[List[float], Penalty]:
+def calculate_solution(population: List[float], scene: Any) -> Tuple[List[float]]:
     if scene is None:
         solution = population
     else:            
@@ -111,5 +111,4 @@ def calculate_solution_and_penalty(population: List[float], scene: Any, logicalS
                         obj.position[1],
                         calculate_heading(obj.velocity[0], obj.velocity[1]),
                         obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
-    penalty = Aggregate.factory(logicalScenario, eval_data.aggregate_strat, minimize=True).derive_penalty(solution)
-    return solution, penalty
+    return solution
