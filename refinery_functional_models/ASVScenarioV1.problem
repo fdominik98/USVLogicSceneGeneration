@@ -1,6 +1,3 @@
-class FunctionalModel {
-    contains Vessel[] object
-}
 
 abstract class Vessel {
     Vessel[0..*] overtaking
@@ -27,11 +24,11 @@ pred isInSituationWith(Vessel v1, Vessel v2) <->
     headOn(v2, v1) ; crossingFromPort(v1, v2) ; crossingFromPort(v2, v1) ; overtaking(v1, v2) ; overtaking(v2, v1).
 
 
-error selfRelation(Vessel v) <->
+error selfCOLREGSRelation(Vessel v) <->
     overtaking(v, v); crossingFromPort(v, v); headOn(v, v).
 
 
-error doubleRelation(Vessel v1, Vessel v2) <->
+error doubleCOLREGSRelation(Vessel v1, Vessel v2) <->
     headOn(v1, v2), crossingFromPort(v1, v2);
     headOn(v1, v2), overtaking(v1, v2);
     overtaking(v1, v2), crossingFromPort(v1, v2);
@@ -44,14 +41,14 @@ error doubleRelation(Vessel v1, Vessel v2) <->
     overtaking(v1, v2), overtaking(v2, v1).
 
 
-error notInSituationWithOS(Vessel v1) <->
-    !isInSituationWith(v1, v2), TS(v1), OS(v2).
+error notInCOLREGSSituationWithOS(TS v1) <->
+    !isInSituationWith(v1, v2), OS(v2).
 
-error twoTSInRelation(Vessel v1, Vessel v2) <->
-    TS(v1), TS(v2), isInSituationWith(v1, v2).
+error twoTSInCOLREGSSituation(TS v1, TS v2) <->
+    isInSituationWith(v1, v2).
 
-error moreThanOneOS(Vessel v1, Vessel v2) <->
-    OS(v1), OS(v2), v1 != v2.
+error moreThanOneOS(OS v1, OS v2) <->
+    v1 != v2.
 
 error noOS() <->
     !OS(_).
@@ -59,12 +56,9 @@ error noOS() <->
 
 OS(OS).
 
-atom COLREGSScenario.
-FunctionalModel(COLREGSScenario).
-
 TS(TS1).
 TS(TS2).
 TS(TS3).
 TS(TS4).
 TS(TS5).
-scope Vessel = 6, FunctionalModel = 1.
+scope OS = 1, TS=5.

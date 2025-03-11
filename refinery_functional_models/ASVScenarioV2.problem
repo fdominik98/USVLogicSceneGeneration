@@ -1,8 +1,3 @@
-class FunctionalModel {
-    contains Vessel[1..*] vessels
-    contains StaticObstacle[0..*] staticObstacles
-}
-
 enum VesselType {OtherType, CargoShip, Tanker,
                  ContainerShip, PassengerShip,
                  FishingShip, MotorVessel,
@@ -15,9 +10,9 @@ abstract class SeaObject {
     Vessel[0..*] inPortSideSectorOf
     Vessel[0..*] inStarboardSideSectorOf
     Vessel[0..*] inHeadOnSectorOf
-    Vessel[0..*] atVisibilityDistanceOf
-    Vessel[0..*] inVisibilityDistanceOf
-    Vessel[0..*] outVisibilityDistanceOf 
+    SeaObject[0..*] atVisibilityDistanceOf opposite atVisibilityDistanceOf
+    SeaObject[0..*] inVisibilityDistanceOf opposite inVisibilityDistanceOf
+    SeaObject[0..*] outVisibilityDistanceOf opposite outVisibilityDistanceOf
     SeaObject[0..*] mayCollideWith opposite mayCollideWith
 }
 
@@ -39,7 +34,7 @@ pred inMastheadSectorOf(SeaObject o, Vessel v) <->
     inStarboardSideSectorOf(o, v).
 
 pred bothAtVisibilityDistanceAndMayCollide(Vessel v1, Vessel v2) <->
-    atVisibilityDistanceOf(v1, v2), atVisibilityDistanceOf(v2, v1), mayCollideWith(v1, v2).
+    atVisibilityDistanceOf(v1, v2), mayCollideWith(v1, v2).
 
 pred headOn(Vessel v1, Vessel v2) <->
     inHeadOnSectorOf(v1, v2), inHeadOnSectorOf(v2, v1), bothAtVisibilityDistanceAndMayCollide(v1, v2).
@@ -154,20 +149,15 @@ error obstacleNotOutOfVisibilityDistanceOrCollidesWithTS(StaticObstacle o, TS ts
 
 //--------------------------------------------------------------------------------
 
-atom FunctionalScenario.
-FunctionalModel(FunctionalScenario).
-
 OS(os).
 vesselType(os, PassengerShip).
 
 TS(ts1).
 TS(ts2).
-TS(ts3).
-TS(ts4).
-StaticObstacle(obst1).
+//StaticObstacle(obst1).
 
 //default !inAmbiguousSituation(*).
 //inAmbiguousSituation(os).
 
 
-scope Vessel = 5, StaticObstacle = 2, FunctionalModel = 1.
+scope Vessel = 3, StaticObstacle = 0.

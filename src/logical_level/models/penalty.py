@@ -2,16 +2,25 @@ from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 from logical_level.models.actor_variable import ActorVariable
+from enum import Enum
 
+class PenaltyCategory(Enum):
+    VISIBILITY = "visibility_penalty"
+    BEARING = "bearing_penalty"
+    COLLISION = "collision_penalty"
+    DIMENSION = "dimension_penalty"
+
+    def __str__(self):
+        return self.value
 
 @dataclass(frozen=True)
 class Penalty():
     actor_penalties : Dict[ActorVariable, float] = field(default_factory=dict)
-    
+
     visibility_penalty : float = 0
     bearing_penalty : float = 0
     collision_penalty : float = 0
-    dimension_penalty : float = 0    
+    dimension_penalty : float = 0
     
     category_num = 4
     

@@ -57,7 +57,7 @@ class VesselType(ABC):
         return next((t for t in ALL_VESSEL_TYPES if t.name == name), None)
     
 @dataclass(frozen=True, repr=False)
-class OtherType(VesselType):
+class OtherVesselType(VesselType):
     name : str = 'OtherType'
     pass
     
@@ -133,4 +133,4 @@ class MilitaryVessel(VesselType):
     min_beam : float = 5
     max_beam : float = 40
     
-ALL_VESSEL_TYPES : List[VesselType] = [OtherType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
+ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
