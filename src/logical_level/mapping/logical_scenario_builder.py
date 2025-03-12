@@ -6,7 +6,7 @@ from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVar
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from logical_level.models.vessel_types import ALL_VESSEL_TYPES, VesselType
+from logical_level.models.vessel_types import ALL_VESSEL_TYPES, DEFAULT_VESSEL_TYPE, VesselType
 from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():  
@@ -16,7 +16,7 @@ class LogicalScenarioBuilder():
             for i, vessel_type in enumerate(ALL_VESSEL_TYPES):
                 if functional_scenario.is_vessel_class_x(i, obj):
                     return vessel_type
-            return None
+            return DEFAULT_VESSEL_TYPE
             
         object_variable_map = {
             obj: OSVariable(obj.id, class_type_map(obj)) if functional_scenario.is_os(obj)

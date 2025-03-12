@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.functional_scenario import FunctionalScenario

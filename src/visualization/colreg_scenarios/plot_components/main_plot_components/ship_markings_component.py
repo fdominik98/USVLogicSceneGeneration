@@ -2,7 +2,7 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from utils.asv_utils import KNOT_TO_MS_CONVERSION
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors

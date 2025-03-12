@@ -22,7 +22,7 @@ class StaticObstacleType(ABC):
         
     @staticmethod    
     def get_static_obstacle_type_by_name(name):
-        return next((t for t in ALL_STATIC_OBSTACLE_TYPES if t.name == name), None)
+        return next((t for t in ALL_STATIC_OBSTACLE_TYPES if t.name == name), DEFAULT_OBSTACLE_TYPE)
     
 @dataclass(frozen=True, repr=False)
 class OtherObstacleType(StaticObstacleType):
@@ -46,3 +46,4 @@ class LargeObstacle(StaticObstacleType):
     min_radius : float = 200
     
 ALL_STATIC_OBSTACLE_TYPES : List[StaticObstacleType] = [SmallObstacle(), MediumObstacle(), LargeObstacle()]
+DEFAULT_OBSTACLE_TYPE = OtherObstacleType()

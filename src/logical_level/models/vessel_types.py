@@ -51,10 +51,11 @@ class VesselType(ABC):
     
     def __str__(self):
         return self.name
-        
+    
+       
     @staticmethod    
     def get_vessel_type_by_name(name):
-        return next((t for t in ALL_VESSEL_TYPES if t.name == name), None)
+        return next((t for t in ALL_VESSEL_TYPES if t.name == name), DEFAULT_VESSEL_TYPE)
     
 @dataclass(frozen=True, repr=False)
 class OtherVesselType(VesselType):
@@ -133,4 +134,5 @@ class MilitaryVessel(VesselType):
     min_beam : float = 5
     max_beam : float = 40
     
-ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
+ALL_VESSEL_TYPES : List[VesselType] = [Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
+DEFAULT_VESSEL_TYPE = OtherVesselType()

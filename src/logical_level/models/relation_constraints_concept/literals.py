@@ -7,7 +7,7 @@ from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCac
 from logical_level.models.actor_variable import ActorVariable, VesselVariable
 from logical_level.models.penalty import Penalty, PenaltyCategory
 from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite
-from logical_level.models.values import Values
+from logical_level.models.values import ActorValues, VesselValues
 from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, MAX_LENGTH, MAX_SPEED_IN_MS
 
 
@@ -49,9 +49,9 @@ class Literal(RelationConstrComposite, ABC):
         return dist / (max(lb, self.max_penalty - ub))
     
 class BinaryLiteral(Literal, ABC):
-    def __init__(self, var1 : ActorVariable, var2 : ActorVariable, literal_type, max_penalty, negated):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, literal_type, max_penalty, negated):
         super().__init__(literal_type, max_penalty, negated)
-        self.var1 : VesselVariable = var1
+        self.var1 : ActorVariable = var1
         self.var2 : VesselVariable = var2
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
@@ -69,7 +69,7 @@ class BinaryLiteral(Literal, ABC):
 class UnaryLiteral(Literal, ABC):
     def __init__(self, var : ActorVariable, literal_type, max_penalty, negated):
         super().__init__(literal_type, max_penalty, negated)
-        self.var : VesselVariable = var
+        self.var : ActorVariable = var
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         values = eval_cache.assignments.get(self.var)
@@ -78,7 +78,7 @@ class UnaryLiteral(Literal, ABC):
                        info=fr'{self.name}({self.var}) : {penalty}')
     
     @abstractmethod
-    def _do_evaluate_penalty(self, value : Values) -> Tuple[PenaltyCategory, float]:
+    def _do_evaluate_penalty(self, value : ActorValues) -> Tuple[PenaltyCategory, float]:
         pass
     
     def __repr__(self) -> str:
@@ -86,21 +86,21 @@ class UnaryLiteral(Literal, ABC):
     
 ############ VISIBILITY DISTANCE ##################
 class AtVis(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'AtVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
         return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.vis_distance - DIST_DRIFT, geo_props.vis_distance + DIST_DRIFT)
         
 class InVis(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
         return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance - DIST_DRIFT)
         
 class OutVis(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'OutVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -109,7 +109,7 @@ class OutVis(BinaryLiteral):
         
 ############ RELATIVE BEARING ##################       
 class InPortSectorOf(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InPortSectorOf', np.pi, negated)
         
     rotation_angle : float = BEAM_ANGLE / 2
@@ -127,7 +127,7 @@ class InPortSectorOf(BinaryLiteral):
         return PenaltyCategory.BEARING, (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0))
     
 class InStarboardSectorOf(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InStarboardSectorOf', np.pi, negated)
         
     rotation_angle : float = BEAM_ANGLE / 2
@@ -145,7 +145,7 @@ class InStarboardSectorOf(BinaryLiteral):
         return PenaltyCategory.BEARING, (self.penalty(angle_p21_v2_rot, 0.0, BEAM_ANGLE / 2.0))
         
 class InHeadOnSectorOf(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InHeadOnSectorOf', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -154,7 +154,7 @@ class InHeadOnSectorOf(BinaryLiteral):
         return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, 0.0, max(angle_half_cone_p21, BOW_ANGLE))
     
 class InSternSectorOf(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InSternSectorOf', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -163,7 +163,7 @@ class InSternSectorOf(BinaryLiteral):
     
 ############ MAY COLLISION ##################
 class MayCollide(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'MayCollide', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -171,7 +171,7 @@ class MayCollide(BinaryLiteral):
     
 ############ COLLISION ##################
 class DoCollide(BinaryLiteral):
-    def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'DoCollide', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -181,14 +181,16 @@ class DoCollide(BinaryLiteral):
 class LengthLiteral(UnaryLiteral):
     def __init__(self, var : VesselVariable, negated : bool = False):
         super().__init__(var, 'Length', MAX_LENGTH, negated)
+        self.var : VesselVariable
     
-    def _do_evaluate_penalty(self, values : Values) -> Tuple[PenaltyCategory, float]:
+    def _do_evaluate_penalty(self, values : VesselValues) -> Tuple[PenaltyCategory, float]:
         return PenaltyCategory.DIMENSION, self.penalty(values.l, self.var.min_length, self.var.max_length)
     
 class SpeedLiteral(UnaryLiteral):
     def __init__(self, var : VesselVariable, negated : bool = False):
         super().__init__(var, 'Speed', MAX_SPEED_IN_MS, negated)
-    
-    def _do_evaluate_penalty(self, values : Values) -> Tuple[PenaltyCategory, float]:
+        self.var : VesselVariable
+        
+    def _do_evaluate_penalty(self, values : VesselValues) -> Tuple[PenaltyCategory, float]:
         return PenaltyCategory.DIMENSION, self.penalty(values.sp, self.var.min_speed, self.var.max_speed)
     

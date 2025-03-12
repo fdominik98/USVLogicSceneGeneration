@@ -2,11 +2,11 @@
 from typing import Dict, Optional, Set, Tuple, Union
 
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
+from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, VesselToVesselProperties
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.models.relation_constraints import DoCollide, MayCollide
@@ -33,7 +33,7 @@ class MultiLevelScenario():
     def to_object(self, actor_or_var : Union[ActorVariable, ConcreteVessel]) -> FuncObject:
         return self.functional_object_map[actor_or_var.id]
     
-    def get_geo_props(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> GeometricProperties:
+    def get_geo_props(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> VesselToVesselProperties:
         var1, var2 = self.to_variable(actor1), self.to_variable(actor2)
         return self.evaluation_cache.get_props(var1, var2)
     

@@ -4,9 +4,9 @@ from typing import Set
 import numpy as np
 from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, DIST_DRIFT, MASTHEAD_LIGHT_ANGLE, MAX_DISTANCE, MAX_LENGTH, MAX_SPEED_IN_MS
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
+from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, VesselToVesselProperties
 from logical_level.models.penalty import Penalty
-from logical_level.models.values import Values
+from logical_level.models.values import VesselValues
 from logical_level.models.actor_variable import ActorVariable, VesselVariable
 
 
@@ -92,7 +92,7 @@ class BinaryLiteral(Literal, ABC):
         return self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
         
     @abstractmethod
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         pass
     
     def __repr__(self) -> str:
@@ -108,7 +108,7 @@ class UnaryLiteral(Literal, ABC):
         return self._do_evaluate_penalty(values)
     
     @abstractmethod
-    def _do_evaluate_penalty(self, value : Values) -> Penalty:
+    def _do_evaluate_penalty(self, value : VesselValues) -> Penalty:
         pass
     
     def __repr__(self) -> str:
@@ -119,7 +119,7 @@ class AtVis(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'AtVis', MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.o_distance, geo_props.vis_distance - DIST_DRIFT, geo_props.vis_distance + DIST_DRIFT)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, visibility_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
@@ -128,7 +128,7 @@ class InVis(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InVis', MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance - DIST_DRIFT)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, visibility_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
@@ -137,7 +137,7 @@ class OutVis(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'OutVis', MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.o_distance, max(geo_props.vis_distance + DIST_DRIFT, geo_props.safety_dist), MAX_DISTANCE)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, visibility_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
@@ -158,15 +158,15 @@ class CrossingBear(BinaryLiteral):
         [np.sin(-rotation_angle), np.cos(-rotation_angle)]
     ])
         
-    def __rotated_v2(self, geo_props : GeometricProperties):
+    def __rotated_v2(self, geo_props : VesselToVesselProperties):
         # Rotate vector
         return np.dot(self.rotation_matrix, geo_props.val2.v)
     
-    def __rotated_v1(self, geo_props : GeometricProperties):
+    def __rotated_v1(self, geo_props : VesselToVesselProperties):
         # Rotate vector
         return np.dot(self.rotation_matrix_backwards, geo_props.val1.v)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
                                      geo_props.o_distance / geo_props.val2.sp)
         angle_p12_v1_rot = np.arccos(np.dot(geo_props.p12, self.__rotated_v1(geo_props)) /
@@ -179,7 +179,7 @@ class HeadOnBear(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'HeadOnBear', np.pi, negated)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         sin_half_cone_p12_theta = np.clip(geo_props.val2.r / geo_props.o_distance, -1, 1)
         angle_half_cone_p12 = abs(np.arcsin(sin_half_cone_p12_theta))
         sin_half_cone_p21_theta = np.clip(geo_props.val1.r / geo_props.o_distance, -1, 1)
@@ -193,7 +193,7 @@ class OvertakingBear(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'OvertakingBear', np.pi, negated)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.angle_p21_v2, MASTHEAD_LIGHT_ANGLE / 2.0, np.pi) + self.penalty(geo_props.angle_p12_v1, 0.0, MASTHEAD_LIGHT_ANGLE / 2.0)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, bearing_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
@@ -205,7 +205,7 @@ class MayCollide(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'MayCollide', MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, collision_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
@@ -215,7 +215,7 @@ class DoCollide(BinaryLiteral):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'DoCollide', MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Penalty:
+    def _do_evaluate_penalty(self, geo_props : VesselToVesselProperties) -> Penalty:
         penalty = self.penalty(geo_props.o_distance, 0, geo_props.safety_dist)
         return Penalty({self.var1 : penalty, self.var2 : penalty}, collision_penalty=penalty,
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')    
@@ -225,7 +225,7 @@ class LengthLiteral(UnaryLiteral):
         super().__init__(var, 'Length', MAX_LENGTH, negated)
         self.var : VesselVariable = var
     
-    def _do_evaluate_penalty(self, values : Values) -> Penalty:
+    def _do_evaluate_penalty(self, values : VesselValues) -> Penalty:
         penalty = self.penalty(values.l, self.var.min_length, self.var.max_length)
         return Penalty({self.var : penalty}, dimension_penalty=penalty,
                        info=fr'{self.name}({self.var}) : {penalty}')
@@ -235,7 +235,7 @@ class SpeedLiteral(UnaryLiteral):
         super().__init__(var, 'Speed', MAX_SPEED_IN_MS, negated)
         self.var : VesselVariable = var
     
-    def _do_evaluate_penalty(self, values : Values) -> Penalty:
+    def _do_evaluate_penalty(self, values : VesselValues) -> Penalty:
         penalty = self.penalty(values.sp, self.var.min_speed, self.var.max_speed)
         return Penalty({self.var : penalty}, dimension_penalty=penalty,
                        info=fr'{self.name}({self.var}) : {penalty}')

@@ -7,31 +7,33 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 from utils.evaluation_config import NUMBER_OF_RUNS, START_FROM, VERBOSE, WARMUPS, nsga2_vessel_sb_o_config, scenic_rs_o_config, scenic_rs_msr_config, nsga2_vessel_sb_msr_config
 
 measurement_names= ['test_2_vessel_scenarios',
-                     'test_3_vessel_scenarios',
-                       'test_4_vessel_scenarios']
-interactions = [LogicalModelManager.get_x_vessel_scenarios(2),
-                 LogicalModelManager.get_x_vessel_scenarios(3),
-                   LogicalModelManager.get_x_vessel_scenarios(4)]
+                     'test_3_vessel_scenarios',]
+
+
+# interactions = [LogicalModelManager.get_x_vessel_scenarios(2),
+#                  LogicalModelManager.get_x_vessel_scenarios(3)]
+# configs = [nsga2_vessel_sb_o_config]
+# configs = [scenic_rs_o_config]
+
+
 interactions = [FunctionalModelManager.get_x_vessel_scenarios(2),
-                 FunctionalModelManager.get_x_vessel_scenarios(3),
-                   FunctionalModelManager.get_x_vessel_scenarios(4)]
-
-measurement_names= ['test_5_vessel_scenarios', ]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
-
-measurement_names= ['test_6_vessel_scenarios']
-interactions = [LogicalModelManager.get_x_vessel_scenarios(6)]
-interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
-
-
-# configs = [nsga2_vessel_sb_o_config, scenic_rs_o_config]
-# configs = [nsga2_vessel_sb_msr_config, scenic_rs_msr_config]
-
-configs = [nsga2_vessel_sb_o_config]
-configs = [nsga2_vessel_sb_msr_config]
-configs = [scenic_rs_o_config]
+                 FunctionalModelManager.get_x_vessel_scenarios(3)]
 configs = [scenic_rs_msr_config]
+configs = [nsga2_vessel_sb_msr_config]
+
+# measurement_names = ['test_4_vessel_scenarios']
+# interactions = [FunctionalModelManager.get_x_vessel_scenarios(4)]
+# interactions = [FunctionalModelManager.get_x_vessel_scenarios(4)]
+
+# measurement_names= ['test_5_vessel_scenarios', ]
+# interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
+# interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
+
+# measurement_names= ['test_6_vessel_scenarios']
+# interactions = [LogicalModelManager.get_x_vessel_scenarios(6)]
+# interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
+
+
 
 meas_start = START_FROM[0]
 algo_start = START_FROM[1]

@@ -1,6 +1,6 @@
 from itertools import chain, permutations
 from typing import Dict, List, Set, Tuple
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
 from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation

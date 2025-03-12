@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 import numpy as np
-from logical_level.models.static_obstacle_types import OtherObstacleType, StaticObstacleType
-from logical_level.models.vessel_types import OtherVesselType, PassengerShip, VesselType
-from utils.asv_utils import EPSILON, MAX_BEAM, MAX_COORD, MAX_HEADING, MAX_LENGTH, MAX_SPEED_IN_MS, MIN_BEAM, MIN_COORD, MIN_HEADING, MIN_LENGTH, MIN_SPEED_IN_MS
+from logical_level.models.static_obstacle_types import DEFAULT_OBSTACLE_TYPE, StaticObstacleType
+from logical_level.models.vessel_types import DEFAULT_VESSEL_TYPE, PassengerShip, VesselType
+from utils.asv_utils import EPSILON, MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 
 @dataclass(frozen=True)
 class ActorVariable(ABC):    
@@ -44,7 +44,7 @@ class ActorVariable(ABC):
 
 @dataclass(frozen=True)    
 class VesselVariable(ActorVariable, ABC):
-    vessel_type : VesselType = OtherVesselType()
+    vessel_type : VesselType = DEFAULT_VESSEL_TYPE
     
     @property
     def min_length(self) -> float:
@@ -153,7 +153,7 @@ class TSVariable(VesselVariable):
  
 @dataclass(frozen=True)    
 class StaticObstacleVariable(ActorVariable): 
-    obstacle_type : StaticObstacleType = OtherObstacleType()
+    obstacle_type : StaticObstacleType = DEFAULT_OBSTACLE_TYPE
     
     @property
     def name(self) -> str:
@@ -168,11 +168,11 @@ class StaticObstacleVariable(ActorVariable):
         return self.obstacle_type.max_radius   
     @property
     def upper_bounds(self) -> List[float]:
-        return [self.max_coord, self.max_coord]
+        return [self.max_coord, self.max_coord, self.max_radius]
     
     @property
     def lower_bounds(self) -> List[float]:
-        return [self.min_coord, self.min_coord]
+        return [self.min_coord, self.min_coord, self.min_radius]
     
 
     

@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from matplotlib import pyplot as plt
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from evaluation.risk_evaluation import RiskVector
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors

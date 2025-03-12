@@ -4,7 +4,7 @@ import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.scenario_metrics_plot import ScenarioMetricsPlot

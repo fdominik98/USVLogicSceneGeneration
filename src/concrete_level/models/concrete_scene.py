@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from itertools import combinations
 from typing import Any, Dict, List, Optional, Set, Type
-from concrete_level.models.concrete_vessel import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.vessel_state import VesselState
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable
@@ -86,6 +86,7 @@ class ConcreteScene(Serializable):
     def non_os(self) -> Set[ConcreteVessel]:
         return {actor for actor in self.actors if not actor.is_os}
     
+    
     def assignments(self, variables : List[ActorVariable]) -> Assignments:
         if len(self) != len(variables):
             raise ValueError('Variable and actor numbers do not match.')
@@ -101,10 +102,6 @@ class ConcreteScene(Serializable):
     def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
         vars = {v : v.logical_variable for v in self.actors}
         return DoCollide(vars[actor1], vars[actor2]).evaluate_penalty(self.assignments(list(vars.values()))).is_zero
-    
-    def others_than(self, vessel : ConcreteVessel) -> List[ConcreteVessel]:
-        return [v for v in self.actors if v is not vessel]
-    
     
     def to_dict(self):
         result = {}
@@ -127,8 +124,4 @@ class ConcreteScene(Serializable):
                         for vessel, state in value
                     }
         return ConcreteScene(**copy_data)
-    
-    @staticmethod
-    def is_os_ts_pair(v1 : ConcreteVessel, v2 : ConcreteVessel) -> bool:
-        return (v1.is_os and not v2.is_os) or (v2.is_os and not v1.is_os)
     

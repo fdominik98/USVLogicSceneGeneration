@@ -1,10 +1,10 @@
 from typing import Dict, List, Union
 
 import numpy as np
-from logical_level.models.values import Values
-from logical_level.models.actor_variable import ActorVariable
+from logical_level.models.values import ObstacleValues, ActorValues, VesselValues
+from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
 
-class Assignments(Dict[ActorVariable, Values]):
+class Assignments(Dict[ActorVariable, ActorValues]):
     def __init__(self, actor_variables : List[ActorVariable] = [], *args, **kwargs):
         super().__init__({var : None for var in actor_variables}, *args, **kwargs)
 
@@ -12,13 +12,15 @@ class Assignments(Dict[ActorVariable, Values]):
         if len(states) != sum(len(var) for var in self.keys()):
             raise Exception("the variable number is insufficient.")
         
-        for i, var in enumerate(self.keys()):
-            var_len = len(var)
-            self[var] = Values(x=states[i * var_len],
-                                y=states[i * var_len + 1],
-                                h=states[i * var_len + 2],
-                                l=states[i * var_len + 3],
-                                sp=states[i * var_len + 4])   
+        index = 0
+        for var in self.keys():
+            if isinstance(var, VesselVariable):
+                self[var] = VesselValues(*states[index:index + len(var)]) 
+            elif isinstance(var, StaticObstacleVariable):
+                self[var] = ObstacleValues(*states[index:index + len(var)]) 
+            else:
+                raise Exception("The variable type is not supported.")
+            index += len(var)
         return self
             
         
