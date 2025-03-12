@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
-from logical_level.models.relation_constraints import RelationConstrComposite
+from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite
 from logical_level.models.actor_variable import ActorVariable
 from utils.scenario import Scenario
 

@@ -1,11 +1,11 @@
 import itertools
-from typing import Dict, List, Optional
+from typing import List
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilder
 from logical_level.models.actor_variable import OSVariable, TSVariable
 from logical_level.models.logical_scenario import LogicalScenario
-from logical_level.models.relation_constraints import RelationConstrTerm
-
+from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
+from logical_level.models.relation_constraints_concept.predicates import OutVisOrMayNotCollide, AtVisAndMayCollide
 
 class LogicalModelManager():
     __scenario_cache_map = {
@@ -25,8 +25,8 @@ class LogicalModelManager():
         os = OSVariable(0)
         ts_vessels = [TSVariable(i) for i in range(1, vessel_number)]
         actor_variables = [os] + ts_vessels
-        relation_constr_exprs = set([LogicalScenarioBuilder.get_no_collide_out_vis_clause(v1, v2) for v1, v2 in itertools.combinations(ts_vessels, 2)] + 
-        [LogicalScenarioBuilder.get_at_vis_may_collide_term(os, ts) for ts in ts_vessels])
+        relation_constr_exprs = set([OutVisOrMayNotCollide(v1, v2) for v1, v2 in itertools.combinations(ts_vessels, 2)] + 
+        [AtVisAndMayCollide(os, ts) for ts in ts_vessels])
         
         cls.__scenario_cache_map[vessel_number] = LogicalScenario(LogicalScenarioBuilder.get_initializer(RandomInstanceInitializer.name, actor_variables),
                         RelationConstrTerm(relation_constr_exprs),

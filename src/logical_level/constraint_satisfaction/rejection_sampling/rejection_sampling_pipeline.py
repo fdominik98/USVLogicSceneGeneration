@@ -1,12 +1,11 @@
 from typing import Any, List, Tuple
 import numpy as np
-from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import calculate_solution, generate_scene, scenic_scenario
 from logical_level.constraint_satisfaction.solver_base import SolverBase
 from logical_level.models.logical_scenario import LogicalScenario
-from logical_level.models.relation_constraints import CrossingBear
+from logical_level.models.relation_constraints_concept.literals import InPortSectorOf
 from utils.asv_utils import BEAM_ANGLE, BOW_ANGLE, MASTHEAD_LIGHT_ANGLE, STERN_ANGLE, o2VisibilityByo1, vessel_radius
 from utils.scenario import Scenario
 
@@ -46,9 +45,9 @@ class RejectionSamplingPipeline(SolverBase):
                 if functional_scenario.head_on(os, ts):
                     bearing_map[(os.id, ts.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0.0, max(angle_half_cone_p21, BOW_ANGLE))
                 if functional_scenario.crossing(os, ts):
-                    bearing_map[(os.id, ts.id)] = (-CrossingBear.rotation_angle, BEAM_ANGLE, -CrossingBear.rotation_angle, BEAM_ANGLE)
+                    bearing_map[(os.id, ts.id)] = (-InPortSectorOf.rotation_angle, BEAM_ANGLE, -InPortSectorOf.rotation_angle, BEAM_ANGLE)
                 if functional_scenario.crossing(ts, os):
-                    bearing_map[(os.id, ts.id)] = (CrossingBear.rotation_angle, BEAM_ANGLE, CrossingBear.rotation_angle, BEAM_ANGLE)
+                    bearing_map[(os.id, ts.id)] = (InPortSectorOf.rotation_angle, BEAM_ANGLE, InPortSectorOf.rotation_angle, BEAM_ANGLE)
                 if functional_scenario.overtaking(os, ts):
                     bearing_map[(os.id, ts.id)] = (0.0, MASTHEAD_LIGHT_ANGLE, -np.pi, STERN_ANGLE)
                 if functional_scenario.overtaking(ts, os):

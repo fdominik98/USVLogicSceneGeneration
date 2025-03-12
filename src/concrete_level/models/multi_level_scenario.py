@@ -3,13 +3,12 @@ from typing import Dict, Optional, Set, Tuple, Union
 
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import VesselState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, VesselToVesselProperties
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.logical_scenario import LogicalScenario
-from logical_level.models.relation_constraints import DoCollide, MayCollide
+from logical_level.models.relation_constraints_concept.literals import DoCollide, MayCollide
 
 
 class MultiLevelScenario():

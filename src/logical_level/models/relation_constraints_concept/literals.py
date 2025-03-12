@@ -56,7 +56,7 @@ class BinaryLiteral(Literal, ABC):
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         category, penalty = self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
-        return Penalty({self.var1 : penalty, self.var2 : penalty}, **{category : penalty},
+        return Penalty({self.var1 : penalty, self.var2 : penalty}, **{str(category) : penalty},
                        info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
         
     @abstractmethod
@@ -74,7 +74,7 @@ class UnaryLiteral(Literal, ABC):
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         values = eval_cache.assignments.get(self.var)
         category, penalty = self._do_evaluate_penalty(values)
-        return Penalty({self.var : penalty}, **{category : penalty},
+        return Penalty({self.var : penalty}, **{str(category) : penalty},
                        info=fr'{self.name}({self.var}) : {penalty}')
     
     @abstractmethod
