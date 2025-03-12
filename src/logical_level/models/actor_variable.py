@@ -31,6 +31,11 @@ class ActorVariable(ABC):
     def lower_bounds(self) -> List[float]:
         pass
     
+    @property
+    @abstractmethod
+    def is_vessel(self) -> bool:
+        pass
+    
     def __len__(self) -> int:
         return len(self.lower_bounds)
     
@@ -76,7 +81,12 @@ class VesselVariable(ActorVariable, ABC):
     
     @property
     def max_heading(self) -> float:
-        return MAX_HEADING    
+        return MAX_HEADING  
+    
+    @property
+    def is_vessel(self) -> bool:
+        return True  
+    
     
     @property
     @abstractmethod
@@ -174,5 +184,6 @@ class StaticObstacleVariable(ActorVariable):
     def lower_bounds(self) -> List[float]:
         return [self.min_coord, self.min_coord, self.min_radius]
     
-
-    
+    @property
+    def is_vessel(self) -> bool:
+        return False  
