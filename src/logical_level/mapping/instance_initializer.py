@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from logical_level.models.actor_variable import ActorVariable
 
 class InstanceInitializer(ABC):    
-    def __init__(self, name: str, vessel_vars : List[ActorVariable]) -> None:
-        self.actor_vars = vessel_vars      
+    def __init__(self, name: str, actor_vars : List[ActorVariable]) -> None:
+        self.actor_vars = actor_vars      
         self.name = name
        
     @abstractmethod     

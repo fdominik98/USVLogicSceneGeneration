@@ -1,8 +1,9 @@
 from itertools import chain
 from typing import List, Optional, Tuple
 from functional_level.metamodels.functional_object import FuncObject
-from logical_level.models.relation_constraints import AtVis, CrossingBear, HeadOnBear, MayCollide, OutVis, OvertakingBear, RelationConstrClause, RelationConstrTerm
-from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable, VesselVariable
+from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
+from logical_level.models.relation_constraints_concept.predicates import HeadOn, Overtaking, CrossingFromPort, OutVisOrMayNotCollide
+from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
@@ -27,19 +28,16 @@ class LogicalScenarioBuilder():
         
         # Define interpretations and their corresponding LogicalScenarioBuilder methods
         interpretations = [
-            (functional_scenario.not_in_colreg_pairs, LogicalScenarioBuilder.get_no_collide_out_vis_clause),
-            (functional_scenario.head_on_interpretation.get_tuples(), LogicalScenarioBuilder.get_head_on_term),
-            (functional_scenario.crossing_interpretation.get_tuples(), LogicalScenarioBuilder.get_crossing_term),
-            (functional_scenario.overtaking_interpretation.get_tuples(), LogicalScenarioBuilder.get_overtaking_term),
+            (functional_scenario.not_in_colreg_pairs, OutVisOrMayNotCollide),
+            (functional_scenario.head_on_interpretation.get_tuples(), HeadOn),
+            (functional_scenario.crossing_interpretation.get_tuples(), CrossingFromPort),
+            (functional_scenario.overtaking_interpretation.get_tuples(), Overtaking),
         ]
         
         # Generate relation constraint expressions
         relation_constr_exprs = {
-            method(
-                object_variable_map[o1],
-                object_variable_map[o2]
-            )
-            for tuples, method in interpretations
+            predicate(object_variable_map[o1], object_variable_map[o2])
+            for tuples, predicate in interpretations
             for o1, o2 in tuples
         }        
        
@@ -74,35 +72,5 @@ class LogicalScenarioBuilder():
         else:
             raise Exception('unknown parameter')
        
-    @staticmethod    
-    def get_head_on_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({AtVis(var1, var2), HeadOnBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_overtaking_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({AtVis(var1, var2), OvertakingBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_crossing_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({AtVis(var1, var2), CrossingBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_head_on_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({HeadOnBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_overtaking_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({OvertakingBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_crossing_term_soft(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({CrossingBear(var1, var2), MayCollide(var1, var2)})
-    
-    @staticmethod    
-    def get_no_collide_out_vis_clause(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrClause:
-        return RelationConstrClause({OutVis(var1, var2), MayCollide(var1, var2, negated=True)})
-    
-    @staticmethod
-    def get_at_vis_may_collide_term(var1 : VesselVariable, var2 : VesselVariable) -> RelationConstrTerm:
-        return RelationConstrTerm({AtVis(var1, var2), MayCollide(var1, var2)})
+
     

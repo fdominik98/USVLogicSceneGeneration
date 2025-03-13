@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 import numpy as np
 from logical_level.mapping.instance_initializer import InstanceInitializer
-from logical_level.models.relation_constraints import RelationConstrComposite
-from logical_level.models.actor_variable import ActorVariable
+from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite
+from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
 from utils.scenario import Scenario
 
 @dataclass(frozen=True)
@@ -23,8 +23,24 @@ class LogicalScenario(Scenario):
         return self.initializer.actor_vars
     
     @property
+    def vessel_vars(self) -> List[VesselVariable]:
+        return [var for var in self.initializer.actor_vars if var.is_vessel]
+    
+    @property
+    def obstacle_vars(self) -> List[StaticObstacleVariable]:
+        return [var for var in self.initializer.actor_vars if not var.is_vessel]
+    
+    @property
     def size(self) -> int:
         return len(self.actor_vars)
+    
+    @property
+    def obstacle_size(self) -> int:
+        return len(self.obstacle_vars)
+    
+    @property
+    def vessel_size(self) -> int:
+        return len(self.vessel_vars)
     
     @property
     def all_variable_num(self) -> int:
@@ -32,7 +48,7 @@ class LogicalScenario(Scenario):
     
     @property
     def name(self) -> str:
-        return f'{str(self.size)}vessel'
+        return f'{str(self.vessel_size)}vessel_{str(self.obstacle_size)}obstacle'
     
     def get_population(self, pop_size : Optional[int]) -> List[List[float]]:
         if pop_size is None:

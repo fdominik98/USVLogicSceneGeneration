@@ -13,7 +13,8 @@ from logical_level.models.logical_scenario import LogicalScenario
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable, VesselVariable
-from logical_level.models.relation_constraints import RelationConstrComposite, RelationConstrTerm
+from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite, RelationConstrTerm
+from logical_level.models.relation_constraints_concept.predicates import HeadOn, Overtaking, CrossingFromPort, OutVisOrMayNotCollide
 from logical_level.models.vessel_types import ALL_VESSEL_TYPES
 
 class ConcreteSceneAbstractor():
@@ -60,24 +61,24 @@ class ConcreteSceneAbstractor():
             
             eval_cache = EvaluationCache(assignments)
             
-            if LogicalScenarioBuilder.get_head_on_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if HeadOn(var1, var2).holds(eval_cache):
                 head_on_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(LogicalScenarioBuilder.get_head_on_term(var1, var2))
+                relation_constr_exprs.add(HeadOn(var1, var2))
                 continue
             
-            if LogicalScenarioBuilder.get_overtaking_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if Overtaking(var1, var2).holds(eval_cache):
                 overtaking_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(LogicalScenarioBuilder.get_overtaking_term(var1, var2))
+                relation_constr_exprs.add(Overtaking(var1, var2))
                 continue
             
-            if LogicalScenarioBuilder.get_crossing_term(var1, var2)._evaluate_penalty(eval_cache).is_zero:
+            if CrossingFromPort(var1, var2).holds(eval_cache):
                 #if (obj2, obj1) not in crossing_interpretation: # filter double crossing
                 crossing_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(LogicalScenarioBuilder.get_crossing_term(var1, var2))
+                relation_constr_exprs.add(CrossingFromPort(var1, var2))
                 continue
             
-            if LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2)._evaluate_penalty(eval_cache).is_zero:
-                relation_constr_exprs.add(LogicalScenarioBuilder.get_no_collide_out_vis_clause(var1, var2))
+            if OutVisOrMayNotCollide(var1, var2).holds(eval_cache):
+                relation_constr_exprs.add(OutVisOrMayNotCollide(var1, var2))
                 continue # Be careful atvis has drift tolerance and is overlapping with outvis.
             
             

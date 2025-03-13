@@ -45,5 +45,5 @@ class LargeObstacle(StaticObstacleType):
     name : str = 'LargeObstacle'
     min_radius : float = 200
     
-ALL_STATIC_OBSTACLE_TYPES : List[StaticObstacleType] = [SmallObstacle(), MediumObstacle(), LargeObstacle()]
+ALL_STATIC_OBSTACLE_TYPES : List[StaticObstacleType] = [OtherObstacleType(), SmallObstacle(), MediumObstacle(), LargeObstacle()]
 DEFAULT_OBSTACLE_TYPE = OtherObstacleType()

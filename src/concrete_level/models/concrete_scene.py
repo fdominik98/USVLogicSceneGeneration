@@ -5,7 +5,7 @@ from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticO
 from concrete_level.models.vessel_state import ActorState
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable
-from logical_level.models.relation_constraints import DoCollide, MayCollide
+from logical_level.models.relation_constraints_concept.literals import DoCollide, MayCollide
 from utils.serializable import Serializable
 
 @dataclass(frozen=True)
