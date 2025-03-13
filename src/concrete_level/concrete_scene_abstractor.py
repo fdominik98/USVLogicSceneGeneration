@@ -36,7 +36,7 @@ class ConcreteSceneAbstractor():
         
         vessel_object_map: Dict[ConcreteVessel, FuncObject] = dict()
         vessel_actor_map: Dict[ConcreteVessel, VesselVariable] = dict()
-        for vessel in scene.sorted_keys:
+        for vessel in scene.actors:
             obj = FuncObject(vessel.id)
             vessel_object_map[vessel] = obj
             logical_actor = vessel.logical_variable

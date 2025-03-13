@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict, List
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
 from logical_level.models.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
@@ -44,7 +44,7 @@ def get_scenes(file_path : str)-> List[ConcreteScene]:
                     raise ValueError('Object speed is out of vessel type limits. Adjust!') 
                 
                 builder.set_state(ConcreteVessel(vessel_id, False, obst.obstacle_shape.length, vessel_radius(obst.obstacle_shape.length), vessel_type.max_speed, vessel_type.name, beam=obst.obstacle_shape.width),
-                                VesselState(p[0], p[1], speed, heading))
+                                ActorState(p[0], p[1], speed, heading))
                 vessel_id += 1
     if len(builder) == 0:
         return scenes   
@@ -55,7 +55,7 @@ def get_scenes(file_path : str)-> List[ConcreteScene]:
         p = planning_problem.initial_state.position
         speed = planning_problem.initial_state.velocity
         heading = planning_problem.initial_state.orientation
-        builder.set_state(ego_vessel, VesselState(p[0], p[1], speed, heading))       
+        builder.set_state(ego_vessel, ActorState(p[0], p[1], speed, heading))       
         scenes.append(builder.build())
     return scenes
 
@@ -69,10 +69,10 @@ for file_path in file_paths:
     for scene in scenes:
         eval_data = EvaluationData()
         eval_data.config_group = 'common_ocean_benchmark'
-        eval_data.vessel_number = scene.vessel_number
-        eval_data.measurement_name = f'test_{scene.vessel_number}_vessel_scenarios_long'
+        eval_data.vessel_number = scene.actor_number
+        eval_data.measurement_name = f'test_{scene.actor_number}_vessel_scenarios_long'
         eval_data.algorithm_desc = 'ais_source'
-        eval_data.scenario_name = f'{scene.vessel_number}vessel'
+        eval_data.scenario_name = f'{scene.actor_number}vessel'
         eval_data.timestamp = datetime.now().isoformat()   
         eval_data.best_scene = scene
         eval_data.best_fitness_index = 0.0

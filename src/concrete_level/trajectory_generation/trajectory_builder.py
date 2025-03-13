@@ -1,15 +1,15 @@
 from typing import Dict, List
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.trajectories import Trajectories
 from utils.asv_utils import ONE_HOUR_IN_SEC
 
-class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):  
-    def __init__(self, existing_dict : Dict[ConcreteVessel, List[VesselState]]={}, *args, **kwargs):
+class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):  
+    def __init__(self, existing_dict : Dict[ConcreteVessel, List[ActorState]]={}, *args, **kwargs):
         super().__init__(existing_dict.copy(), *args, **kwargs)
     
-    def add_state(self, vessel : ConcreteVessel, state : VesselState):
+    def add_state(self, vessel : ConcreteVessel, state : ActorState):
         if vessel not in self:
             self[vessel] = [state]
         else:
@@ -38,7 +38,7 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[VesselState]]):
         return self.extend(max(len(states) for states in self.values()))        
     
                 
-    def extend_trajectory(self, trajectory : List[VesselState], length : int = ONE_HOUR_IN_SEC) -> List[VesselState]:
+    def extend_trajectory(self, trajectory : List[ActorState], length : int = ONE_HOUR_IN_SEC) -> List[ActorState]:
         new_trajectory = trajectory.copy()
         while len(new_trajectory) < length:
             turned_state = new_trajectory[-1].modify_copy(heading=new_trajectory[0].heading)

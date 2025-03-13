@@ -10,6 +10,8 @@ from utils.serializable import Serializable
 @dataclass(frozen=True)
 class ConcreteActor(Serializable, ABC):
     id: int
+    radius: float
+    type : str
     
     @classmethod
     @abstractmethod
@@ -26,6 +28,11 @@ class ConcreteActor(Serializable, ABC):
     def logical_variable(self) -> ActorVariable:
         pass
     
+    @property
+    @abstractmethod
+    def is_vessel(self) -> bool:
+        pass
+        
     def __repr__(self):
         return self.name
 
@@ -33,8 +40,6 @@ class ConcreteActor(Serializable, ABC):
 class ConcreteStaticObstacle(ConcreteActor):
     x: float
     y: float 
-    radius: float
-    obstacle_type : str
     
     @property
     def name(self) -> str:
@@ -48,22 +53,28 @@ class ConcreteStaticObstacle(ConcreteActor):
     
     @property
     def logical_variable(self) -> 'StaticObstacleVariable':
-        t = StaticObstacleType.get_static_obstacle_type_by_name(self.obstacle_type)
+        t = StaticObstacleType.get_static_obstacle_type_by_name(self.type)
         return StaticObstacleVariable(self.id, t)
         
     @classmethod
     def from_dict(cls: Type['ConcreteStaticObstacle'], data: Dict[str, Any]) -> 'ConcreteStaticObstacle':
         return ConcreteStaticObstacle(**data)
     
+    @property
+    def is_vessel(self) -> bool:
+        return False
+    
     
 @dataclass(frozen=True)
 class ConcreteVessel(ConcreteActor):
     is_os : bool
     length: float
-    radius: float
     max_speed: float
-    vessel_type : str
     beam: Optional[float] = None
+    
+    @property
+    def is_vessel(self) -> bool:
+        return True
     
     @property
     def name(self) -> str:
@@ -79,7 +90,7 @@ class ConcreteVessel(ConcreteActor):
     
     @property
     def logical_variable(self) -> VesselVariable:
-        t = VesselType.get_vessel_type_by_name(self.vessel_type)
+        t = VesselType.get_vessel_type_by_name(self.type)
         return OSVariable(self.id, t) if self.is_os else TSVariable(self.id, t)
         
     @classmethod

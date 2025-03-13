@@ -6,7 +6,7 @@ import numpy as np
 from utils.serializable import Serializable
 
 @dataclass(frozen=True)
-class VesselState(Serializable):
+class ActorState(Serializable):
     x : float
     y : float
     speed : float
@@ -29,10 +29,10 @@ class VesselState(Serializable):
         return np.array([self.v_norm[1], -self.v_norm[0]])
     
     def modify_copy(self, x : Optional[float] = None, y : Optional[float] = None,
-             speed : Optional[float] = None, heading : Optional[float] = None) -> 'VesselState':
-        return VesselState(x or self.x, y or self.y, speed or self.speed, heading or self.heading)
+             speed : Optional[float] = None, heading : Optional[float] = None) -> 'ActorState':
+        return ActorState(x or self.x, y or self.y, speed or self.speed, heading or self.heading)
     
     
     @classmethod
-    def from_dict(cls: Type['VesselState'], data: Dict[str, Any]) -> 'VesselState':
-        return VesselState(**data)
+    def from_dict(cls: Type['ActorState'], data: Dict[str, Any]) -> 'ActorState':
+        return ActorState(**data)

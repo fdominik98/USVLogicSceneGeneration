@@ -5,7 +5,7 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.models.rrt_models import RRTNode
 from concrete_level.models.trajectories import Trajectories
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
 
 class PathInterpolator():
@@ -34,7 +34,7 @@ class PathInterpolator():
         return self.trajectory_builder.build().get_scene(second)
                 
 
-    def interpolate_path(self, vessel_state: VesselState, path : List[RRTNode]) -> List[VesselState]:
+    def interpolate_path(self, vessel_state: ActorState, path : List[RRTNode]) -> List[ActorState]:
         """
         Interpolates the given path to have positions at one-second intervals
         and calculates the heading based on the direction of movement.
@@ -74,7 +74,7 @@ class PathInterpolator():
         interpolated_headings.append(vessel_state.heading)
         interpolated_speeds.append(vessel_state.speed)
         
-        return [VesselState(interpolated_positions[i][0], interpolated_positions[i][1],
+        return [ActorState(interpolated_positions[i][0], interpolated_positions[i][1],
                             interpolated_speeds[i], heading) for i, heading in enumerate(interpolated_headings)]
         
     @property    

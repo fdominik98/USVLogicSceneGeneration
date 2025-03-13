@@ -4,7 +4,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
 
@@ -32,7 +32,7 @@ class AngleCircleComponent(PlotComponent):
             self.one_draw(vessel, state, self.zorder, light_colors[vessel.id])
             
     
-    def one_draw(self, vessel : ConcreteVessel, state : VesselState,  zorder : int, circle_color):        
+    def one_draw(self, vessel : ConcreteVessel, state : ActorState,  zorder : int, circle_color):        
         # Draw two lines centered on the vector
         circle_line1 = self.draw_line(state.p, state.v_norm, -self.angle_circle_slice_1 / 2, circle_color, self.angle_circle_radius, zorder)  # Left line
         self.line1_graphs[vessel] = circle_line1
@@ -79,7 +79,7 @@ class AngleCircleComponent(PlotComponent):
         return self.graphs
     
     
-    def update_one(self, vessel : ConcreteVessel, state : VesselState):
+    def update_one(self, vessel : ConcreteVessel, state : ActorState):
         self.circle_graphs[vessel].set_center(state.p)
         self.circle_graphs[vessel].set_radius(self.angle_circle_radius)
         

@@ -1,7 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 import numpy as np
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
 from concrete_level.models.vessel_order_graph import VesselNode
 from concrete_level.models.rrt_models import LineObstacle, RRTNode, Obstacle, RandomPoint
@@ -14,7 +14,7 @@ class BidirectionalRRTStarFND():
     """
     Class for RRT Planning
     """
-    def __init__(self, v_node : VesselNode, start_state : VesselState, goal_state : VesselState,
+    def __init__(self, v_node : VesselNode, start_state : ActorState, goal_state : ActorState,
                  min_go_around_line : LineObstacle, go_around_split_line : LineObstacle,
                  obstacle_list : List[Obstacle], sample_area : List[Tuple[float, float]], 
                  collision_points : List[np.ndarray], interpolator : PathInterpolator,

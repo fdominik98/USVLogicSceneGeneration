@@ -372,7 +372,7 @@ class ScenarioPlotManager():
     
     def get_actor_infos(self) -> List[List[str]]:
         actor_infos : List[List[str]] = []
-        for vessel, state in self.colreg_plot.animation.current_scene.sorted_items:
+        for vessel, state in self.colreg_plot.animation.current_scene.sorted_actor_states:
             actor_infos.append([f'{vessel.vessel_type}', f'{vessel.length:.2f}', f'{vessel.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
         return actor_infos
     

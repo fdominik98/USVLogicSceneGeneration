@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from itertools import combinations
 from typing import Any, Dict, List, Optional, Set, Type
-from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
+from concrete_level.models.vessel_state import ActorState
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.relation_constraints import DoCollide, MayCollide
@@ -10,7 +10,7 @@ from utils.serializable import Serializable
 
 @dataclass(frozen=True)
 class ConcreteScene(Serializable):       
-    _data : Dict[ConcreteVessel, VesselState]
+    _data : Dict[ConcreteActor, ActorState]
     dcpa : Optional[float] = None
     tcpa : Optional[float] = None
     danger_sector : Optional[float] = None
@@ -28,11 +28,23 @@ class ConcreteScene(Serializable):
 
     @property
     def actors(self):
-        return [actor for actor, _ in self.sorted_items]
+        return [actor for actor, _ in self.sorted_actor_states]
+    
+    @property
+    def vessels(self):
+        return [actor for actor, _ in self.sorted_actor_states if actor.is_vessel]
+    
+    @property
+    def obstacles(self):
+        return [actor for actor, _ in self.sorted_actor_states if not actor.is_vessel]
     
     @property
     def all_actor_pairs(self):
         return {(ai, aj) for ai, aj in combinations(self.actors, 2)}
+    
+    @property
+    def all_vessel_pairs(self):
+        return {(ai, aj) for ai, aj in combinations(self.vessels, 2)}
 
     @property
     def actor_states(self):
@@ -42,12 +54,9 @@ class ConcreteScene(Serializable):
         return self._data.items()
     
     @property
-    def sorted_items(self):
+    def sorted_actor_states(self):
         return sorted(self.items(), key=lambda item: item[0].id)
     
-    @property
-    def sorted_keys(self) -> List[ConcreteVessel]:
-        return [key for key, value in self.sorted_items]
 
     def get(self, key, default=None):
         return self._data.get(key, default)
@@ -61,19 +70,32 @@ class ConcreteScene(Serializable):
     def __repr__(self):
         return f"{self.__class__.__name__}({self._data})"
     
-    def as_dict(self) -> Dict[ConcreteVessel, VesselState]:
+    def as_dict(self) -> Dict[ConcreteActor, ActorState]:
         return self._data
     
     @property
     def individual(self) -> List[float]:        
         individual : List[float] = []
-        for vessel, state in self.sorted_items:
-            individual += [state.x, state.y, state.heading, vessel.length, state.speed]
+        for actor, state in self.sorted_actor_states:
+            if isinstance(actor, ConcreteVessel):
+                individual += [state.x, state.y, state.heading, actor.length, state.speed]
+            elif isinstance(actor, ConcreteStaticObstacle):
+                individual += [state.x, state.y, actor.radius]
+            else:
+                raise ValueError('Unsupported actor type.')
         return individual
     
     @property
-    def vessel_number(self) -> int:
+    def actor_number(self) -> int:
         return len(self)
+    
+    @property
+    def vessel_number(self) -> int:
+        return len(self.vessels)
+    
+    @property
+    def obstacle_number(self) -> int:
+        return len(self.obstacles)
     
     @property
     def os(self) -> ConcreteVessel:
@@ -90,7 +112,7 @@ class ConcreteScene(Serializable):
     def assignments(self, variables : List[ActorVariable]) -> Assignments:
         if len(self) != len(variables):
             raise ValueError('Variable and actor numbers do not match.')
-        for actor, var in zip(self.sorted_keys, variables):
+        for actor, var in zip(self.sorted_vessels, variables):
             if actor.id != var.id:
                 raise ValueError('Insufficient order of actors and variables.')
         return Assignments(variables).update_from_individual(self.individual)
@@ -120,7 +142,7 @@ class ConcreteScene(Serializable):
             if attr == '_data':
                 copy_data[attr] = {
                         ConcreteVessel.from_dict(vessel):
-                        VesselState.from_dict(state)
+                        ActorState.from_dict(state)
                         for vessel, state in value
                     }
         return ConcreteScene(**copy_data)

@@ -1,14 +1,14 @@
 import random
 from typing import Dict
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import VesselVariable
 from logical_level.models.vessel_types import ALL_VESSEL_TYPES
 
 
-class SceneBuilder(Dict[ConcreteVessel, VesselState]):  
+class SceneBuilder(Dict[ConcreteVessel, ActorState]):  
     def __init__(self, existing_dict=None, *args, **kwargs):
         # Initialize with an empty dict if no existing_dict is provided
         if existing_dict is None:
@@ -16,7 +16,7 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
         # Call the parent constructor with the provided data
         super().__init__(existing_dict, *args, **kwargs)
     
-    def set_state(self, vessel : ConcreteVessel, state : VesselState) -> 'SceneBuilder':
+    def set_state(self, vessel : ConcreteVessel, state : ActorState) -> 'SceneBuilder':
        self[vessel] = state
        return self
        
@@ -34,7 +34,7 @@ class SceneBuilder(Dict[ConcreteVessel, VesselState]):
                     valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(values.l, values.sp)]
                     vessel_type = random.choice(valid_types)
                 builder.set_state(ConcreteVessel(actor_var.id, actor_var.is_os, values.l, values.r, vessel_type.max_speed, vessel_type.name),
-                                  VesselState(values.x, values.y, values.sp, values.h))
+                                  ActorState(values.x, values.y, values.sp, values.h))
             else:
                 raise TypeError('Unsupported Actor')
         return builder.build()

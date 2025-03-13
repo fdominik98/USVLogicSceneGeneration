@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 from shapely import Point, Polygon
 
-from concrete_level.models.vessel_state import VesselState
+from concrete_level.models.vessel_state import ActorState
 
 class TrajectoryState(Enum):
     START = auto()
@@ -39,7 +39,7 @@ class RRTNode():
         self.children : set[int] = set()
         
     @staticmethod
-    def calc_cost(vessel_state : VesselState, d : float) -> Tuple[int, float]:
+    def calc_cost(vessel_state : ActorState, d : float) -> Tuple[int, float]:
         # Calculate the distance and heading between the points
         s_dist = int(d // vessel_state.speed)
         # Calculate the number of seconds required to cover the distance
