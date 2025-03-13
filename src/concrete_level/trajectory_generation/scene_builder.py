@@ -1,10 +1,12 @@
 import random
 from typing import Dict
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteStaticObstacle, ConcreteVessel
 from concrete_level.models.vessel_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.models.actor_variable import VesselVariable
+from logical_level.models.actor_variable import StaticObstacleVariable, VesselVariable
+from logical_level.models.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
+from logical_level.models.values import ObstacleValues, VesselValues
 from logical_level.models.vessel_types import ALL_VESSEL_TYPES
 
 
@@ -28,13 +30,21 @@ class SceneBuilder(Dict[ConcreteVessel, ActorState]):
     def build_from_assignments(assignments : Assignments) -> ConcreteScene:
         builder = SceneBuilder()
         for actor_var, values in assignments.items():
-            if isinstance(actor_var, VesselVariable):
+            if isinstance(actor_var, VesselVariable) and isinstance(values, VesselValues):
                 vessel_type = actor_var.vessel_type
-                if vessel_type is None:
+                if vessel_type.is_unspecified:
                     valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(values.l, values.sp)]
                     vessel_type = random.choice(valid_types)
-                builder.set_state(ConcreteVessel(actor_var.id, actor_var.is_os, values.l, values.r, vessel_type.max_speed, vessel_type.name),
-                                  ActorState(values.x, values.y, values.sp, values.h))
+                builder.set_state(ConcreteVessel(id=actor_var.id, radius=values.r, type=vessel_type.name, 
+                                                 is_os=actor_var.is_os, length=values.l, max_speed=vessel_type.max_speed),
+                                  ActorState(x=values.x, y=values.y, speed=values.sp, heading=values.h))
+            elif isinstance(actor_var, StaticObstacleVariable) and isinstance(values, ObstacleValues):
+                obstacle_type = actor_var.obstacle_type
+                if obstacle_type.is_unspecified:
+                    valid_types = [t for t in ALL_STATIC_OBSTACLE_TYPES if t.do_match(values.r)]
+                    obstacle_type = random.choice(valid_types)
+                builder.set_state(ConcreteStaticObstacle(id=actor_var.id, radius=values.r, type=obstacle_type.name),
+                                  ActorState(x=values.x, y=values.y, speed=0, heading=0))
             else:
                 raise TypeError('Unsupported Actor')
         return builder.build()

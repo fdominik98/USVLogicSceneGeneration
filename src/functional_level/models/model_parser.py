@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation
+from functional_level.metamodels.interpretation import crossingFromPortInterpretation, headOnInterpretation, OSInterpretation, overtakingInterpretation, TSInterpretation
 from functional_level.models.object_generator import ObjectGenerator
 from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 
@@ -13,19 +13,19 @@ class ModelParser():
     FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{ASSET_FOLDER}/functional_models/ambiguous'
     
     scenario_path_map = {
-        2 : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_scenarios',
-        3 : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_scenarios',
-        4 : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_scenarios',
-        5 : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_scenarios',
-        6 : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_scenarios'
+        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacles_scenarios',
+        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_0obstacles_scenarios',
+        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_0obstacles_scenarios',
+        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_0obstacles_scenarios',
+        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_0obstacles_scenarios'
     }
     
     ambiguous_scenario_path_map = {
-        2 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_scenarios',
-        3 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_scenarios',
-        4 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_scenarios',
-        5 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_scenarios',
-        6 : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_scenarios'
+        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_0obstacles_scenarios',
+        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_0obstacles_scenarios',
+        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_0obstacles_scenarios',
+        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_0obstacles_scenarios',
+        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_0obstacles_scenarios'
     }
     
     @staticmethod
@@ -34,9 +34,9 @@ class ModelParser():
         
         os_interpretation = OSInterpretation()
         ts_interpretation = TSInterpretation()
-        head_on_interpretation = HeadOnInterpretation()
-        overtaking_interpretation = OvertakingInterpretation()
-        crossing_interpretation = CrossingFromPortInterpretation()        
+        head_on_interpretation = headOnInterpretation()
+        overtaking_interpretation = overtakingInterpretation()
+        crossing_interpretation = crossingFromPortInterpretation()        
         
         object_generator = ObjectGenerator()
         objects : Dict[str, FuncObject] = dict()
@@ -79,11 +79,11 @@ class ModelParser():
         return [ModelParser.parse_problem(ModelParser.load_problem_from_file(path)) for path in get_all_file_paths(dir, 'problem')]
     
     @staticmethod
-    def load_functional_scenarios(vessel_num : int) -> List[FunctionalScenario]:
-        return ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[vessel_num])
+    def load_functional_scenarios(vessel_number : int, obstacle_number : int) -> List[FunctionalScenario]:
+        return ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[(vessel_number, obstacle_number)])
     
     @staticmethod
-    def load_ambiguous_functional_scenarios(vessel_num : int) -> List[FunctionalScenario]:
-        return ModelParser.__load_functional_scenarios(ModelParser.ambiguous_scenario_path_map[vessel_num])
+    def load_ambiguous_functional_scenarios(vessel_number : int, obstacle_number : int) -> List[FunctionalScenario]:
+        return ModelParser.__load_functional_scenarios(ModelParser.ambiguous_scenario_path_map[(vessel_number, obstacle_number)])
     
   

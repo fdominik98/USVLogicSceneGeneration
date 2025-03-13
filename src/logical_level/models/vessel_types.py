@@ -52,11 +52,22 @@ class VesselType(ABC):
     def __str__(self):
         return self.name
     
-       
+    @property
+    def is_unspecified(self) -> bool:
+        return False
+    
     @staticmethod    
     def get_vessel_type_by_name(name):
-        return next((t for t in ALL_VESSEL_TYPES if t.name == name), DEFAULT_VESSEL_TYPE)
+        return next((t for t in ALL_VESSEL_TYPES if t.name == name))
+
+@dataclass(frozen=True, repr=False)
+class UnspecifiedVesselType(VesselType):
+    name : str = 'UnspecifiedType'
     
+    @property
+    def is_unspecified(self) -> bool:
+        return True
+   
 @dataclass(frozen=True, repr=False)
 class OtherVesselType(VesselType):
     name : str = 'OtherType'
@@ -135,4 +146,4 @@ class MilitaryVessel(VesselType):
     max_beam : float = 40
     
 ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
-DEFAULT_VESSEL_TYPE = OtherVesselType()
+DEFAULT_VESSEL_TYPE = UnspecifiedVesselType()

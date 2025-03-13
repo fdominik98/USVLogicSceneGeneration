@@ -19,29 +19,31 @@ class ScenarioTypeStatisticsTable(DummyEvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0)]
         
     def create_fig(self) -> plt.Figure:
-        samples : Dict[int, Dict[str, List[int]]] = defaultdict(lambda: defaultdict())
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        samples : Dict[Tuple[int, int], Dict[str, List[int]]] = defaultdict(lambda: defaultdict())
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, comparison_group in enumerate(self.comparison_groups):
-                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data).functional_scenario for eval_data in self.measurements[vessel_number][comparison_group]]
+                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data).functional_scenario for eval_data in self.measurements[actor_number_by_type][comparison_group]]
                 values = [round(value) for value in VesselTypeSampler.sample(scenarios, 0, {})]
-                samples[vessel_number][comparison_group] = values
+                samples[actor_number_by_type][comparison_group] = values
                 
             values = [round(value) for value in [56952*0.131, 56952*0.002, 56952*0.867]]
-            samples[vessel_number]['zhu_et_al'] = values
-            values = [round(value) for value in VesselTypeSampler.sample(FunctionalModelManager.get_x_vessel_scenarios(vessel_number), 0, {})]
-            samples[vessel_number]['base_reference'] = values
+            samples[actor_number_by_type]['zhu_et_al'] = values
+            values = [round(value) for value in VesselTypeSampler.sample(
+                FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(actor_number_by_type[0], actor_number_by_type[1]), 0, {})]
+            
+            samples[actor_number_by_type]['base_reference'] = values
             
         groups_to_compare = list(combinations(self.comparison_groups, 2))
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, (group1, group2) in enumerate(groups_to_compare):
-                samples1 = samples[vessel_number][group1]
-                samples2 = samples[vessel_number][group2]
+                samples1 = samples[actor_number_by_type][group1]
+                samples2 = samples[actor_number_by_type][group2]
                 test = ChiSquareKLDiv(samples1, samples2)
-                print(f'{vessel_number} vessels, {group1} - {group2}: {group1} p-value:{test.p_value}, KL Divergence::{test.kl_div}')
+                print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {group1} - {group2}: {group1} p-value:{test.p_value}, KL Divergence::{test.kl_div}')
                 
                 # evenness_test = PermutationEvennessTest(samples1, samples2)
                 # print(f'{vessel_number} vessels, {group1} - {group2}: {group1} evenness={evenness_test.evenness_1}, {group2} evenness={evenness_test.evenness_2}, p-value:{evenness_test.p_value}, effect-size:{evenness_test.observed_diff}')

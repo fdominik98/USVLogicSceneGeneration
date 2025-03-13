@@ -44,16 +44,17 @@ class RejectionSamplingPipeline(SolverBase):
                 # heading_ts_to_ego: relative angle to p12
                 if functional_scenario.head_on(os, ts):
                     bearing_map[(os.id, ts.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0.0, max(angle_half_cone_p21, BOW_ANGLE))
-                if functional_scenario.crossing(os, ts):
+                if functional_scenario.crossing_from_port(os, ts):
                     bearing_map[(os.id, ts.id)] = (-InPortSectorOf.rotation_angle, BEAM_ANGLE, -InPortSectorOf.rotation_angle, BEAM_ANGLE)
-                if functional_scenario.crossing(ts, os):
+                if functional_scenario.crossing_from_port(ts, os):
                     bearing_map[(os.id, ts.id)] = (InPortSectorOf.rotation_angle, BEAM_ANGLE, InPortSectorOf.rotation_angle, BEAM_ANGLE)
                 if functional_scenario.overtaking(os, ts):
                     bearing_map[(os.id, ts.id)] = (0.0, MASTHEAD_LIGHT_ANGLE, -np.pi, STERN_ANGLE)
                 if functional_scenario.overtaking(ts, os):
                     bearing_map[(os.id, ts.id)] = (-np.pi, STERN_ANGLE, 0, MASTHEAD_LIGHT_ANGLE)
-            
-        scenario = scenic_scenario(eval_data.vessel_number, length_map, vis_distance_map = vis_distance_map, bearing_map=bearing_map)
+        
+        scenario = scenic_scenario(eval_data.vessel_number, eval_data.obstacle_number,
+                                   length_map, vis_distance_map = vis_distance_map, bearing_map=bearing_map)
         
         return scenario, logical_scenario, population
     

@@ -46,7 +46,8 @@ class SolverBase(ABC):
     def evaluate(self, logical_scenario : LogicalScenario, save : bool) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
-            eval_data.vessel_number = logical_scenario.actor_number
+            eval_data.vessel_number = logical_scenario.vessel_number
+            eval_data.obstacle_number = logical_scenario.obstacle_number
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
             eval_data.scenario_name = logical_scenario.name

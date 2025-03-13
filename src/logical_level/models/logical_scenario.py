@@ -20,19 +20,15 @@ class LogicalScenario(Scenario):
     
     @property
     def actor_variables(self) -> List[ActorVariable]:
-        return self.initializer.actor_vars
+        return self.initializer.actor_variables
     
     @property
     def vessel_variables(self) -> List[VesselVariable]:
-        return [var for var in self.initializer.actor_vars if var.is_vessel]
+        return [var for var in self.initializer.actor_variables if var.is_vessel]
     
     @property
     def obstacle_variables(self) -> List[StaticObstacleVariable]:
-        return [var for var in self.initializer.actor_vars if not var.is_vessel]
-    
-    @property
-    def actor_number(self) -> int:
-        return len(self.actor_variables)
+        return [var for var in self.initializer.actor_variables if not var.is_vessel]
     
     @property
     def obstacle_number(self) -> int:
@@ -45,11 +41,7 @@ class LogicalScenario(Scenario):
     @property
     def all_variable_number(self) -> int:
         return len(self.xl)
-    
-    @property
-    def name(self) -> str:
-        return f'{str(self.vessel_number)}vessel_{str(self.obstacle_number)}obstacle'
-    
+        
     def get_population(self, pop_size : Optional[int]) -> List[List[float]]:
         if pop_size is None:
             pop_size = 1

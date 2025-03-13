@@ -5,10 +5,6 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
-from logical_level.constraint_satisfaction.aggregates import Aggregate
-from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.models.logical_scenario import LogicalScenario
-from logical_level.models.penalty import Penalty
 from utils.asv_utils import calculate_heading
 from utils.file_system_utils import ASSET_FOLDER
 
@@ -77,15 +73,17 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
     return scene, iterations, datetime.now() - start_time, empty_region
     
 
-SCENIC_SCENARIOS : Dict[int, str] = {
-    2 : f'{ASSET_FOLDER}/scenic/2vessel_scenario.scenic',
-    3 : f'{ASSET_FOLDER}/scenic/3vessel_scenario.scenic',
-    4 : f'{ASSET_FOLDER}/scenic/4vessel_scenario.scenic',
-    5 : f'{ASSET_FOLDER}/scenic/5vessel_scenario.scenic',
-    6 : f'{ASSET_FOLDER}/scenic/6vessel_scenario.scenic'
+SCENIC_SCENARIOS : Dict[Tuple[int, int], str] = {
+    (2, 0) : f'{ASSET_FOLDER}/scenic/2vessel_0obstacle_scenario.scenic',
+    (3, 0) : f'{ASSET_FOLDER}/scenic/3vessel_0obstacle_scenario.scenic',
+    (4, 0) : f'{ASSET_FOLDER}/scenic/4vessel_0obstacle_scenario.scenic',
+    (5, 0) : f'{ASSET_FOLDER}/scenic/5vessel_0obstacle_scenario.scenic',
+    (6, 0) : f'{ASSET_FOLDER}/scenic/6vessel_0obstacle_scenario.scenic'
 }
 
-def scenic_scenario(vessel_number, length_map, vis_distance_map = {}, bearing_map={}) -> Scenario:
+def scenic_scenario(vessel_number : int, obstacle_number : int, length_map, vis_distance_map = {}, bearing_map={}) -> Scenario:
+    actor_number_by_type = (vessel_number, obstacle_number)
+    
     base_path = f'{ASSET_FOLDER}/scenic/scenic_base.scenic'
     if not os.path.exists(base_path):
         raise FileNotFoundError(base_path)
@@ -93,9 +91,9 @@ def scenic_scenario(vessel_number, length_map, vis_distance_map = {}, bearing_ma
         base = file.read()
     
     
-    if not os.path.exists(SCENIC_SCENARIOS[vessel_number]):
-        raise FileNotFoundError(SCENIC_SCENARIOS[vessel_number])
-    with open(SCENIC_SCENARIOS[vessel_number], 'r') as file:
+    if not os.path.exists(SCENIC_SCENARIOS[actor_number_by_type]):
+        raise FileNotFoundError(SCENIC_SCENARIOS[actor_number_by_type])
+    with open(SCENIC_SCENARIOS[actor_number_by_type], 'r') as file:
         scenario_path = file.read()
     
     content = f'vis_distance_map = {str(vis_distance_map)}\nlength_map = {str(length_map)}\nbearing_map = {str(bearing_map)}\n{base}\n{scenario_path}' 

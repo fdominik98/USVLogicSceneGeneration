@@ -7,7 +7,7 @@ from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVar
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from logical_level.models.vessel_types import ALL_VESSEL_TYPES, DEFAULT_VESSEL_TYPE, VesselType
+from logical_level.models.vessel_types import ALL_VESSEL_TYPES, VesselType
 from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():  
@@ -17,7 +17,7 @@ class LogicalScenarioBuilder():
             for i, vessel_type in enumerate(ALL_VESSEL_TYPES):
                 if functional_scenario.is_vessel_class_x(i, obj):
                     return vessel_type
-            return DEFAULT_VESSEL_TYPE
+            raise ValueError('No vessel type found.')
             
         object_variable_map = {
             obj: OSVariable(obj.id, class_type_map(obj)) if functional_scenario.is_os(obj)
@@ -30,7 +30,7 @@ class LogicalScenarioBuilder():
         interpretations = [
             (functional_scenario.not_in_colreg_pairs, OutVisOrMayNotCollide),
             (functional_scenario.head_on_interpretation.get_tuples(), HeadOn),
-            (functional_scenario.crossing_interpretation.get_tuples(), CrossingFromPort),
+            (functional_scenario.crossing_from_port_interpretation.get_tuples(), CrossingFromPort),
             (functional_scenario.overtaking_interpretation.get_tuples(), Overtaking),
         ]
         

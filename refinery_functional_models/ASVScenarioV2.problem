@@ -95,7 +95,7 @@ error selfLoopRules(SeaObject o) <->
 error sectorRules(SeaObject o, Vessel v) <->
     inSternSectorOf(o, v), inMastheadSectorOf(o, v);
     inPortSideSectorOf(o, v), inStarboardSideSectorOf(o, v);
-    inHeadOnSectorOf(o, v), !inMastheadSectorOf(o, v).
+    inHeadOnSectorOf(o, v), inSternSectorOf(o, v).
 
 // A sea object is in one and only one visibility sector of a vessel.
 error visibilityRules(SeaObject o, Vessel v) <->
@@ -153,11 +153,10 @@ OS(os).
 vesselType(os, PassengerShip).
 
 TS(ts1).
-TS(ts2).
-//StaticObstacle(obst1).
+StaticObstacle(obst1).
 
 //default !inAmbiguousSituation(*).
 //inAmbiguousSituation(os).
 
 
-scope Vessel = 3, StaticObstacle = 0.
+scope Vessel = 2, StaticObstacle = 1.

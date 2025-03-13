@@ -17,29 +17,29 @@ class DiversityPlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(3 * 4, 3.8), constrained_layout=True)
         axes = np.atleast_2d(axes)
         
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$")
                 
-                equivalence_classes : Dict[int, Tuple[FunctionalScenario, int]] = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[vessel_number][config_group]], vessel_number)
+                equivalence_classes : Dict[int, Tuple[FunctionalScenario, int]] = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]], actor_number_by_type)
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                 
                 irrelevant_classes = [(int(count), scenario) for scenario, count 
                                       in equivalence_classes.values() if (len(scenario.overtaking_interpretation) +
-                                                                        len(scenario.crossing_interpretation) +
-                                                                        len(scenario.head_on_interpretation) / 2) < vessel_number-1]
-                print(f'{vessel_number} vessels, {config_group}: irrelevant classes: {sum([count for count, _ in irrelevant_classes])}')
+                                                                        len(scenario.crossing_from_port_interpretation) +
+                                                                        len(scenario.head_on_interpretation) / 2) < actor_number_by_type-1]
+                print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {config_group}: irrelevant classes: {sum([count for count, _ in irrelevant_classes])}')
                 
                 axi.text(0.98, 0.98, self.get_shape_coverage_text(values), 
                 transform=axi.transAxes,  # Use axis coordinates

@@ -17,26 +17,26 @@ class RuntimePlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr',] 
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]   
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
     
     def create_fig(self):
         fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.vessel_num_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
         axes = np.atleast_1d(axes)
         
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             axi : plt.Axes = axes[i]
             axi.set_title(self.vessel_num_labels[i])
             self.init_axi(i, axi, 'Runtime (s)')
             
             data = []
             new_group_labels = []
-            for measurement, label in zip(self.measurements[vessel_number].values(), self.group_labels):
+            for measurement, label in zip(self.measurements[actor_number_by_type].values(), self.group_labels):
                 values = [eval_data.evaluation_time for eval_data in measurement]
                 if len(values) != 0:
                     data.append(values)
                     new_group_labels.append(label)
-                    print(f'{vessel_number} vessels, {label}: median: {np.median(values)} , mean: {np.mean(values)}')
+                    print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {label}: median: {np.median(values)} , mean: {np.mean(values)}')
             
             if len(data) == 0:
                 continue

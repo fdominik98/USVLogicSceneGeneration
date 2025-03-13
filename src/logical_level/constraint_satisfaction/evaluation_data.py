@@ -13,6 +13,7 @@ class EvaluationData(Serializable):
     scenario_name: Optional[str] = None
     random_seed: Optional[int] = None
     vessel_number: Optional[int] = None
+    obstacle_number: Optional[int] = None
     evaluation_time: Optional[float] = None
     number_of_generations: Optional[int] = None
     population_size: Optional[int] = None

@@ -3,7 +3,7 @@ from typing import Dict, List, Set, Tuple
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from functional_level.metamodels.interpretation import CrossingFromPortInterpretation, HeadOnInterpretation, OSInterpretation, OvertakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation
+from functional_level.metamodels.interpretation import crossingFromPortInterpretation, headOnInterpretation, OSInterpretation, overtakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
@@ -19,16 +19,16 @@ from logical_level.models.vessel_types import ALL_VESSEL_TYPES
 
 class ConcreteSceneAbstractor():
     
-    __all_scenario_hash_cache : Dict[int, List[Tuple[int, FunctionalScenario]]] = {}
-    __ambiguous_scenario_hash_cache : Dict[int, List[Tuple[int, FunctionalScenario]]] = {}
+    __all_scenario_hash_cache : Dict[Tuple[int, int], List[Tuple[int, FunctionalScenario]]] = {}
+    __ambiguous_scenario_hash_cache : Dict[Tuple[int, int], List[Tuple[int, FunctionalScenario]]] = {}
     
     @staticmethod
     def get_abstractions_from_concrete(scene : ConcreteScene, init_method = RandomInstanceInitializer.name) -> MultiLevelScenario:
         os_interpretation = OSInterpretation()
         ts_interpretation = TSInterpretation()
-        head_on_interpretation = HeadOnInterpretation()
-        overtaking_interpretation = OvertakingInterpretation()
-        crossing_interpretation = CrossingFromPortInterpretation()    
+        head_on_interpretation = headOnInterpretation()
+        overtaking_interpretation = overtakingInterpretation()
+        crossing_interpretation = crossingFromPortInterpretation()    
         vessel_class_interpretations : List[VesselInterpretation] = [VesselClass0Interpretation(), VesselClass1Interpretation(),
                                                                      VesselClass2Interpretation(), VesselClass3Interpretation(),
                                                                      VesselClass4Interpretation(), VesselClass5Interpretation(),
@@ -121,28 +121,38 @@ class ConcreteSceneAbstractor():
         return equivalence_classes, extra_scenarios
     
     @staticmethod
-    def get_all_equivalence_classes(vessel_number):
+    def get_all_equivalence_classes(vessel_number : int, obstacle_number : int):
+        actor_number_by_type = (vessel_number, obstacle_number)
         if vessel_number not in ConcreteSceneAbstractor.__all_scenario_hash_cache:
-            ConcreteSceneAbstractor.__all_scenario_hash_cache[vessel_number] = [(scenario.shape_hash(), scenario) for scenario in FunctionalModelManager.get_x_vessel_scenarios(vessel_number)]
-        return {shape_hash : (scenario, 0) for shape_hash, scenario in ConcreteSceneAbstractor.__all_scenario_hash_cache[vessel_number]}
+            ConcreteSceneAbstractor.__all_scenario_hash_cache[actor_number_by_type] = [
+                (scenario.shape_hash(), scenario) for scenario in
+                FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)]
+            
+        return {shape_hash : (scenario, 0) for shape_hash, scenario in
+                ConcreteSceneAbstractor.__all_scenario_hash_cache[actor_number_by_type]}
     
     @staticmethod
-    def get_ambiguous_equivalence_classes(vessel_number):
+    def get_ambiguous_equivalence_classes(vessel_number : int, obstacle_number : int):
+        actor_number_by_type = (vessel_number, obstacle_number)
         if vessel_number not in ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache:
-            ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[vessel_number] = [(scenario.shape_hash(), scenario) for scenario in FunctionalModelManager.get_x_vessel_ambiguous_scenarios(vessel_number)]
-        return {shape_hash : (scenario, 0) for shape_hash, scenario in ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[vessel_number]}
+            ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[actor_number_by_type] = [
+                (scenario.shape_hash(), scenario) for scenario in
+                FunctionalModelManager.get_x_vessel_y_obstacle_ambiguous_scenarios(vessel_number, obstacle_number)]
+            
+        return {shape_hash : (scenario, 0) for shape_hash, scenario in
+                ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[actor_number_by_type]}
     
     @staticmethod        
-    def get_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number)
+    def get_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
+        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number, obstacle_number)
         return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[0]
     
     @staticmethod        
-    def get_unspecified_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number)
+    def get_unspecified_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
+        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number, obstacle_number)
         return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[1]
     
     @staticmethod 
-    def get_ambiguous_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_ambiguous_equivalence_classes(vessel_number)
+    def get_ambiguous_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
+        equivalence_classes = ConcreteSceneAbstractor.get_ambiguous_equivalence_classes(vessel_number, obstacle_number)
         return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[0]

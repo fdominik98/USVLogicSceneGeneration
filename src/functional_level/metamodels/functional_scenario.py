@@ -5,56 +5,50 @@ from typing import Dict, List, Optional, Set, Tuple
 import copy
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
-    BinaryInterpretation, HeadOnInterpretation, OvertakingInterpretation, CrossingFromPortInterpretation, OSInterpretation, TSInterpretation,
-    VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation,
-    VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation,
-    VesselClass8Interpretation, VesselInterpretation)
+    BinaryInterpretation, StaticObstacleInterpretation, headOnInterpretation, overtakingInterpretation,
+    crossingFromPortInterpretation, OSInterpretation, TSInterpretation, VesselInterpretation, VesselTypeInterpretation,
+    StaticObstacleTypeInterpretation, inHeadOnSectorInterpretation, inPortSideSectorInterpretation,
+    inStarboardSideSectorInterpretation, inSternSectorInterpretation, staticObstacleTypeInterpretation, vesselTypeInterpretation)
 from utils.scenario import Scenario
    
 @dataclass(frozen=True)
 class FunctionalScenario(Scenario):
-    os_interpretation : OSInterpretation = OSInterpretation()
-    ts_interpretation : TSInterpretation = TSInterpretation()
-    head_on_interpretation : HeadOnInterpretation = HeadOnInterpretation()
-    overtaking_interpretation : OvertakingInterpretation = OvertakingInterpretation()
-    crossing_interpretation : CrossingFromPortInterpretation = CrossingFromPortInterpretation()
+    OS_interpretation : OSInterpretation = OSInterpretation()
+    TS_interpretation : TSInterpretation = TSInterpretation()
+    Static_obstacle_interpretation : StaticObstacleInterpretation = StaticObstacleInterpretation()
     
-    vessel_class_0_interpretation : VesselClass0Interpretation = VesselClass0Interpretation()
-    vessel_class_1_interpretation : VesselClass1Interpretation = VesselClass1Interpretation()
-    vessel_class_2_interpretation : VesselClass2Interpretation = VesselClass2Interpretation()
-    vessel_class_3_interpretation : VesselClass3Interpretation = VesselClass3Interpretation()
-    vessel_class_4_interpretation : VesselClass4Interpretation = VesselClass4Interpretation()
-    vessel_class_5_interpretation : VesselClass5Interpretation = VesselClass5Interpretation()
-    vessel_class_6_interpretation : VesselClass6Interpretation = VesselClass6Interpretation()
-    vessel_class_7_interpretation : VesselClass7Interpretation = VesselClass7Interpretation()
-    vessel_class_8_interpretation : VesselClass8Interpretation = VesselClass8Interpretation()
+    Vessel_type_interpretation : VesselTypeInterpretation = VesselTypeInterpretation()
+    Static_obstacle_type_interpretation : StaticObstacleTypeInterpretation = StaticObstacleTypeInterpretation()
+    
+    head_on_interpretation : headOnInterpretation = headOnInterpretation()
+    overtaking_interpretation : overtakingInterpretation = overtakingInterpretation()
+    crossing_from_port_interpretation : crossingFromPortInterpretation = crossingFromPortInterpretation()
+    
+    in_head_on_sector_interpretation : inHeadOnSectorInterpretation = inHeadOnSectorInterpretation()
+    in_port_side_sector_interpretation : inPortSideSectorInterpretation = inPortSideSectorInterpretation()
+    in_starboard_side_sector_interpretation : inStarboardSideSectorInterpretation = inStarboardSideSectorInterpretation()
+    in_stern_sector_interpretation : inSternSectorInterpretation = inSternSectorInterpretation()
+    
+    vessel_type_interpretation : vesselTypeInterpretation = vesselTypeInterpretation()
+    static_obstacle_type_interpretation : staticObstacleTypeInterpretation = staticObstacleTypeInterpretation()
     
     func_objects : List[FuncObject] = field(init=False)
-    class_interpretation_list : List[VesselInterpretation] = field(init=False)
+    Vessel_interpretation : VesselInterpretation = field(init=False)
     
     def __post_init__(self):
         object_set : Set[FuncObject] = set()
-        for interpretations in [self.os_interpretation, self.ts_interpretation, self.head_on_interpretation, self.overtaking_interpretation, self.crossing_interpretation]:
+        for interpretations in [self.OS_interpretation, self.TS_interpretation, self.head_on_interpretation, self.overtaking_interpretation, self.crossing_from_port_interpretation]:
             for interpretation in interpretations:
                 for func_object in interpretation:
                     object_set.add(func_object)
         object.__setattr__(self, 'func_objects', sorted(list(object_set), key=lambda x: x.id))
+        
+        object.__setattr__(self, 'Vessel_interpretation', VesselInterpretation(self.OS_interpretation._data.union(self.TS_interpretation._data)))
+        
         head_on_interpretation_temp = copy.deepcopy(self.head_on_interpretation)
         for o1, o2 in head_on_interpretation_temp:
             self.head_on_interpretation.add(o1, o2)
-            
-        class_interpretation_list = [self.vessel_class_0_interpretation, self.vessel_class_1_interpretation,
-                                    self.vessel_class_2_interpretation, self.vessel_class_3_interpretation,
-                                    self.vessel_class_4_interpretation, self.vessel_class_5_interpretation,
-                                    self.vessel_class_6_interpretation, self.vessel_class_7_interpretation,
-                                    self.vessel_class_8_interpretation,
-        ]
-        object.__setattr__(self, 'class_interpretation_list', class_interpretation_list)
         
-    
-    @property
-    def name(self):
-        return f'{str(self.actor_number)}vessel'
     
     def in_colreg_rel(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.colreg_rel(o1, o2) or self.colreg_rel(o2, o1)
@@ -62,11 +56,11 @@ class FunctionalScenario(Scenario):
     def in_overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.overtaking(o1, o2) or self.overtaking(o2, o1)
     
-    def in_crossing(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.crossing(o1, o2) or self.crossing(o2, o1)
+    def in_crossing_from_port(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+        return self.crossing_from_port(o1, o2) or self.crossing_from_port(o2, o1)
     
     def colreg_rel(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.head_on(o1, o2) or self.overtaking(o1, o2) or self.crossing(o1, o2)
+        return self.head_on(o1, o2) or self.overtaking(o1, o2) or self.crossing_from_port(o1, o2)
     
     def head_on(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.head_on_interpretation.contains((o1, o2))
@@ -74,37 +68,46 @@ class FunctionalScenario(Scenario):
     def overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.overtaking_interpretation.contains((o1, o2))
     
-    def crossing(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.crossing_interpretation.contains((o1, o2))
+    def crossing_from_port(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+        return self.crossing_from_port_interpretation.contains((o1, o2))
     
     def is_os(self, o : FuncObject) -> bool:
-        return self.os_interpretation.contains(o)
+        return self.OS_interpretation.contains(o)
     
     def is_ts(self, o : FuncObject) -> bool:
-        return self.ts_interpretation.contains(o)
+        return self.TS_interpretation.contains(o)
+    
+    def is_vessel(self, o : FuncObject) -> bool:
+        return self.Vessel_interpretation.contains(o)
+    
+    def is_obstacle(self, o : FuncObject) -> bool:
+        return self.Static_obstacle_interpretation.contains(o)
     
     def is_vessel_class_x(self, class_num : int, o: FuncObject):
-        return self.class_interpretation_list[class_num].contains(o)
+        raise NotImplementedError()
     
     @property
     def binary_interpretation_tuples(self) -> List[Tuple[FuncObject, FuncObject]]:
         return (list(self.overtaking_interpretation.get_tuples()) +
                 list(self.head_on_interpretation.get_tuples()) + 
-                list(self.crossing_interpretation.get_tuples()))
+                list(self.crossing_from_port_interpretation.get_tuples()))
     
     
     @property
     def ts_objects(self) -> Set[FuncObject]:
-        return {obj for obj in self.func_objects if self.is_ts(obj)}
+        return {ts for ts, in self.TS_interpretation._data}
     
     @property
     def os_object(self) -> FuncObject:
-        return self.os_interpretation.next
+        return self.OS_interpretation.next
     
     @property
-    def actor_number(self) -> int:
-        return len(self.func_objects)
-        
+    def obstacle_number(self) -> int:
+        return len(self.Static_obstacle_interpretation)
+    
+    @property
+    def vessel_number(self) -> int:
+        return len(self.Vessel_interpretation)        
     
     @property
     def all_object_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
@@ -151,14 +154,14 @@ class FunctionalScenario(Scenario):
         # Initialize base (0-hop) attributes
         for node in self.func_objects:
             attributes: Set[tuple] = set()
-            if self.os_interpretation.contains(node):
+            if self.OS_interpretation.contains(node):
                 attributes.add((OSInterpretation.name, 1))
-            if self.ts_interpretation.contains(node):
+            if self.TS_interpretation.contains(node):
                 attributes.add((TSInterpretation.name, 1))
             
             attributes.update(generate_tuples(0, self.overtaking_interpretation, node))
             attributes.update(generate_tuples(0, self.head_on_interpretation, node))
-            attributes.update(generate_tuples(0, self.crossing_interpretation, node))
+            attributes.update(generate_tuples(0, self.crossing_from_port_interpretation, node))
             
             neighborhoods[0][node] = (None, frozenset(attributes))
 
@@ -167,14 +170,14 @@ class FunctionalScenario(Scenario):
             neighborhoods[hop] = {}
             for node in self.func_objects:
                 attributes: Set[tuple] = set()
-                if self.os_interpretation.contains(node):
+                if self.OS_interpretation.contains(node):
                     attributes.add((OSInterpretation.name, 1))
-                if self.ts_interpretation.contains(node):
+                if self.TS_interpretation.contains(node):
                     attributes.add((TSInterpretation.name, 1))
                     
                 attributes.update(generate_tuples(hop, self.overtaking_interpretation, node))
                 attributes.update(generate_tuples(hop, self.head_on_interpretation, node))
-                attributes.update(generate_tuples(hop, self.crossing_interpretation, node))
+                attributes.update(generate_tuples(hop, self.crossing_from_port_interpretation, node))
                 
                 neighborhoods[hop][node] = (neighborhoods[hop - 1][node], frozenset(attributes))
 

@@ -75,64 +75,66 @@ class BinaryInterpretation(Interpretation, ABC):
         return descs
     
 @dataclass(frozen=True)
-class VesselInterpretation(UnaryInterpretation, ABC):
-    pass
+class VesselInterpretation(UnaryInterpretation):
+    name : str = field(default='Vessel', init=False)
 
 @dataclass(frozen=True)
-class OSInterpretation(VesselInterpretation):
+class OSInterpretation(UnaryInterpretation):
     name : str = field(default='OS', init=False)
 
 @dataclass(frozen=True)
-class TSInterpretation(VesselInterpretation):
+class TSInterpretation(UnaryInterpretation):
     name : str = field(default='TS', init=False)
+    
+@dataclass(frozen=True)
+class StaticObstacleInterpretation(UnaryInterpretation):
+    name : str = field(default='StaticObstacle', init=False)
 
 @dataclass(frozen=True)
-class HeadOnInterpretation(BinaryInterpretation):
-    name : str = field(default='HeadOn', init=False)
+class StaticObstacleTypeInterpretation(UnaryInterpretation):
+    name : str = field(default='StaticObstacleType', init=False)
+    
+@dataclass(frozen=True)
+class VesselTypeInterpretation(UnaryInterpretation):
+    name : str = field(default='VesselType', init=False)
 
 @dataclass(frozen=True)
-class CrossingFromPortInterpretation(BinaryInterpretation):
-    name : str = field(default='Crossing', init=False)
+class headOnInterpretation(BinaryInterpretation):
+    name : str = field(default='headOn', init=False)
 
 @dataclass(frozen=True)
-class OvertakingInterpretation(BinaryInterpretation):
-    name : str = field(default='Overtaking', init=False)
+class crossingFromPortInterpretation(BinaryInterpretation):
+    name : str = field(default='crossingFromPort', init=False)
+
+@dataclass(frozen=True)
+class overtakingInterpretation(BinaryInterpretation):
+    name : str = field(default='overtaking', init=False)
+    
     
 @dataclass(frozen=True)
-class VesselClass0Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass0', init=False)
+class inPortSideSectorInterpretation(BinaryInterpretation):
+    name : str = field(default='inPortSideSector', init=False)
+
+@dataclass(frozen=True)
+class inStarboardSideSectorInterpretation(BinaryInterpretation):
+    name : str = field(default='inStarboardSideSector', init=False)
+
+@dataclass(frozen=True)
+class inSternSectorInterpretation(BinaryInterpretation):
+    name : str = field(default='inSternSector', init=False)
     
 @dataclass(frozen=True)
-class VesselClass1Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass1', init=False)
+class inHeadOnSectorInterpretation(BinaryInterpretation):
+    name : str = field(default='inHeadOnSector', init=False)
     
 @dataclass(frozen=True)
-class VesselClass2Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass2', init=False)
+class staticObstacleTypeInterpretation(BinaryInterpretation):
+    name : str = field(default='staticObstacleType', init=False)
     
 @dataclass(frozen=True)
-class VesselClass3Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass3', init=False)
+class vesselTypeInterpretation(BinaryInterpretation):
+    name : str = field(default='vesselType', init=False)
     
-@dataclass(frozen=True)
-class VesselClass4Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass4', init=False)
-    
-@dataclass(frozen=True)
-class VesselClass5Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass5', init=False)
-    
-@dataclass(frozen=True)
-class VesselClass6Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass6', init=False)
-    
-@dataclass(frozen=True)
-class VesselClass7Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass7', init=False)
-    
-@dataclass(frozen=True)
-class VesselClass8Interpretation(VesselInterpretation):
-    name : str = field(default='VesselClass8', init=False)
     
     
 

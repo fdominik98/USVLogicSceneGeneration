@@ -16,14 +16,14 @@ class CoverageEvolutionPlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(3 * 4, 3.8), constrained_layout=True)
         axes = np.atleast_2d(axes)
         
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
                 if j == 0:
@@ -32,9 +32,9 @@ class CoverageEvolutionPlot(EvalPlot):
                 
                 values : List[float] = [0]
                 equivalence_classes : Dict[int, Tuple[FunctionalScenario, int]] = {}
-                for eval_data in self.measurements[vessel_number][config_group]:
+                for eval_data in self.measurements[actor_number_by_type][config_group]:
                     if eval_data.is_valid:
-                        new_classes = self.get_equivalence_class_distribution([eval_data.best_scene], vessel_number)
+                        new_classes = self.get_equivalence_class_distribution([eval_data.best_scene], actor_number_by_type)
                         for key, value in new_classes.items():
                             if key in equivalence_classes:
                                 equivalence_classes[key] = (value[0], equivalence_classes[key][1] + value[1])

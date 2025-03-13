@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 
 # Length/beam ratio (LBR) = WL/B
@@ -47,7 +48,25 @@ from abc import ABC, abstractmethod
 # ------------------------------------------------------------------------------------------
 
 class Scenario(ABC):
+    
     @property
     @abstractmethod
-    def actor_number(self) -> int:
+    def obstacle_number(self) -> int:
         pass
+    
+    @property
+    @abstractmethod
+    def vessel_number(self) -> int:
+        pass
+    
+    @property
+    def actor_number(self) -> int:
+        return self.vessel_number + self.obstacle_number
+    
+    @property
+    def actor_number_by_type(self) -> Tuple[int, int]:
+        return (self.vessel_number, self.obstacle_number)
+    
+    @property
+    def name(self) -> str:
+        return f'{str(self.vessel_number)}vessel_{str(self.obstacle_number)}obstacle'

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
@@ -22,8 +22,8 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.vessel_num_count, self.comparison_group_count, figsize=(1 * 14, 2*self.vessel_num_count), constrained_layout=True)
@@ -31,7 +31,7 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
         
         def configure_axi(i : int, j : int, group_label, color, values):
             axi : plt.Axes = axes[i][j]
-            self.init_axi(j, axi, f'{self.vessel_numbers[i]}-vessel samples')
+            self.init_axi(j, axi, f'{self.actor_numbers_by_type[i]}-vessel samples')
             if sum(values) == 0:
                 return
             
@@ -56,15 +56,18 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
                 fontweight='bold')
 
 
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, comparison_group in enumerate(self.comparison_groups):
-                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data).functional_scenario for eval_data in self.measurements[vessel_number][comparison_group]]
+                scenarios = [ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data).functional_scenario for eval_data in self.measurements[actor_number_by_type][comparison_group]]
                 values = VesselTypeSampler.sample(scenarios, self.sample_size, {})
                 configure_axi(i, j, self.group_labels[j], self.colors[j], values)
             
-            if self.vessel_numbers[i] == 2:
+            if self.actor_numbers_by_type[i] == 2:
                 configure_axi(i, len(self.group_labels)-2, self.group_labels[-2], self.colors[-2], [56952*0.131, 56952*0.002, 56952*0.867])
+                
             configure_axi(i, len(self.group_labels)-1, self.group_labels[-1], self.colors[-1],
-                          VesselTypeSampler.sample(FunctionalModelManager.get_x_vessel_scenarios(vessel_number), self.sample_size, {}))
+                            VesselTypeSampler.sample(
+                            FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(actor_number_by_type[0], actor_number_by_type[1]),
+                            self.sample_size, {}))
         
         return fig

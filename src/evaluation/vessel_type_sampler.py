@@ -13,7 +13,7 @@ class VesselTypeSampler():
             if len(current_distribution) == 0:
                 result[0] += len(scenario.overtaking_interpretation)
                 result[1] += len(scenario.head_on_interpretation) / 2
-                result[2] += len(scenario.crossing_interpretation)
+                result[2] += len(scenario.crossing_from_port_interpretation)
             # else:                        
             #     for obj in scenario.concrete_scene.non_os:
             #         if obj.vessel_type in sized_distribution and current_distribution[obj.vessel_type] < sized_distribution[obj.vessel_type]:

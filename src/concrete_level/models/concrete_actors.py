@@ -38,8 +38,6 @@ class ConcreteActor(Serializable, ABC):
 
 @dataclass(frozen=True)
 class ConcreteStaticObstacle(ConcreteActor):
-    x: float
-    y: float 
     
     @property
     def name(self) -> str:

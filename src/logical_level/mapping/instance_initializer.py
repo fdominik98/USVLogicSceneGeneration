@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from logical_level.models.actor_variable import ActorVariable
 
 class InstanceInitializer(ABC):    
-    def __init__(self, name: str, actor_vars : List[ActorVariable]) -> None:
-        self.actor_vars = actor_vars      
+    def __init__(self, name: str, actor_variables : List[ActorVariable]) -> None:
+        self.actor_variables = actor_variables      
         self.name = name
        
     @abstractmethod     
@@ -20,32 +20,32 @@ class InstanceInitializer(ABC):
         return result
 class RandomInstanceInitializer(InstanceInitializer):
     name = 'uniform'
-    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
-        super().__init__(self.name, vessel_vars)
+    def __init__(self, actor_variable : List[ActorVariable]) -> None:
+        super().__init__(self.name, actor_variable)
         
     def _do_get_population(self) -> List[float]:
         population : List[float] = []
-        for vessel_var in self.actor_vars:
-            population += [random.uniform(x, y) for x, y in zip(vessel_var.lower_bounds, vessel_var.upper_bounds)]                
+        for actor_variable in self.actor_variables:
+            population += [random.uniform(x, y) for x, y in zip(actor_variable.lower_bounds, actor_variable.upper_bounds)]                
         return population
     
     
 class DeterministicInitializer(InstanceInitializer):
     name = 'deterministic'
-    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
-        super().__init__(self.name, vessel_vars)
+    def __init__(self, actor_variable : List[ActorVariable]) -> None:
+        super().__init__(self.name, actor_variable)
         
     def _do_get_population(self) -> List[float]:
         population : List[float] = []
-        for vessel_var in self.actor_vars:
-            population += [(x + y) / 2 for x, y in zip(vessel_var.lower_bounds, vessel_var.upper_bounds)]                
+        for actor_variable in self.actor_variables:
+            population += [(x + y) / 2 for x, y in zip(actor_variable.lower_bounds, actor_variable.upper_bounds)]                
         return population 
     
 
 class LatinHypercubeInitializer(InstanceInitializer):
     name = 'lhs'
-    def __init__(self, vessel_vars : List[ActorVariable]) -> None:
-        super().__init__(self.name, vessel_vars)
+    def __init__(self, actor_variable : List[ActorVariable]) -> None:
+        super().__init__(self.name, actor_variable)
         
     def lhs_sampling(self, n_samples: int, lower_bounds: List[float], upper_bounds: List[float]) -> np.ndarray:
         """
@@ -71,8 +71,8 @@ class LatinHypercubeInitializer(InstanceInitializer):
 
     def _do_get_population(self) -> List[float]:
         population: List[float] = []
-        for vessel_var in self.actor_vars:
-            population += self.lhs_sampling(1, vessel_var.lower_bounds, vessel_var.upper_bounds)[0]
+        for actor_variable in self.actor_variables:
+            population += self.lhs_sampling(1, actor_variable.lower_bounds, actor_variable.upper_bounds)[0]
         return population
     
     

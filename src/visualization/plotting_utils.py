@@ -27,8 +27,8 @@ class EvalPlot(PlotBase, ABC):
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
     
-    vessel_number_map = {
-        2 : '2 Vessels', 3 : '3 Vessels', 4 : '4 Vessels', 5 : '5 Vessels', 6 : '6 Vessels', 
+    actor_numbers_by_type_map = {
+        (2, 0) : '2 Vessels', (3, 0) : '3 Vessels', (4, 0) : '4 Vessels', (5, 0) : '5 Vessels', (6, 0) : '6 Vessels', 
     }
     
     algo_map = {'nsga2' : 'N2', 'nsga3' : 'N3', 'ga' : 'GA', 'de' : 'DE', 'pso' : 'PSO', 'scenic' : 'Scenic'}
@@ -37,22 +37,23 @@ class EvalPlot(PlotBase, ABC):
     def __init__(self, eval_datas : List[EvaluationData], is_algo=False, is_all=False) -> None:
         self.comparison_groups : List[Any] = self.algos if is_algo else self.config_groups
         self.comparison_group_count = len(self.comparison_groups)
-        self.vessel_num_count = len(self.vessel_numbers)
+        self.vessel_num_count = len(self.actor_numbers_by_type)
         self.colors = self.generate_colors(self.comparison_group_count)
-        self.vessel_num_labels = [self.vessel_number_map[vn] for vn in self.vessel_numbers]
+        self.vessel_num_labels = [self.actor_numbers_by_type_map[vn] for vn in self.actor_numbers_by_type]
         self.group_labels = [self.algo_map[algo] + '-' + self.aggregate_map[aggregate] for algo, aggregate in self.algos] if is_algo else [self.config_group_map[cg.lower()] for cg in self.config_groups]
         
-        self.measurements : Dict[int, Dict[str, List[EvaluationData]]] = defaultdict(lambda: defaultdict(list))
-        for vessel_number in self.vessel_numbers:
+        self.measurements : Dict[Tuple[int, int], Dict[str, List[EvaluationData]]] = defaultdict(lambda: defaultdict(list))
+        for actor_number_by_type in self.actor_numbers_by_type:
             for comparison_group in self.comparison_groups:
-                self.measurements[vessel_number][comparison_group] = []   
+                self.measurements[actor_number_by_type][comparison_group] = []   
         
         self.eval_datas : List[EvaluationData] = sorted(eval_datas, key=lambda eval_data: eval_data.timestamp)
         for eval_data in self.eval_datas:
+            actor_number_by_type : Tuple[int, int] = (eval_data.vessel_number, eval_data.obstacle_number)
             comparison_group = (eval_data.algorithm_desc.lower(), eval_data.aggregate_strat.lower()) if is_algo else eval_data.config_group.lower()    
-            if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or eval_data.vessel_number not in self.vessel_numbers:
+            if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or actor_number_by_type not in self.actor_numbers_by_type:
                 continue
-            self.measurements[eval_data.vessel_number][comparison_group].append(eval_data) 
+            self.measurements[actor_number_by_type][comparison_group].append(eval_data) 
         super().__init__()                
         
     
@@ -63,7 +64,7 @@ class EvalPlot(PlotBase, ABC):
     
     @property
     @abstractmethod
-    def vessel_numbers(self) -> List[int]:
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
         pass
     
     @property
@@ -106,5 +107,5 @@ class DummyEvalPlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]

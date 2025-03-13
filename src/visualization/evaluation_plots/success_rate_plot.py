@@ -17,14 +17,14 @@ class SuccessRatePlot(EvalPlot):
         return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr']
     
     @property
-    def vessel_numbers(self) -> List[int]:
-        return [2, 3, 4, 5, 6]
+    def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(1, self.vessel_num_count, figsize=(self.comparison_group_count, 4), gridspec_kw={'width_ratios': [1]*self.vessel_num_count}, constrained_layout=True)
         axes = np.atleast_1d(axes)
 
-        for i, vessel_number in enumerate(self.vessel_numbers):
+        for i, vessel_number in enumerate(self.actor_numbers_by_type):
             axi : plt.Axes = axes[i]
             axi.set_title(self.vessel_num_labels[i])
             axi.set_aspect('auto', adjustable='box')
