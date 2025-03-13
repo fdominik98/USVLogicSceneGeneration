@@ -27,7 +27,7 @@ class Aggregate(ABC):
         pass
     
     def derive_penalty(self, individual : np.ndarray) -> Penalty :
-        assignments = Assignments(self.logical_scenario.actor_vars).update_from_individual(individual)
+        assignments = Assignments(self.logical_scenario.actor_variables).update_from_individual(individual)
         penalty = self.logical_scenario.relation_constraint.evaluate_penalty(assignments)
         return penalty
     
@@ -55,11 +55,11 @@ class ActorAggregate(Aggregate):
     
     @property
     def object_num(self) -> int:
-        return int(self.logical_scenario.size)
+        return int(self.logical_scenario.actor_number)
 
     def evaluate(self, individual : np.ndarray):
         penalty = self.derive_penalty(individual)
-        return tuple((penalty.actor_penalties[var] for var in self.logical_scenario.actor_vars))
+        return tuple((penalty.actor_penalties[var] for var in self.logical_scenario.actor_variables))
     
 class AggregateAll(Aggregate):
     name =  'all'

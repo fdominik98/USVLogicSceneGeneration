@@ -54,7 +54,7 @@ class PySwarmPSOAlgorithm(SolverBase):
         # Create a PSO instance
         optimizer = ps.single.GlobalBestPSO(options={'c1': eval_data.c_1, 'c2': eval_data.c_2, 'w': eval_data.w},
                                             n_particles=eval_data.population_size, 
-                                            dimensions=logical_scenario.all_variable_num,
+                                            dimensions=logical_scenario.all_variable_number,
                                             bounds=(np.array(logical_scenario.xl), np.array(logical_scenario.xu)),
                                             init_pos=pos)
         monitor = ObjectiveMonitor(logical_scenario, eval_data, time.time(), eval_data.timeout, self.verbose)

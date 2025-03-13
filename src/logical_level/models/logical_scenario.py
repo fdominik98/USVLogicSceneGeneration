@@ -19,36 +19,36 @@ class LogicalScenario(Scenario):
         object.__setattr__(self, 'xu', tuple(self.xu))  
     
     @property
-    def actor_vars(self) -> List[ActorVariable]:
+    def actor_variables(self) -> List[ActorVariable]:
         return self.initializer.actor_vars
     
     @property
-    def vessel_vars(self) -> List[VesselVariable]:
+    def vessel_variables(self) -> List[VesselVariable]:
         return [var for var in self.initializer.actor_vars if var.is_vessel]
     
     @property
-    def obstacle_vars(self) -> List[StaticObstacleVariable]:
+    def obstacle_variables(self) -> List[StaticObstacleVariable]:
         return [var for var in self.initializer.actor_vars if not var.is_vessel]
     
     @property
-    def size(self) -> int:
-        return len(self.actor_vars)
+    def actor_number(self) -> int:
+        return len(self.actor_variables)
     
     @property
-    def obstacle_size(self) -> int:
-        return len(self.obstacle_vars)
+    def obstacle_number(self) -> int:
+        return len(self.obstacle_variables)
     
     @property
-    def vessel_size(self) -> int:
-        return len(self.vessel_vars)
+    def vessel_number(self) -> int:
+        return len(self.vessel_variables)
     
     @property
-    def all_variable_num(self) -> int:
+    def all_variable_number(self) -> int:
         return len(self.xl)
     
     @property
     def name(self) -> str:
-        return f'{str(self.vessel_size)}vessel_{str(self.obstacle_size)}obstacle'
+        return f'{str(self.vessel_number)}vessel_{str(self.obstacle_number)}obstacle'
     
     def get_population(self, pop_size : Optional[int]) -> List[List[float]]:
         if pop_size is None:

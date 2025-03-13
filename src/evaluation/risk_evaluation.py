@@ -9,7 +9,7 @@ from logical_level.models.actor_variable import VesselVariable
 
 class RiskVector():
     def __init__(self, scenario: MultiLevelScenario) -> None:
-        self.proximity_vectors : Dict[Tuple[ConcreteVessel, ConcreteVessel], ProximityVector] = {(a1, a2) : ProximityVector(scenario, a1, a2) for a1, a2 in scenario.os_non_os_pairs}
+        self.proximity_vectors : Dict[Tuple[ConcreteVessel, ConcreteVessel], ProximityVector] = {(a1, a2) : ProximityVector(scenario, a1, a2) for a1, a2 in scenario.os_ts_pairs}
         self.danger_sectors : Dict[ConcreteVessel, float] = {vessel : NavigationRiskIndex(scenario, vessel).find_danger_sector() for vessel in [scenario.concrete_scene.os]}
             
         self.max_proximity_index = min(self.proximity_vectors.values(), key=lambda obj: obj.tcpa)
@@ -59,11 +59,11 @@ class NavigationRiskIndex():
     
     def find_danger_sector(self) -> float:
         for i in range(91):
-            new_scenario = self.scenario.modify_copy(self.vessel, heading=self.initial_state.heading + np.radians(i))
+            new_scenario = self.scenario.modify_state_get_new_scene(self.vessel, heading=self.initial_state.heading + np.radians(i))
             if not new_scenario.may_collide_anyone(self.vessel):
                 break
         for j in range(91):
-            new_scenario = self.scenario.modify_copy(self.vessel, heading=self.initial_state.heading - np.radians(i))
+            new_scenario = self.scenario.modify_state_get_new_scene(self.vessel, heading=self.initial_state.heading - np.radians(i))
             if not new_scenario.may_collide_anyone(self.vessel):
                 break
         return pow((i + j) / 180, 0.33)

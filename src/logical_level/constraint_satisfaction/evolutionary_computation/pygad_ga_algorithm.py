@@ -43,7 +43,7 @@ class PyGadGAAlgorithm(SolverBase):
             num_parents_mating=eval_data.num_parents_mating,
             fitness_func=fitness_func,
             sol_per_pop=eval_data.population_size,
-            num_genes=logical_scenario.all_variable_num,
+            num_genes=logical_scenario.all_variable_number,
             gene_space=[{'low': low, 'high': high} for low, high in zip(logical_scenario.xl, logical_scenario.xu)],
             initial_population=initial_population,
             on_generation=on_generation,

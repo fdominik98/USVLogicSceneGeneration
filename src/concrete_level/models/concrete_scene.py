@@ -27,15 +27,15 @@ class ConcreteScene(Serializable):
         return self._data[key]
 
     @property
-    def actors(self):
+    def actors(self) -> List[ConcreteActor]:
         return [actor for actor, _ in self.sorted_actor_states]
     
     @property
-    def vessels(self):
+    def vessels(self) -> List[ConcreteVessel]:
         return [actor for actor, _ in self.sorted_actor_states if actor.is_vessel]
     
     @property
-    def obstacles(self):
+    def obstacles(self)-> List[ConcreteStaticObstacle]:
         return [actor for actor, _ in self.sorted_actor_states if not actor.is_vessel]
     
     @property
@@ -99,38 +99,38 @@ class ConcreteScene(Serializable):
     
     @property
     def os(self) -> ConcreteVessel:
-        vessel = next((actor for actor in self.actors if actor.is_os), None)
+        vessel = next((vessel for vessel in self.vessels if vessel.is_os), None)
         if vessel is None:
             raise ValueError('No OS in the scene.')
         return vessel
     
     @property
-    def non_os(self) -> Set[ConcreteVessel]:
-        return {actor for actor in self.actors if not actor.is_os}
+    def ts_vessels(self) -> Set[ConcreteVessel]:
+        return {vessel for vessel in self.vessels if not vessel.is_os}
     
     
     def assignments(self, variables : List[ActorVariable]) -> Assignments:
         if len(self) != len(variables):
             raise ValueError('Variable and actor numbers do not match.')
-        for actor, var in zip(self.sorted_vessels, variables):
+        for actor, var in zip(self.actors, variables):
             if actor.id != var.id:
                 raise ValueError('Insufficient order of actors and variables.')
         return Assignments(variables).update_from_individual(self.individual)
     
-    def may_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
-        vars = {v : v.logical_variable for v in self.actors}
+    def may_collide(self, actor1 : ConcreteActor, actor2 : ConcreteVessel) -> bool:
+        vars = {a : a.logical_variable for a in self.actors}
         return MayCollide(vars[actor1], vars[actor2]).evaluate_penalty(self.assignments(list(vars.values()))).is_zero
     
-    def do_collide(self, actor1 : ConcreteVessel, actor2 : ConcreteVessel) -> bool:
-        vars = {v : v.logical_variable for v in self.actors}
+    def do_collide(self, actor1 : ConcreteActor, actor2 : ConcreteVessel) -> bool:
+        vars = {a : a.logical_variable for a in self.actors}
         return DoCollide(vars[actor1], vars[actor2]).evaluate_penalty(self.assignments(list(vars.values()))).is_zero
     
     def to_dict(self):
         result = {}
         for key, value in self.__dict__.items():
             if key == '_data':
-                result[key] = [(vessel.to_dict(), state.to_dict())
-                    for vessel, state in self._data.items()]
+                result[key] = [(actor.to_dict(), state.to_dict())
+                    for actor, state in self._data.items()]
             else:  # Handle primitive types
                 result[key] = value
         return result
@@ -141,9 +141,9 @@ class ConcreteScene(Serializable):
         for attr, value in data.items():
             if attr == '_data':
                 copy_data[attr] = {
-                        ConcreteVessel.from_dict(vessel):
+                        ConcreteActor.from_dict(actor):
                         ActorState.from_dict(state)
-                        for vessel, state in value
+                        for actor, state in value
                     }
         return ConcreteScene(**copy_data)
     

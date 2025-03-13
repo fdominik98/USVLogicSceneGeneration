@@ -54,7 +54,7 @@ class FunctionalScenario(Scenario):
     
     @property
     def name(self):
-        return f'{str(self.size)}vessel'
+        return f'{str(self.actor_number)}vessel'
     
     def in_colreg_rel(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
         return self.colreg_rel(o1, o2) or self.colreg_rel(o2, o1)
@@ -102,7 +102,7 @@ class FunctionalScenario(Scenario):
         return self.os_interpretation.next
     
     @property
-    def size(self) -> int:
+    def actor_number(self) -> int:
         return len(self.func_objects)
         
     

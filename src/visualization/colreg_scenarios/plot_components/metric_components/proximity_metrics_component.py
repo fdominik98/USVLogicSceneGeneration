@@ -57,7 +57,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
     
     def do_draw(self):
         x = range(0, self.length)
-        for vessel1, vessel2 in self.scenario.os_non_os_pairs:
+        for vessel1, vessel2 in self.scenario.os_ts_pairs:
             if self.length == 0:
                 break
             if self.ref_risk_vectors is not None:
@@ -69,7 +69,7 @@ class ProximityMetricComponent(PlotComponent, ABC):
             threshold_y = [self.get_threshold_y(self.risk_vectors[0].proximity_vectors[(vessel1, vessel2)])] * self.length
             y = [self.get_y_metric(rv.proximity_vectors[(vessel1, vessel2)]) for rv in self.risk_vectors if (vessel1, vessel2) in rv.proximity_vectors]
             line, = self.ax.plot(x, y, color=colors[vessel2.id],
-                                linewidth=1.7, label=fr'${self.scenario.get_vessel_name(vessel1)} \rightarrow {self.scenario.get_vessel_name(vessel2)}$', linestyle='-')
+                                linewidth=1.7, label=fr'${self.scenario.get_actor_name(vessel1)} \rightarrow {self.scenario.get_actor_name(vessel2)}$', linestyle='-')
             #threshold, = self.ax.plot(x, threshold_y, color=light_colors[vessel2.id], linewidth=1, linestyle='--')
             self.line_graphs[(vessel1, vessel2)] = line
             #self.threshold_graphs[(vessel1, vessel2)] = threshold

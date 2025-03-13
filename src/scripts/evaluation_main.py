@@ -54,7 +54,7 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         else:
             interactions_to_run = interaction 
         
-        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].size] / len(interactions_to_run))
+        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].actor_number] / len(interactions_to_run))
         one_interaction = [SolverFactory.factory(measurement_name=measurement_name,
                                                  functional_scenarios=interactions_to_run, test_config=config,
                                 number_of_runs=number_of_runs_per_interaction, warmups=WARMUPS, verbose=VERBOSE)]

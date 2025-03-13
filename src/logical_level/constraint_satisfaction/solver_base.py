@@ -46,7 +46,7 @@ class SolverBase(ABC):
     def evaluate(self, logical_scenario : LogicalScenario, save : bool) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
-            eval_data.vessel_number = logical_scenario.size
+            eval_data.vessel_number = logical_scenario.actor_number
             eval_data.measurement_name = self.measurement_name
             eval_data.algorithm_desc = self.algorithm_desc
             eval_data.scenario_name = logical_scenario.name
@@ -61,7 +61,7 @@ class SolverBase(ABC):
             eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
             
             best_solution, number_of_generations = self.convert_results(some_results, eval_data)
-            assignments = Assignments(logical_scenario.actor_vars).update_from_individual(best_solution)
+            assignments = Assignments(logical_scenario.actor_variables).update_from_individual(best_solution)
             eval_data.best_scene = SceneBuilder().build_from_assignments(assignments)
             eval_data.number_of_generations = number_of_generations
             

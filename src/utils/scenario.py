@@ -49,5 +49,5 @@ from abc import ABC, abstractmethod
 class Scenario(ABC):
     @property
     @abstractmethod
-    def size(self) -> int:
+    def actor_number(self) -> int:
         pass

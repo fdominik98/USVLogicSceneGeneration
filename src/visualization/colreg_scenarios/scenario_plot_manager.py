@@ -166,7 +166,7 @@ class ScenarioPlotManager():
         col=self.create_actor_info_col('grey')
         actors_label = tk.Label(master=col, text='Attribute', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.trajectory_manger.logical_scenario.actor_vars:
+        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
             col = self.create_actor_info_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -192,7 +192,7 @@ class ScenarioPlotManager():
         col=self.create_actor_control_col('grey')
         actors_label = tk.Label(master=col, text='Component', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.trajectory_manger.logical_scenario.actor_vars:
+        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
             col = self.create_actor_control_col(light_colors[vessel.id])
             actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
@@ -218,7 +218,7 @@ class ScenarioPlotManager():
         for vessel1, vessel2 in self.all_actor_pairs:
             col = self.create_colreg_control_col(light_colors[vessel2.id])
             rel_label = tk.Label(master=col, text=
-                f'{self.trajectory_manger.scenario.get_vessel_name(vessel1)}->{self.trajectory_manger.scenario.get_vessel_name(vessel2)}',
+                f'{self.trajectory_manger.scenario.get_actor_name(vessel1)}->{self.trajectory_manger.scenario.get_actor_name(vessel2)}',
                 background=light_colors[vessel2.id])
             rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
@@ -298,7 +298,7 @@ class ScenarioPlotManager():
         if not self.root.winfo_exists():
             return
         actor_infos = self.get_actor_infos()
-        for vessel in self.trajectory_manger.logical_scenario.actor_vars:
+        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
             for i, info in enumerate(actor_infos[vessel.id]):
                 self.actor_info_labels[vessel.id][i].config(text=info)
         self.control_frame.after(50, self.update_actor_info_labels) 
@@ -361,7 +361,7 @@ class ScenarioPlotManager():
         actor_infos = self.get_actor_infos()
         actor_info_labels = []
         actor_info_columns = self.actor_info_columns[1:]
-        for o in self.trajectory_manger.logical_scenario.actor_vars:
+        for o in self.trajectory_manger.logical_scenario.actor_variables:
             actor_info_label_list : List[tk.Label] = []
             actor_info_labels.append(actor_info_label_list)
             for info in actor_infos[o.id]:

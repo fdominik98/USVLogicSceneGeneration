@@ -29,12 +29,12 @@ class RiskMetricComponent(PlotComponent):
                 break
             if self.ref_risk_vectors is not None:
                 y = [rv.danger_sectors[vessel] for rv in self.ref_risk_vectors if vessel in rv.danger_sectors]
-                line, = self.ax.plot(x, y, color=light_colors[vessel.id], linestyle=':', label=f'{self.scenario.get_vessel_name(vessel)} no intervention', linewidth=2)
+                line, = self.ax.plot(x, y, color=light_colors[vessel.id], linestyle=':', label=f'{self.scenario.get_actor_name(vessel)} no intervention', linewidth=2)
                 self.reference_line_graphs[vessel] = line
                 self.graphs += [line]
             
             y = [rv.danger_sectors[vessel] for rv in self.risk_vectors if vessel in rv.danger_sectors]
-            line, = self.ax.plot(x, y, color=colors[vessel.id], linewidth=1.7, label=f'{self.scenario.get_vessel_name(vessel)} COLREGS compliant', linestyle='-')
+            line, = self.ax.plot(x, y, color=colors[vessel.id], linewidth=1.7, label=f'{self.scenario.get_actor_name(vessel)} COLREGS compliant', linestyle='-')
             self.line_graphs[vessel] = line
             self.graphs += [line]   
             

@@ -19,7 +19,7 @@ class VOConeComponent(PlotComponent):
         self.zorder = -1
             
     def do_draw(self):
-        eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_vars))
+        eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_variables))
         for vessel1, vessel2 in self.scenario.concrete_scene.all_actor_pairs:
             var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
             key = (vessel1, vessel2)
@@ -54,7 +54,7 @@ class VOConeComponent(PlotComponent):
             self.graphs += [line1, line2, other_velocity, filling[0]] 
         
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
-        eval_cache = EvaluationCache(scene.assignments(self.scenario.logical_scenario.actor_vars))
+        eval_cache = EvaluationCache(scene.assignments(self.scenario.logical_scenario.actor_variables))
         for vessel1, vessel2 in self.other_velocity_graphs.keys():
             var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
             key = (vessel1, vessel2)

@@ -21,7 +21,7 @@ from pymoo.algorithms.base.genetic import GeneticAlgorithm
 class NSGAProblem(ElementwiseProblem):
     def __init__(self,logical_scenario: LogicalScenario, eval_data : EvaluationData):
         self.aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)           
-        super().__init__(n_var=logical_scenario.all_variable_num,  # Number of decision variables
+        super().__init__(n_var=logical_scenario.all_variable_number,  # Number of decision variables
                         n_obj=self.aggregate.object_num,  # Number of objective functions
                         n_constr=0,  # Number of constraints
                         xl=logical_scenario.xl, # Lower bounds for variables

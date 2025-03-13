@@ -20,13 +20,13 @@ class RejectionSamplingPipeline(SolverBase):
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         population = initial_population[0]
         functional_scenario = self.scenarios[logical_scenario]
-        assignments = Assignments(logical_scenario.actor_vars).update_from_individual(population)
+        assignments = Assignments(logical_scenario.actor_variables).update_from_individual(population)
         
         length_map = {}
         vis_distance_map = {}
         bearing_map = {}
         
-        for var in logical_scenario.actor_vars:
+        for var in logical_scenario.actor_variables:
             length_map[var.id] = assignments[var].l
         
         if functional_scenario is not None:
