@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Tuple, Type
 import numpy as np
+from functional_level.metamodels.functional_object import FuncObject
+from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
 from logical_level.models.actor_variable import ActorVariable, OSVariable, StaticObstacleVariable, TSVariable, VesselVariable
-from logical_level.models.static_obstacle_types import StaticObstacleType
-from logical_level.models.vessel_types import VesselType
+from utils.static_obstacle_types import StaticObstacleType
+from utils.vessel_types import VesselType
 from utils.serializable import Serializable
 
 @dataclass(frozen=True)
@@ -26,6 +28,10 @@ class ConcreteActor(Serializable, ABC):
     @property
     @abstractmethod    
     def logical_variable(self) -> ActorVariable:
+        pass
+    
+    @abstractmethod
+    def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         pass
     
     @property
@@ -53,6 +59,13 @@ class ConcreteStaticObstacle(ConcreteActor):
     def logical_variable(self) -> 'StaticObstacleVariable':
         t = StaticObstacleType.get_static_obstacle_type_by_name(self.type)
         return StaticObstacleVariable(self.id, t)
+    
+    def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
+        logical_variable = self.logical_variable
+        obj = builder.add_new_obstacle(self.id)
+        t_obj = builder.find_obstacle_type(logical_variable.obstacle_type.name)
+        builder.static_obstacle_type_interpretation.add(obj, t_obj)
+        return logical_variable, obj
         
     @classmethod
     def from_dict(cls: Type['ConcreteStaticObstacle'], data: Dict[str, Any]) -> 'ConcreteStaticObstacle':
@@ -90,6 +103,13 @@ class ConcreteVessel(ConcreteActor):
     def logical_variable(self) -> VesselVariable:
         t = VesselType.get_vessel_type_by_name(self.type)
         return OSVariable(self.id, t) if self.is_os else TSVariable(self.id, t)
+    
+    def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
+        logical_variable = self.logical_variable
+        obj = builder.add_new_os(self.id) if self.is_os else builder.add_new_ts(self.id)
+        t_obj = builder.find_obstacle_type(logical_variable.vessel_type.name)
+        builder.static_obstacle_type_interpretation.add(obj, t_obj)
+        return logical_variable, obj
         
     @classmethod
     def from_dict(cls: Type['ConcreteVessel'], data: Dict[str, Any]) -> 'ConcreteVessel':

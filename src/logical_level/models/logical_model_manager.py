@@ -26,9 +26,9 @@ class LogicalModelManager():
         
         id_generator = IdGenerator()
         
-        os = OSVariable(id_generator.next())
-        ts_vessels = [TSVariable(id_generator.next()) for _ in range(vessel_number)]
-        obstacles = [StaticObstacleVariable(id_generator.next()) for _ in range(obstacle_number)]
+        os = OSVariable(id_generator.os_id())
+        ts_vessels = [TSVariable(id_generator.next_ts()) for _ in range(vessel_number)]
+        obstacles = [StaticObstacleVariable(id_generator.next_obstacle()) for _ in range(obstacle_number)]
         
         actor_variables = [os] + ts_vessels + obstacles
         relation_constr_exprs = set(

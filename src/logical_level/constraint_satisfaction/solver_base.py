@@ -6,7 +6,7 @@ import random
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from logical_level.constraint_satisfaction.aggregates import Aggregate, AggregateAll
+from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from abc import ABC, abstractmethod

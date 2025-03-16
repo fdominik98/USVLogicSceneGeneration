@@ -7,18 +7,20 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 from utils.evaluation_config import NUMBER_OF_RUNS, START_FROM, VERBOSE, WARMUPS, nsga2_vessel_sb_o_config, scenic_rs_o_config, scenic_rs_msr_config, nsga2_vessel_sb_msr_config
 
 measurement_names= ['test_2_vessel_scenarios',
-                     'test_3_vessel_scenarios',]
+                     #'test_3_vessel_scenarios',
+                     ]
 
 
-# interactions = [LogicalModelManager.get_x_vessel_scenarios(2),
-#                  LogicalModelManager.get_x_vessel_scenarios(3)]
+# interactions = [LogicalModelManager.get_x_vessel_scenarios(2, 0),
+#                  LogicalModelManager.get_x_vessel_scenarios(3, 0)]
 # configs = [nsga2_vessel_sb_o_config]
 # configs = [scenic_rs_o_config]
 
 
-interactions = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2),
-                 FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3)]
-configs = [scenic_rs_msr_config]
+interactions = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0),
+                # FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0)
+                 ]
+#configs = [scenic_rs_msr_config]
 configs = [nsga2_vessel_sb_msr_config]
 
 # measurement_names = ['test_4_vessel_scenarios']
@@ -54,7 +56,7 @@ for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_s
         else:
             interactions_to_run = interaction 
         
-        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].vessel_number] / len(interactions_to_run))
+        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].actor_number_by_type] / len(interactions_to_run))
         one_interaction = [SolverFactory.factory(measurement_name=measurement_name,
                                                  functional_scenarios=interactions_to_run, test_config=config,
                                 number_of_runs=number_of_runs_per_interaction, warmups=WARMUPS, verbose=VERBOSE)]

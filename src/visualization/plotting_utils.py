@@ -49,11 +49,10 @@ class EvalPlot(PlotBase, ABC):
         
         self.eval_datas : List[EvaluationData] = sorted(eval_datas, key=lambda eval_data: eval_data.timestamp)
         for eval_data in self.eval_datas:
-            actor_number_by_type : Tuple[int, int] = (eval_data.vessel_number, eval_data.obstacle_number)
             comparison_group = (eval_data.algorithm_desc.lower(), eval_data.aggregate_strat.lower()) if is_algo else eval_data.config_group.lower()    
-            if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or actor_number_by_type not in self.actor_numbers_by_type:
+            if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or eval_data.actor_number_by_type not in self.actor_numbers_by_type:
                 continue
-            self.measurements[actor_number_by_type][comparison_group].append(eval_data) 
+            self.measurements[eval_data.actor_number_by_type][comparison_group].append(eval_data) 
         super().__init__()                
         
     

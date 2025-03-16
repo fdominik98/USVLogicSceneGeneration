@@ -1,9 +1,9 @@
 from itertools import chain, permutations
 from typing import Dict, List, Set, Tuple
-from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
-from functional_level.metamodels.interpretation import crossingFromPortInterpretation, headOnInterpretation, OSInterpretation, overtakingInterpretation, TSInterpretation, VesselClass1Interpretation, VesselClass2Interpretation, VesselClass3Interpretation, VesselClass4Interpretation, VesselClass5Interpretation, VesselClass0Interpretation, VesselClass6Interpretation, VesselClass7Interpretation, VesselClass8Interpretation, VesselInterpretation
+from functional_level.metamodels.interpretation import BinaryInterpretation
+from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
@@ -12,10 +12,9 @@ from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilde
 from logical_level.models.logical_scenario import LogicalScenario
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
-from logical_level.models.actor_variable import ActorVariable, VesselVariable
+from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite, RelationConstrTerm
-from logical_level.models.relation_constraints_concept.predicates import HeadOn, Overtaking, CrossingFromPort, OutVisOrMayNotCollide
-from logical_level.models.vessel_types import ALL_VESSEL_TYPES
+from logical_level.models.relation_constraints_concept.literals import AtVis, BinaryLiteral, InHeadOnSectorOf, InVis, MayCollide, OutVis, InPortSideSectorOf, InStarboardSideSectorOf, InSternSectorOf
 
 class ConcreteSceneAbstractor():
     
@@ -24,68 +23,39 @@ class ConcreteSceneAbstractor():
     
     @staticmethod
     def get_abstractions_from_concrete(scene : ConcreteScene, init_method = RandomInstanceInitializer.name) -> MultiLevelScenario:
-        os_interpretation = OSInterpretation()
-        ts_interpretation = TSInterpretation()
-        head_on_interpretation = headOnInterpretation()
-        overtaking_interpretation = overtakingInterpretation()
-        crossing_interpretation = crossingFromPortInterpretation()    
-        vessel_class_interpretations : List[VesselInterpretation] = [VesselClass0Interpretation(), VesselClass1Interpretation(),
-                                                                     VesselClass2Interpretation(), VesselClass3Interpretation(),
-                                                                     VesselClass4Interpretation(), VesselClass5Interpretation(),
-                                                                     VesselClass6Interpretation(), VesselClass7Interpretation(),
-                                                                     VesselClass8Interpretation()]
+        builder = FunctionalScenarioBuilder()
         
-        vessel_object_map: Dict[ConcreteVessel, FuncObject] = dict()
-        vessel_actor_map: Dict[ConcreteVessel, VesselVariable] = dict()
-        for vessel in scene.actors:
-            obj = FuncObject(vessel.id)
-            vessel_object_map[vessel] = obj
-            logical_actor = vessel.logical_variable
-            vessel_actor_map[vessel] = logical_actor
-            vessel_class_interpretations[ALL_VESSEL_TYPES.index(logical_actor.vessel_type)].add(obj)
-            if vessel.is_os:
-                os_interpretation.add(obj)
-            else:
-                ts_interpretation.add(obj)
+        abstractions : List[Tuple[ActorVariable, FuncObject]] = [actor.create_abstraction(builder) for actor in scene.actors]
                 
-        actor_variables : List[ActorVariable] = list(vessel_actor_map.values())
+        actor_variables : List[ActorVariable] = [var for var, _ in abstractions]
         
         relation_constr_exprs : Set[RelationConstrComposite] = set()
         
         assignments = Assignments(actor_variables).update_from_individual(scene.individual)
+        eval_cache = EvaluationCache(assignments)
         
-        vessel_pairs = list(permutations(scene.actors, 2))
-        for v1, v2 in vessel_pairs:
-            obj1, obj2 = vessel_object_map[v1], vessel_object_map[v2]
-            var1, var2 = vessel_actor_map[v1], vessel_actor_map[v2]
-            
-            eval_cache = EvaluationCache(assignments)
-            
-            if HeadOn(var1, var2).holds(eval_cache):
-                head_on_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(HeadOn(var1, var2))
+        constraint_interpretation_map : List[Tuple[type[BinaryLiteral], BinaryInterpretation]] = [
+            (MayCollide, builder.may_collide_interpretation),
+            (AtVis, builder.at_visibility_distance_interpretation),
+            (OutVis, builder.out_visibility_distance_interpretation),
+            (InVis, builder.in_visibility_distance_interpretation),
+            (InHeadOnSectorOf, builder.in_head_on_sector_of_interpretation),
+            (InPortSideSectorOf, builder.in_port_side_sector_of_interpretation),
+            (InStarboardSideSectorOf, builder.in_starboard_side_sector_of_interpretation),
+            (InSternSectorOf, builder.in_stern_sector_of_interpretation)
+        ]
+        
+        for (var1, obj1), (var2, obj2) in permutations(abstractions, 2):
+            if not var2.is_vessel:
                 continue
             
-            if Overtaking(var1, var2).holds(eval_cache):
-                overtaking_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(Overtaking(var1, var2))
-                continue
+            for Constr, interpretation in constraint_interpretation_map:
+                pred = Constr(var1, var2)
+                if pred.holds(eval_cache):
+                    interpretation.add(obj1, obj2)
+                    relation_constr_exprs.add(pred)
             
-            if CrossingFromPort(var1, var2).holds(eval_cache):
-                #if (obj2, obj1) not in crossing_interpretation: # filter double crossing
-                crossing_interpretation.add(obj1, obj2)
-                relation_constr_exprs.add(CrossingFromPort(var1, var2))
-                continue
-            
-            if OutVisOrMayNotCollide(var1, var2).holds(eval_cache):
-                relation_constr_exprs.add(OutVisOrMayNotCollide(var1, var2))
-                continue # Be careful atvis has drift tolerance and is overlapping with outvis.
-            
-            
-            
-        functional_scenario = FunctionalScenario(os_interpretation, ts_interpretation,
-                                                 head_on_interpretation, overtaking_interpretation,
-                                                 crossing_interpretation, *vessel_class_interpretations)
+        functional_scenario = builder.build()
         
         xl = list(chain.from_iterable([var.lower_bounds for var in actor_variables]))
         xu = list(chain.from_iterable([var.upper_bounds for var in actor_variables]))

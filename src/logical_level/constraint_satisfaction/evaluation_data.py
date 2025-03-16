@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 import os
 import pprint
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from concrete_level.models.concrete_scene import ConcreteScene
 from utils.file_system_utils import ASSET_FOLDER
 from utils.serializable import Serializable
@@ -35,7 +35,11 @@ class EvaluationData(Serializable):
     best_fitness_index: Optional[float] = None  # best_fitness_index
     aggregate_strat: Optional[str] = None  # aggregation strategy
     config_group: Optional[str] = None  # config group
-    best_scene: ConcreteScene = None    
+    best_scene: ConcreteScene = None  
+    
+    @property
+    def actor_number_by_type(self) -> Tuple[int, int]:
+        return (self.vessel_number, self.obstacle_number)  
 
     def save_to_json(self, path2=None):
         if self.path is None:

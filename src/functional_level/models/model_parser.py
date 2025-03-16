@@ -1,10 +1,7 @@
 import re
-from typing import Dict, List
-
-from functional_level.metamodels.functional_object import FuncObject
+from typing import List
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from functional_level.metamodels.interpretation import crossingFromPortInterpretation, headOnInterpretation, OSInterpretation, overtakingInterpretation, TSInterpretation
-from functional_level.models.object_generator import ObjectGenerator
+from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
 from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 
 
@@ -31,42 +28,37 @@ class ModelParser():
     @staticmethod
     def parse_problem(problem : str) -> FunctionalScenario:
         cropped_problem = problem.split('declare')[1]
-        
-        os_interpretation = OSInterpretation()
-        ts_interpretation = TSInterpretation()
-        head_on_interpretation = headOnInterpretation()
-        overtaking_interpretation = overtakingInterpretation()
-        crossing_interpretation = crossingFromPortInterpretation()        
-        
-        object_generator = ObjectGenerator()
-        objects : Dict[str, FuncObject] = dict()
+        builder = FunctionalScenarioBuilder()
 
         # Parse object declarations
         object_pattern = r"(\bOS|\bTS)\((\w+)\)\."
         for obj_type, obj_name in re.findall(object_pattern, cropped_problem):
-            obj = object_generator.new_object
-            objects[obj_name] = obj
             if obj_type == "OS":
-                os_interpretation.add(obj)
+                builder.add_new_os(obj_name)
             elif obj_type == "TS":
-                ts_interpretation.add(obj)
+                builder.add_new_ts(obj_name)
+            elif obj_type == "StaticObstacle":
+                builder.add_new_obstacle(obj_name)
+            else:
+                raise ValueError(f"Unknown object type: {obj_type}")
 
         # Parse relationships
         relationship_patterns = {
-            "headOn": lambda o1, o2: head_on_interpretation.add(o1, o2),
-            "overtaking": lambda o1, o2: overtaking_interpretation.add(o1, o2),
-            "crossingFromPort": lambda o1, o2: crossing_interpretation.add(o1, o2),
+            "headOn": lambda o1, o2: builder.add_head_on(o1, o2),
+            "overtakingToPort": lambda o1, o2: builder.add_overtaking_from_port(o1, o2),
+            "overtakingToStarboard": lambda o1, o2: builder.add_overtaking_from_starboard(o1, o2),
+            "crossingFromPort": lambda o1, o2: builder.add_crossing_from_port(o1, o2),
+            "atDangerousHeadOnSectorOf" : lambda o1, o2: builder.add_at_dangerous_head_on_sector_of(o1, o2),
+            "vesselType" : lambda o1, o2: builder.vessel_type_interpretation.add(o1, o2),
+            "staticObstacleType" : lambda o1, o2: builder.static_obstacle_type_interpretation.add(o1, o2),
         }
         for rel_type, assertion in relationship_patterns.items():
             rel_pattern = fr"{rel_type}\((\w+), (\w+)\)\."
             for o1, o2 in re.findall(rel_pattern, cropped_problem):
-                if o1 in objects and o2 in objects:
-                    assertion(objects[o1], objects[o2])
-        scenario = FunctionalScenario(os_interpretation, ts_interpretation,
-                                  head_on_interpretation, overtaking_interpretation,
-                                  crossing_interpretation)
-
-        return scenario
+                if o1 in builder.objects and o2 in builder.objects:
+                    assertion(builder.objects[o1], builder.objects[o2])
+                    
+        return builder.build()
     
     
     @staticmethod

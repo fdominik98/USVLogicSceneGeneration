@@ -18,6 +18,9 @@ class RelationConstrComposite(ABC):
         cache = EvaluationCache(assignments)
         return self._evaluate_penalty(cache)
     
+    def holds(self, eval_cache : EvaluationCache) -> bool:
+        return self._evaluate_penalty(eval_cache).is_zero
+    
      
 class RelationConstrTerm(RelationConstrComposite):
     def __init__(self, components : Set['RelationConstrComposite'] = set()):

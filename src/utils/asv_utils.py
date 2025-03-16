@@ -4,6 +4,7 @@ BOW_ANGLE = np.radians(10.0)
 STERN_ANGLE = np.radians(135)
 BEAM_ANGLE = np.radians(112.5)
 MASTHEAD_LIGHT_ANGLE = 2 * BEAM_ANGLE
+BEAM_ROTATION_ANGLE = BEAM_ANGLE / 2
 
 KNOT_TO_MS_CONVERSION = 0.5144447 # 1 knot in metres per second
 N_MILE_TO_M_CONVERSION = 1852.001 # 1 nautical miles in metres

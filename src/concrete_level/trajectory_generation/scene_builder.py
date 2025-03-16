@@ -1,16 +1,16 @@
 import random
 from typing import Dict
-from concrete_level.models.concrete_actors import ConcreteStaticObstacle, ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
 from concrete_level.models.vessel_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import StaticObstacleVariable, VesselVariable
-from logical_level.models.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
+from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
 from logical_level.models.values import ObstacleValues, VesselValues
-from logical_level.models.vessel_types import ALL_VESSEL_TYPES
+from utils.vessel_types import ALL_VESSEL_TYPES
 
 
-class SceneBuilder(Dict[ConcreteVessel, ActorState]):  
+class SceneBuilder(Dict[ConcreteActor, ActorState]):  
     def __init__(self, existing_dict=None, *args, **kwargs):
         # Initialize with an empty dict if no existing_dict is provided
         if existing_dict is None:
@@ -18,8 +18,8 @@ class SceneBuilder(Dict[ConcreteVessel, ActorState]):
         # Call the parent constructor with the provided data
         super().__init__(existing_dict, *args, **kwargs)
     
-    def set_state(self, vessel : ConcreteVessel, state : ActorState) -> 'SceneBuilder':
-       self[vessel] = state
+    def set_state(self, actor : ConcreteActor, state : ActorState) -> 'SceneBuilder':
+       self[actor] = state
        return self
        
             

@@ -1,46 +1,43 @@
 from itertools import chain
-from typing import List, Optional, Tuple
-from functional_level.metamodels.functional_object import FuncObject
+from typing import Any, List, Optional, Tuple
 from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
-from logical_level.models.relation_constraints_concept.predicates import HeadOn, Overtaking, CrossingFromPort, OutVisOrMayNotCollide
+from logical_level.models.relation_constraints_concept.predicates import BinaryPredicate, HeadOn, CrossingFromPort, OutVisOrMayNotCollide, OvertakingToPort, OvertakingToStarboard
 from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from logical_level.models.vessel_types import ALL_VESSEL_TYPES, VesselType
+from utils.static_obstacle_types import StaticObstacleType
+from utils.vessel_types import VesselType
 from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():  
     @staticmethod    
     def build_from_functional(functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:    
-        def class_type_map(obj : FuncObject) -> Optional[VesselType]:
-            for i, vessel_type in enumerate(ALL_VESSEL_TYPES):
-                if functional_scenario.is_vessel_class_x(i, obj):
-                    return vessel_type
-            raise ValueError('No vessel type found.')
-            
-        object_variable_map = {
-            obj: OSVariable(obj.id, class_type_map(obj)) if functional_scenario.is_os(obj)
-            else TSVariable(obj.id, class_type_map(obj)) if functional_scenario.is_ts(obj)
-            else ValueError('Neither OS or TS.')
-            for obj in functional_scenario.func_objects
-        }
+        os = functional_scenario.os_object
+        object_variable_map = {os: OSVariable(os.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(os)))}
+        object_variable_map |= {ts : TSVariable(ts.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(ts)))
+                                for ts in functional_scenario.ts_objects}
+        object_variable_map |= {o : TSVariable(o.id, StaticObstacleType.get_static_obstacle_type_by_name(functional_scenario.find_obstacle_type_name(o)))
+                                for o in functional_scenario.obstacle_objects}
+         
         
         # Define interpretations and their corresponding LogicalScenarioBuilder methods
-        interpretations = [
-            (functional_scenario.not_in_colreg_pairs, OutVisOrMayNotCollide),
-            (functional_scenario.head_on_interpretation.get_tuples(), HeadOn),
-            (functional_scenario.crossing_from_port_interpretation.get_tuples(), CrossingFromPort),
-            (functional_scenario.overtaking_interpretation.get_tuples(), Overtaking),
+        predicate_constraint_map : List[Tuple[Any, type[BinaryPredicate]]] = [
+            (functional_scenario.dangerous_head_on_sector_of, OutVisOrMayNotCollide),
+            (functional_scenario.head_on, HeadOn),
+            (functional_scenario.overtaking_to_port, OvertakingToPort),
+            (functional_scenario.overtaking_to_starboard, OvertakingToStarboard),
+            (functional_scenario.crossing_from_port, CrossingFromPort),
+            (functional_scenario.out_vis_or_may_not_collide, OutVisOrMayNotCollide)
         ]
         
         # Generate relation constraint expressions
-        relation_constr_exprs = {
-            predicate(object_variable_map[o1], object_variable_map[o2])
-            for tuples, predicate in interpretations
-            for o1, o2 in tuples
-        }        
-       
+        relation_constr_exprs = set()
+        for o1, o2 in functional_scenario.all_sea_object_pair_permutations:
+            for pred, Constr in predicate_constraint_map:
+                if pred(o1, o2):
+                    relation_constr_exprs.add(Constr(object_variable_map[o1], object_variable_map[o2]))
+                    
         actor_variables : List[ActorVariable] = sorted(object_variable_map.values(), key=lambda x: x.id)
         
         return LogicalScenario(LogicalScenarioBuilder.get_initializer(init_method, actor_variables),

@@ -9,7 +9,7 @@ from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 
 
-NUMBER_OF_RUNS = {2 : 100, 3 : 100, 4 : 100, 5 : 1000, 6 : 1000}
+NUMBER_OF_RUNS = {(2, 0) : 1 * 8, (3, 0) : 100, (4, 0) : 100, (5, 0) : 1000, (6, 0) : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 20

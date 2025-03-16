@@ -4,8 +4,8 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.vessel_state import ActorState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
-from logical_level.models.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from utils.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
 from utils.asv_utils import EGO_BEAM, EGO_LENGTH, vessel_radius
 from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
 from commonroad.geometry.shape import Rectangle

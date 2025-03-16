@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
+import copy
 from dataclasses import dataclass, field
-from typing import Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 from functional_level.metamodels.functional_scenario import FuncObject
 
 @dataclass(frozen=True)
@@ -17,6 +19,7 @@ class Interpretation(ABC):
     def __repr__(self):
         return f"{self.__class__.__name__}({self._data})"
     
+    
     @abstractmethod
     def contains(self, objects) -> bool:
         pass
@@ -24,10 +27,11 @@ class Interpretation(ABC):
     @abstractmethod
     def _add(self, objects):
         pass
-        
+    
 @dataclass(frozen=True)
 class UnaryInterpretation(Interpretation, ABC):
     _data : Set[Tuple[FuncObject]] = field(default_factory=set)
+    _data_values : Dict[FuncObject, str] = field(default_factory=lambda: defaultdict(str))
     
     def contains(self, object : FuncObject) -> bool:
         return (object,) in self._data
@@ -35,21 +39,45 @@ class UnaryInterpretation(Interpretation, ABC):
     def _add(self, objects : Tuple[FuncObject]):
         self._data.add(objects) 
         
-    def add(self, object : FuncObject):
+    def add(self, object : FuncObject, value : str = ''):
         self._add((object,))
+        self._data_values[object] = value
         
     @property
-    def next(self) -> FuncObject:
+    def first(self) -> FuncObject:
         return next(iter(self._data))[0]
+    
+    def get_value(self, o : FuncObject) -> str:
+        return self._data_values[o]
+    
+    def name_with_value(self, object : FuncObject) -> str:
+        return f'{self.name}_{self.get_value(object)}'
+    
+    @classmethod
+    def union(cls, i1 : 'UnaryInterpretation', i2 : 'UnaryInterpretation') -> 'UnaryInterpretation':
+        new_data = i1._data.union(i2._data)
+        new_data_values = i1._data_values | i2._data_values
+        new_interpretation = cls()
+        for (data,) in new_data:
+            new_interpretation.add(data, new_data_values[data])
+        return new_interpretation
     
 @dataclass(frozen=True)
 class BinaryInterpretation(Interpretation, ABC):
     _data : Set[Tuple[FuncObject, FuncObject]] = field(default_factory=set)
     
+    def add(self, o1 : FuncObject, o2 : FuncObject):
+        self._add((o1, o2))
+    
     def contains(self, objects : Tuple[Optional[FuncObject], Optional[FuncObject]]) -> bool:
         if objects[0] == None and objects[1] == None:
             return False
         return len(self.get_tuples(*objects)) > 0
+    
+    def make_two_directional(self):
+        data_temp = copy.deepcopy(self._data)
+        for o1, o2 in data_temp:
+            self._data.add((o2, o1))
     
     def _add(self, objects : Tuple[FuncObject, FuncObject]):
         self._data.add(objects)
@@ -75,6 +103,10 @@ class BinaryInterpretation(Interpretation, ABC):
         return descs
     
 @dataclass(frozen=True)
+class SeaObjectInterpretation(UnaryInterpretation):
+    name : str = field(default='SeaObject', init=False)
+    
+@dataclass(frozen=True)
 class VesselInterpretation(UnaryInterpretation):
     name : str = field(default='Vessel', init=False)
 
@@ -98,33 +130,21 @@ class StaticObstacleTypeInterpretation(UnaryInterpretation):
 class VesselTypeInterpretation(UnaryInterpretation):
     name : str = field(default='VesselType', init=False)
 
-@dataclass(frozen=True)
-class headOnInterpretation(BinaryInterpretation):
-    name : str = field(default='headOn', init=False)
-
-@dataclass(frozen=True)
-class crossingFromPortInterpretation(BinaryInterpretation):
-    name : str = field(default='crossingFromPort', init=False)
-
-@dataclass(frozen=True)
-class overtakingInterpretation(BinaryInterpretation):
-    name : str = field(default='overtaking', init=False)
-    
     
 @dataclass(frozen=True)
-class inPortSideSectorInterpretation(BinaryInterpretation):
+class inPortSideSectorOfInterpretation(BinaryInterpretation):
     name : str = field(default='inPortSideSector', init=False)
 
 @dataclass(frozen=True)
-class inStarboardSideSectorInterpretation(BinaryInterpretation):
+class inStarboardSideSectorOfInterpretation(BinaryInterpretation):
     name : str = field(default='inStarboardSideSector', init=False)
 
 @dataclass(frozen=True)
-class inSternSectorInterpretation(BinaryInterpretation):
+class inSternSectorOfInterpretation(BinaryInterpretation):
     name : str = field(default='inSternSector', init=False)
     
 @dataclass(frozen=True)
-class inHeadOnSectorInterpretation(BinaryInterpretation):
+class inHeadOnSectorOfInterpretation(BinaryInterpretation):
     name : str = field(default='inHeadOnSector', init=False)
     
 @dataclass(frozen=True)
@@ -134,6 +154,22 @@ class staticObstacleTypeInterpretation(BinaryInterpretation):
 @dataclass(frozen=True)
 class vesselTypeInterpretation(BinaryInterpretation):
     name : str = field(default='vesselType', init=False)
+    
+@dataclass(frozen=True)
+class outVisibilityDistanceInterpretation(BinaryInterpretation):
+    name : str = field(default='outVisibilityDistance', init=False)
+
+@dataclass(frozen=True)
+class atVisibilityDistanceInterpretation(BinaryInterpretation):
+    name : str = field(default='atVisibilityDistance', init=False)
+
+@dataclass(frozen=True)
+class inVisibilityDistanceInterpretation(BinaryInterpretation):
+    name : str = field(default='inVisibilityDistance', init=False)
+    
+@dataclass(frozen=True)
+class mayCollideInterpretation(BinaryInterpretation):
+    name : str = field(default='mayCollide', init=False)
     
     
     

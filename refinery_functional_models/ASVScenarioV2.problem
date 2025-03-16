@@ -10,10 +10,10 @@ abstract class SeaObject {
     Vessel[0..*] inPortSideSectorOf
     Vessel[0..*] inStarboardSideSectorOf
     Vessel[0..*] inHeadOnSectorOf
-    SeaObject[0..*] atVisibilityDistanceOf opposite atVisibilityDistanceOf
-    SeaObject[0..*] inVisibilityDistanceOf opposite inVisibilityDistanceOf
-    SeaObject[0..*] outVisibilityDistanceOf opposite outVisibilityDistanceOf
-    SeaObject[0..*] mayCollideWith opposite mayCollideWith
+    SeaObject[0..*] atVisibilityDistance opposite atVisibilityDistance
+    SeaObject[0..*] inVisibilityDistance opposite inVisibilityDistance
+    SeaObject[0..*] outVisibilityDistance opposite outVisibilityDistance
+    SeaObject[0..*] mayCollide opposite mayCollide
 }
 
 class StaticObstacle extends SeaObject {
@@ -34,7 +34,7 @@ pred inMastheadSectorOf(SeaObject o, Vessel v) <->
     inStarboardSideSectorOf(o, v).
 
 pred bothAtVisibilityDistanceAndMayCollide(Vessel v1, Vessel v2) <->
-    atVisibilityDistanceOf(v1, v2), mayCollideWith(v1, v2).
+    atVisibilityDistance(v1, v2), mayCollide(v1, v2).
 
 pred headOn(Vessel v1, Vessel v2) <->
     inHeadOnSectorOf(v1, v2), inHeadOnSectorOf(v2, v1), bothAtVisibilityDistanceAndMayCollide(v1, v2).
@@ -57,9 +57,9 @@ pred inRelativeBearingRelationWith(SeaObject o, Vessel v) <->
     inSternSectorOf(o, v).
 
 pred inVisibilityDistanceRelationWith(SeaObject o, Vessel v) <->
-    inVisibilityDistanceOf(o, v);
-    outVisibilityDistanceOf(o, v);
-    atVisibilityDistanceOf(o,v).
+    inVisibilityDistance(o, v);
+    outVisibilityDistance(o, v);
+    atVisibilityDistance(o,v).
 
 pred inGiveWayRole(Vessel v1) <-> 
     overtaking(v1, _);
@@ -82,10 +82,10 @@ error selfLoopRules(SeaObject o) <->
     inPortSideSectorOf(o, o);
     inStarboardSideSectorOf(o, o);
     inHeadOnSectorOf(o, o);
-    atVisibilityDistanceOf(o, o);
-    inVisibilityDistanceOf(o, o);
-    outVisibilityDistanceOf(o, o);
-    mayCollideWith(o, o).
+    atVisibilityDistance(o, o);
+    inVisibilityDistance(o, o);
+    outVisibilityDistance(o, o);
+    mayCollide(o, o).
 
 // If a sea object is in the:
 //   - stern sector of a vessel, it cannot be in the masthead sector,
@@ -99,13 +99,13 @@ error sectorRules(SeaObject o, Vessel v) <->
 
 // A sea object is in one and only one visibility sector of a vessel.
 error visibilityRules(SeaObject o, Vessel v) <->
-    atVisibilityDistanceOf(o, v), inVisibilityDistanceOf(o, v);
-    atVisibilityDistanceOf(o, v), outVisibilityDistanceOf(o, v);
-    inVisibilityDistanceOf(o, v), outVisibilityDistanceOf(o, v).
+    atVisibilityDistance(o, v), inVisibilityDistance(o, v);
+    atVisibilityDistance(o, v), outVisibilityDistance(o, v);
+    inVisibilityDistance(o, v), outVisibilityDistance(o, v).
 
 // Two static obstacles cannot collide with each other.
 error staticObstacleCollisionRule(StaticObstacle o1, StaticObstacle o2) <->
-    mayCollideWith(o1, o2).
+    mayCollide(o1, o2).
 
 
 //----------------------------------------------------------------------------
@@ -126,26 +126,26 @@ error TSNotInCOLREGSSituationWithOS(TS ts, OS os) <->
 // A static obstacle must be at the visibility distance of the OS
 // and the OS may collide with it.
 error obstacleNotInSituationWithOS(StaticObstacle o, OS os) <->
-    !mayCollideWith(os, o);
-    !atVisibilityDistanceOf(o, os).
+    !mayCollide(os, o);
+    !atVisibilityDistance(o, os).
 
 // Two TSs either do not collide or are outside of each other's visibility range.
 // (Two TSs cannot be in a COLREGS situation.)
 error TSNotOutOfVisibilityDistanceOrCollidesWithTS(TS ts1, TS ts2) <->
-    mayCollideWith(ts1, ts2), !outVisibilityDistanceOf(ts1, ts2), ts1!=ts2.
+    mayCollide(ts1, ts2), !outVisibilityDistance(ts1, ts2), ts1!=ts2.
 
 error noTSEdgesRule(TS ts1, TS ts2) <->
-    atVisibilityDistanceOf(ts1, ts2);
-    inVisibilityDistanceOf(ts1, ts2);
+    atVisibilityDistance(ts1, ts2);
+    inVisibilityDistance(ts1, ts2);
     inRelativeBearingRelationWith(ts1, ts2).
 
 error noTSObstEdgesRule(StaticObstacle o, TS ts2) <->
-    atVisibilityDistanceOf(o, ts2);
-    inVisibilityDistanceOf(o, ts2);
+    atVisibilityDistance(o, ts2);
+    inVisibilityDistance(o, ts2);
     inRelativeBearingRelationWith(o, ts2).
 
 error obstacleNotOutOfVisibilityDistanceOrCollidesWithTS(StaticObstacle o, TS ts) <->
-    mayCollideWith(ts, o), !outVisibilityDistanceOf(o, ts).
+    mayCollide(ts, o), !outVisibilityDistance(o, ts).
 
 //--------------------------------------------------------------------------------
 
