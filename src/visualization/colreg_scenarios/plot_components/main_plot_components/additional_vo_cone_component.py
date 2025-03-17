@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
@@ -11,17 +11,17 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 class AdditionalVOConeComponent(PlotComponent):
     def __init__(self, ax : plt.Axes, scenario : MultiLevelScenario) -> None:
         super().__init__(ax, scenario)
-        self.circle_graphs : Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Circle] = {}
-        self.line1_graphs : Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Line2D] = {}
-        self.line2_graphs : Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Line2D] = {}
+        self.circle_graphs : Dict[Tuple[ConcreteActor, ConcreteActor], plt.Circle] = {}
+        self.line1_graphs : Dict[Tuple[ConcreteActor, ConcreteActor], plt.Line2D] = {}
+        self.line2_graphs : Dict[Tuple[ConcreteActor, ConcreteActor], plt.Line2D] = {}
         self.graphs_by_rels = [self.circle_graphs, self.line1_graphs, self.line2_graphs]
         self.zorder = -2
             
     def do_draw(self):
         eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for vessel1, vessel2 in self.scenario.concrete_scene.all_actor_pairs:
-            var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
-            key = (vessel1, vessel2)
+        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+            var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
+            key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
             vo_circle = plt.Circle(props.val2.p, props.safety_dist, color='black', fill=False, linestyle='--', linewidth=0.7, zorder=self.zorder)
             self.ax.add_artist(vo_circle)
@@ -47,9 +47,9 @@ class AdditionalVOConeComponent(PlotComponent):
             
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         eval_cache = EvaluationCache(scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for vessel1, vessel2 in self.scenario.concrete_scene.all_actor_pairs:
-            var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
-            key = (vessel1, vessel2)
+        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+            var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
+            key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
             self.circle_graphs[key].set_center(props.val2.p)
             self.circle_graphs[key].set_radius(props.safety_dist)

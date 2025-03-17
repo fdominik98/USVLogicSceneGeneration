@@ -4,7 +4,7 @@ import tkinter as tk
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.scenario_metrics_plot import ScenarioMetricsPlot
@@ -200,7 +200,7 @@ class ScenarioPlotManager():
         self.create_actor_checkbox_row([self.colreg_plot.ship_markings_component.ship_dot_graphs], 'Dot')
         self.create_actor_checkbox_row([self.colreg_plot.ship_markings_component.velocity_graphs], 'Velocity')
         self.create_actor_checkbox_row([self.colreg_plot.ship_markings_component.radius_graphs], 'Radius')
-        self.create_actor_checkbox_row([self.colreg_plot.ship_image_component.ship_image_graphs], 'Image')
+        self.create_actor_checkbox_row([self.colreg_plot.ship_image_component.image_graphs], 'Image')
         self.create_actor_checkbox_row([self.colreg_plot.ship_image_component.traj_line_graphs], 'Traj')
         self.create_actor_checkbox_row(self.colreg_plot.angle_circle_component.graphs_by_vessel, 'c')
         self.create_actor_checkbox_row(self.colreg_plot.centered_angle_circle_component.graphs_by_vessel, 'C', False)
@@ -214,12 +214,12 @@ class ScenarioPlotManager():
         col=self.create_colreg_control_col('grey')
         rel_label = tk.Label(master=col, text='Component', background='grey')
         rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        self.all_actor_pairs = self.trajectory_manger.scenario.concrete_scene.all_actor_pairs
-        for vessel1, vessel2 in self.all_actor_pairs:
-            col = self.create_colreg_control_col(light_colors[vessel2.id])
+        self.all_actor_pairs = self.trajectory_manger.scenario.concrete_scene.all_actor_pair_combinations
+        for actor1, actor1 in self.all_actor_pairs:
+            col = self.create_colreg_control_col(light_colors[actor1.id])
             rel_label = tk.Label(master=col, text=
-                f'{self.trajectory_manger.scenario.get_actor_name(vessel1)}->{self.trajectory_manger.scenario.get_actor_name(vessel2)}',
-                background=light_colors[vessel2.id])
+                f'{self.trajectory_manger.scenario.get_actor_name(actor1)}->{self.trajectory_manger.scenario.get_actor_name(actor1)}',
+                background=light_colors[actor1.id])
             rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.create_relation_checkbox_row(self.colreg_plot.distance_component.graphs_by_rels, 'Dist', True)
@@ -229,27 +229,27 @@ class ScenarioPlotManager():
         self.create_relation_checkbox_row([self.colreg_plot.prime_component.p12_vec_graphs], 'P12', False)
         self.create_relation_checkbox_row([self.colreg_plot.prime_component.p21_vec_graphs], 'P21', False)
         
-    def create_actor_checkbox_row(self, plot_components: List[Dict[ConcreteVessel, plt.Artist]], text: str, init_checked=True):
+    def create_actor_checkbox_row(self, plot_components: List[Dict[ConcreteActor, plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
             if len(self.actor_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
         cb_array = CheckboxArray(self.actor_control_columns[0], text, self.colreg_plot.fig)
         actor_columns = self.actor_control_columns[1:]
-        for i, vessel in enumerate(self.trajectory_manger.concrete_scene.actors):
-            Checkbox(actor_columns[i], [cp[vessel] for cp in plot_components], cb_array, light_colors[vessel.id], init_checked)
+        for i, actor in enumerate(self.trajectory_manger.concrete_scene.actors):
+            Checkbox(actor_columns[i], [cp[actor] for cp in plot_components], cb_array, light_colors[actor.id], init_checked)
             
             
-    def create_relation_checkbox_row(self, plot_components: List[Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Artist]], text: str, init_checked=True):
+    def create_relation_checkbox_row(self, plot_components: List[Dict[Tuple[ConcreteActor, ConcreteActor], plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:
             if len(self.rel_control_columns) != len(pc) + 1:
                 raise Exception('data and column dimensions do not match!')
         
         cb_array = CheckboxArray(self.rel_control_columns[0], text, self.colreg_plot.fig)
         colreg_columns = self.rel_control_columns[1:]
-        for i, (vessel1, vessel2) in enumerate(self.all_actor_pairs):
-            Checkbox(colreg_columns[i], [cp[(vessel1, vessel2)] for cp in plot_components], cb_array,
-                     light_colors[vessel1.id], init_checked)
+        for i, (actor1, actor2) in enumerate(self.all_actor_pairs):
+            Checkbox(colreg_columns[i], [cp[(actor1, actor2)] for cp in plot_components], cb_array,
+                     light_colors[actor1.id], init_checked)
         
     def create_actor_control_col(self, color):
         col = tk.Frame(self.actor_control_frame, background=color)
@@ -298,9 +298,9 @@ class ScenarioPlotManager():
         if not self.root.winfo_exists():
             return
         actor_infos = self.get_actor_infos()
-        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
-            for i, info in enumerate(actor_infos[vessel.id]):
-                self.actor_info_labels[vessel.id][i].config(text=info)
+        for actor in self.trajectory_manger.logical_scenario.actor_variables:
+            for i, info in enumerate(actor_infos[actor.id]):
+                self.actor_info_labels[actor.id][i].config(text=info)
         self.control_frame.after(50, self.update_actor_info_labels) 
            
     def exit_application(self):
@@ -361,19 +361,20 @@ class ScenarioPlotManager():
         actor_infos = self.get_actor_infos()
         actor_info_labels = []
         actor_info_columns = self.actor_info_columns[1:]
-        for o in self.trajectory_manger.logical_scenario.actor_variables:
+        for var in self.trajectory_manger.logical_scenario.actor_variables:
             actor_info_label_list : List[tk.Label] = []
             actor_info_labels.append(actor_info_label_list)
-            for info in actor_infos[o.id]:
-                actor_info_label = tk.Label(master=actor_info_columns[o.id], text=info, background=light_colors[o.id], width=16)
+            for info in actor_infos[var.id]:
+                actor_info_label = tk.Label(master=actor_info_columns[var.id], text=info, background=light_colors[var.id], width=16)
                 actor_info_label.pack(side=tk.TOP, fill=tk.NONE)
                 actor_info_label_list.append(actor_info_label)
         return actor_info_labels
     
     def get_actor_infos(self) -> List[List[str]]:
         actor_infos : List[List[str]] = []
-        for vessel, state in self.colreg_plot.animation.current_scene.sorted_actor_states:
-            actor_infos.append([f'{vessel.vessel_type}', f'{vessel.length:.2f}', f'{vessel.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
+        for actor, state in self.colreg_plot.animation.current_scene.sorted_actor_states:
+            length = 0 if not actor.is_vessel else actor.length
+            actor_infos.append([f'{actor.type}', f'{length:.2f}', f'{actor.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
         return actor_infos
     
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Tuple, Type
 import numpy as np
 from functional_level.metamodels.functional_object import FuncObject
@@ -12,13 +12,16 @@ from utils.serializable import Serializable
 @dataclass(frozen=True)
 class ConcreteActor(Serializable, ABC):
     id: int
+    is_vessel : bool
     radius: float
     type : str
     
     @classmethod
-    @abstractmethod
     def from_dict(cls: Type['ConcreteActor'], data: Dict[str, Any]) -> 'ConcreteActor':
-        pass
+        new_data = {k: v for k, v in data.items() if k != 'is_vessel'}
+        if data['is_vessel']:
+            return ConcreteVessel.from_dict(new_data)
+        return ConcreteStaticObstacle.from_dict(new_data)
     
     @property
     @abstractmethod
@@ -34,16 +37,16 @@ class ConcreteActor(Serializable, ABC):
     def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         pass
     
-    @property
-    @abstractmethod
-    def is_vessel(self) -> bool:
-        pass
-        
     def __repr__(self):
         return self.name
 
 @dataclass(frozen=True)
 class ConcreteStaticObstacle(ConcreteActor):
+    is_vessel : bool = field(init=False)
+    
+    def __post_init__(self):
+        object.__setattr__(self, 'is_vessel', False)
+        
     
     @property
     def name(self) -> str:
@@ -63,17 +66,13 @@ class ConcreteStaticObstacle(ConcreteActor):
     def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         logical_variable = self.logical_variable
         obj = builder.add_new_obstacle(self.id)
-        t_obj = builder.find_obstacle_type(logical_variable.obstacle_type.name)
+        t_obj = builder.find_obstacle_type(logical_variable.type_name)
         builder.static_obstacle_type_interpretation.add(obj, t_obj)
         return logical_variable, obj
         
     @classmethod
     def from_dict(cls: Type['ConcreteStaticObstacle'], data: Dict[str, Any]) -> 'ConcreteStaticObstacle':
         return ConcreteStaticObstacle(**data)
-    
-    @property
-    def is_vessel(self) -> bool:
-        return False
     
     
 @dataclass(frozen=True)
@@ -83,9 +82,10 @@ class ConcreteVessel(ConcreteActor):
     max_speed: float
     beam: Optional[float] = None
     
-    @property
-    def is_vessel(self) -> bool:
-        return True
+    is_vessel : bool = field(init=False)
+    
+    def __post_init__(self):
+        object.__setattr__(self, 'is_vessel', True)
     
     @property
     def name(self) -> str:
@@ -107,7 +107,7 @@ class ConcreteVessel(ConcreteActor):
     def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         logical_variable = self.logical_variable
         obj = builder.add_new_os(self.id) if self.is_os else builder.add_new_ts(self.id)
-        t_obj = builder.find_obstacle_type(logical_variable.vessel_type.name)
+        t_obj = builder.find_obstacle_type(logical_variable.type_name)
         builder.static_obstacle_type_interpretation.add(obj, t_obj)
         return logical_variable, obj
         

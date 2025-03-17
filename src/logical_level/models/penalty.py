@@ -69,4 +69,4 @@ class Penalty():
     
     @property
     def is_zero(self) -> bool:
-        return self.total_penalty == 0
+        return self.total_penalty == 0.0

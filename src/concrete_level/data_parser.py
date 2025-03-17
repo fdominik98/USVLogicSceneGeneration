@@ -34,8 +34,11 @@ class DataParser(ABC):
         
         for data in data_lines:
             measurement_data = []
-            if data['error_message'] != None and data['best_solution'] != None:
-                continue
+            error_message = data['error_message']
+            if error_message is not None:
+                print(f'WARNING: error in evaluation data: {error_message}')
+                if data['best_scene'] is not None:
+                    continue
             for column in self.column_names:
                 measurement_data.append(data[column])
             data_lists.append(measurement_data)

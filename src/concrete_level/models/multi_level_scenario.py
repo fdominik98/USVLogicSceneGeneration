@@ -64,8 +64,8 @@ class MultiLevelScenario():
         os = self.concrete_scene.os
         return {(os, obst) for obst in self.concrete_scene.obstacles}
     
-    def get_actor_name(self, vessel : ConcreteActor) -> str:
-        return self.to_variable(vessel).name
+    def get_actor_name(self, actor : ConcreteActor) -> str:
+        return self.to_variable(actor).name
     
     def modify_state_get_new_scene(self, actor: ConcreteActor, x : Optional[float] = None, y : Optional[float] = None,
         speed : Optional[float] = None, heading : Optional[float] = None) -> 'MultiLevelScenario':

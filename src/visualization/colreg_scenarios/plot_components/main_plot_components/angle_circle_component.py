@@ -2,7 +2,7 @@ from typing import Dict, List
 from matplotlib import pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.models.vessel_state import ActorState
 from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
@@ -16,11 +16,11 @@ class AngleCircleComponent(PlotComponent):
     
     def __init__(self, ax: plt.Axes, scenario : MultiLevelScenario, linewidth=0.8, radius_ratio = 10) -> None:
         super().__init__(ax, scenario)
-        self.circle_graphs : Dict[ConcreteVessel, plt.Circle] = {}
-        self.line1_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
-        self.line2_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
-        self.line3_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
-        self.line4_graphs : Dict[ConcreteVessel, plt.Line2D] = {}
+        self.circle_graphs : Dict[ConcreteActor, plt.Circle] = {}
+        self.line1_graphs : Dict[ConcreteActor, plt.Line2D] = {}
+        self.line2_graphs : Dict[ConcreteActor, plt.Line2D] = {}
+        self.line3_graphs : Dict[ConcreteActor, plt.Line2D] = {}
+        self.line4_graphs : Dict[ConcreteActor, plt.Line2D] = {}
         self.graphs_by_vessel = [self.circle_graphs, self.line1_graphs, self.line2_graphs, self.line3_graphs, self.line4_graphs]
         self.zorder = -20
         
@@ -28,22 +28,22 @@ class AngleCircleComponent(PlotComponent):
         self.angle_circle_radius = MAX_COORD / radius_ratio
             
     def do_draw(self):
-        for vessel, state in self.scenario.concrete_scene.items():
-            self.one_draw(vessel, state, self.zorder, light_colors[vessel.id])
+        for actor, state in self.scenario.concrete_scene.items():
+            self.one_draw(actor, state, self.zorder, light_colors[actor.id])
             
     
-    def one_draw(self, vessel : ConcreteVessel, state : ActorState,  zorder : int, circle_color):        
+    def one_draw(self, actor : ConcreteActor, state : ActorState,  zorder : int, circle_color):        
         # Draw two lines centered on the vector
         circle_line1 = self.draw_line(state.p, state.v_norm, -self.angle_circle_slice_1 / 2, circle_color, self.angle_circle_radius, zorder)  # Left line
-        self.line1_graphs[vessel] = circle_line1
+        self.line1_graphs[actor] = circle_line1
         circle_line2 = self.draw_line(state.p, state.v_norm, self.angle_circle_slice_1 / 2, circle_color,  self.angle_circle_radius, zorder)   # Right line
-        self.line2_graphs[vessel] = circle_line2
+        self.line2_graphs[actor] = circle_line2
         
         # Draw two lines centered on the negated vector
         circle_line3 = self.draw_line(state.p, -state.v_norm, -self.angle_circle_slice_2 / 2, circle_color, self.angle_circle_radius, zorder)  # Left line
-        self.line3_graphs[vessel] = circle_line3
+        self.line3_graphs[actor] = circle_line3
         circle_line4 = self.draw_line(state.p, -state.v_norm, self.angle_circle_slice_2 / 2, circle_color, self.angle_circle_radius, zorder)   # Right line
-        self.line4_graphs[vessel] = circle_line4
+        self.line4_graphs[actor] = circle_line4
         
         # # Plot vectors for better visibility
         # v1_scaled = state.v_norm * MAX_COORD / 11
@@ -54,7 +54,7 @@ class AngleCircleComponent(PlotComponent):
         
         circle = plt.Circle(state.p, self.angle_circle_radius, fill=False, color=circle_color, linewidth=self.linewidth, zorder=zorder)
         self.ax.add_artist(circle)
-        self.circle_graphs[vessel] = circle
+        self.circle_graphs[actor] = circle
         
         self.graphs += [circle, circle_line1, circle_line2, circle_line3, circle_line4]
         
@@ -79,19 +79,19 @@ class AngleCircleComponent(PlotComponent):
         return self.graphs
     
     
-    def update_one(self, vessel : ConcreteVessel, state : ActorState):
-        self.circle_graphs[vessel].set_center(state.p)
-        self.circle_graphs[vessel].set_radius(self.angle_circle_radius)
+    def update_one(self, actor : ConcreteActor, state : ActorState):
+        self.circle_graphs[actor].set_center(state.p)
+        self.circle_graphs[actor].set_radius(self.angle_circle_radius)
         
         x1, y1 = self.get_line_x_y(state.p, state.v_norm, -self.angle_circle_slice_1 / 2, self.angle_circle_radius)
-        self.line1_graphs[vessel].set_data(x1, y1)
+        self.line1_graphs[actor].set_data(x1, y1)
         
         x2, y2 = self.get_line_x_y(state.p, state.v_norm, self.angle_circle_slice_1 / 2, self.angle_circle_radius)
-        self.line2_graphs[vessel].set_data(x2, y2)
+        self.line2_graphs[actor].set_data(x2, y2)
         
         x3, y3 = self.get_line_x_y(state.p, -state.v_norm, -self.angle_circle_slice_2 / 2, self.angle_circle_radius)
-        self.line3_graphs[vessel].set_data(x3, y3)
+        self.line3_graphs[actor].set_data(x3, y3)
         
         x4, y4 = self.get_line_x_y(state.p, -state.v_norm, self.angle_circle_slice_2 / 2, self.angle_circle_radius)
-        self.line4_graphs[vessel].set_data(x4, y4)
+        self.line4_graphs[actor].set_data(x4, y4)
     

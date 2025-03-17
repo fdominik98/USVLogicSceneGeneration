@@ -14,6 +14,7 @@ from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilde
 from logical_level.models.logical_scenario import LogicalScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from utils.scenario import Scenario
+from itertools import cycle, islice
 
 
 class SolverBase(ABC):
@@ -28,22 +29,16 @@ class SolverBase(ABC):
         self.warmups = warmups
         self.verbose = verbose
        
-    def run(self) -> List[List[EvaluationData]]:
+    def run(self):
         self.set_seed(self.test_config.random_seed)
         
-        for i in range(self.warmups):
-            logical_scenario = list(self.scenarios.keys())[0]
-            res = self.evaluate(logical_scenario, False)
+        for logical_scenario in islice(cycle(self.scenarios.keys()), self.warmups):
+            self.evaluate(logical_scenario, False)
         
-        results : List[List[EvaluationData]] = []
-        for logical_scenario in self.scenarios.keys():
-            results.append([])
-            for i in range(self.number_of_runs):
-                res = self.evaluate(logical_scenario, True)
-                results[-1].append(res)
-        return results
+        for logical_scenario in islice(cycle(self.scenarios.keys()), self.number_of_runs):
+            self.evaluate(logical_scenario, True)
          
-    def evaluate(self, logical_scenario : LogicalScenario, save : bool) -> EvaluationData:
+    def evaluate(self, logical_scenario : LogicalScenario, save : bool):
         try:
             eval_data = deepcopy(self.test_config)
             eval_data.vessel_number = logical_scenario.vessel_number
@@ -82,7 +77,6 @@ class SolverBase(ABC):
         finally:
             if save:
                 eval_data.save_as_measurement()
-            return eval_data
         
     @abstractmethod   
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):

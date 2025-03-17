@@ -18,12 +18,12 @@ class LegendComponent(PlotComponent):
         self.graphs += [self.legend]
         
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
-        for i, (vessel, state) in enumerate(scene.items()):
+        for i, (actor, state) in enumerate(scene.items()):
             # Plot the positions
-            dot_label = f'{vessel}\; p: ({state.p[0]:.1f}, {state.p[1]:.1f}), r: {vessel.radius:.1f} m'
+            dot_label = f'{actor}\; p: ({state.p[0]:.1f}, {state.p[1]:.1f}), r: {actor.radius:.1f} m'
             angle = f'h: {np.degrees(state.heading):.1f}^\circ'
             speed = f'sp: {(state.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
-            velocity_label =f'{vessel}\; {angle}, {speed}'
+            velocity_label =f'{actor}\; {angle}, {speed}'
             
             self.legend.get_texts()[i * 2 + 0].set_text(rf'${dot_label}$') 
             self.legend.get_texts()[i * 2 + 1].set_text(rf'${velocity_label}$') 

@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 from matplotlib import pyplot as plt
 from concrete_level.models.concrete_scene import ConcreteScene
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
@@ -10,15 +10,15 @@ from visualization.colreg_scenarios.plot_components.plot_component import PlotCo
 class PrimeComponent(PlotComponent):
     def __init__(self, ax: plt.Axes, scenario : MultiLevelScenario) -> None:
         super().__init__(ax, scenario)
-        self.p12_vec_graphs: Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Quiver] = {}
-        self.p21_vec_graphs: Dict[Tuple[ConcreteVessel, ConcreteVessel], plt.Quiver] = {}
+        self.p12_vec_graphs: Dict[Tuple[ConcreteActor, ConcreteActor], plt.Quiver] = {}
+        self.p21_vec_graphs: Dict[Tuple[ConcreteActor, ConcreteActor], plt.Quiver] = {}
         self.zorder = -15
 
     def do_draw(self):
         eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for vessel1, vessel2 in self.scenario.concrete_scene.all_actor_pairs:
-            var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
-            key = (vessel1, vessel2)
+        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+            var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
+            key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
 
             p12_scaled = props.p12 * 0.95
@@ -37,9 +37,9 @@ class PrimeComponent(PlotComponent):
 
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         eval_cache = EvaluationCache(scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for vessel1, vessel2 in self.scenario.concrete_scene.all_actor_pairs:
-            var1, var2 = self.scenario.to_variable(vessel1), self.scenario.to_variable(vessel2)
-            key = (vessel1, vessel2)
+        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+            var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
+            key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
 
             p12_scaled = props.p12 * 0.95

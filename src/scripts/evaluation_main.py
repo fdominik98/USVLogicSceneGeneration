@@ -4,63 +4,44 @@ from functional_level.models.functional_model_manager import FunctionalModelMana
 from logical_level.constraint_satisfaction.solver_base import SolverBase
 from logical_level.constraint_satisfaction.solver_factory import SolverFactory
 from logical_level.models.logical_model_manager import LogicalModelManager
-from utils.evaluation_config import NUMBER_OF_RUNS, START_FROM, VERBOSE, WARMUPS, nsga2_vessel_sb_o_config, scenic_rs_o_config, scenic_rs_msr_config, nsga2_vessel_sb_msr_config
-
-measurement_names= ['test_2_vessel_scenarios',
-                     #'test_3_vessel_scenarios',
-                     ]
+from utils.evaluation_config import NUMBER_OF_RUNS, VERBOSE, WARMUPS, nsga2_vessel_sb_o_config, scenic_rs_o_config, scenic_rs_msr_config, nsga2_vessel_sb_msr_config
 
 
-# interactions = [LogicalModelManager.get_x_vessel_scenarios(2, 0),
-#                  LogicalModelManager.get_x_vessel_scenarios(3, 0)]
-# configs = [nsga2_vessel_sb_o_config]
-# configs = [scenic_rs_o_config]
+measurements = [
+    # ('test_2_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga2_vessel_sb_o_config),
+    # ('test_3_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga2_vessel_sb_o_config),
+    # ('test_4_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga2_vessel_sb_o_config),
+    # ('test_5_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga2_vessel_sb_o_config),
+    # ('test_6_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga2_vessel_sb_o_config),
+    
+    ('test_2_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga2_vessel_sb_msr_config),
+    # ('test_3_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga2_vessel_sb_msr_config),
+    # ('test_4_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga2_vessel_sb_msr_config),
+    # ('test_5_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga2_vessel_sb_msr_config),
+    # ('test_6_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga2_vessel_sb_msr_config),
+    
+    # ('test_2_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_o_config),
+    # ('test_3_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_o_config),
+    # ('test_4_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_o_config),
+    # ('test_5_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_o_config),
+    # ('test_6_vessel_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_o_config),
+    
+    # ('test_2_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
+    # ('test_3_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
+    # ('test_4_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
+    # ('test_5_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
+    # ('test_6_vessel_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
+    
+]
 
-
-interactions = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0),
-                # FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0)
-                 ]
-#configs = [scenic_rs_msr_config]
-configs = [nsga2_vessel_sb_msr_config]
-
-# measurement_names = ['test_4_vessel_scenarios']
-# interactions = [FunctionalModelManager.get_x_vessel_scenarios(4)]
-# interactions = [FunctionalModelManager.get_x_vessel_scenarios(4)]
-
-# measurement_names= ['test_5_vessel_scenarios', ]
-# interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
-# interactions = [FunctionalModelManager.get_x_vessel_scenarios(5)]
-
-# measurement_names= ['test_6_vessel_scenarios']
-# interactions = [LogicalModelManager.get_x_vessel_scenarios(6)]
-# interactions = [FunctionalModelManager.get_x_vessel_scenarios(6)]
-
-
-
-meas_start = START_FROM[0]
-algo_start = START_FROM[1]
-interaction_group_start = START_FROM[2]
 
 #----------------------------------------------------------
 
-tests : List[SolverBase] = []
-for i, (measurement_name, interaction) in enumerate(zip(measurement_names[meas_start:], interactions[meas_start:])):
-    if i == 0:
-        configs_to_run = configs[algo_start:]
-    else:
-        configs_to_run = configs
-        
-    for config in configs_to_run:   
-        if i == 0:
-            interactions_to_run = interaction[interaction_group_start:]
-        else:
-            interactions_to_run = interaction 
-        
-        number_of_runs_per_interaction = int(NUMBER_OF_RUNS[interactions_to_run[0].actor_number_by_type] / len(interactions_to_run))
-        one_interaction = [SolverFactory.factory(measurement_name=measurement_name,
-                                                 functional_scenarios=interactions_to_run, test_config=config,
-                                number_of_runs=number_of_runs_per_interaction, warmups=WARMUPS, verbose=VERBOSE)]
-        tests += one_interaction
+tests : List[SolverBase] = [SolverFactory.factory(measurement_name=measurement_name,
+                                                functional_scenarios=interactions_to_run, test_config=config,
+                                                number_of_runs=NUMBER_OF_RUNS[interactions_to_run[0].actor_number_by_type],
+                                                warmups=WARMUPS, verbose=VERBOSE)
+                            for (measurement_name, interactions_to_run, config) in measurements]
 
 for test in tests: 
     test.run()

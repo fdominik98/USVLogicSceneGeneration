@@ -16,9 +16,6 @@ TIMEOUT = 20
 INIT_METHOD = RandomInstanceInitializer.name
 VERBOSE = True
 
-START_FROM = [0,0,0]
-
-
 nsga2_vessel_sb_msr_config = EvaluationData(population_size=10, mutate_eta=15, mutate_prob=0.8,
                             crossover_eta=20, crossover_prob=1, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,

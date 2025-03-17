@@ -46,10 +46,19 @@ class ActorVariable(ABC):
     @property
     def max_coord(self) -> float:
         return MAX_COORD
+    
+    @property
+    @abstractmethod
+    def type_name(self) -> str:
+        pass
 
 @dataclass(frozen=True)    
 class VesselVariable(ActorVariable, ABC):
     vessel_type : VesselType = DEFAULT_VESSEL_TYPE
+    
+    @property
+    def type_name(self) -> str:
+        return self.vessel_type.name
     
     @property
     def min_length(self) -> float:
@@ -164,6 +173,10 @@ class TSVariable(VesselVariable):
 @dataclass(frozen=True)    
 class StaticObstacleVariable(ActorVariable): 
     obstacle_type : StaticObstacleType = DEFAULT_OBSTACLE_TYPE
+    
+    @property
+    def type_name(self) -> str:
+        return self.obstacle_type.name
     
     @property
     def name(self) -> str:

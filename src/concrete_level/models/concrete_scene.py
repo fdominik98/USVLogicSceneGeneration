@@ -39,11 +39,11 @@ class ConcreteScene(Serializable):
         return [actor for actor, _ in self.sorted_actor_states if not actor.is_vessel]
     
     @property
-    def all_actor_pairs(self):
+    def all_actor_pair_combinations(self):
         return {(ai, aj) for ai, aj in combinations(self.actors, 2)}
     
     @property
-    def all_vessel_pairs(self):
+    def all_vessel_pair_combinations(self):
         return {(ai, aj) for ai, aj in combinations(self.vessels, 2)}
 
     @property
@@ -141,8 +141,7 @@ class ConcreteScene(Serializable):
         for attr, value in data.items():
             if attr == '_data':
                 copy_data[attr] = {
-                        ConcreteActor.from_dict(actor):
-                        ActorState.from_dict(state)
+                        ConcreteActor.from_dict(actor): ActorState.from_dict(state)
                         for actor, state in value
                     }
         return ConcreteScene(**copy_data)

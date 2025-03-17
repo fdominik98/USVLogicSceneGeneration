@@ -147,5 +147,7 @@ class MilitaryVessel(VesselType):
     min_beam : float = 5
     max_beam : float = 40
     
-ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
+#ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
+ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType()]
+
 DEFAULT_VESSEL_TYPE = UnspecifiedVesselType()
