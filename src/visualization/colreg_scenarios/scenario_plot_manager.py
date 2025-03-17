@@ -166,9 +166,9 @@ class ScenarioPlotManager():
         col=self.create_actor_info_col('grey')
         actors_label = tk.Label(master=col, text='Attribute', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
-            col = self.create_actor_info_col(light_colors[vessel.id])
-            actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
+        for actor in self.trajectory_manger.logical_scenario.actor_variables:
+            col = self.create_actor_info_col(light_colors[actor.id])
+            actors_label = tk.Label(master=col, text=actor.name, background=light_colors[actor.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.actor_info_labels = self.create_actor_info_labels()
@@ -192,9 +192,9 @@ class ScenarioPlotManager():
         col=self.create_actor_control_col('grey')
         actors_label = tk.Label(master=col, text='Component', background='grey')
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        for vessel in self.trajectory_manger.logical_scenario.actor_variables:
-            col = self.create_actor_control_col(light_colors[vessel.id])
-            actors_label = tk.Label(master=col, text=vessel.name, background=light_colors[vessel.id])
+        for actor in self.trajectory_manger.logical_scenario.actor_variables:
+            col = self.create_actor_control_col(light_colors[actor.id])
+            actors_label = tk.Label(master=col, text=actor.name, background=light_colors[actor.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         
         self.create_actor_checkbox_row([self.colreg_plot.ship_markings_component.ship_dot_graphs], 'Dot')
@@ -215,10 +215,10 @@ class ScenarioPlotManager():
         rel_label = tk.Label(master=col, text='Component', background='grey')
         rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         self.all_actor_pairs = self.trajectory_manger.scenario.concrete_scene.all_actor_pair_combinations
-        for actor1, actor1 in self.all_actor_pairs:
-            col = self.create_colreg_control_col(light_colors[actor1.id])
+        for actor1, actor2 in self.all_actor_pairs:
+            col = self.create_colreg_control_col(light_colors[actor2.id])
             rel_label = tk.Label(master=col, text=
-                f'{self.trajectory_manger.scenario.get_actor_name(actor1)}->{self.trajectory_manger.scenario.get_actor_name(actor1)}',
+                f'{self.trajectory_manger.scenario.get_actor_name(actor1)}->{self.trajectory_manger.scenario.get_actor_name(actor2)}',
                 background=light_colors[actor1.id])
             rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             

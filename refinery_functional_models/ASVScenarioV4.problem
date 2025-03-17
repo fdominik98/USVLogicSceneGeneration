@@ -4,7 +4,7 @@
                  SailingVessel, MilitaryVessel}
 */
 
-enum StaticObstacleType {Small, Medium, Large}
+//enum StaticObstacleType {Small, Medium, Large}
 
 abstract class Vessel {
     //VesselType[1] vesselType
@@ -47,9 +47,7 @@ pred inCOLREGSSituationWith(Vessel v1, Vessel v2) <->
 //------------------------------------------------------------------------
 
 error selfCOLREGSRelation(Vessel v) <->
-    overtaking(v, v);
-    crossingFromPort(v, v);
-    headOn(v, v).
+    inCOLREGSSituationWith(v, v).
 
 
 error doubleCOLREGSRelation(Vessel v1, Vessel v2) <->
@@ -62,7 +60,9 @@ error doubleCOLREGSRelation(Vessel v1, Vessel v2) <->
     overtaking(v1, v2), crossingFromPort(v2, v1);
 
     crossingFromPort(v1, v2), crossingFromPort(v2, v1);
-    overtaking(v1, v2), overtaking(v2, v1).
+    overtaking(v1, v2), overtaking(v2, v1);
+
+    overtakingToPort(v1, v2), overtakingToStarboard(v1, v2).
 
 
 //----------------------------------------------------------------

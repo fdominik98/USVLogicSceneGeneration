@@ -45,8 +45,8 @@ class ModelParser():
         # Parse relationships
         relationship_patterns = {
             "headOn": lambda o1, o2: builder.add_head_on(o1, o2),
-            "overtakingToPort": lambda o1, o2: builder.add_overtaking_from_port(o1, o2),
-            "overtakingToStarboard": lambda o1, o2: builder.add_overtaking_from_starboard(o1, o2),
+            "overtakingToPort": lambda o1, o2: builder.add_overtaking_to_port(o1, o2),
+            "overtakingToStarboard": lambda o1, o2: builder.add_overtaking_to_starboard(o1, o2),
             "crossingFromPort": lambda o1, o2: builder.add_crossing_from_port(o1, o2),
             "atDangerousHeadOnSectorOf" : lambda o1, o2: builder.add_at_dangerous_head_on_sector_of(o1, o2),
             "vesselType" : lambda o1, o2: builder.vessel_type_interpretation.add(o1, o2),

@@ -51,10 +51,10 @@ class Serializable(ABC):
         obj = cls.__new__(cls)
         for attr, value in data.items():
             attr_type = cls.get_type_by_annotation(attr)
-            if isinstance(attr_type, Type) and issubclass(attr_type, Serializable):
-                setattr(obj, attr, attr_type.from_dict(value))
-            else:
+            if value is None or not (isinstance(attr_type, type) and issubclass(attr_type, Serializable)):
                 setattr(obj, attr, value)
+            else:
+                setattr(obj, attr, attr_type.from_dict(value))
         return obj
         
     @classmethod
