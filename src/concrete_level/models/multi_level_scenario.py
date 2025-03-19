@@ -20,7 +20,7 @@ class MultiLevelScenario():
         
         self.concrete_actor_map : Dict[int, ConcreteActor] = {actor.id : actor for actor in self.concrete_scene.actors}
         self.logical_actor_map : Dict[int, ActorVariable] = {actor.id : actor for actor in self.logical_scenario.actor_variables}
-        self.functional_object_map : Dict[int, FuncObject] = {obj.id : obj for obj in self.functional_scenario.func_objects}
+        self.functional_object_map : Dict[int, FuncObject] = {obj.id : obj for obj in self.functional_scenario.sorted_sea_objects}
         self.evaluation_cache = EvaluationCache(self.concrete_scene.assignments(self.logical_scenario.actor_variables))
         
     def to_concrete_vessel(self, actor_or_obj : Union[ConcreteActor, FuncObject]) -> ConcreteScene:

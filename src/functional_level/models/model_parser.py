@@ -13,6 +13,7 @@ class ModelParser():
         (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacle_scenarios',
         (2, 1) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_1obstacle_scenarios',
         (3, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_0obstacle_scenarios',
+        (3, 1) : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_1obstacle_scenarios',
         (4, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_0obstacle_scenarios',
         (5, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_0obstacle_scenarios',
         (6, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_0obstacle_scenarios'
@@ -22,6 +23,7 @@ class ModelParser():
         (2, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_0obstacle_scenarios',
         (2, 1) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_1obstacle_scenarios',
         (3, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_0obstacle_scenarios',
+        (3, 1) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_1obstacle_scenarios',
         (4, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_0obstacle_scenarios',
         (5, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_0obstacle_scenarios',
         (6, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_0obstacle_scenarios'

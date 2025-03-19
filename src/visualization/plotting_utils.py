@@ -28,7 +28,7 @@ class EvalPlot(PlotBase, ABC):
                         'base_reference' : 'BaseRef'}
     
     actor_numbers_by_type_map = {
-        (2, 0) : '2 Vessels', (3, 0) : '3 Vessels', (4, 0) : '4 Vessels', (5, 0) : '5 Vessels', (6, 0) : '6 Vessels', 
+        (2, 0) : '2 vessels', (2, 1) : '2 vessels, 1 obstacle', (3, 0) : '3 vessels', (3, 1) : '3 vessels, 1 obstacle', (4, 0) : '4 vessels', (5, 0) : '5 vessels', (6, 0) : '6 vessels', 
     }
     
     algo_map = {'nsga2' : 'N2', 'nsga3' : 'N3', 'ga' : 'GA', 'de' : 'DE', 'pso' : 'PSO', 'scenic' : 'Scenic'}
@@ -107,4 +107,4 @@ class DummyEvalPlot(EvalPlot):
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
-        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        return [(2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (5, 0), (6, 0)]

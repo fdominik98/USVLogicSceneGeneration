@@ -69,10 +69,8 @@ class BinaryInterpretation(Interpretation, ABC):
     def add(self, o1 : FuncObject, o2 : FuncObject):
         self._add((o1, o2))
     
-    def contains(self, objects : Tuple[Optional[FuncObject], Optional[FuncObject]]) -> bool:
-        if objects[0] == None and objects[1] == None:
-            return False
-        return len(self.get_tuples(*objects)) > 0
+    def contains(self, objects : Tuple[FuncObject, FuncObject]) -> bool:
+        return objects in self._data
     
     def make_two_directional(self):
         data_temp = copy.deepcopy(self._data)
@@ -84,14 +82,6 @@ class BinaryInterpretation(Interpretation, ABC):
         
     def add(self, o1 : FuncObject, o2 : FuncObject):
         self._add((o1, o2))
-        
-    def get_tuples(self, o1 : Optional[FuncObject] = None, o2 : Optional[FuncObject] = None):
-        if o1 is None and o2 is None:
-            return self._data
-        return {
-            (t1, t2) for t1, t2 in self._data
-            if (o1 is None or o1 == t1) and (o2 is None or o2 == t2)
-        }
         
     def get_relation_descs(self, o : FuncObject) -> Set[Tuple[str, int, FuncObject]]:
         descs : Set[Tuple[str, int, FuncObject]] = set()

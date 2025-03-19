@@ -70,59 +70,15 @@ class ConcreteSceneAbstractor():
     
     
     @staticmethod            
-    def __get_equivalence_class_distribution(equivalence_classes : Dict[int, Tuple[FunctionalScenario, int]], scenes : List[ConcreteScene]) -> Tuple[Dict[int, Tuple[FunctionalScenario, int]], Dict[int, Tuple[FunctionalScenario, int]]]:
-        extra_scenarios : Dict[int, Tuple[FunctionalScenario, int]] = {}
+    def get_equivalence_class_distribution(scenes : List[ConcreteScene]) -> Dict[int, Tuple[MultiLevelScenario, int]]:
+        equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
         for scene in scenes:
             scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene)
-            hash = scenario.functional_scenario.shape_hash()
+            hash = scenario.functional_scenario.shape_hash(2)
             if hash not in equivalence_classes:
-                #print('WARNING: new equivalence class found')
-                if hash not in extra_scenarios:
-                    extra_scenarios[hash] = (scenario.functional_scenario, 1)
-                else:
-                    _, count = extra_scenarios[hash]
-                    extra_scenarios[hash] = (scenario.functional_scenario, count + 1)
-                # from concrete_level.models.trajectory_manager import TrajectoryManager
-                # from visualization.colreg_scenarios.scenario_plot_manager import ScenarioPlotManager
-                # ScenarioPlotManager(TrajectoryManager(scenario))
+                equivalence_classes[hash] = (scenario, 1)
             else:
                 _, count = equivalence_classes[hash]
-                equivalence_classes[hash] = (scenario.functional_scenario, count + 1)
-        return equivalence_classes, extra_scenarios
+                equivalence_classes[hash] = (scenario, count + 1)
+        return equivalence_classes
     
-    @staticmethod
-    def get_all_equivalence_classes(vessel_number : int, obstacle_number : int):
-        actor_number_by_type = (vessel_number, obstacle_number)
-        if vessel_number not in ConcreteSceneAbstractor.__all_scenario_hash_cache:
-            ConcreteSceneAbstractor.__all_scenario_hash_cache[actor_number_by_type] = [
-                (scenario.shape_hash(), scenario) for scenario in
-                FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)]
-            
-        return {shape_hash : (scenario, 0) for shape_hash, scenario in
-                ConcreteSceneAbstractor.__all_scenario_hash_cache[actor_number_by_type]}
-    
-    @staticmethod
-    def get_ambiguous_equivalence_classes(vessel_number : int, obstacle_number : int):
-        actor_number_by_type = (vessel_number, obstacle_number)
-        if vessel_number not in ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache:
-            ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[actor_number_by_type] = [
-                (scenario.shape_hash(), scenario) for scenario in
-                FunctionalModelManager.get_x_vessel_y_obstacle_ambiguous_scenarios(vessel_number, obstacle_number)]
-            
-        return {shape_hash : (scenario, 0) for shape_hash, scenario in
-                ConcreteSceneAbstractor.__ambiguous_scenario_hash_cache[actor_number_by_type]}
-    
-    @staticmethod        
-    def get_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number, obstacle_number)
-        return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[0]
-    
-    @staticmethod        
-    def get_unspecified_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_all_equivalence_classes(vessel_number, obstacle_number)
-        return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[1]
-    
-    @staticmethod 
-    def get_ambiguous_equivalence_class_distribution(scenes : List[ConcreteScene], vessel_number : int, obstacle_number : int) -> Dict[int, Tuple[FunctionalScenario, int]]:
-        equivalence_classes = ConcreteSceneAbstractor.get_ambiguous_equivalence_classes(vessel_number, obstacle_number)
-        return ConcreteSceneAbstractor.__get_equivalence_class_distribution(equivalence_classes, scenes)[0]

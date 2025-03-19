@@ -9,12 +9,12 @@ from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 
 
-NUMBER_OF_RUNS = {(2, 0) : 7, (2, 1) : 7, (3, 0) : 100, (4, 0) : 100, (5, 0) : 1000, (6, 0) : 1000}
+NUMBER_OF_RUNS = {(2, 0) : 1000, (2, 1) : 1000, (3, 0) : 1000, (3, 1) : 1000, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
-TIMEOUT = 20
+TIMEOUT = 240
 INIT_METHOD = RandomInstanceInitializer.name
-VERBOSE = True
+VERBOSE = False
 
 nsga2_vessel_sb_msr_config = EvaluationData(population_size=10, mutate_eta=15, mutate_prob=0.8,
                             crossover_eta=20, crossover_prob=1, timeout=TIMEOUT,

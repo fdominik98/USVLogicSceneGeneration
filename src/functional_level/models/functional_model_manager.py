@@ -7,6 +7,7 @@ class FunctionalModelManager():
         (2, 0) : None,
         (2, 1) : None,
         (3, 0) : None,
+        (3, 1) : None,
         (4, 0) : None,
         (5, 0) : None,
         (6, 0) : None
@@ -16,6 +17,7 @@ class FunctionalModelManager():
         (2, 0) : None,
         (2, 1) : None,
         (3, 0) : None,
+        (3, 1) : None,
         (4, 0) : None,
         (5, 0) : None,
         (6, 0) : None

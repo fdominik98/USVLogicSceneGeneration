@@ -36,13 +36,14 @@ class FunctionalScenario(Scenario):
     vessel_type_interpretation : vesselTypeInterpretation = vesselTypeInterpretation()
     static_obstacle_type_interpretation : staticObstacleTypeInterpretation = staticObstacleTypeInterpretation()
     
-    func_objects : List[FuncObject] = field(init=False)
+    sorted_sea_objects : List[FuncObject] = field(init=False)
     
     def __post_init__(self):
         object.__setattr__(self, 'Vessel_interpretation', VesselInterpretation.union(self.OS_interpretation, self.TS_interpretation))
         object.__setattr__(self, 'SeaObject_interpretation', SeaObjectInterpretation.union(self.Vessel_interpretation, self.Static_obstacle_interpretation))
         
-        object.__setattr__(self, 'func_objects', sorted(list(self.sea_objects), key=lambda x: x.id))
+        
+        object.__setattr__(self, 'sorted_sea_objects', sorted(list(self.sea_objects), key=lambda x: x.id))
         
         self.out_visibility_distance_interpretation.make_two_directional()
         self.in_visibility_distance_interpretation.make_two_directional()
@@ -72,69 +73,83 @@ class FunctionalScenario(Scenario):
     
     
     
-    def in_masthead_sector_of(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def in_masthead_sector_of(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_sea_object(o1) and self.is_vessel(o2) and
                     (self.in_port_side_sector_of_interpretation.contains((o1, o2)) or
                      self.in_starboard_side_sector_of_interpretation.contains((o1, o2)))
                 )
         
-    def at_visibility_distance_and_may_collide(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def at_visibility_distance_and_may_collide(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         
         return (self.is_sea_object(o1) and self.is_vessel(o2) and
                 self.at_visibility_distance_interpretation.contains((o1, o2)) and
                 self.may_collide_interpretation.contains((o1, o2)))
     
-    def out_vis_or_may_not_collide(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def out_vis_or_may_not_collide(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_sea_object(o1) and self.is_vessel(o2) and
                     (self.out_visibility_distance_interpretation.contains((o1, o2)) or
                     not self.may_collide_interpretation.contains((o1, o2)))
                )
     
     
-    def head_on(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def head_on(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_vessel(o1) and self.is_vessel(o2) and
                 self.in_head_on_sector_of_interpretation.contains((o1, o2)) and
                 self.in_head_on_sector_of_interpretation.contains((o2, o1)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
     
-    def overtaking_to_port(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def overtaking_to_port(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_vessel(o1) and self.is_vessel(o2) and
                 self.in_stern_sector_of_interpretation.contains((o1, o2)) and
                 self.in_port_side_sector_of_interpretation.contains((o2, o1)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
         
-    def overtaking_to_starboard(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def overtaking_to_starboard(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_vessel(o1) and self.is_vessel(o2) and
                 self.in_stern_sector_of_interpretation.contains((o1, o2)) and
                 self.in_starboard_side_sector_of_interpretation.contains((o2, o1)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
     
-    def overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def overtaking(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return self.overtaking_to_port(o1, o2) or self.overtaking_to_starboard(o1, o2) 
         
-    def crossing_from_port(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def crossing_from_port(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_vessel(o1) and self.is_vessel(o2) and
                 self.in_port_side_sector_of_interpretation.contains((o1, o2)) and
                 self.in_starboard_side_sector_of_interpretation.contains((o2, o1)) and
                 self.at_visibility_distance_and_may_collide(o1, o2) and not self.head_on(o1, o2))
         
-    def dangerous_head_on_sector_of(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
+    def give_way(self, o : FuncObject) -> bool:
+        if not self.is_vessel(o):
+            return False
+        for o2 in self.sea_objects:
+            if self.overtaking(o, o2) or self.crossing_from_port(o, o2) or self.head_on(o, o2) or self.dangerous_head_on_sector_of(o2, o):
+                return True
+        return False
+        
+    def stand_on(self, o : FuncObject) -> bool:
+        if not self.is_vessel(o):
+            return False
+        for o2 in self.sea_objects:
+            if self.overtaking(o2, o) or self.crossing_from_port(o2, o):
+                return True
+        return False
+        
+    def ambiguous(self, o : FuncObject) -> bool:
+        return self.is_vessel(o) and self.give_way(o) and self.stand_on(o)
+        
+    def dangerous_head_on_sector_of(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_obstacle(o1) and self.is_vessel(o2) and
                 self.in_head_on_sector_of_interpretation.contains((o1, o2)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
     
-    def colreg_situation(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.head_on(o1, o2) or self.overtaking(o1, o2) or self.crossing_from_port(o1, o2)
-    
-    def in_colregs_situation_with(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.colreg_situation(o1, o2) or self.colreg_situation(o2, o1)
-    
-    def in_overtaking(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.overtaking(o1, o2) or self.overtaking(o2, o1)
-    
-    def in_crossing_from_port(self, o1 : Optional[FuncObject], o2 : Optional[FuncObject]) -> bool:
-        return self.crossing_from_port(o1, o2) or self.crossing_from_port(o2, o1)
-    
+    def in_colregs_situation_with(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+        return (self.is_vessel(o1) and self.is_vessel(o2) and
+                (self.head_on(o1, o2) or
+                self.crossing_from_port(o1, o2) or
+                self.crossing_from_port(o2, o1) or
+                self.overtaking(o1, o2) or
+                self.overtaking(o2, o1)))
     
     def find_vessel_type_name(self, obj : FuncObject) -> Optional[str]:
         return next((self.Vessel_interpretation.get_value(o2)
@@ -147,9 +162,18 @@ class FunctionalScenario(Scenario):
     @property
     def is_relevant(self) -> bool:
         os = self.os_object
+        os_obst = all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects)
+        os_ts = all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects)
+        ts_ts = all(self.out_vis_or_may_not_collide(o1, o2) or self.out_vis_or_may_not_collide(o2, o1) for (o1, o2) in self.all_ts_obstacle_pair_combinations)
+        
         return (all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects) and
                 all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects) and
-                all(self.out_vis_or_may_not_collide(o1, o2) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
+                all((self.out_vis_or_may_not_collide(o1, o2) or self.out_vis_or_may_not_collide(o2, o1)) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
+       
+    @property 
+    def is_ambiguous(self) -> bool:
+        return self.ambiguous(self.os_object)
+        
                     
     @property
     def ts_objects(self) -> Set[FuncObject]:
@@ -158,6 +182,18 @@ class FunctionalScenario(Scenario):
     @property
     def obstacle_objects(self) -> Set[FuncObject]:
         return {o for (o,) in self.Static_obstacle_interpretation}
+    
+    @property
+    def vessel_types(self) -> Set[FuncObject]:
+        return {o for (o,) in self.Vessel_type_interpretation}
+    
+    @property
+    def obstacle_types(self) -> Set[FuncObject]:
+        return {o for (o,) in self.Static_obstacle_type_interpretation}
+    
+    @property
+    def functional_objects(self) -> Set[FuncObject]:
+        return self.sea_objects | self.vessel_types | self.obstacle_types
     
     @property
     def os_object(self) -> FuncObject:
@@ -240,13 +276,13 @@ class FunctionalScenario(Scenario):
                     
         
         # Initialize base (0-hop) attributes
-        for node in self.func_objects:
+        for node in self.functional_objects:
             neighborhoods[0][node] = (None, create_attributes(0, node))
 
         # Build neighborhoods iteratively for each hop
         for hop in range(1, hops + 1):
             neighborhoods[hop] = {}
-            for node in self.func_objects:
+            for node in self.functional_objects:
                 neighborhoods[hop][node] = (neighborhoods[hop - 1][node], create_attributes(hop, node))
 
         # Return hash of the last neighborhood
