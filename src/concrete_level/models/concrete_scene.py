@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from itertools import combinations
+from itertools import combinations, product
 from typing import Any, Dict, List, Optional, Set, Type
 from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
 from concrete_level.models.vessel_state import ActorState
@@ -41,6 +41,10 @@ class ConcreteScene(Serializable):
     @property
     def all_actor_pair_combinations(self):
         return {(ai, aj) for ai, aj in combinations(self.actors, 2)}
+    
+    @property
+    def all_vessel_pair_combinations_with_obstacles(self):
+        return self.all_vessel_pair_combinations.union(set(product(self.obstacles, self.vessels)))
     
     @property
     def all_vessel_pair_combinations(self):

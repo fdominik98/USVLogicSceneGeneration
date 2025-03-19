@@ -11,6 +11,7 @@ from logical_level.models.relation_constraints_concept.predicates import OutVisO
 class LogicalModelManager():
     __scenario_cache_map = {
         (2, 0) : None,
+        (2, 1) : None,
         (3, 0) : None,
         (4, 0) : None,
         (5, 0) : None,
@@ -27,7 +28,7 @@ class LogicalModelManager():
         id_generator = IdGenerator()
         
         os = OSVariable(id_generator.os_id())
-        ts_vessels = [TSVariable(id_generator.next_ts()) for _ in range(vessel_number)]
+        ts_vessels = [TSVariable(id_generator.next_ts()) for _ in range(vessel_number - 1)]
         obstacles = [StaticObstacleVariable(id_generator.next_obstacle()) for _ in range(obstacle_number)]
         
         actor_variables = [os] + ts_vessels + obstacles

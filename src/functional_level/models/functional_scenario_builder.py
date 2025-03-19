@@ -90,7 +90,7 @@ class FunctionalScenarioBuilder():
     
     def add_crossing_from_port(self, o1, o2):
         self.in_port_side_sector_of_interpretation.add(o1, o2)
-        self.in_starboard_side_sector_of_interpretation.add(o1, o2)
+        self.in_starboard_side_sector_of_interpretation.add(o2, o1)
         self.add_at_visibility_distance_and_may_collide(o1, o2)
     
     def add_at_dangerous_head_on_sector_of(self, o1, o2):

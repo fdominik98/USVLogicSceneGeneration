@@ -5,8 +5,9 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from utils.asv_utils import MAX_LENGTH
+from utils.colors import light_colors
 from utils.file_system_utils import ASSET_FOLDER
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 from matplotlib.offsetbox import (OffsetImage, AnnotationBbox)
 from scipy.ndimage import rotate
 import matplotlib.image as mpimg
@@ -27,7 +28,7 @@ class ShipImageComponent(PlotComponent):
         
     def do_draw(self):
         for actor, state in self.scenario.concrete_scene.items():         
-            zoom = 0.32 + actor.radius / MAX_LENGTH / 40
+            zoom = 0.07 + actor.radius / MAX_LENGTH / 256
             (line,) = self.ax.plot(self.xs[actor], self.ys[actor], ':', lw=3, color=light_colors[actor.id], zorder=self.zorder-10)
             self.traj_line_graphs[actor] = line
             

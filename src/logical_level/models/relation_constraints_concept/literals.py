@@ -97,14 +97,14 @@ class InVis(BinaryLiteral):
         super().__init__(var1, var2, 'InVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.safety_dist, geo_props.vis_distance - DIST_DRIFT)
+        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, 0, geo_props.vis_distance - DIST_DRIFT)
         
 class OutVis(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'OutVis', MAX_DISTANCE, negated)
     
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, max(geo_props.vis_distance + DIST_DRIFT, geo_props.safety_dist), MAX_DISTANCE)
+        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.vis_distance + DIST_DRIFT, MAX_DISTANCE)
         
         
 ############ RELATIVE BEARING ##################   

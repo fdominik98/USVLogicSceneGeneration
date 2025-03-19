@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List
 import numpy as np
 from utils.static_obstacle_types import DEFAULT_OBSTACLE_TYPE, StaticObstacleType
-from utils.vessel_types import DEFAULT_VESSEL_TYPE, PassengerShip, VesselType
+from utils.vessel_types import DEFAULT_VESSEL_TYPE, OtherVesselType, PassengerShip, VesselType
 from utils.asv_utils import EPSILON, MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
 
 @dataclass(frozen=True)
@@ -117,7 +117,7 @@ class VesselVariable(ActorVariable, ABC):
     
 @dataclass(frozen=True)   
 class OSVariable(VesselVariable):
-    vessel_type : VesselType = PassengerShip()
+    vessel_type : VesselType = OtherVesselType()
     
     @property
     def min_length(self) -> float:

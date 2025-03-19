@@ -6,7 +6,8 @@ from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.models.vessel_state import ActorState
 from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, light_colors
+from utils.colors import light_colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class AngleCircleComponent(PlotComponent):

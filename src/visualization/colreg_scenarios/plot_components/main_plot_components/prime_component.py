@@ -16,7 +16,7 @@ class PrimeComponent(PlotComponent):
 
     def do_draw(self):
         eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+        for actor1, actor2 in self.scenario.concrete_scene.all_vessel_pair_combinations_with_obstacles:
             var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
             key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
@@ -37,7 +37,7 @@ class PrimeComponent(PlotComponent):
 
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         eval_cache = EvaluationCache(scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+        for actor1, actor2 in self.scenario.concrete_scene.all_vessel_pair_combinations_with_obstacles:
             var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
             key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)

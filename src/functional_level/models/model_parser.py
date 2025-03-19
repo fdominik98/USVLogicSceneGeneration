@@ -10,19 +10,21 @@ class ModelParser():
     FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{ASSET_FOLDER}/functional_models/ambiguous'
     
     scenario_path_map = {
-        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacles_scenarios',
-        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_0obstacles_scenarios',
-        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_0obstacles_scenarios',
-        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_0obstacles_scenarios',
-        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_0obstacles_scenarios'
+        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacle_scenarios',
+        (2, 1) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_1obstacle_scenarios',
+        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/3vessel_0obstacle_scenarios',
+        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/4vessel_0obstacle_scenarios',
+        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/5vessel_0obstacle_scenarios',
+        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/6vessel_0obstacle_scenarios'
     }
     
     ambiguous_scenario_path_map = {
-        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_0obstacles_scenarios',
-        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_0obstacles_scenarios',
-        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_0obstacles_scenarios',
-        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_0obstacles_scenarios',
-        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_0obstacles_scenarios'
+        (2, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_0obstacle_scenarios',
+        (2, 1) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/2vessel_1obstacle_scenarios',
+        (3, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/3vessel_0obstacle_scenarios',
+        (4, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/4vessel_0obstacle_scenarios',
+        (5, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/5vessel_0obstacle_scenarios',
+        (6, 0) : f'{FUNCTIONAL_MODELS_PATH_AMBIGUOUS}/6vessel_0obstacle_scenarios'
     }
     
     @staticmethod
@@ -31,7 +33,7 @@ class ModelParser():
         builder = FunctionalScenarioBuilder()
 
         # Parse object declarations
-        object_pattern = r"(\bOS|\bTS)\((\w+)\)\."
+        object_pattern = r"(\bOS|\bTS|\bStaticObstacle)\((\w+)\)\."
         for obj_type, obj_name in re.findall(object_pattern, cropped_problem):
             if obj_type == "OS":
                 builder.add_new_os(obj_name)

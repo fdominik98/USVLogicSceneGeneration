@@ -43,7 +43,7 @@ class SceneBuilder(Dict[ConcreteActor, ActorState]):
                 if obstacle_type.is_unspecified:
                     valid_types = [t for t in ALL_STATIC_OBSTACLE_TYPES if t.do_match(values.r)]
                     obstacle_type = random.choice(valid_types)
-                builder.set_state(ConcreteStaticObstacle(id=actor_var.id, radius=values.r, type=actor_var.type_name),
+                builder.set_state(ConcreteStaticObstacle(id=actor_var.id, radius=values.r, type=obstacle_type.name),
                                   ActorState(x=values.x, y=values.y, speed=0, heading=0))
             else:
                 raise TypeError('Unsupported Actor')

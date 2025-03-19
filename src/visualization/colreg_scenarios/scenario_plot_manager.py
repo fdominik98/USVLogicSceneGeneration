@@ -9,7 +9,7 @@ from concrete_level.models.trajectory_manager import TrajectoryManager
 from utils.file_system_utils import ASSET_FOLDER
 from visualization.colreg_scenarios.scenario_metrics_plot import ScenarioMetricsPlot
 from visualization.colreg_scenarios.scenario_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
-from visualization.colreg_scenarios.plot_components.plot_component import light_colors
+from utils.colors import light_colors
 from visualization.colreg_scenarios.scenario_plot import ScenarioPlot
 
 class StandaloneCheckbox:
@@ -214,7 +214,7 @@ class ScenarioPlotManager():
         col=self.create_colreg_control_col('grey')
         rel_label = tk.Label(master=col, text='Component', background='grey')
         rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
-        self.all_actor_pairs = self.trajectory_manger.scenario.concrete_scene.all_actor_pair_combinations
+        self.all_actor_pairs = self.trajectory_manger.scenario.concrete_scene.all_vessel_pair_combinations_with_obstacles
         for actor1, actor2 in self.all_actor_pairs:
             col = self.create_colreg_control_col(light_colors[actor2.id])
             rel_label = tk.Label(master=col, text=
@@ -298,9 +298,9 @@ class ScenarioPlotManager():
         if not self.root.winfo_exists():
             return
         actor_infos = self.get_actor_infos()
-        for actor in self.trajectory_manger.logical_scenario.actor_variables:
-            for i, info in enumerate(actor_infos[actor.id]):
-                self.actor_info_labels[actor.id][i].config(text=info)
+        for i, actor in enumerate(self.trajectory_manger.logical_scenario.actor_variables):
+            for j, info in enumerate(actor_infos[actor.id]):
+                self.actor_info_labels[i][j].config(text=info)
         self.control_frame.after(50, self.update_actor_info_labels) 
            
     def exit_application(self):
@@ -361,20 +361,20 @@ class ScenarioPlotManager():
         actor_infos = self.get_actor_infos()
         actor_info_labels = []
         actor_info_columns = self.actor_info_columns[1:]
-        for var in self.trajectory_manger.logical_scenario.actor_variables:
+        for i, var in enumerate(self.trajectory_manger.logical_scenario.actor_variables):
             actor_info_label_list : List[tk.Label] = []
             actor_info_labels.append(actor_info_label_list)
             for info in actor_infos[var.id]:
-                actor_info_label = tk.Label(master=actor_info_columns[var.id], text=info, background=light_colors[var.id], width=16)
+                actor_info_label = tk.Label(master=actor_info_columns[i], text=info, background=light_colors[var.id], width=16)
                 actor_info_label.pack(side=tk.TOP, fill=tk.NONE)
                 actor_info_label_list.append(actor_info_label)
         return actor_info_labels
     
-    def get_actor_infos(self) -> List[List[str]]:
-        actor_infos : List[List[str]] = []
+    def get_actor_infos(self) -> Dict[int, List[str]]:
+        actor_infos : Dict[int, List[str]] = {}
         for actor, state in self.colreg_plot.animation.current_scene.sorted_actor_states:
             length = 0 if not actor.is_vessel else actor.length
-            actor_infos.append([f'{actor.type}', f'{length:.2f}', f'{actor.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
+            actor_infos[actor.id] = ([f'{actor.type}', f'{length:.2f}', f'{actor.radius:.2f}', f'({state.x:.2f}, {state.y:.2f})', f'{state.heading:.2f}', f'{state.speed:.2f}'])
         return actor_infos
     
 

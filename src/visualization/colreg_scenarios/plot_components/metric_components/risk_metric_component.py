@@ -4,7 +4,9 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from evaluation.risk_evaluation import RiskVector
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
+from utils.colors import light_colors
+from utils.colors import colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class RiskMetricComponent(PlotComponent):
     def __init__(self, ax : plt.Axes, scenario: MultiLevelScenario, risk_vectors : List[RiskVector], y_label : str, x_label : bool, ref_risk_vectors : Optional[List[RiskVector]] = None) -> None:

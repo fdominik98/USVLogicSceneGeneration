@@ -5,7 +5,8 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors
+from utils.colors import colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class VOConeComponent(PlotComponent):
@@ -20,7 +21,7 @@ class VOConeComponent(PlotComponent):
             
     def do_draw(self):
         eval_cache = EvaluationCache(self.scenario.concrete_scene.assignments(self.scenario.logical_scenario.actor_variables))
-        for actor1, actor2 in self.scenario.concrete_scene.all_actor_pair_combinations:
+        for actor1, actor2 in self.scenario.concrete_scene.all_vessel_pair_combinations_with_obstacles:
             var1, var2 = self.scenario.to_variable(actor1), self.scenario.to_variable(actor2)
             key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
@@ -31,7 +32,7 @@ class VOConeComponent(PlotComponent):
             angle1 = angle_rel + angle_half_cone
             angle2 = angle_rel - angle_half_cone
             
-            cone_size = max(props.o_distance / 2, (props.val1.sp + props.val2.sp) * 1.2)
+            cone_size = props.o_distance / 2
                         
             cone1 = props.val2.v + props.val1.p + np.array([np.cos(angle1), np.sin(angle1)]) * cone_size
             cone2 = props.val2.v + props.val1.p + np.array([np.cos(angle2), np.sin(angle2)]) * cone_size

@@ -1,8 +1,8 @@
 from itertools import chain
 from typing import Any, List, Optional, Tuple
 from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
-from logical_level.models.relation_constraints_concept.predicates import BinaryPredicate, HeadOn, CrossingFromPort, OutVisOrMayNotCollide, OvertakingToPort, OvertakingToStarboard
-from logical_level.models.actor_variable import ActorVariable, OSVariable, TSVariable
+from logical_level.models.relation_constraints_concept.predicates import BinaryPredicate, DangerousHeadOnSectorOf, HeadOn, CrossingFromPort, OutVisOrMayNotCollide, OvertakingToPort, OvertakingToStarboard
+from logical_level.models.actor_variable import ActorVariable, OSVariable, StaticObstacleVariable, TSVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
@@ -17,13 +17,13 @@ class LogicalScenarioBuilder():
         object_variable_map = {os: OSVariable(os.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(os)))}
         object_variable_map |= {ts : TSVariable(ts.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(ts)))
                                 for ts in functional_scenario.ts_objects}
-        object_variable_map |= {o : TSVariable(o.id, StaticObstacleType.get_static_obstacle_type_by_name(functional_scenario.find_obstacle_type_name(o)))
+        object_variable_map |= {o : StaticObstacleVariable(o.id, StaticObstacleType.get_static_obstacle_type_by_name(functional_scenario.find_obstacle_type_name(o)))
                                 for o in functional_scenario.obstacle_objects}
          
         
         # Define interpretations and their corresponding LogicalScenarioBuilder methods
         predicate_constraint_map : List[Tuple[Any, type[BinaryPredicate]]] = [
-            (functional_scenario.dangerous_head_on_sector_of, OutVisOrMayNotCollide),
+            (functional_scenario.dangerous_head_on_sector_of, DangerousHeadOnSectorOf),
             (functional_scenario.head_on, HeadOn),
             (functional_scenario.overtaking_to_port, OvertakingToPort),
             (functional_scenario.overtaking_to_starboard, OvertakingToStarboard),

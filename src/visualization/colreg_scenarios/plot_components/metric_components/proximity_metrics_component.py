@@ -6,7 +6,9 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from evaluation.risk_evaluation import ProximityVector, RiskVector
 from utils.asv_utils import N_MILE_TO_M_CONVERSION
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors, light_colors
+from utils.colors import light_colors
+from utils.colors import colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class ProximityMetricComponent(PlotComponent, ABC):
     time_treshold = 10 * 60

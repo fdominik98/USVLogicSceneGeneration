@@ -5,7 +5,8 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from utils.asv_utils import KNOT_TO_MS_CONVERSION
-from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent, colors
+from utils.colors import colors
+from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class ShipMarkingsComponent(PlotComponent):
