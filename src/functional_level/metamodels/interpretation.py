@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 import copy
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from functional_level.metamodels.functional_scenario import FuncObject
 
 @dataclass(frozen=True)
@@ -27,6 +27,7 @@ class Interpretation(ABC):
     @abstractmethod
     def _add(self, objects):
         pass
+    
     
 @dataclass(frozen=True)
 class UnaryInterpretation(Interpretation, ABC):
@@ -91,6 +92,12 @@ class BinaryInterpretation(Interpretation, ABC):
             elif _o2 is o:
                 descs.add((self.name, 2, _o1))
         return descs
+    
+    @classmethod
+    def intersection(cls, *binary_interpretations : 'BinaryInterpretation'):
+        datas = set.intersection(*[i._data for i in binary_interpretations])
+        new_interpretation = cls(_data=datas)
+        return new_interpretation
     
 @dataclass(frozen=True)
 class SeaObjectInterpretation(UnaryInterpretation):
@@ -161,6 +168,30 @@ class inVisibilityDistanceInterpretation(BinaryInterpretation):
 class mayCollideInterpretation(BinaryInterpretation):
     name : str = field(default='mayCollide', init=False)
     
+    
+    
+    
+    
+@dataclass(frozen=True)
+class headOnInterpretation(BinaryInterpretation):
+    name : str = field(default='headOn', init=False)
+    
+@dataclass(frozen=True)
+class overtakingToPortInterpretation(BinaryInterpretation):
+    name : str = field(default='overtakingToPort', init=False)
+
+@dataclass(frozen=True)
+class overtakingToStarboardInterpretation(BinaryInterpretation):
+    name : str = field(default='overtakingToStarboard', init=False)
+
+@dataclass(frozen=True)
+class crossingFromPortInterpretation(BinaryInterpretation):
+    name : str = field(default='crossingFromPort', init=False)
+    
+@dataclass(frozen=True)
+class dangerousHeadOnSectorOfInterpretation(BinaryInterpretation):
+    name : str = field(default='atDangerousHeadOnSectorOf', init=False)
+
     
     
 

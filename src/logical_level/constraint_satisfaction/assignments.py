@@ -15,9 +15,9 @@ class Assignments(Dict[ActorVariable, ActorValues]):
         index = 0
         for var in self.keys():
             if isinstance(var, VesselVariable):
-                self[var] = VesselValues(*states[index:index + len(var)]) 
+                self[var] = VesselValues(x=states[index+0], y=states[index+1], h=states[index+2], l=states[index+3], sp=states[index+4]) 
             elif isinstance(var, StaticObstacleVariable):
-                self[var] = ObstacleValues(*states[index:index + len(var)]) 
+                self[var] = ObstacleValues(x=states[index+0], y=states[index+1], r=states[index+2]) 
             else:
                 raise Exception("The variable type is not supported.")
             index += len(var)

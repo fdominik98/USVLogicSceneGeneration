@@ -1,4 +1,4 @@
-import itertools
+from itertools import chain
 import re
 import iso3166
 from collections import defaultdict
@@ -449,7 +449,7 @@ class Scenario:
     @property
     def obstacles(self) -> List[Union[Obstacle, StaticObstacle, DynamicObstacle]]:
         """ Returns a list of all static and dynamic obstacles in the scenario."""
-        return list(itertools.chain(self._static_obstacles.values(),
+        return list(chain(self._static_obstacles.values(),
                                     self._dynamic_obstacles.values()))
 
     def add_objects(self, scenario_object: Union[List[Union[Obstacle, Waters, WatersNetwork, TrafficSign]], Obstacle, Waters, WatersNetwork,

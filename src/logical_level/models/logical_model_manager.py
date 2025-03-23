@@ -1,4 +1,4 @@
-import itertools
+from itertools import combinations, product
 from typing import List
 from functional_level.models.object_generator import IdGenerator
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
@@ -34,8 +34,8 @@ class LogicalModelManager():
         
         actor_variables = [os] + ts_vessels + obstacles
         relation_constr_exprs = set(
-            [OutVisOrMayNotCollide(ts1, ts2) for ts1, ts2 in itertools.combinations(ts_vessels, 2)] + 
-            [OutVisOrMayNotCollide(o, ts) for ts in ts_vessels for o in obstacles] +
+            [OutVisOrMayNotCollide(ts1, ts2) for ts1, ts2 in combinations(ts_vessels, 2)] + 
+            [OutVisOrMayNotCollide(o, ts) for o, ts in product(obstacles, ts_vessels)] +
             [AtVisAndMayCollide(non_os, os) for non_os in ts_vessels + obstacles])
         
         cls.__scenario_cache_map[actor_number_by_type] = LogicalScenario(LogicalScenarioBuilder.get_initializer(RandomInstanceInitializer.name, actor_variables),

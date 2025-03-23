@@ -18,9 +18,18 @@ class LogicalScenario(Scenario):
         object.__setattr__(self, 'xl', tuple(self.xl))
         object.__setattr__(self, 'xu', tuple(self.xu))  
     
+    
+    @property
+    def os_variable(self) -> ActorVariable:
+        return next((v for v in self.vessel_variables if v.is_os))
+    
     @property
     def actor_variables(self) -> List[ActorVariable]:
         return self.initializer.actor_variables
+    
+    @property
+    def ts_variables(self) -> List[VesselVariable]:
+        return [var for var in self.vessel_variables if not var.is_os]
     
     @property
     def vessel_variables(self) -> List[VesselVariable]:

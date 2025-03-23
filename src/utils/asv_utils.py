@@ -47,6 +47,11 @@ def vessel_radius(length : float) -> float:
 def calculate_heading(vx : float, vy : float):
     heading_radians = np.arctan2(vy, vx)
     return heading_radians
+
+def compute_angle(vec1, vec2, norm1, norm2):
+    """Compute angle between two vectors."""
+    cos_theta = np.clip(np.dot(vec1, vec2) / (norm1 * norm2), -1, 1)
+    return np.arccos(cos_theta)
         
 
 VISIBILITY_DIST_2 = 2 * N_MILE_TO_M_CONVERSION

@@ -1,10 +1,9 @@
 from itertools import chain, permutations
 from typing import Dict, List, Set, Tuple
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
+from functional_level.metamodels.functional_scenario import FuncObject
 from functional_level.metamodels.interpretation import BinaryInterpretation
 from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
-from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
@@ -17,9 +16,6 @@ from logical_level.models.relation_constraints_concept.composites import Relatio
 from logical_level.models.relation_constraints_concept.literals import AtVis, BinaryLiteral, InHeadOnSectorOf, InVis, MayCollide, OutVis, InPortSideSectorOf, InStarboardSideSectorOf, InSternSectorOf
 
 class ConcreteSceneAbstractor():
-    
-    __all_scenario_hash_cache : Dict[Tuple[int, int], List[Tuple[int, FunctionalScenario]]] = {}
-    __ambiguous_scenario_hash_cache : Dict[Tuple[int, int], List[Tuple[int, FunctionalScenario]]] = {}
     
     @staticmethod
     def get_abstractions_from_concrete(scene : ConcreteScene, init_method = RandomInstanceInitializer.name) -> MultiLevelScenario:
@@ -74,7 +70,7 @@ class ConcreteSceneAbstractor():
         equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
         for scene in scenes:
             scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene)
-            hash = scenario.functional_scenario.shape_hash(2)
+            hash = scenario.functional_scenario.shape_hash_soft()
             if hash not in equivalence_classes:
                 equivalence_classes[hash] = (scenario, 1)
             else:

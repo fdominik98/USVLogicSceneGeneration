@@ -1,6 +1,6 @@
 import random
 import time
-import itertools
+from  itertools import product
 from typing import Any, List, Tuple
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
@@ -27,10 +27,10 @@ c1_s = [1.0, 1.5, 2.0, 2.5]
 c2_s = [1.0, 1.5, 2.0, 2.5]
 w_s = [0.4, 0.6, 0.9]
 
-combinations_GA = list(itertools.product(population_sizes, nums_parents_mating, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
-combinations_NSGA = list(itertools.product(population_sizes, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
-combinations_PSO = list(itertools.product(population_sizes, c1_s, c2_s, w_s))
-combination_DE = list(itertools.product(population_sizes, mutate_probs, crossover_probs))
+combinations_GA = list(product(population_sizes, nums_parents_mating, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
+combinations_NSGA = list(product(population_sizes, mutate_probs, crossover_probs, mutate_etas, crossover_etas))
+combinations_PSO = list(product(population_sizes, c1_s, c2_s, w_s))
+combination_DE = list(product(population_sizes, mutate_probs, crossover_probs))
 
 
 def create_GA_config() -> EvaluationData:

@@ -1,12 +1,14 @@
+import inspect
 from datetime import datetime
-from itertools import chain
+from itertools import chain, combinations, product
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Any, List, Tuple
 import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
 from utils.asv_utils import calculate_heading
 from utils.file_system_utils import ASSET_FOLDER
+from utils import asv_utils
 
 import scenic
 from scenic.core.distributions import (
@@ -73,40 +75,65 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
     return scene, iterations, datetime.now() - start_time, empty_region
     
 
-SCENIC_SCENARIOS : Dict[Tuple[int, int], str] = {
-    (2, 0) : f'{ASSET_FOLDER}/scenic/2vessel_0obstacle_scenario.scenic',
-    (3, 0) : f'{ASSET_FOLDER}/scenic/3vessel_0obstacle_scenario.scenic',
-    (4, 0) : f'{ASSET_FOLDER}/scenic/4vessel_0obstacle_scenario.scenic',
-    (5, 0) : f'{ASSET_FOLDER}/scenic/5vessel_0obstacle_scenario.scenic',
-    (6, 0) : f'{ASSET_FOLDER}/scenic/6vessel_0obstacle_scenario.scenic'
-}
-
-def scenic_scenario(vessel_number : int, obstacle_number : int, length_map, vis_distance_map = {}, bearing_map={}) -> Scenario:
-    actor_number_by_type = (vessel_number, obstacle_number)
-    
+def scenic_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map = {}, bearing_map={}, verbose=False) -> Scenario:
     base_path = f'{ASSET_FOLDER}/scenic/scenic_base.scenic'
     if not os.path.exists(base_path):
         raise FileNotFoundError(base_path)
     with open(base_path, 'r') as file:
-        base = file.read()
+        base_code = file.read()
     
+    scenic_code = generate_scenario_code(base_code, os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map, bearing_map)
+    if verbose:
+        with open(f'{ASSET_FOLDER}/scenic/test_gen.scenic', 'w') as file:
+            file.write(scenic_code)
+    return scenic.scenarioFromString(scenic_code)
     
-    if not os.path.exists(SCENIC_SCENARIOS[actor_number_by_type]):
-        raise FileNotFoundError(SCENIC_SCENARIOS[actor_number_by_type])
-    with open(SCENIC_SCENARIOS[actor_number_by_type], 'r') as file:
-        scenario_path = file.read()
-    
-    content = f'vis_distance_map = {str(vis_distance_map)}\nlength_map = {str(length_map)}\nbearing_map = {str(bearing_map)}\n{base}\n{scenario_path}' 
-    return scenic.scenarioFromString(content)
-    
+  
+def vessel_object_to_individual(obj):
+    return [obj.position[0], obj.position[1], calculate_heading(obj.velocity[0], obj.velocity[1]), obj.length, np.linalg.norm(obj.velocity)]
+        
+def obstacle_object_to_individual(obj):
+    return [obj.position[0], obj.position[1], obj.area_radius]
+
+def object_to_individual(obj):
+    return vessel_object_to_individual(obj) if obj.is_vessel else obstacle_object_to_individual(obj)
     
 def calculate_solution(population: List[float], scene: Any) -> Tuple[List[float]]:
     if scene is None:
         solution = population
     else:            
-        objects = sorted([obj for obj in scene.objects if obj.is_vessel], key=lambda obj: obj.id)
-        solution = list(chain.from_iterable([[obj.position[0],
-                        obj.position[1],
-                        calculate_heading(obj.velocity[0], obj.velocity[1]),
-                        obj.length, np.linalg.norm(obj.velocity)] for obj in objects]))
+        actors = sorted([obj for obj in scene.objects if obj.is_actor], key=lambda obj: obj.id)
+        solution = list(chain.from_iterable([object_to_individual(obj) for obj in actors]))
     return solution
+
+
+def generate_scenario_code(base_code, os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map, bearing_map):
+    ts_infos_assignments = "\n".join(
+        [f"ts{i}, prop{i} = ts_infos.pop(0)\nrequire prop{i}.check_at_vis_may_collide()" for i in ts_ids]
+    )
+    
+    obst_infos_assignments = "\n".join(
+        [f"obst{i}, prop{i} = obst_infos.pop(0)\nrequire prop{i}.check_at_vis_may_collide()" for i in obst_ids]
+    )
+    
+    ts_pair_constraints = "\n".join(
+        [f"prop_ts_ts{k} = new VesselToVesselProperties with val1 ts{i}, with val2 ts{j}\nrequire prop_ts_ts{k}.check_out_vis_or_may_not_collide()"
+         for k, (i, j) in enumerate(combinations(ts_ids, 2))]
+    )
+    
+    ts_obst_pair_constraints = "\n".join(
+        [f"prop_obst_ts{k} = new ObstacleToVesselProperties with val1 obst{i}, with val2 ts{j}\nrequire prop_obst_ts{k}.check_out_vis_or_may_not_collide()"
+         for k, (i, j) in enumerate(product(obst_ids, ts_ids))]
+    )
+    
+    code = "\n".join(
+        [inspect.getsource(asv_utils),
+         base_code,
+         f"ts_infos, obst_infos = create_scenario(os_id = {os_id}, ts_ids={ts_ids}, obst_ids={obst_ids}, length_map={length_map}, radius_map={radius_map}, vis_distance_map={vis_distance_map}, bearing_map={bearing_map})",
+         ts_infos_assignments,
+         obst_infos_assignments,
+         ts_pair_constraints,
+         ts_obst_pair_constraints
+        ]        
+    )
+    return code.strip()

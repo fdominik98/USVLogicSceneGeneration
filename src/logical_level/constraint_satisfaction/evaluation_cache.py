@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 import numpy as np
-from utils.asv_utils import EPSILON, MASTHEAD_LIGHT_ANGLE, o2VisibilityByo1
+from utils.asv_utils import EPSILON, MASTHEAD_LIGHT_ANGLE, o2VisibilityByo1, compute_angle
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import ActorValues, VesselValues
 from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
@@ -11,6 +11,7 @@ class GeometricProperties(ABC):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, assignments):
         self.val1 : ActorValues = assignments[var1]
         self.val2 : VesselValues = assignments[var2]
+        
         self.safety_dist = max(self.val1.r, self.val2.r)
 
         self.p12 = self.val2.p - self.val1.p
@@ -20,7 +21,7 @@ class GeometricProperties(ABC):
         self.o_distance = float(max(np.linalg.norm(self.p12), EPSILON))
 
         # Compute visibility angles
-        self.angle_p21_v2 = self.compute_angle(self.p21, self.val2.v, self.o_distance, self.val2.sp)
+        self.angle_p21_v2 = compute_angle(self.p21, self.val2.v, self.o_distance, self.val2.sp)
         
         self.sin_half_cone_p21_theta = np.clip(self.val1.r / self.o_distance, -1, 1)
         self.angle_half_cone_p21 = abs(np.arcsin(self.sin_half_cone_p21_theta))
@@ -29,11 +30,6 @@ class GeometricProperties(ABC):
         self.tcpa = 0.0
         self.vis_distance = 0.0
 
-    def compute_angle(self, vec1, vec2, norm1, norm2):
-        """Compute angle between two vectors."""
-        cos_theta = np.clip(np.dot(vec1, vec2) / (norm1 * norm2), -1, 1)
-        return np.arccos(cos_theta)
-    
     @abstractmethod
     def get_collision_points(self, time_limit=np.inf) -> List[np.ndarray]:
         pass
@@ -93,7 +89,7 @@ class VesselToVesselProperties(GeometricProperties):
         self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
 
         # Compute angles
-        self.angle_p12_v1 = self.compute_angle(self.p12, self.val1.v, self.o_distance, self.val1.sp)
+        self.angle_p12_v1 = compute_angle(self.p12, self.val1.v, self.o_distance, self.val1.sp)
 
         # Compute visibility distance
         self.vis_distance = min(

@@ -1,4 +1,4 @@
-import itertools
+from itertools import combinations
 from typing import Dict, List, Tuple
 from scipy.stats import fisher_exact
 
@@ -7,7 +7,7 @@ class FisherExactOddsRatio():
     def __init__(self, samples : Dict[str, List[int]] = {}) -> None:
         self.samples = samples
         
-        pairs = list(itertools.combinations(samples.items(), 2))
+        pairs = list(combinations(samples.items(), 2))
         
         self.odds_ratios : Dict[Tuple[str, str], float] = {}
         self.p_values : Dict[Tuple[str, str], float] = {}

@@ -21,40 +21,60 @@ class RejectionSamplingPipeline(SolverBase):
         functional_scenario = self.scenarios[logical_scenario]
         assignments = Assignments(logical_scenario.actor_variables).update_from_individual(population)
         
+        os_id = logical_scenario.os_variable.id
+        ts_ids = [v.id for v in logical_scenario.ts_variables]
+        obst_ids = [v.id for v in logical_scenario.obstacle_variables]
         length_map = {}
+        radius_map = {}
         vis_distance_map = {}
         bearing_map = {}
         
         for var in logical_scenario.actor_variables:
             length_map[var.id] = assignments[var].l
+            radius_map[var.id] = assignments[var].r
         
         if functional_scenario is not None:
-            for ts in functional_scenario.ts_objects:
-                os = functional_scenario.os_object
-                vis_distance_map[(os.id, ts.id)] = min(o2VisibilityByo1(functional_scenario.overtaking(os, ts), length_map[ts.id]),
-                            o2VisibilityByo1(functional_scenario.overtaking(ts, os), length_map[os.id]))
+            os = functional_scenario.os_object
+            for o in functional_scenario.ts_objects:
+                vis_distance_map[(os.id, o.id)] = min(o2VisibilityByo1(functional_scenario.overtaking(os, o), length_map[o.id]),
+                            o2VisibilityByo1(functional_scenario.overtaking(o, os), length_map[os.id]))
                 
-                sin_half_cone_p12_theta = np.clip(vessel_radius(length_map[ts.id]) / vis_distance_map[(os.id, ts.id)], -1, 1)
+                sin_half_cone_p12_theta = np.clip(vessel_radius(length_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
                 angle_half_cone_p12 = abs(np.arcsin(sin_half_cone_p12_theta))
-                sin_half_cone_p21_theta = np.clip(vessel_radius(length_map[os.id]) / vis_distance_map[(os.id, ts.id)], -1, 1)
+                sin_half_cone_p21_theta = np.clip(vessel_radius(length_map[os.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
                 angle_half_cone_p21 = abs(np.arcsin(sin_half_cone_p21_theta))
                 
                 #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
                 # heading_ego_to_ts: relative angle to ego heading
                 # heading_ts_to_ego: relative angle to p12
-                if functional_scenario.head_on(os, ts):
-                    bearing_map[(os.id, ts.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0.0, max(angle_half_cone_p21, BOW_ANGLE))
-                if functional_scenario.crossing_from_port(os, ts):
-                    bearing_map[(os.id, ts.id)] = (-BEAM_ROTATION_ANGLE, BEAM_ANGLE, -BEAM_ROTATION_ANGLE, BEAM_ANGLE)
-                if functional_scenario.crossing_from_port(ts, os):
-                    bearing_map[(os.id, ts.id)] = (BEAM_ROTATION_ANGLE, BEAM_ANGLE, BEAM_ROTATION_ANGLE, BEAM_ANGLE)
-                if functional_scenario.overtaking(os, ts):
-                    bearing_map[(os.id, ts.id)] = (0.0, MASTHEAD_LIGHT_ANGLE, -np.pi, STERN_ANGLE)
-                if functional_scenario.overtaking(ts, os):
-                    bearing_map[(os.id, ts.id)] = (-np.pi, STERN_ANGLE, 0, MASTHEAD_LIGHT_ANGLE)
+                if functional_scenario.head_on(os, o):
+                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0.0, max(angle_half_cone_p21, BOW_ANGLE))
+                if functional_scenario.crossing_from_port(os, o):
+                    bearing_map[(os.id, o.id)] = (-BEAM_ROTATION_ANGLE, BEAM_ANGLE, -BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                if functional_scenario.crossing_from_port(o, os):
+                    bearing_map[(os.id, o.id)] = (BEAM_ROTATION_ANGLE, BEAM_ANGLE, BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                if functional_scenario.overtaking_to_port(os, o):
+                    bearing_map[(os.id, o.id)] = (BEAM_ROTATION_ANGLE, BEAM_ANGLE, -np.pi, STERN_ANGLE)
+                if functional_scenario.overtaking_to_port(o, os):
+                    bearing_map[(os.id, o.id)] = (-np.pi, STERN_ANGLE, -BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                if functional_scenario.overtaking_to_starboard(os, o):
+                    bearing_map[(os.id, o.id)] = (-BEAM_ROTATION_ANGLE, BEAM_ANGLE, -np.pi, STERN_ANGLE)
+                if functional_scenario.overtaking_to_starboard(o, os):
+                    bearing_map[(os.id, o.id)] = (-np.pi, STERN_ANGLE, BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                    
+            for o in functional_scenario.obstacle_objects:
+                os = functional_scenario.os_object
+                vis_distance_map[(os.id, o.id)] = o2VisibilityByo1(True, radius_map[o.id])
+                
+                sin_half_cone_p12_theta = np.clip(vessel_radius(length_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+                angle_half_cone_p12 = abs(np.arcsin(sin_half_cone_p12_theta))
+                    
+                if functional_scenario.dangerous_head_on_sector_of(o, os):
+                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0, 2*np.pi)
         
-        scenario = scenic_scenario(eval_data.vessel_number, eval_data.obstacle_number,
-                                   length_map, vis_distance_map = vis_distance_map, bearing_map=bearing_map)
+        scenario = scenic_scenario(os_id, ts_ids, obst_ids,
+                                   length_map, radius_map, vis_distance_map = vis_distance_map,
+                                   bearing_map=bearing_map, verbose=self.verbose)
         
         return scenario, logical_scenario, population
     
