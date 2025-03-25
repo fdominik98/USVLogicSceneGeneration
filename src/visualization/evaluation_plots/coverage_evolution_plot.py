@@ -7,8 +7,8 @@ from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import EvalPlot
 
 class CoverageEvolutionPlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], get_equivalence_class_distribution=ConcreteSceneAbstractor.get_equivalence_class_distribution): 
-        self.get_equivalence_class_distribution = get_equivalence_class_distribution
+    def __init__(self, eval_datas : List[EvaluationData], is_higher_abstraction = False): 
+        self.is_higher_abstraction = is_higher_abstraction
         super().__init__(eval_datas, is_all=True)
         
     @property   
@@ -36,7 +36,7 @@ class CoverageEvolutionPlot(EvalPlot):
                 equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
                 for eval_data in self.measurements[actor_number_by_type][config_group]:
                     if eval_data.is_valid:
-                        new_classes = self.get_equivalence_class_distribution([eval_data.best_scene])
+                        new_classes = ConcreteSceneAbstractor.get_equivalence_class_distribution([eval_data.best_scene], self.is_higher_abstraction)
                         for key, value in new_classes.items():
                             if key in equivalence_classes:
                                 equivalence_classes[key] = (value[0], equivalence_classes[key][1] + value[1])

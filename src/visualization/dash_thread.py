@@ -164,4 +164,4 @@ class DashThread(threading.Thread):
         
     
     def run(self):
-        self.app.run_server(debug=False, use_reloader=False)
+        self.app.run(debug=False, use_reloader=False)

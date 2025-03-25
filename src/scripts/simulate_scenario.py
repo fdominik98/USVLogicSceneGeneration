@@ -16,6 +16,7 @@ def main():
 
     parser = WARAPSParser(trajectory_manager)
 
+    input("Press Enter to continue...")
     for client in parser.agent_clients:
         client.connect()
         client.publish_command(parser.waypoint_map[client.vessel])

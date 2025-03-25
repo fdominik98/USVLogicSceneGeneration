@@ -153,7 +153,7 @@ class MqttScenarioClient(MqttClient):
         vessel_dict : Dict[str, Dict[str, Any]] = defaultdict(lambda: defaultdict(dict))
         for vessel in scene.vessels:
             waypoint = waypoint_from_state(scene[vessel])
-            vessel_dict[vessel.name]["coordinates"] = [{"lat" : waypoint["latitude"], "long" : waypoint["longitude"]}]
+            vessel_dict[vessel.name]["coordinates"] = [{"lat" : waypoint["latitude"], "lng" : waypoint["longitude"]}]
             vessel_dict[vessel.name]["image"] = "boat"
             vessel_dict[vessel.name]["imageObj"] = {"name": "boat", "type": "boat", "icon": "/icons/simulated_boat.svg", "parent": False, "mapObject": False,
                                     "modules": {"gazebo": {"active": False, "camera": False}, "team_leader": {"active": False}, "object_detection": {"active": False}}}

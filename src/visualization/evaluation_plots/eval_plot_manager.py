@@ -30,23 +30,27 @@ class EvalPlotManager():
     def __init__(self, eval_datas : List[EvaluationData]): 
         self.eval_datas = eval_datas
         self.plots : Dict[str, PlotWrapper] = {
-            "Home" : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
+            ".---------------------------------------." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             #"Scenario Type Statistics" : PlotWrapper(ScenarioTypeStatisticsPlot, {'eval_datas': self.eval_datas}),
-            "Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
-            "Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas}),
-            #"Unspecified Diversity" : PlotWrapper(UnspecifiedDiversityPlot, {'eval_datas': self.eval_datas}),
+            "Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : False}),
+            #"Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : False}),
+            "Higher Abstraction Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : True}),
+            #"Higher Abstraction Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : True}),
+            'Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : False}),
+            'Higher Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_higher_abstraction' : True}),
+            "..-------------------------------------.." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
             "Runtime (successful)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
             "Runtime (all)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            "...-----------------------------------..." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
             "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
             "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
+            "....---------------------------------...." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas}),
             "Ambiguous Diversity Statistics Test" : PlotWrapper(AmbiguousDiversityStatisticsTable, {'eval_datas': self.eval_datas}),
             "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
-            #'Scenario Type Statistical Test' : PlotWrapper(ScenarioTypeStatisticsTable, {'eval_datas': self.eval_datas}),
-            'Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas}),
         }
         
         self.root = tk.Tk()

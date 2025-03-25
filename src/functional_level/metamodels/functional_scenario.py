@@ -40,11 +40,11 @@ class FunctionalScenario(Scenario):
     sorted_sea_objects : List[FuncObject] = field(init=False)
     
 
-    head_on_interpretation : headOnInterpretation = field(default=headOnInterpretation(), init=False)
-    overtaking_to_port_interpretation : overtakingToPortInterpretation = field(default=overtakingToPortInterpretation(), init=False)
-    overtaking_to_starboard_interpretation : overtakingToStarboardInterpretation = field(default=overtakingToStarboardInterpretation(), init=False)
-    crossing_from_port_interpretation : crossingFromPortInterpretation = field(default=crossingFromPortInterpretation(), init=False)
-    dangerous_head_on_sector_of_interpretation : dangerousHeadOnSectorOfInterpretation = field(default=dangerousHeadOnSectorOfInterpretation(), init=False)
+    head_on_interpretation : headOnInterpretation = field(init=False)
+    overtaking_to_port_interpretation : overtakingToPortInterpretation = field(init=False)
+    overtaking_to_starboard_interpretation : overtakingToStarboardInterpretation = field(init=False)
+    crossing_from_port_interpretation : crossingFromPortInterpretation = field(init=False)
+    dangerous_head_on_sector_of_interpretation : dangerousHeadOnSectorOfInterpretation = field(init=False)
     
     
     def __post_init__(self):
@@ -58,7 +58,11 @@ class FunctionalScenario(Scenario):
         object.__setattr__(self, 'Sea_object_interpretation', SeaObjectInterpretation.union(self.Vessel_interpretation, self.Static_obstacle_interpretation))
         object.__setattr__(self, 'sorted_sea_objects', sorted(list(self.sea_objects), key=lambda x: x.id))
         
-        
+        object.__setattr__(self, 'head_on_interpretation', headOnInterpretation())
+        object.__setattr__(self, 'overtaking_to_port_interpretation', overtakingToPortInterpretation())
+        object.__setattr__(self, 'overtaking_to_starboard_interpretation', overtakingToStarboardInterpretation())
+        object.__setattr__(self, 'crossing_from_port_interpretation', crossingFromPortInterpretation())
+        object.__setattr__(self, 'dangerous_head_on_sector_of_interpretation', dangerousHeadOnSectorOfInterpretation())
         for o1, o2 in self.all_sea_object_pair_permutations:
             if self.head_on(o1, o2):
                 self.head_on_interpretation.add(o1, o2)

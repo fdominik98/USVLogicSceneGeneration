@@ -66,11 +66,15 @@ class ConcreteSceneAbstractor():
     
     
     @staticmethod            
-    def get_equivalence_class_distribution(scenes : List[ConcreteScene]) -> Dict[int, Tuple[MultiLevelScenario, int]]:
+    def get_equivalence_class_distribution(scenes : List[ConcreteScene], is_higher_abstraction = False) -> Dict[int, Tuple[MultiLevelScenario, int]]:
         equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
         for scene in scenes:
             scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene)
-            hash = scenario.functional_scenario.shape_hash_soft()
+            if is_higher_abstraction:
+                hash = scenario.functional_scenario.shape_hash_soft()
+            else:
+                hash = scenario.functional_scenario.shape_hash_hard()
+                
             if hash not in equivalence_classes:
                 equivalence_classes[hash] = (scenario, 1)
             else:

@@ -1,15 +1,13 @@
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
-from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import EvalPlot
 
 class DiversityPlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], get_equivalence_class_distribution=ConcreteSceneAbstractor.get_equivalence_class_distribution): 
-        self.get_equivalence_class_distribution = get_equivalence_class_distribution
+    def __init__(self, eval_datas : List[EvaluationData], is_higher_abstraction=False): 
+        self.is_higher_abstraction = is_higher_abstraction
         super().__init__(eval_datas)
         
     
@@ -32,7 +30,8 @@ class DiversityPlot(EvalPlot):
                     axi.set_title(self.vessel_num_labels[i])                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$")
                 
-                equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]])
+                equivalence_classes = ConcreteSceneAbstractor.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]],
+                                                                                                                                             self.is_higher_abstraction)
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                 
@@ -62,6 +61,6 @@ class DiversityPlot(EvalPlot):
 
         
 class AmbiguousDiversityPlot(DiversityPlot):
-    def __init__(self, eval_datas):
-        super().__init__(eval_datas)
+    def __init__(self, eval_datas, is_higher_abstraction=False):
+        super().__init__(eval_datas, is_higher_abstraction)
         

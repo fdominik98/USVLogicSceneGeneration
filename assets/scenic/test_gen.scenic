@@ -297,16 +297,11 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distanc
     ts_infos = [add_ts(ts_id, distance_region, distance) for ts_id in ts_ids]
     obst_infos = [add_obst(obst_id, distance_region, distance) for obst_id in obst_ids]
     return ts_infos, obst_infos
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[100], length_map={0: 30.000000000097934, 1: 12.79113602464016, 2: 330.7542233311797, 100: 1}, radius_map={0: 120.00000000039174, 1: 51.16454409856064, 2: 1323.0168933247187, 100: 67.79844204597376}, vis_distance_map={(0, 1): 3704.002, (0, 2): 3704.002, (0, 100): 5556.003}, bearing_map={(0, 1): (-0.9817477042468103, 1.9634954084936207, -3.141592653589793, 2.356194490192345), (0, 2): (-3.141592653589793, 2.356194490192345, 0.9817477042468103, 1.9634954084936207), (0, 100): (0.0, 0.17453292519943295, 0, 6.283185307179586)})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1], obst_ids=[100], length_map={0: 29.999999999900204, 1: 396.7509632730928, 100: 1}, radius_map={0: 119.99999999960082, 1: 1587.0038530923712, 100: 125.78139088744983}, vis_distance_map={}, bearing_map={})
 ts1, prop1 = ts_infos.pop(0)
 require prop1.check_at_vis_may_collide()
-ts2, prop2 = ts_infos.pop(0)
-require prop2.check_at_vis_may_collide()
 obst100, prop100 = obst_infos.pop(0)
 require prop100.check_at_vis_may_collide()
-prop_ts_ts0 = new VesselToVesselProperties with val1 ts1, with val2 ts2
-require prop_ts_ts0.check_out_vis_or_may_not_collide()
+
 prop_obst_ts0 = new ObstacleToVesselProperties with val1 obst100, with val2 ts1
 require prop_obst_ts0.check_out_vis_or_may_not_collide()
-prop_obst_ts1 = new ObstacleToVesselProperties with val1 obst100, with val2 ts2
-require prop_obst_ts1.check_out_vis_or_may_not_collide()

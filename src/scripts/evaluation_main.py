@@ -30,7 +30,7 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     
     # RS-O
     # ('test_2_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_o_config),
-    # ('test_2_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_o_config),
+    ('test_2_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_o_config),
     # ('test_3_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_o_config),
     # ('test_3_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_o_config),
     # ('test_4_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_o_config),
@@ -41,7 +41,7 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     # ('test_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
     # ('test_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_msr_config),
     # ('test_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
-    ('test_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_msr_config),
+    # ('test_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_msr_config),
     # ('test_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
     # ('test_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
     # ('test_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
