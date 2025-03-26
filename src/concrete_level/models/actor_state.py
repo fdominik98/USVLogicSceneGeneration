@@ -28,6 +28,10 @@ class ActorState(Serializable):
     def v_norm_perp(self) -> np.ndarray:
         return np.array([self.v_norm[1], -self.v_norm[0]])
     
+    @property
+    def heading_deg(self):
+        return np.rad2deg(self.heading)
+        
     def modify_copy(self, x : Optional[float] = None, y : Optional[float] = None,
              speed : Optional[float] = None, heading : Optional[float] = None) -> 'ActorState':
         return ActorState(x or self.x, y or self.y, speed or self.speed, heading or self.heading)
@@ -36,3 +40,5 @@ class ActorState(Serializable):
     @classmethod
     def from_dict(cls: Type['ActorState'], data: Dict[str, Any]) -> 'ActorState':
         return ActorState(**data)
+    
+        

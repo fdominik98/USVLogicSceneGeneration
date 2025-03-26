@@ -2,12 +2,12 @@ import re
 from typing import List
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
-from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
+from utils.file_system_utils import FUNCTIONAL_MODELS_FOLDER, get_all_file_paths
 
 
 class ModelParser():
-    FUNCTIONAL_MODELS_PATH_ALL = f'{ASSET_FOLDER}/functional_models/all'
-    FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{ASSET_FOLDER}/functional_models/ambiguous'
+    FUNCTIONAL_MODELS_PATH_ALL = f'{FUNCTIONAL_MODELS_FOLDER}/all'
+    FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{FUNCTIONAL_MODELS_FOLDER}/ambiguous'
     
     scenario_path_map = {
         (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacle_scenarios',

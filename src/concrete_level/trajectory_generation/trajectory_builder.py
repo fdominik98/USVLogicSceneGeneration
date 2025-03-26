@@ -1,6 +1,6 @@
 from typing import Dict, List
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.trajectories import Trajectories
 from utils.asv_utils import ONE_HOUR_IN_SEC

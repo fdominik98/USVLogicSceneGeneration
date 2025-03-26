@@ -1,6 +1,6 @@
 """ Generate a report of the python code outline of a folder. """
 import os
-from utils.file_system_utils import ASSET_FOLDER, ROOT_FOLDER
+from utils.file_system_utils import PROJECT_REPORT_FOLDER, ROOT_FOLDER
 
 
 import os
@@ -148,16 +148,6 @@ def process_directory(
         # Write files content
         f.write("\n\n".join(files_content))
 
-
-
-
-
-# Specify the report and ignore file paths (optional)
-REPORT_DIR_PATH = f'{ASSET_FOLDER}/project_report'
-
-if not os.path.exists(REPORT_DIR_PATH):
-    os.makedirs(REPORT_DIR_PATH)
-    
-REPORT_FILE_PATH=f"{REPORT_DIR_PATH}/project_report.txt"
+REPORT_FILE_PATH=f"{PROJECT_REPORT_FOLDER}/project_report.txt"
 
 process_directory(ROOT_FOLDER, output_file=REPORT_FILE_PATH)

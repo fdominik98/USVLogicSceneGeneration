@@ -4,12 +4,11 @@ from typing import List, Tuple
 import pandas as pd
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 import tkfilebrowser
-from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
+from utils.file_system_utils import GEN_DATA_FOLDER, get_all_file_paths
 from concrete_level.trajectory_generation.trajectory_data import TrajectoryData
 
 class DataParser(ABC):
-    gen_data_dir = f'{ASSET_FOLDER}/gen_data'
-    RRT_DIR = f'{gen_data_dir}/RRTStar_algo'
+    RRT_DIR = f'{GEN_DATA_FOLDER}/RRTStar_algo'
     EVAL_DATA_COLUMN_NAMES = list(sorted(asdict(EvaluationData()).keys()))
     
     TRAJ_COLUMN_NAMES = ['trajectories', 'config_name', 'measurement_name', 'rrt_evaluation_times',
@@ -58,7 +57,7 @@ class DataParser(ABC):
 
 class EvalDataParser(DataParser):    
     def __init__(self) -> None:
-        super().__init__(self.EVAL_DATA_COLUMN_NAMES, self.gen_data_dir)
+        super().__init__(self.EVAL_DATA_COLUMN_NAMES, GEN_DATA_FOLDER)
 
     def load_data_models(self) -> List[EvaluationData]:
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)

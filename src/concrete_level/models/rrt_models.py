@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 from shapely import Point, Polygon
 
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 
 class TrajectoryState(Enum):
     START = auto()

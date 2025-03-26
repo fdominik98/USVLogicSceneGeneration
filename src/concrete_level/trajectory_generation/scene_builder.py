@@ -1,7 +1,7 @@
 import random
 from typing import Dict
 from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import StaticObstacleVariable, VesselVariable

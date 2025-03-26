@@ -2,10 +2,10 @@ import os
 from PIL import Image
 import numpy as np
 
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import EXPORTED_PLOTS_FOLDER, IMAGES_FOLDER
 
-gradient_image_path = f'{ASSET_FOLDER}/images/gradient.png'
-striped_image_path = f'{ASSET_FOLDER}/images/distr.png'
+gradient_image_path = f'{IMAGES_FOLDER}/gradient.png'
+striped_image_path = f'{IMAGES_FOLDER}/distr.png'
 
 gradient_image = Image.open(gradient_image_path)
 striped_image = Image.open(striped_image_path)
@@ -85,11 +85,8 @@ axi.set_ylim(0, 1 * 1.15)
 fig.tight_layout()
 
 file_name = f'wang2024_risk'
-image_folder = f'{ASSET_FOLDER}/images/exported_plots/wang'
-if not os.path.exists(image_folder):
-    os.makedirs(image_folder)
-fig.canvas.figure.savefig(f'{image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
-fig.canvas.figure.savefig(f'{image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
+fig.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
+fig.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
 print('image saved')
 
 # Display the plot

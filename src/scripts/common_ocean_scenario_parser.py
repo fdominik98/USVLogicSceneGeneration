@@ -2,21 +2,20 @@ from datetime import datetime
 from typing import Dict, List
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from utils.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
 from utils.asv_utils import EGO_BEAM, EGO_LENGTH, vessel_radius
-from utils.file_system_utils import ASSET_FOLDER, get_all_file_paths
+from utils.file_system_utils import COMMON_OCEAN_FOLDER, get_all_file_paths
 from commonroad.geometry.shape import Rectangle
 from commonocean.common.file_reader import CommonOceanFileReader
 from commonocean.scenario.obstacle import ObstacleType
 
-COMMON_OCEAN_PATH = f'{ASSET_FOLDER}/common_ocean_scenarios'
-COMMON_OCEAN_TWO_VESSEL_SCENARIOS_PATH = f'{COMMON_OCEAN_PATH}/HandcraftedTwoVesselEncounters_01_24'
-COMMON_OCEAN_FLO_SCENARIOS_PATH = f'{COMMON_OCEAN_PATH}/Florida'
-COMMON_OCEAN_MEC_SCENARIOS_PATH = f'{COMMON_OCEAN_PATH}/MiddleEastCoast'
-COMMON_OCEAN_UWC_SCENARIOS_PATH = f'{COMMON_OCEAN_PATH}/UpperWestCoast'
+COMMON_OCEAN_TWO_VESSEL_SCENARIOS_PATH = f'{COMMON_OCEAN_FOLDER}/HandcraftedTwoVesselEncounters_01_24'
+COMMON_OCEAN_FLO_SCENARIOS_PATH = f'{COMMON_OCEAN_FOLDER}/Florida'
+COMMON_OCEAN_MEC_SCENARIOS_PATH = f'{COMMON_OCEAN_FOLDER}/MiddleEastCoast'
+COMMON_OCEAN_UWC_SCENARIOS_PATH = f'{COMMON_OCEAN_FOLDER}/UpperWestCoast'
 
 obstacle_type_map : Dict[ObstacleType, VesselType]= {ObstacleType.CARGOSHIP : CargoShip(),
                      ObstacleType.FISHINGVESSEL : FishingShip(),

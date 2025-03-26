@@ -4,7 +4,7 @@ from manim import *
 from manim.constants import DEFAULT_DOT_RADIUS, ORIGIN
 from manim.utils.color import WHITE
 from numpy import floating
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import IMAGES_FOLDER
 from utils.asv_utils import MAX_COORD
 from concrete_level.data_parser import EvalDataParser, TrajDataParser
 from logical_level.models.logical_scenario import LoadedEnvironment
@@ -87,7 +87,7 @@ class SimImage(SVGMobject, Animated):
         self.vessel = vessel
         self.traj_length = len(self.traj) - 1
         self.refresh_data(z=200)
-        super().__init__(f'{ASSET_FOLDER}/images/ship_white.svg', height=0.03, width=0.03)
+        super().__init__(f'{IMAGES_FOLDER}/ship_white.svg', height=0.03, width=0.03)
         self.move_to(self.point)
         self.rotate(self.vessel.heading - PI / 2)
         self.angle = self.vessel.heading - PI / 2

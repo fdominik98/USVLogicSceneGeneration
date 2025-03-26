@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.trajectory_manager import TrajectoryManager
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import EXPORTED_PLOTS_FOLDER
 from visualization.colreg_scenarios.scenario_metrics_plot import ScenarioMetricsPlot
 from visualization.colreg_scenarios.scenario_animation import ANIM_REAL_TIME, ANIM_SIM_TIME, TWO_HOURS, TWO_MINUTES
 from utils.colors import light_colors
@@ -88,7 +88,7 @@ class ScenarioPlotManager():
         self.metrics_plot = None
         self.root = tk.Tk()
         self.root.resizable(True, True)
-        self.image_folder = f'{ASSET_FOLDER}/images/exported_plots'
+        self.image_folder = f'{EXPORTED_PLOTS_FOLDER}/images/exported_plots'
         
         self.sim_time_update_id = None
         self.root.option_add("*Font", ("Times New Roman", 14))
@@ -317,8 +317,6 @@ class ScenarioPlotManager():
         
     def to_pdf(self):
         file_name = f'{self.trajectory_manger.functional_scenario.name}_{datetime.now().isoformat().replace(":","-")}'
-        if not os.path.exists(self.image_folder):
-            os.makedirs(self.image_folder)
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')

@@ -5,7 +5,7 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.models.rrt_models import RRTNode
 from concrete_level.models.trajectories import Trajectories
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
 
 class PathInterpolator():

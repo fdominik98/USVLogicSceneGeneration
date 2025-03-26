@@ -7,7 +7,7 @@ import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
 from utils.asv_utils import calculate_heading
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import SCENIC_FOLDER
 from utils import asv_utils
 
 import scenic
@@ -76,7 +76,7 @@ def generate_scene(scenario : Scenario, timeout, verbosity, feedback=None):
     
 
 def scenic_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map = {}, bearing_map={}, verbose=False) -> Scenario:
-    base_path = f'{ASSET_FOLDER}/scenic/scenic_base.scenic'
+    base_path = f'{SCENIC_FOLDER}/scenic_base.scenic'
     if not os.path.exists(base_path):
         raise FileNotFoundError(base_path)
     with open(base_path, 'r') as file:
@@ -84,7 +84,7 @@ def scenic_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distanc
     
     scenic_code = generate_scenario_code(base_code, os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map, bearing_map)
     if verbose:
-        with open(f'{ASSET_FOLDER}/scenic/test_gen.scenic', 'w') as file:
+        with open(f'{SCENIC_FOLDER}/test_gen.scenic', 'w') as file:
             file.write(scenic_code)
     return scenic.scenarioFromString(scenic_code)
     

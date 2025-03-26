@@ -4,7 +4,7 @@ import tkinter as tk
 from typing import Dict, List
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import IMAGES_FOLDER
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from visualization.evaluation_plots.coverage_evolution_plot import CoverageEvolutionPlot
 from visualization.evaluation_plots.diversity_statistics_table import AmbiguousDiversityStatisticsTable, DiversityStatisticsTable
@@ -55,7 +55,7 @@ class EvalPlotManager():
         
         self.root = tk.Tk()
         self.root.resizable(True, True)
-        self.image_folder = f'{ASSET_FOLDER}/images/exported_plots'
+        self.image_folder = f'{IMAGES_FOLDER}/exported_plots'
         
         self.root.option_add("*Font", ("Times New Roman", 14))
         
@@ -120,8 +120,6 @@ class EvalPlotManager():
         
     def to_pdf(self):
         file_name = f'{self.selected_plot.get()}_{datetime.now().isoformat().replace(":","-")}'
-        if not os.path.exists(self.image_folder):
-            os.makedirs(self.image_folder)
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
         self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')

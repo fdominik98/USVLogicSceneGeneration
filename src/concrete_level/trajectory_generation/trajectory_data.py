@@ -5,7 +5,7 @@ import os
 import pprint
 from typing import Optional, Dict
 from concrete_level.models.trajectories import Trajectories
-from utils.file_system_utils import ASSET_FOLDER
+from utils.file_system_utils import GEN_DATA_FOLDER
 from utils.serializable import Serializable
 
 @dataclass(frozen=False)
@@ -55,7 +55,7 @@ class TrajectoryData(Serializable):
     
     def save_as_measurement(self):
         measurement_id = f"{self.measurement_name} - {datetime.now().isoformat().replace(':','-')}"
-        asset_folder = f'{ASSET_FOLDER}/gen_data/{self.algorithm_desc}/{self.config_name}/{measurement_id}'
+        asset_folder = f'{GEN_DATA_FOLDER}/{self.algorithm_desc}/{self.config_name}/{measurement_id}'
         if not os.path.exists(asset_folder):
             os.makedirs(asset_folder)
         file_path=f"{asset_folder}/{self.timestamp.replace(':','-')}.json"

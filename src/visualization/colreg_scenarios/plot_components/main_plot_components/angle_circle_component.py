@@ -4,7 +4,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
 from utils.colors import light_colors
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent

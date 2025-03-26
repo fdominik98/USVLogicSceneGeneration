@@ -1,0 +1,50 @@
+services:
+  OS_0_arduagent:
+    command: python -B -u /app/main.py
+    depends_on:
+    - OS_0_mavproxy
+    - OS_0_simulator
+    environment: &id001
+      AGENT_DESCRIPTION: surface vessel
+      AGENT_MODEL: vessel.mini_usv
+      BAUD_RATE: '57600'
+      BROKER: host.docker.internal
+      DOMAIN: surface
+      FCS_SERIAL: /dev/serial0
+      GCS_1: host.docker.internal:14552
+      GCS_2: host.docker.internal:14552
+      HOME_POS: 57.86238875763564,16.97363715603418,0,89.99999999818081
+      LOCAL_BRIDGE: udp:172.17.0.1:14550
+      MAVPROXY: tcpin:mavproxy:14551
+      MODEL: motorboat
+      MQTT_PASSWORD: ''
+      MQTT_USER: ''
+      NAME: OS_0
+      PORT: '1883'
+      REAL_SIM: simulation
+      SIM_PORT: 5760
+      SPEEDUP: '1'
+      TLS_CERTIFICE: '0'
+      VEHICLE: Rover
+      VEHICLE_PARAMS: Rover
+      VIDEO_SERVER: ome.waraps.org
+      VIDEO_SRC0: /dev/video0
+    image: registry.waraps.org/waraps-arduagent:latest
+    restart: unless-stopped
+  OS_0_mavproxy:
+    command: mavproxy.py --master=tcp:simulator:${SIM_PORT} --out=${MAVPROXY} --out=${LOCAL_BRIDGE}
+      --out=${GCS_1} --out=${GCS_2}
+    environment: *id001
+    image: registry.waraps.org/waraps-mavproxy:latest
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+  OS_0_simulator:
+    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle ${VEHICLE} --frame
+      ${MODEL} -I${INSTANCE} --custom-location=${HOME_POS} --add-param-file=/params/my${VEHICLE_PARAMS}.params
+      -w --no-rebuild --no-mavproxy --speedup ${SPEEDUP}
+    depends_on:
+    - OS_0_mavproxy
+    environment: *id001
+    image: registry.waraps.org/ardupilot-sitl:latest
+    restart: unless-stopped

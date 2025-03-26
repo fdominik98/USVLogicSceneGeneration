@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 
 
 REFERENCE_POINT = np.array([57.75425, 16.77096])

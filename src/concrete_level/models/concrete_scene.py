@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from itertools import combinations, product
 from typing import Any, Dict, List, Optional, Set, Type
 from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
-from concrete_level.models.vessel_state import ActorState
+from concrete_level.models.actor_state import ActorState
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.relation_constraints_concept.literals import DoCollide, MayCollide

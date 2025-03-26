@@ -1,0 +1,43 @@
+# INFO ==========================================================================
+# Default images are built for X64. 
+#
+# Purpose: Creates a configurable agent for the WARA-PS Core System     
+# Prereq
+#  - a .env file with your settings (copy .env.template and enter your data)
+#  - docker, docker-compose installed and logged in to registry.waraps.org OR
+#    (You can also download each repo, modify and build local images)
+# Execute: docker-compose up (add -d for daemon)
+#
+# ================================================================================
+
+services:
+
+  # Mavproxy that connects the autonomous/flight control system, e.g. pixhawk or simulator, to the different user software as GCS etc.
+  mavproxy:
+    image: registry.waraps.org/waraps-mavproxy:latest    # global image (Multi OS)
+#    image: registry.waraps.org/waraps-mavproxy:test      # local image (Single OS)
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    command: "mavproxy.py --master=tcp:simulator:${SIM_PORT} --out=${MAVPROXY} --out=${LOCAL_BRIDGE} --out=${GCS_1} --out=${GCS_2}"
+
+
+  # ArduPilot simulator ==============================================================================================================================================
+  simulator:
+    image: registry.waraps.org/ardupilot-sitl:latest     # global image (Multi OS)
+    # image: registry.waraps.org/ardupilot-sitl:test       # local image (Single OS)
+    depends_on:
+      - mavproxy
+    restart: unless-stopped
+    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle ${VEHICLE} --frame ${MODEL} -I${INSTANCE} --custom-location=${HOME_POS} --add-param-file=/params/my${VEHICLE_PARAMS}.params -w --no-rebuild --no-mavproxy --speedup ${SPEEDUP}
+
+
+  # MQTT Bridge for integration with WARA-PS Core System ============================================================================================================================
+  arduagent:
+    image: registry.waraps.org/waraps-arduagent:latest      # global image (Multi OS)
+#    image: registry.waraps.org/waraps-arduagent:test        # local image (Single OS)
+    depends_on:
+      - mavproxy
+      - simulator
+    restart: unless-stopped
+    command: "python -B -u /app/main.py"
