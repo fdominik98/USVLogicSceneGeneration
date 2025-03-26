@@ -24,15 +24,17 @@ class CoverageEvolutionPlot(EvalPlot):
         axes = np.atleast_2d(axes)
         
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
+            max_value = 0
+            all_axes : List[plt.Axes] = []
             for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$" + "\nCovered classes")
                 
-                values : List[float] = [0]
-                relevant_values : List[float] = [0]
-                ambiguous_values : List[float] = [0]
+                values : List[int] = [0]
+                relevant_values : List[int] = [0]
+                ambiguous_values : List[int] = [0]
                 equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
                 for eval_data in self.measurements[actor_number_by_type][config_group]:
                     if eval_data.is_valid:
@@ -52,6 +54,9 @@ class CoverageEvolutionPlot(EvalPlot):
                 
                 if len(values) == 1:
                     continue
+                
+                if max_value < max(values):
+                    max_value = max(values)
                         
                 labels = list(range(len(values)))
                 axi.plot(labels, values, color=self.colors[j], linestyle='-', linewidth=5)
@@ -61,7 +66,10 @@ class CoverageEvolutionPlot(EvalPlot):
                 xticks = list(np.linspace(labels[0], labels[-1], 6))
                 xticks = [int(t) for t in xticks] 
                 axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
-                self.set_yticks(axi, values)
+            
+            for ax in all_axes:
+                self.set_yticks(ax, range(max_value + 1))
+                ax.set_ylim(0, max_value)
                 
         return fig
         

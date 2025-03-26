@@ -24,8 +24,11 @@ class DiversityPlot(EvalPlot):
         axes = np.atleast_2d(axes)
         
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
+            max_value = 0
+            all_axes : List[plt.Axes] = []
             for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
+                all_axes.append(axi)
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$")
@@ -34,7 +37,7 @@ class DiversityPlot(EvalPlot):
                                                                                                                                              self.is_higher_abstraction)
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
-                
+                    
                 all_shapes = len(equivalence_classes)
                 relevant_shapes = sum(1 for scenario, count in equivalence_classes.values() if scenario.functional_scenario.is_relevant)
                 ambiguous_shapes = sum(1 for scenario, count in equivalence_classes.values() if scenario.functional_scenario.is_ambiguous)
@@ -48,6 +51,8 @@ class DiversityPlot(EvalPlot):
                 
                 if sum(values) == 0:
                     continue
+                if max_value < max(values):
+                    max_value = max(values)
                 
                 labels = range(1, len(equivalence_classes.keys()) + 1)
                 bars : plt.BarContainer = axi.bar(labels, values, color=self.colors[j], edgecolor='black', linewidth=0)
@@ -55,7 +60,9 @@ class DiversityPlot(EvalPlot):
                 xticks = list(np.linspace(labels[0], labels[-1], 6))
                 xticks = [int(t) for t in xticks] 
                 axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
-                self.set_yticks(axi, values)
+            for ax in all_axes:
+                self.set_yticks(ax, range(max_value + 1))
+                ax.set_ylim(0, max_value)
                 
         return fig
 
