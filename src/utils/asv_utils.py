@@ -52,6 +52,15 @@ def compute_angle(vec1, vec2, norm1, norm2):
     """Compute angle between two vectors."""
     cos_theta = np.clip(np.dot(vec1, vec2) / (norm1 * norm2), -1, 1)
     return np.arccos(cos_theta)
+
+
+def absolute_to_true_north(absolute_heading):
+    """Convert absolute heading [-180, 180] to true north heading [0, 360]"""
+    return (absolute_heading + 360) % 360
+
+def true_north_to_absolute(true_heading):
+    """Convert true north heading [0, 360] to absolute heading [-180, 180]"""
+    return true_heading - 360 if true_heading > 180 else true_heading
         
 
 VISIBILITY_DIST_2 = 2 * N_MILE_TO_M_CONVERSION
