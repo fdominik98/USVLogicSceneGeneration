@@ -29,7 +29,7 @@ services:
     depends_on:
       - mavproxy
     restart: unless-stopped
-    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle ${VEHICLE} --frame ${MODEL} -I${INSTANCE} --custom-location=${HOME_POS} --add-param-file=/params/my${VEHICLE_PARAMS}.params -w --no-rebuild --no-mavproxy --speedup ${SPEEDUP}
+    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle ${VEHICLE} --frame ${MODEL} -I ${INSTANCE} --custom-location=${HOME_POS} --add-param-file=/params/my${VEHICLE_PARAMS}.params -w --no-rebuild --no-mavproxy --speedup ${SPEEDUP}
 
 
   # MQTT Bridge for integration with WARA-PS Core System ============================================================================================================================
