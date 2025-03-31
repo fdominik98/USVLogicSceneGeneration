@@ -115,7 +115,7 @@ class MqttAgentClient(MqttClient):
         return self.vessel.name
             
             
-    def publish_command(self, waypoints : List[dict]):
+    def publish_command(self, waypoints : List[dict], speed):
         command = {
             'com-uuid': str(uuid.uuid4()),
             'command': 'start-task',
@@ -124,7 +124,7 @@ class MqttAgentClient(MqttClient):
             'task': {
                 'name': 'move-path',
                 'params': {
-                'speed': 'standard',
+                'speed': str(speed),
                 'waypoints': waypoints,
                 'loop' : False,
                 }

@@ -29,7 +29,7 @@ def main():
             for client in parser.agent_clients:
                 # Get the command list for this client.
                 if command == 1:
-                    client.publish_command(parser.waypoint_map[client.vessel])
+                    client.publish_command(parser.waypoint_map[client.vessel], trajectory_manager.concrete_scene[client.vessel].speed)
                     print(f"Sent command {command} to vessel {client.vessel}")
                 else:
                     print(f"Invalid command number for vessel {client.vessel}.")

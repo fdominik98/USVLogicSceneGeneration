@@ -1,0 +1,50 @@
+services:
+  TS_1_arduagent:
+    command: python -B -u /app/main.py
+    depends_on:
+    - TS_1_mavproxy
+    - TS_1_simulator
+    environment: &id001
+    - NAME=TS_1
+    - DOMAIN=surface
+    - REAL_SIM=simulation
+    - AGENT_DESCRIPTION=surface vessel
+    - AGENT_MODEL=vessel.mini_usv
+    - VIDEO_SRC0=/dev/video0
+    - VIDEO_SERVER=ome.waraps.org
+    - BROKER=host.docker.internal
+    - PORT=1883
+    - TLS_CERTIFICE=0
+    - MQTT_USER=
+    - MQTT_PASSWORD=
+    - FCS_SERIAL=/dev/serial0
+    - BAUD_RATE=57600
+    - CONNECTION_STRING=tcp:TS_1_mavproxy:14551
+    - SIM_PORT=5760
+    - SPEEDUP=1
+    - VEHICLE=Rover
+    - MODEL=rover-skid
+    - VEHICLE_PARAMS=Rover
+    - INSTANCE=0
+    - HOME_POS=55.849927003489434,17.427824245801894,0,178.87609568124006
+    - MAVPROXY=tcpin:TS_1_mavproxy:14551
+    - LOCAL_BRIDGE=udp:localhost:14550
+    - GCS_1=udp:host.docker.internal:14553
+    image: registry.waraps.org/waraps-arduagent:test
+    restart: unless-stopped
+  TS_1_mavproxy:
+    command: mavproxy.py --master=tcp:TS_1_simulator:5760 --out=tcpin:TS_1_mavproxy:14551
+      --out=udp:host.docker.internal:14553
+    depends_on:
+    - TS_1_simulator
+    environment: *id001
+    image: registry.waraps.org/waraps-mavproxy:latest
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+  TS_1_simulator:
+    environment: *id001
+    image: registry.waraps.org/ardupilot-sitl:latest
+    restart: unless-stopped
+    volumes:
+    - C:\Users\domfr93\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/params-3vessel_0obstacle_ts_1.params:/params/myRover.params
