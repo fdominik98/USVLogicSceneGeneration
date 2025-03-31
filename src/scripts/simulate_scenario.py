@@ -16,17 +16,28 @@ def main():
 
     parser = WARAPSParser(trajectory_manager)
 
-    input("Press Enter to continue...")
     for client in parser.agent_clients:
         client.connect()
-        client.publish_command(parser.waypoint_map[client.vessel])
-    try:
-        while True:
-            time.sleep(1)
 
-    except Exception:
-        print(traceback.format_exc())
-
+    # Main loop: wait for a number input corresponding to a command index.
+    while True:
+        try:
+            user_input = input("Enter command number: ").strip()
+            # Convert the user input to an integer.
+            command = int(user_input)
+            
+            for client in parser.agent_clients:
+                # Get the command list for this client.
+                if command == 1:
+                    client.publish_command(parser.waypoint_map[client.vessel])
+                    print(f"Sent command {command} to vessel {client.vessel}")
+                else:
+                    print(f"Invalid command number for vessel {client.vessel}.")
+        except Exception:
+            print(traceback.format_exc())
+        
+        # Optional: pause briefly between loops.
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()

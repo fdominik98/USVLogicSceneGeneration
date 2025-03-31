@@ -4,26 +4,20 @@ from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from simulation.mqtt_client import MqttAgentClient, MqttScenarioClient
-from simulation.sim_utils import coord_to_lat_long, waypoint_from_state
+from simulation.sim_utils import coord_to_lat_long, waypoint_from_state, to_true_north
 import os
 import docker
 import yaml
 import time
-from utils.asv_utils import absolute_to_true_north
+from utils.asv_utils import TEN_MINUTE_IN_SEC
 from utils.file_system_utils import SIMULATION_FOLDER
 
 class WARAPSParser():
     def __init__(self, trajectory_manager : TrajectoryManager):
         self.trajectory_manager = trajectory_manager
         
-        # Load the docker-compose file
-        compose_file = f'{SIMULATION_FOLDER}/docker-compose-simulation.yml'
-        with open(compose_file, 'r') as file:
-            self.compose_config : dict = yaml.safe_load(file)
-
         # Start Docker client
         self.docker_client = docker.from_env()
-        
         
         # self.scenario_client = MqttScenarioClient()
         # self.scenario_client.connect()
@@ -34,7 +28,8 @@ class WARAPSParser():
             self.start_container(vessel, state, 14552 + i)
             # TODO: configuring container environments for agents
             self.agent_clients.append(MqttAgentClient(vessel))
-            waypoints = [waypoint_from_state(state) for state in self.trajectory_manager.trajectories[vessel]]
+            data = self.trajectory_manager.trajectories[0:TEN_MINUTE_IN_SEC][vessel]
+            waypoints = [waypoint_from_state(state) for state in data]
             self.waypoint_map[vessel] = waypoints
     
     def start_container(self, vessel : ConcreteVessel, init_state : ActorState, port : int):
@@ -43,6 +38,27 @@ class WARAPSParser():
         process = subprocess.Popen(['docker-compose', '-p', project_name, 'down'])
         process.wait()
         
+        params_file = f'{SIMULATION_FOLDER}/params-{project_name}.params'
+        params = {'WP_PIVOT_ANGLE' : 0.0,
+                    'WP_RADIUS' : vessel.length / 2,
+                    'WP_SPEED' : vessel.max_speed,
+                    'GRIP_ENABLE' : 1,
+                    'GRIP_GRAB' : 1100,
+                    'GRIP_NEUTRAL' : 1500,
+                    'GRIP_REGRAB' : 0,
+                    'GRIP_RELEASE' : 1900,
+                    'GRIP_TYPE' : 1,
+                    'RC7_OPTION' : 19,
+                    'SERVO9_FUNCTION' : 28,
+                    'SERVO1_FUNCTION' : 73,
+                    'SERVO3_FUNCTION' : 74,
+                    
+                    'OA_MARGIN_MAX' : 0.0,
+        }
+        with open(params_file, 'w') as file:
+            for key, value in params.items():
+                file.write(f'{key}\t{value}\n')
+                
            
         mavproxy = f'{vessel.name}_mavproxy'
         arduagent = f'{vessel.name}_arduagent'
@@ -73,11 +89,11 @@ class WARAPSParser():
             
             'SPEEDUP': '1',
             'VEHICLE' : 'Rover',
-            'MODEL': 'motorboat',
+            'MODEL': 'rover-skid',
             'VEHICLE_PARAMS': 'Rover',
             'INSTANCE' : '0',
             
-            'HOME_POS': f'{vessel_pos[0]},{vessel_pos[1]},0,{absolute_to_true_north(init_state.heading_deg)}',
+            'HOME_POS': f'{vessel_pos[0]},{vessel_pos[1]},0,{to_true_north(init_state.heading_deg)}',
             
             'MAVPROXY': f'tcpin:{mavproxy}:14551',
             'LOCAL_BRIDGE': f'udp:localhost:14550',
@@ -102,7 +118,7 @@ class WARAPSParser():
                     'stdin_open' : True,
                     'restart' : 'unless-stopped',
                     'environment' : env_list,
-                    'command' :f'mavproxy.py --master=tcp:{simulator}:{env['SIM_PORT']} --out={env['MAVPROXY']} --out={env['LOCAL_BRIDGE']} --out={env['GCS_1']}'
+                    'command' : f'mavproxy.py --master=tcp:{simulator}:{env["SIM_PORT"]} --out={env["MAVPROXY"]} --out={env["LOCAL_BRIDGE"]} --out={env["GCS_1"]}'
                 },
                 
                 arduagent : {

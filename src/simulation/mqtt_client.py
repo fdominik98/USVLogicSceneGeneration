@@ -36,7 +36,10 @@ class MqttClient(ABC):
             self.client.tls_set(cert_reqs=ssl.CERT_NONE)
             self.client.tls_insecure_set(True)
         try:
-            self.client.connect(self.broker, self.port, 60)
+            res = None
+            while res is None or res is not mqtt.MQTTErrorCode.MQTT_ERR_SUCCESS:
+                res : mqtt.MQTTErrorCode = self.client.connect(self.broker, self.port, 60)
+                print(f'{self.name} connection result: {res}')
             self.client.loop_start()
         except Exception as exc:
             print(f'{self.name} failed to connect to broker {self.broker}:{self.port}')

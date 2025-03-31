@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, asdict
 import json
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Union
 import numpy as np
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.actor_state import ActorState
@@ -16,8 +16,10 @@ class Trajectories(Serializable):
     def __post_init__(self):
         object.__setattr__(self, '_data', dict(self._data).copy())
             
-    def __getitem__(self, key):
-        return self._data[key]
+    def __getitem__(self, index) -> Union['Trajectories', List[ActorState]]:
+        if isinstance(index, slice):  # Handle slicing
+            return Trajectories({key : value[index] for key, value in self.items()})
+        return self._data[index]
 
     def keys(self):
         return self._data.keys()

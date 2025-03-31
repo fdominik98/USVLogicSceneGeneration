@@ -75,6 +75,16 @@ class OtherVesselType(VesselType):
     name : str = 'OtherType'
     pass
     
+    
+@dataclass(frozen=True, repr=False)
+class MiniUSV(VesselType):
+    name : str = 'MiniUSV'
+    min_length : float = 1.0
+    max_length : float = 1.0
+    max_speed : float = 2.0 * KNOT_TO_MS_CONVERSION
+    min_beam : float = 0.5
+    max_beam : float = 0.5
+    
 @dataclass(frozen=True, repr=False)
 class CargoShip(VesselType):
     name : str = 'CargoShip'

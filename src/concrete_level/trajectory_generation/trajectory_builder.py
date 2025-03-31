@@ -45,4 +45,4 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):
             new_p = turned_state.p + turned_state.v
             new_trajectory.append(turned_state.modify_copy(x=new_p[0], y=new_p[1]))
         return new_trajectory
-        
+    

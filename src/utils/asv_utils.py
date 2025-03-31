@@ -38,7 +38,10 @@ EGO_BEAM = 10
 MIN_OBSTACLE_RADIUS = 10
 MAX_OBSTACLE_RADIUS = 400
 
-ONE_HOUR_IN_SEC = 60 * 60
+ONE_MINUTE_IN_SEC = 60
+ONE_HOUR_IN_SEC = 60 * ONE_MINUTE_IN_SEC
+TEN_MINUTE_IN_SEC = 10 * ONE_MINUTE_IN_SEC
+
 TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
 def vessel_radius(length : float) -> float:
@@ -54,15 +57,6 @@ def compute_angle(vec1, vec2, norm1, norm2):
     return np.arccos(cos_theta)
 
 
-def absolute_to_true_north(absolute_heading):
-    """Convert absolute heading [-180, 180] to true north heading [0, 360]"""
-    return (absolute_heading + 360) % 360
-
-def true_north_to_absolute(true_heading):
-    """Convert true north heading [0, 360] to absolute heading [-180, 180]"""
-    return true_heading - 360 if true_heading > 180 else true_heading
-        
-
 VISIBILITY_DIST_2 = 2 * N_MILE_TO_M_CONVERSION
 VISIBILITY_DIST_3 = 3 * N_MILE_TO_M_CONVERSION
 VISIBILITY_DIST_5 = 5 * N_MILE_TO_M_CONVERSION
@@ -70,16 +64,16 @@ VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
 
 def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
     if o1_sees_o2_stern:
-        if o2_length < 12:
-            return VISIBILITY_DIST_2
-        elif o2_length < 20:
-            return VISIBILITY_DIST_2
+        if o2_length < 5:
+            return o2_length / 50 * VISIBILITY_DIST_2 # MADE UP FOR WARA-PS
         elif o2_length < 50:
             return VISIBILITY_DIST_2
         else:
             return VISIBILITY_DIST_3        
     else:
-        if o2_length < 12:
+        if o2_length < 5:
+            return o2_length / 50 * VISIBILITY_DIST_5 # MADE UP FOR WARA-PS
+        elif o2_length < 12:
             return VISIBILITY_DIST_2
         elif o2_length < 20:
             return VISIBILITY_DIST_3
