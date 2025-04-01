@@ -9,7 +9,7 @@ import os
 import docker
 import yaml
 import time
-from utils.asv_utils import TEN_MINUTE_IN_SEC
+from global_config import GlobalConfig
 from utils.file_system_utils import SIMULATION_FOLDER
 
 class WARAPSParser():
@@ -28,7 +28,7 @@ class WARAPSParser():
             self.start_container(vessel, state, 14552 + i)
             # TODO: configuring container environments for agents
             self.agent_clients.append(MqttAgentClient(vessel))
-            data = self.trajectory_manager.trajectories[0:TEN_MINUTE_IN_SEC][vessel]
+            data = self.trajectory_manager.trajectories[0:GlobalConfig.TEN_MINUTE_IN_SEC][vessel]
             waypoints = [waypoint_from_state(state) for state in data]
             self.waypoint_map[vessel] = waypoints
     
@@ -40,11 +40,19 @@ class WARAPSParser():
         
         params_file = f'{SIMULATION_FOLDER}/params-{project_name}.params'
         params = {
+                    # Boat params
+                    'FRAME_CLASS' : 2, # motorboat
+                    'SIM_TIDE' : 0,
+                    'SIM_WIND_SPD' : 0,
+                    'SIM_WIND_T' : 0,
+                    'SIM_WAVE_ENABLE' : 0,
+                    
                     # Waypoint navigation parameters
                     'WP_PIVOT_ANGLE': 0.0,  # Angle threshold in degrees for initiating a pivot turn at a waypoint
                     'WP_RADIUS': vessel.length / 2,  # Acceptance radius in meters around a waypoint, set to half the vessel's length
                     'WP_SPEED': vessel.max_speed,  # Target speed in meters per second between waypoints, set to the vessel's maximum speed
 
+                    'SPEED_MAX' : vessel.max_speed,
                     # Gripper control parameters
                     'GRIP_ENABLE': 1,  # Enables the use of a gripper; 1 for enabled, 0 for disabled
                     'GRIP_GRAB': 1100,  # PWM value in microseconds to command the gripper to grab a payload
@@ -53,13 +61,8 @@ class WARAPSParser():
                     'GRIP_RELEASE': 1900,  # PWM value in microseconds to command the gripper to release a payload
                     'GRIP_TYPE': 1,  # Type of gripper; 1 for servo gripper, 2 for EMP gripper
 
-                    # Radio control options
-                    'RC7_OPTION': 19,  # Assigns RC channel 7 to control the gripper; 19 corresponds to the 'Gripper' function
-
                     # Servo output functions
                     'SERVO9_FUNCTION': 28,  # Assigns servo output 9 to function as a gripper
-                    'SERVO1_FUNCTION': 73,  # Assigns servo output 1 to control the left throttle (for skid-steering vehicles)
-                    'SERVO3_FUNCTION': 74,  # Assigns servo output 3 to control the right throttle (for skid-steering vehicles)
 
                     # Obstacle avoidance parameters
                     'OA_MARGIN_MAX': vessel.radius,  # Maximum distance in meters to maintain from obstacles; 0 disables margin
@@ -69,15 +72,11 @@ class WARAPSParser():
                     'RNGFND_TURN_TIME': None,  # Time in seconds to execute the turn when an obstacle is detected; specific value to be determined
                     'RNGFND_TRIGGER_CM': None,  # Distance in centimeters at which the rangefinder triggers an obstacle avoidance maneuver; specific value to be determined
                     
-                    # FROM ROVER DEFAULT PARAMS
-                    # Airspeed sensor configuration
-                    'ARSPD_PIN': 1,  # Analog pin assigned for airspeed sensor input
-                    'ARSPD_BUS': 2,  # I2C bus number for airspeed sensor communication
-
                     # Speed and steering control gains
                     'ATC_SPEED_P': 0.1,  # Proportional gain for speed control loop
                     'ATC_STR_RAT_FF': 0.75,  # Feedforward term for steering rate control
-
+                    'ATC_ACCEL_MAX' : 0.5,
+                    
                     # Battery monitoring setup
                     'BATT_MONITOR': 4,  # Type of battery monitoring (e.g., analog voltage and current sensing)
 
@@ -85,51 +84,6 @@ class WARAPSParser():
                     'CRUISE_SPEED': init_state.speed,  # Target speed in meters per second for autonomous modes
                     'CRUISE_THROTTLE': 30,  # Initial throttle percentage to achieve cruise speed
 
-                    # Accelerometer calibration offsets and scaling factors for the second accelerometer
-                    'INS_ACC2OFFS_X': 0.001,  # Offset correction for X-axis
-                    'INS_ACC2OFFS_Y': 0.001,  # Offset correction for Y-axis
-                    'INS_ACC2OFFS_Z': 0.001,  # Offset correction for Z-axis
-                    'INS_ACC2SCAL_X': 1.001,  # Scaling factor for X-axis
-                    'INS_ACC2SCAL_Y': 1.001,  # Scaling factor for Y-axis
-                    'INS_ACC2SCAL_Z': 1.001,  # Scaling factor for Z-axis
-
-                    # Accelerometer calibration offsets and scaling factors for the primary accelerometer
-                    'INS_ACCOFFS_X': 0.001,  # Offset correction for X-axis
-                    'INS_ACCOFFS_Y': 0.001,  # Offset correction for Y-axis
-                    'INS_ACCOFFS_Z': 0.001,  # Offset correction for Z-axis
-                    'INS_ACCSCAL_X': 1.001,  # Scaling factor for X-axis
-                    'INS_ACCSCAL_Y': 1.001,  # Scaling factor for Y-axis
-                    'INS_ACCSCAL_Z': 1.001,  # Scaling factor for Z-axis
-
-                    # Flight mode assignments
-                    'MODE3': 11,  # Flight mode assigned to position 3 (e.g., Auto mode)
-                    'MODE4': 10,  # Flight mode assigned to position 4 (e.g., Steering mode)
-                    'MODE5': 2,   # Flight mode assigned to position 5 (e.g., Acro mode)
-
-                    # Radio control input ranges
-                    'RC1_MAX': 2000,  # Maximum pulse width for RC channel 1 (steering)
-                    'RC1_MIN': 1000,  # Minimum pulse width for RC channel 1
-                    'RC3_MAX': 2000,  # Maximum pulse width for RC channel 3 (throttle)
-                    'RC3_MIN': 1000,  # Minimum pulse width for RC channel 3
-
-                    # Relay pin assignments
-                    'RELAY1_PIN': 1,  # GPIO pin assigned to relay 1
-                    'RELAY2_PIN': 2,  # GPIO pin assigned to relay 2
-
-                    # Servo output ranges
-                    'SERVO1_MIN': 1000,  # Minimum pulse width for servo output 1
-                    'SERVO1_MAX': 2000,  # Maximum pulse width for servo output 1
-                    'SERVO3_MIN': 1000,  # Minimum pulse width for servo output 3
-                    'SERVO3_MAX': 2000,  # Maximum pulse width for servo output 3
-
-                    # Simulation settings
-                    'SIM_PIN_MASK': 127,  # Bitmask for enabling/disabling simulated pins
-
-                    # Logging configuration
-                    'INS_LOG_BAT_MASK': 127,  # Bitmask for enabling IMU logging during flight
-
-                    # FROM ROVER-SKID DEFAULT PARAMS
-                    # Skid-steering specific parameters
                     'SERVO1_FUNCTION': 73,  # Function assigned to servo output 1 (Throttle Left)
                     'SERVO3_FUNCTION': 74,  # Function assigned to servo output 3 (Throttle Right)
         }
@@ -170,7 +124,7 @@ class WARAPSParser():
             
             'SPEEDUP': '1',
             'VEHICLE' : 'Rover',
-            'MODEL': 'rover-skid',
+            'MODEL': 'motorboat',
             'VEHICLE_PARAMS': 'Rover',
             'INSTANCE' : '0',
             

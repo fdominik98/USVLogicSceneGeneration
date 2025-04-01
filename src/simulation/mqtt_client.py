@@ -18,7 +18,7 @@ class MqttClient(ABC):
     client: mqtt.Client = field(init=False)
     user: str = field(default='', init=False)
     password: str = field(default='', init=False)
-    broker: str = field(default='host.docker.internal', init=False)
+    broker: str = field(default='localhost', init=False)
     port: int = field(default=1883, init=False)
     tls_connection: bool = field(default=False, init=False)
     

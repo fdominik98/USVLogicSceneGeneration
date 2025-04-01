@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.asv_utils import N_MILE_TO_M_CONVERSION
+from global_config import GlobalConfig
 from visualization.plotting_utils import EvalPlot
 
 class RiskVectorPlot(EvalPlot):  
@@ -31,7 +31,7 @@ class RiskVectorPlot(EvalPlot):
     }
     
     metric_map_max = {
-        'dcpa' : 1 * N_MILE_TO_M_CONVERSION,
+        'dcpa' : 1 * GlobalConfig.N_MILE_TO_M_CONVERSION,
         'tcpa' : 1500,
         'ds' : 1.0,
         'proximity' : 1.0,

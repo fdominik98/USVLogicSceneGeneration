@@ -6,9 +6,10 @@ from typing import Any, List, Tuple
 import numpy as np
 import random, scenic
 from scenic.core.scenarios import Scenario
-from utils.asv_utils import calculate_heading
+from utils.math_utils import calculate_heading
 from utils.file_system_utils import SCENIC_FOLDER
-from utils import asv_utils
+import global_config
+from utils import math_utils
 
 import scenic
 from scenic.core.distributions import (
@@ -127,7 +128,8 @@ def generate_scenario_code(base_code, os_id, ts_ids, obst_ids, length_map, radiu
     )
     
     code = "\n".join(
-        [inspect.getsource(asv_utils),
+        [inspect.getsource(math_utils),
+         inspect.getsource(global_config),
          base_code,
          f"ts_infos, obst_infos = create_scenario(os_id = {os_id}, ts_ids={ts_ids}, obst_ids={obst_ids}, length_map={length_map}, radius_map={radius_map}, vis_distance_map={vis_distance_map}, bearing_map={bearing_map})",
          ts_infos_assignments,

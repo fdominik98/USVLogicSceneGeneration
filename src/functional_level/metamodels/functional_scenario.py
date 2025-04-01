@@ -11,6 +11,8 @@ from functional_level.metamodels.interpretation import (
     staticObstacleTypeInterpretation, vesselTypeInterpretation, overtakingToPortInterpretation, overtakingToStarboardInterpretation,
     crossingFromPortInterpretation, dangerousHeadOnSectorOfInterpretation)
 from utils.scenario import Scenario
+from utils.static_obstacle_types import UnspecifiedObstacleType
+from utils.vessel_types import UnspecifiedVesselType
    
 @dataclass(frozen=True)
 class FunctionalScenario(Scenario):
@@ -187,11 +189,11 @@ class FunctionalScenario(Scenario):
     
     def find_vessel_type_name(self, obj : FuncObject) -> Optional[str]:
         return next((self.Vessel_interpretation.get_value(o2)
-                     for o1, o2 in self.vessel_type_interpretation if o1 == obj), None)
+                     for o1, o2 in self.vessel_type_interpretation if o1 == obj), UnspecifiedVesselType.name)
         
     def find_obstacle_type_name(self, obj : FuncObject) -> Optional[str]:
         return next((self.Static_obstacle_interpretation.get_value(o2)
-                     for o1, o2 in self.static_obstacle_type_interpretation if o1 == obj), None)
+                     for o1, o2 in self.static_obstacle_type_interpretation if o1 == obj), UnspecifiedObstacleType.name)
         
     @property
     def is_relevant(self) -> bool:

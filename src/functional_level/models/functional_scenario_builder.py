@@ -6,7 +6,6 @@ from functional_level.models.object_generator import ObjectGenerator
 from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
 from utils.vessel_types import ALL_VESSEL_TYPES
 
-
 class FunctionalScenarioBuilder():
     def __init__(self):
         self.OS_interpretation = OSInterpretation()
@@ -32,15 +31,15 @@ class FunctionalScenarioBuilder():
         self.object_generator = ObjectGenerator()
         self.objects : Dict[str, FuncObject] = dict()
         
-        for vt in ALL_VESSEL_TYPES:
+        for vt in ALL_VESSEL_TYPES.keys():
             obj = self.object_generator.new_vessel_type()
-            self.objects[vt.name] = obj
-            self.Vessel_type_interpretation.add(obj, vt.name)
+            self.objects[vt] = obj
+            self.Vessel_type_interpretation.add(obj, vt)
             
-        for ot in ALL_STATIC_OBSTACLE_TYPES:
+        for ot in ALL_STATIC_OBSTACLE_TYPES.keys():
             obj = self.object_generator.new_obstacle_type()
-            self.objects[ot.name] = obj
-            self.Static_obstacle_type_interpretation.add(obj, ot.name)
+            self.objects[ot] = obj
+            self.Static_obstacle_type_interpretation.add(obj, ot)
             
     def find_vessel_type_by_name(self, name: str) -> FuncObject:
         for (obj,) in self.Vessel_type_interpretation:
@@ -48,7 +47,7 @@ class FunctionalScenarioBuilder():
                 return obj
         raise ValueError(f'Vessel type "{name}" does not exist on the functional level.')
     
-    def find_obstacle_type(self, name: str) -> FuncObject:
+    def find_obstacle_type_by_name(self, name: str) -> FuncObject:
         for (obj,) in self.Static_obstacle_type_interpretation:
             if self.Static_obstacle_type_interpretation.get_value(obj) == name:
                 return obj

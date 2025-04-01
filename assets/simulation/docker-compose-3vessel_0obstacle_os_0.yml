@@ -23,10 +23,10 @@ services:
     - SIM_PORT=5760
     - SPEEDUP=1
     - VEHICLE=Rover
-    - MODEL=rover-skid
+    - MODEL=motorboat
     - VEHICLE_PARAMS=Rover
     - INSTANCE=0
-    - HOME_POS=55.76718595763565,17.42409724319159,0,359.9999999942704
+    - HOME_POS=55.66320638298599,17.365440663199678,0,5.498776545209694e-09
     - MAVPROXY=tcpin:OS_0_mavproxy:14551
     - LOCAL_BRIDGE=udp:localhost:14550
     - GCS_1=udp:host.docker.internal:14552
@@ -47,4 +47,4 @@ services:
     image: registry.waraps.org/ardupilot-sitl:latest
     restart: unless-stopped
     volumes:
-    - C:\Users\domfr93\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/params-3vessel_0obstacle_os_0.params:/params/myRover.params
+    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/params-3vessel_0obstacle_os_0.params:/params/myRover.params

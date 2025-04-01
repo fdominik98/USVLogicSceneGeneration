@@ -5,14 +5,14 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from evaluation.risk_evaluation import ProximityVector, RiskVector
-from utils.asv_utils import N_MILE_TO_M_CONVERSION
+from global_config import GlobalConfig
 from utils.colors import light_colors
 from utils.colors import colors
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class ProximityMetricComponent(PlotComponent, ABC):
     time_treshold = 10 * 60
-    dist_treshold = 1 * N_MILE_TO_M_CONVERSION
+    dist_treshold = 1 * GlobalConfig.N_MILE_TO_M_CONVERSION
     
     def __init__(self, ax : plt.Axes, scenario: MultiLevelScenario,  risk_vectors : List[RiskVector], ref_risk_vectors : Optional[List[RiskVector]] = None) -> None:
         super().__init__(ax, scenario)
@@ -119,7 +119,7 @@ class DistanceAxesComponent(ProximityMetricComponent):
         return self.dist_treshold
     
     def get_threshold2_label(self) -> str:
-        return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
+        return f'{(self.dist_treshold / GlobalConfig.N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class DCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, scenario: MultiLevelScenario,  risk_vectors : List[RiskVector],   ref_risk_vectors : Optional[List[RiskVector]] = None) -> None:
@@ -146,7 +146,7 @@ class DCPAAxesComponent(ProximityMetricComponent):
         return self.dist_treshold
     
     def get_threshold2_label(self) -> str:
-        return f'{(self.dist_treshold / N_MILE_TO_M_CONVERSION):.0f} NM'
+        return f'{(self.dist_treshold / GlobalConfig.N_MILE_TO_M_CONVERSION):.0f} NM'
     
 class TCPAAxesComponent(ProximityMetricComponent):
     def __init__(self, ax : plt.Axes, scenario: MultiLevelScenario,  risk_vectors : List[RiskVector],   ref_risk_vectors : Optional[List[RiskVector]] = None) -> None:

@@ -1,9 +1,8 @@
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import List, Optional
-
-from utils.asv_utils import KNOT_TO_MS_CONVERSION, MAX_BEAM, MAX_LENGTH, MAX_SPEED_IN_MS, MIN_BEAM, MIN_LENGTH, MIN_SPEED_IN_MS
+from typing import Dict
+from global_config import GlobalConfig
 
 """
 Ship types:
@@ -33,17 +32,17 @@ Passenger ship, MMSI: 477995293 : 30 x 8 m
 @dataclass(frozen=True, repr=False)
 class VesselType(ABC):
     name : str = 'VesselType'
-    min_length : float = MIN_LENGTH
-    max_length : float = MAX_LENGTH
-    min_speed : float = MIN_SPEED_IN_MS
-    max_speed : float = MAX_SPEED_IN_MS
-    min_beam : float = MIN_BEAM
-    max_beam : float = MAX_BEAM
+    min_length : float = GlobalConfig.MIN_LENGTH
+    max_length : float = GlobalConfig.MAX_LENGTH
+    min_speed : float = GlobalConfig.MIN_SPEED_IN_MS
+    max_speed : float = GlobalConfig.MAX_SPEED_IN_MS
+    min_beam : float = GlobalConfig.MIN_BEAM
+    max_beam : float = GlobalConfig.MAX_BEAM
     
     def do_match(self, length : float, speed : float, beam=None) -> bool:
-        return (self.min_length <= length <= self.max_length and
-                self.min_speed <= speed <= self.max_speed and
-                (beam is None or self.min_beam <= beam <= self.max_beam)
+        return (self.min_length - GlobalConfig.EPSILON <= length <= self.max_length + GlobalConfig.EPSILON and
+                self.min_speed - GlobalConfig.EPSILON <= speed <= self.max_speed + GlobalConfig.EPSILON and
+                (beam is None or self.min_beam - GlobalConfig.EPSILON <= beam <= self.max_beam + GlobalConfig.EPSILON)
                 )
         
     def __repr__(self):
@@ -56,12 +55,6 @@ class VesselType(ABC):
     def is_unspecified(self) -> bool:
         return False
     
-    @staticmethod    
-    def get_vessel_type_by_name(name : Optional[str]):
-        if name is None:
-            return DEFAULT_VESSEL_TYPE
-        return next((t for t in ALL_VESSEL_TYPES if t.name == name))
-
 @dataclass(frozen=True, repr=False)
 class UnspecifiedVesselType(VesselType):
     name : str = 'UnspecifiedType'
@@ -81,7 +74,7 @@ class MiniUSV(VesselType):
     name : str = 'MiniUSV'
     min_length : float = 1.0
     max_length : float = 1.0
-    max_speed : float = 2.0 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 2.0 # m/s
     min_beam : float = 0.5
     max_beam : float = 0.5
     
@@ -90,7 +83,7 @@ class CargoShip(VesselType):
     name : str = 'CargoShip'
     min_length : float = 50
     max_length : float = 400
-    max_speed : float = 25 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 25 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 10
     max_beam : float = 60
     
@@ -99,7 +92,7 @@ class Tanker(VesselType):
     name : str = 'Tanker'
     min_length : float = 60
     max_length : float = 350
-    max_speed : float = 20 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 20 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 10
     max_beam : float = 60
     
@@ -108,7 +101,7 @@ class ContainerShip(VesselType):
     name : str = 'ContainerShip'
     min_length : float = 100
     max_length : float = 400
-    max_speed : float = 25 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 25 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 15
     max_beam : float = 65
     
@@ -117,16 +110,26 @@ class PassengerShip(VesselType):
     name : str = 'PassengerShip'
     min_length : float = 20
     max_length : float = 350
-    max_speed : float = 40 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 40 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 5
     max_beam : float = 50
     
+    
+@dataclass(frozen=True, repr=False)
+class EgoPassengerShip(VesselType):
+    name : str = 'EgoPassengerShip'
+    min_length : float = 30.0
+    max_length : float = 30.0
+    max_speed : float = 40.0 * GlobalConfig.KNOT_TO_MS_CONVERSION
+    min_beam : float = 10.0
+    max_beam : float = 10.0
+
 @dataclass(frozen=True, repr=False)
 class FishingShip(VesselType):
     name : str = 'FishingShip'
     min_length : float = 2
     max_length : float = 100
-    max_speed : float = 15 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 15 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 2
     max_beam : float = 20
  
@@ -135,7 +138,7 @@ class MotorVessel(VesselType):
     name : str = 'MotorVessel'
     min_length : float = 10
     max_length : float = 370
-    max_speed : float = 30 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 30 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 3
     max_beam : float = 80
     
@@ -144,7 +147,7 @@ class SailingVessel(VesselType):
     name : str = 'SailingVessel'
     min_length : float = 5
     max_length : float = 60
-    max_speed : float = 20 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 20 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 2
     max_beam : float = 12
     
@@ -153,11 +156,22 @@ class MilitaryVessel(VesselType):
     name : str = 'MilitaryVessel'
     min_length : float = 20
     max_length : float = 300
-    max_speed : float = 50 * KNOT_TO_MS_CONVERSION
+    max_speed : float = 50 * GlobalConfig.KNOT_TO_MS_CONVERSION
     min_beam : float = 5
     max_beam : float = 40
     
 #ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType(), Tanker(), CargoShip(), ContainerShip(), PassengerShip(), FishingShip(), MotorVessel(), SailingVessel(), MilitaryVessel()]
-ALL_VESSEL_TYPES : List[VesselType] = [OtherVesselType()]
+ALL_VESSEL_TYPES : Dict[str, VesselType] = {'OtherType' : OtherVesselType(),
+                                            'MiniUSV' : MiniUSV(),
+                                            'CargoShip' : CargoShip(),
+                                            'Tanker' : Tanker(),
+                                            'ContainerShip' : ContainerShip(),
+                                            'PassengerShip' : PassengerShip(),
+                                            'FishingShip' : FishingShip(),
+                                            'MotorVessel' : MotorVessel(),
+                                            'SailingVessel' : SailingVessel(),
+                                            'MilitaryVessel' : MilitaryVessel(),
+                                            'EgoPassengerShip' : EgoPassengerShip(),
+                                            'UnspecifiedType' : UnspecifiedVesselType()}
 
 DEFAULT_VESSEL_TYPE = UnspecifiedVesselType()

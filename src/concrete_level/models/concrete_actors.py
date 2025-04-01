@@ -5,8 +5,8 @@ import numpy as np
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.models.functional_scenario_builder import FunctionalScenarioBuilder
 from logical_level.models.actor_variable import ActorVariable, OSVariable, StaticObstacleVariable, TSVariable, VesselVariable
-from utils.static_obstacle_types import StaticObstacleType
-from utils.vessel_types import VesselType
+from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
+from utils.vessel_types import ALL_VESSEL_TYPES
 from utils.serializable import Serializable
 
 @dataclass(frozen=True)
@@ -60,13 +60,13 @@ class ConcreteStaticObstacle(ConcreteActor):
     
     @property
     def logical_variable(self) -> 'StaticObstacleVariable':
-        t = StaticObstacleType.get_static_obstacle_type_by_name(self.type)
+        t = ALL_STATIC_OBSTACLE_TYPES[self.type]
         return StaticObstacleVariable(self.id, t)
     
     def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         logical_variable = self.logical_variable
         obj = builder.add_new_obstacle(self.id)
-        t_obj = builder.find_obstacle_type(logical_variable.type_name)
+        t_obj = builder.find_obstacle_type_by_name(logical_variable.type_name)
         builder.static_obstacle_type_interpretation.add(obj, t_obj)
         return logical_variable, obj
         
@@ -101,13 +101,13 @@ class ConcreteVessel(ConcreteActor):
     
     @property
     def logical_variable(self) -> VesselVariable:
-        t = VesselType.get_vessel_type_by_name(self.type)
+        t = ALL_VESSEL_TYPES[self.type]
         return OSVariable(self.id, t) if self.is_os else TSVariable(self.id, t)
     
     def create_abstraction(self, builder : FunctionalScenarioBuilder) -> Tuple[ActorVariable, FuncObject]:
         logical_variable = self.logical_variable
         obj = builder.add_new_os(self.id) if self.is_os else builder.add_new_ts(self.id)
-        t_obj = builder.find_obstacle_type(logical_variable.type_name)
+        t_obj = builder.find_vessel_type_by_name(logical_variable.type_name)
         builder.static_obstacle_type_interpretation.add(obj, t_obj)
         return logical_variable, obj
         

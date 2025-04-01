@@ -97,7 +97,7 @@ random.shuffle(combinations_NSGA)
 random.shuffle(combinations_PSO)
 random.shuffle(combination_DE)
 
-functional_scenarios = [FunctionalModelManager.get_6_vessel_scenarios()[0]]
+functional_scenarios = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
 
 
 tests : List[Tuple[Any, SolverBase]]= [

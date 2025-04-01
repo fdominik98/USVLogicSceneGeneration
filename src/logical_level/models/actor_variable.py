@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import List
 import numpy as np
 from utils.static_obstacle_types import DEFAULT_OBSTACLE_TYPE, StaticObstacleType
-from utils.vessel_types import DEFAULT_VESSEL_TYPE, OtherVesselType, PassengerShip, VesselType
-from utils.asv_utils import EPSILON, MAX_COORD, MAX_HEADING, MIN_COORD, MIN_HEADING
+from utils.vessel_types import ALL_VESSEL_TYPES, DEFAULT_VESSEL_TYPE, VesselType
+from global_config import GlobalConfig
 
 @dataclass(frozen=True)
 class ActorVariable(ABC):    
@@ -41,11 +41,11 @@ class ActorVariable(ABC):
     
     @property
     def min_coord(self) -> float:
-        return MIN_COORD
+        return GlobalConfig.MIN_COORD
     
     @property
     def max_coord(self) -> float:
-        return MAX_COORD
+        return GlobalConfig.MAX_COORD
     
     @property
     @abstractmethod
@@ -62,35 +62,35 @@ class VesselVariable(ActorVariable, ABC):
     
     @property
     def min_length(self) -> float:
-        return self.vessel_type.min_length
+        return self.vessel_type.min_length - GlobalConfig.EPSILON
     
     @property
     def max_length(self) -> float:
-        return self.vessel_type.max_length
+        return self.vessel_type.max_length + GlobalConfig.EPSILON
     
     @property
     def min_beam(self) -> float:
-        return self.vessel_type.min_beam
+        return self.vessel_type.min_beam - GlobalConfig.EPSILON
     
     @property
     def max_beam(self) -> float:
-        return self.vessel_type.max_beam
+        return self.vessel_type.max_beam + GlobalConfig.EPSILON
         
     @property
     def min_speed(self) -> float:
-        return self.vessel_type.min_speed
+        return self.vessel_type.min_speed - GlobalConfig.EPSILON
     
     @property
     def max_speed(self) -> float:
-        return self.vessel_type.max_speed
+        return self.vessel_type.max_speed + GlobalConfig.EPSILON
     
     @property
     def min_heading(self) -> float:
-        return MIN_HEADING
+        return GlobalConfig.MIN_HEADING - GlobalConfig.EPSILON
     
     @property
     def max_heading(self) -> float:
-        return MAX_HEADING  
+        return GlobalConfig.MAX_HEADING + GlobalConfig.EPSILON
     
     @property
     def is_vessel(self) -> bool:
@@ -117,39 +117,23 @@ class VesselVariable(ActorVariable, ABC):
     
 @dataclass(frozen=True)   
 class OSVariable(VesselVariable):
-    vessel_type : VesselType = OtherVesselType()
-    
-    @property
-    def min_length(self) -> float:
-        return 30 - EPSILON
-    
-    @property
-    def max_length(self) -> float:
-        return 30 + EPSILON
-    
-    @property
-    def min_beam(self) -> float:
-        return 10 - EPSILON
-    
-    @property
-    def max_beam(self) -> float:
-        return 10 + EPSILON
+    vessel_type : VesselType = ALL_VESSEL_TYPES[GlobalConfig.OS_VESSEL_TYPE]
     
     @property
     def min_heading(self) -> float:
-        return np.pi / 2 - EPSILON
+        return GlobalConfig.MAX_HEADING / 2 - GlobalConfig.EPSILON
     
     @property
     def max_heading(self) -> float:
-        return np.pi / 2 + EPSILON
+        return GlobalConfig.MAX_HEADING / 2 + GlobalConfig.EPSILON
     
     @property
     def min_coord(self) -> float:
-        return MAX_COORD / 2 - EPSILON
+        return GlobalConfig.MAX_COORD / 2 - GlobalConfig.EPSILON
     
     @property
     def max_coord(self) -> float:
-        return MAX_COORD / 2 + EPSILON
+        return GlobalConfig.MAX_COORD / 2 + GlobalConfig.EPSILON
     
     @property
     def name(self) -> str:

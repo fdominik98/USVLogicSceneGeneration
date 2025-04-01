@@ -4,7 +4,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from utils.asv_utils import BOW_ANGLE, MASTHEAD_LIGHT_ANGLE
+from global_config import GlobalConfig
 from visualization.colreg_scenarios.plot_components.main_plot_components.angle_circle_component import AngleCircleComponent
 
 
@@ -19,11 +19,11 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         
     def do_draw(self):
         for actor, state in self.scenario.concrete_scene.items():
-            angle1_masthead = np.degrees(state.heading + MASTHEAD_LIGHT_ANGLE / 2)
-            angle2_masthead = np.degrees(state.heading - MASTHEAD_LIGHT_ANGLE / 2)
+            angle1_masthead = np.degrees(state.heading + GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
+            angle2_masthead = np.degrees(state.heading - GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
             
-            angle1_bow = np.degrees(state.heading + BOW_ANGLE / 2)
-            angle2_bow = np.degrees(state.heading - BOW_ANGLE / 2)
+            angle1_bow = np.degrees(state.heading + GlobalConfig.BOW_ANGLE / 2)
+            angle2_bow = np.degrees(state.heading - GlobalConfig.BOW_ANGLE / 2)
             
             # Create the wedge (filled circle slice)
             wedge_stern = patches.Wedge(state.p,
@@ -56,11 +56,11 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
             
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for actor, state in scene.items():
-            angle1_masthead = np.degrees(state.heading + MASTHEAD_LIGHT_ANGLE / 2)
-            angle2_masthead = np.degrees(state.heading - MASTHEAD_LIGHT_ANGLE / 2)
+            angle1_masthead = np.degrees(state.heading + GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
+            angle2_masthead = np.degrees(state.heading - GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
             
-            angle1_bow = np.degrees(state.heading + BOW_ANGLE / 2)
-            angle2_bow = np.degrees(state.heading - BOW_ANGLE / 2)
+            angle1_bow = np.degrees(state.heading + GlobalConfig.BOW_ANGLE / 2)
+            angle2_bow = np.degrees(state.heading - GlobalConfig.BOW_ANGLE / 2)
             
             self.wedge_sterns[actor].set_center(state.p)
             self.wedge_sterns[actor].set_radius(self.angle_circle_radius)

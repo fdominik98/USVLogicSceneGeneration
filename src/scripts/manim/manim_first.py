@@ -5,7 +5,7 @@ from manim.constants import DEFAULT_DOT_RADIUS, ORIGIN
 from manim.utils.color import WHITE
 from numpy import floating
 from utils.file_system_utils import IMAGES_FOLDER
-from utils.asv_utils import MAX_COORD
+from global_config import GlobalConfig
 from concrete_level.data_parser import EvalDataParser, TrajDataParser
 from logical_level.models.logical_scenario import LoadedEnvironment
 from functional_level.metamodels.functional_scenario import Vessel
@@ -148,17 +148,17 @@ class PointsWithVectorsAndRadius(ThreeDScene):
         self.trajectories = TrajectoryReceiver(self.logical_scenario, traj[0].trajectories)
         
         # Set the background color to white
-        axes_3d = ThreeDAxes(x_range=[-MAX_COORD, MAX_COORD*3, MAX_COORD*3 / 5],
-                             y_range=[-MAX_COORD, MAX_COORD*3, MAX_COORD*3 / 5],
+        axes_3d = ThreeDAxes(x_range=[-GlobalConfig.MAX_COORD, GlobalConfig.MAX_COORD*3, GlobalConfig.MAX_COORD*3 / 5],
+                             y_range=[-GlobalConfig.MAX_COORD, GlobalConfig.MAX_COORD*3, GlobalConfig.MAX_COORD*3 / 5],
                              z_range=[0, 200, 200],
                              axis_config={"decimal_number_config": {"num_decimal_places": 0}},
-                             x_axis_config={"numbers_to_include": [int(val) for val in np.arange(-MAX_COORD, MAX_COORD*3, MAX_COORD *3 / 5)]},
-                             y_axis_config={"numbers_to_include": [int(val) for val in np.arange(-MAX_COORD, MAX_COORD*3, MAX_COORD *3 / 5)]},
+                             x_axis_config={"numbers_to_include": [int(val) for val in np.arange(-GlobalConfig.MAX_COORD, GlobalConfig.MAX_COORD*3, GlobalConfig.MAX_COORD *3 / 5)]},
+                             y_axis_config={"numbers_to_include": [int(val) for val in np.arange(-GlobalConfig.MAX_COORD, GlobalConfig.MAX_COORD*3, GlobalConfig.MAX_COORD *3 / 5)]},
                              tips=True,)
         labels = axes_3d.get_axis_labels(x_label=Tex("x (m)"), y_label=Tex("y (m)"))
                 
         self.add(axes_3d, labels)
-        self.move_camera(frame_center=axes_3d.c2p(MAX_COORD*0.5, MAX_COORD*1, 10), zoom=2.5)
+        self.move_camera(frame_center=axes_3d.c2p(GlobalConfig.MAX_COORD*0.5, GlobalConfig.MAX_COORD*1, 10), zoom=2.5)
         self.wait(1)
         self.move_camera(phi=50 * DEGREES, theta=-45 * DEGREES, run_time=2)
         

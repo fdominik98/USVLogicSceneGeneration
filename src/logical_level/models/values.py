@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from utils.asv_utils import vessel_radius        
+from global_config import vessel_radius        
 
 @dataclass(frozen=True)
 class ActorValues():

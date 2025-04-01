@@ -5,15 +5,15 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.models.actor_state import ActorState
-from utils.asv_utils import BOW_ANGLE, MAX_COORD, STERN_ANGLE
+from global_config import GlobalConfig
 from utils.colors import light_colors
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 
 class AngleCircleComponent(PlotComponent):
     # Define the angle and radius
-    angle_circle_slice_1 = BOW_ANGLE  # 20 degree slice
-    angle_circle_slice_2 = STERN_ANGLE # 140 degree slice
+    angle_circle_slice_1 = GlobalConfig.BOW_ANGLE  # 20 degree slice
+    angle_circle_slice_2 = GlobalConfig.STERN_ANGLE # 140 degree slice
     
     def __init__(self, ax: plt.Axes, scenario : MultiLevelScenario, linewidth=0.8, radius_ratio = 10) -> None:
         super().__init__(ax, scenario)
@@ -26,7 +26,7 @@ class AngleCircleComponent(PlotComponent):
         self.zorder = -20
         
         self.linewidth = linewidth
-        self.angle_circle_radius = MAX_COORD / radius_ratio
+        self.angle_circle_radius = GlobalConfig.MAX_COORD / radius_ratio
             
     def do_draw(self):
         for actor, state in self.scenario.concrete_scene.items():
@@ -47,7 +47,7 @@ class AngleCircleComponent(PlotComponent):
         self.line4_graphs[actor] = circle_line4
         
         # # Plot vectors for better visibility
-        # v1_scaled = state.v_norm * MAX_COORD / 11
+        # v1_scaled = state.v_norm * GlobalConfig.MAX_COORD / 11
         # big_quiver = self.ax.quiver(state.x, state.y, v1_scaled[0], v1_scaled[1], angles='xy', scale_units='xy', scale=1,
         #                             color=light_colors[vessel.id], zorder=zorder)
         

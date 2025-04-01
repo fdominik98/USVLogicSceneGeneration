@@ -3,7 +3,7 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.trajectories import Trajectories
-from utils.asv_utils import ONE_HOUR_IN_SEC
+from global_config import GlobalConfig
 
 class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):  
     def __init__(self, existing_dict : Dict[ConcreteVessel, List[ActorState]]={}, *args, **kwargs):
@@ -23,13 +23,13 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):
         return Trajectories(self.even_lengths())
     
     @staticmethod
-    def default_trajectory_from_scene(scene : ConcreteScene, length : int = ONE_HOUR_IN_SEC) -> Trajectories:
+    def default_trajectory_from_scene(scene : ConcreteScene, length : int = GlobalConfig.ONE_HOUR_IN_SEC) -> Trajectories:
         builder = TrajectoryBuilder()
         builder.add_scene(scene)
         builder.extend(length)
         return builder.build()
     
-    def extend(self, length : int = ONE_HOUR_IN_SEC) -> 'TrajectoryBuilder':
+    def extend(self, length : int = GlobalConfig.ONE_HOUR_IN_SEC) -> 'TrajectoryBuilder':
         for vessel in self.keys():       
             self[vessel] = self.extend_trajectory(self[vessel], length)
         return self
@@ -38,7 +38,7 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):
         return self.extend(max(len(states) for states in self.values()))        
     
                 
-    def extend_trajectory(self, trajectory : List[ActorState], length : int = ONE_HOUR_IN_SEC) -> List[ActorState]:
+    def extend_trajectory(self, trajectory : List[ActorState], length : int = GlobalConfig.ONE_HOUR_IN_SEC) -> List[ActorState]:
         new_trajectory = trajectory.copy()
         while len(new_trajectory) < length:
             turned_state = new_trajectory[-1].modify_copy(heading=new_trajectory[0].heading)

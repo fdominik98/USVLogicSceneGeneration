@@ -6,18 +6,18 @@ from logical_level.models.actor_variable import ActorVariable, OSVariable, Stati
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from utils.static_obstacle_types import StaticObstacleType
-from utils.vessel_types import VesselType
+from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
+from utils.vessel_types import ALL_VESSEL_TYPES
 from utils.scenario import Scenario
 
 class LogicalScenarioBuilder():  
     @staticmethod    
     def build_from_functional(functional_scenario : FunctionalScenario, init_method=RandomInstanceInitializer.name) -> LogicalScenario:    
         os = functional_scenario.os_object
-        object_variable_map = {os: OSVariable(os.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(os)))}
-        object_variable_map |= {ts : TSVariable(ts.id, VesselType.get_vessel_type_by_name(functional_scenario.find_vessel_type_name(ts)))
+        object_variable_map = {os: OSVariable(os.id, ALL_VESSEL_TYPES[functional_scenario.find_vessel_type_name(os)])}
+        object_variable_map |= {ts : TSVariable(ts.id, ALL_VESSEL_TYPES[functional_scenario.find_vessel_type_name(ts)])
                                 for ts in functional_scenario.ts_objects}
-        object_variable_map |= {o : StaticObstacleVariable(o.id, StaticObstacleType.get_static_obstacle_type_by_name(functional_scenario.find_obstacle_type_name(o)))
+        object_variable_map |= {o : StaticObstacleVariable(o.id, ALL_STATIC_OBSTACLE_TYPES[functional_scenario.find_obstacle_type_name(o)])
                                 for o in functional_scenario.obstacle_objects}
          
         

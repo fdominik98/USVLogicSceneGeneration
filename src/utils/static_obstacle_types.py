@@ -1,18 +1,17 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import List, Optional
-
-from utils.asv_utils import MIN_OBSTACLE_RADIUS, MAX_OBSTACLE_RADIUS
+from typing import Dict
+from global_config import GlobalConfig
 
 
 @dataclass(frozen=True, repr=False)
 class StaticObstacleType(ABC):
     name : str = 'StaticObstacleType'
-    min_radius : float = MIN_OBSTACLE_RADIUS
-    max_radius : float = MAX_OBSTACLE_RADIUS
+    min_radius : float = GlobalConfig.MIN_OBSTACLE_RADIUS
+    max_radius : float = GlobalConfig.MAX_OBSTACLE_RADIUS
     
     def do_match(self, radius : float) -> bool:
-        return (self.min_radius <= radius <= self.max_radius)
+        return (self.min_radius - GlobalConfig.EPSILON <= radius <= self.max_radius + GlobalConfig.EPSILON)
         
     def __repr__(self):
         return self.name
@@ -20,12 +19,6 @@ class StaticObstacleType(ABC):
     def __str__(self):
         return self.name
         
-    @staticmethod    
-    def get_static_obstacle_type_by_name(name : Optional[str]):
-        if name is None:
-            return DEFAULT_OBSTACLE_TYPE
-        return next((t for t in ALL_STATIC_OBSTACLE_TYPES if t.name == name))
-    
     @property
     def is_unspecified(self) -> bool:
         return False
@@ -60,6 +53,10 @@ class LargeObstacle(StaticObstacleType):
     min_radius : float = 200
     
 #ALL_STATIC_OBSTACLE_TYPES : List[StaticObstacleType] = [OtherObstacleType(), SmallObstacle(), MediumObstacle(), LargeObstacle()]
-ALL_STATIC_OBSTACLE_TYPES : List[StaticObstacleType] = [OtherObstacleType()]
+ALL_STATIC_OBSTACLE_TYPES : Dict[str, StaticObstacleType] = {'OtherType' : OtherObstacleType(),
+                                                             'SmallObstacle' : SmallObstacle(),
+                                                             'MediumObstacle' : MediumObstacle(),
+                                                             'LargeObstacle' : LargeObstacle(),
+                                                             'UnspecifiedType' : UnspecifiedObstacleType()}
 
 DEFAULT_OBSTACLE_TYPE = UnspecifiedObstacleType()

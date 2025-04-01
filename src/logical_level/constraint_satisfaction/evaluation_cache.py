@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 import numpy as np
-from utils.asv_utils import EPSILON, MASTHEAD_LIGHT_ANGLE, o2VisibilityByo1, compute_angle
+from global_config import GlobalConfig, o2VisibilityByo1
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import ActorValues, VesselValues
 from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
+from utils.math_utils import compute_angle
 
 class GeometricProperties(ABC):
     
@@ -18,7 +19,7 @@ class GeometricProperties(ABC):
         self.p21 = -self.p12  # Avoid redundant calculations
 
         # Compute norm of relative position vector (distance)
-        self.o_distance = float(max(np.linalg.norm(self.p12), EPSILON))
+        self.o_distance = float(max(np.linalg.norm(self.p12), GlobalConfig.EPSILON))
 
         # Compute visibility angles
         self.angle_p21_v2 = compute_angle(self.p21, self.val2.v, self.o_distance, self.val2.sp)
@@ -86,15 +87,15 @@ class VesselToVesselProperties(GeometricProperties):
         super().__init__(var1, var2, assignments)
         self.val1 : VesselValues
         self.v12 = self.val1.v - self.val2.v
-        self.v12_norm_stable = max(np.linalg.norm(self.v12), EPSILON)
+        self.v12_norm_stable = max(np.linalg.norm(self.v12), GlobalConfig.EPSILON)
 
         # Compute angles
         self.angle_p12_v1 = compute_angle(self.p12, self.val1.v, self.o_distance, self.val1.sp)
 
         # Compute visibility distance
         self.vis_distance = min(
-            o2VisibilityByo1(self.angle_p21_v2 >= MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
-            o2VisibilityByo1(self.angle_p12_v1 >= MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)
+            o2VisibilityByo1(self.angle_p21_v2 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
+            o2VisibilityByo1(self.angle_p12_v1 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)
         )
 
         # Compute time and distance to closest approach

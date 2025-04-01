@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 import numpy as np
 from concrete_level.models.trajectory_manager import TrajectoryManager
-from utils.asv_utils import N_MILE_TO_M_CONVERSION
+from global_config import GlobalConfig
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
@@ -30,7 +30,7 @@ class ProximityVector():
         self.tcpa = self.props.tcpa
         self.dcpa = self.props.dcpa
         
-        dr = 1 * N_MILE_TO_M_CONVERSION
+        dr = 1 * GlobalConfig.N_MILE_TO_M_CONVERSION
         ts = 10 * 60
         
         if self.tcpa < 0 or self.tcpa > ts:

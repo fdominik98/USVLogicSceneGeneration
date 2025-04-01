@@ -4,7 +4,7 @@ from matplotlib.legend import Legend
 import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from utils.asv_utils import KNOT_TO_MS_CONVERSION
+from global_config import GlobalConfig
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
 class LegendComponent(PlotComponent):
@@ -22,7 +22,7 @@ class LegendComponent(PlotComponent):
             # Plot the positions
             dot_label = f'{actor}\; p: ({state.p[0]:.1f}, {state.p[1]:.1f}), r: {actor.radius:.1f} m'
             angle = f'h: {np.degrees(state.heading):.1f}^\circ'
-            speed = f'sp: {(state.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
+            speed = f'sp: {(state.speed / GlobalConfig.KNOT_TO_MS_CONVERSION):.1f} kn'
             velocity_label =f'{actor}\; {angle}, {speed}'
             
             self.legend.get_texts()[i * 2 + 0].set_text(rf'${dot_label}$') 

@@ -4,7 +4,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
-from utils.asv_utils import KNOT_TO_MS_CONVERSION
+from global_config import GlobalConfig
 from utils.colors import colors
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
 
@@ -33,7 +33,7 @@ class ShipMarkingsComponent(PlotComponent):
             self.ship_dot_graphs[actor] = ship_dot
             
             angle = f'h: {np.degrees(state.heading):.1f}^\circ'
-            speed = f'sp: {(state.speed / KNOT_TO_MS_CONVERSION):.1f} kn'
+            speed = f'sp: {(state.speed / GlobalConfig.KNOT_TO_MS_CONVERSION):.1f} kn'
             velocity_label = f'{actor}\; {angle}, {speed}'
             # Plot the velocity vector with their actual lengths
             ship_vel = self.ax.quiver(state.p[0], state.p[1], state.v[0], state.v[1], angles='xy', scale_units='xy', scale=1, color=colors[actor.id], label=rf'${velocity_label}$', zorder=self.zorder-10)

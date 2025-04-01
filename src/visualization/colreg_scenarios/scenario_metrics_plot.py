@@ -3,7 +3,7 @@ from matplotlib import gridspec
 import matplotlib.pyplot as plt
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from evaluation.risk_evaluation import TrajectoryRiskEvaluator
-from utils.asv_utils import *
+from global_config import *
 from visualization.plotting_utils import PlotBase
 from visualization.colreg_scenarios.plot_components.metric_components.risk_metric_component import RiskMetricComponent
 from visualization.colreg_scenarios.plot_components.metric_components.proximity_metrics_component import DistanceAxesComponent, DCPAAxesComponent, TCPAAxesComponent

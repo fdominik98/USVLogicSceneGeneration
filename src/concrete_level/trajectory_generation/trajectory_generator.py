@@ -5,7 +5,7 @@ from typing import List, Dict
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.trajectory_generation.trajectory_builder import TrajectoryBuilder
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.asv_utils import MAX_COORD, TWO_N_MILE
+from global_config import GlobalConfig
 from utils.math_utils import find_center_and_radius
 from concrete_level.models.rrt_models import Obstacle, PolygonalObstacle, LineObstacle, CircularObstacle
 from concrete_level.models.vessel_order_graph import VesselNode, VesselOrderGraph
@@ -15,7 +15,7 @@ import numpy as np
 from concrete_level.trajectory_generation.bidirectional_rrt_star_fnd import BidirectionalRRTStarFND, DIM
 
 
-SCALER = 1 / MAX_COORD / 1.5  * DIM
+SCALER = 1 / GlobalConfig.MAX_COORD / 1.5  * DIM
 
 DIRECTION_THRESHOLD = 100 # meter
 GOAL_SAMPLE_RATE = 5.0 #%
@@ -114,8 +114,8 @@ class TrajectoryGenerator:
         
         bounding_lines = [
             LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, True, DIRECTION_THRESHOLD),   # Left bounding line
-            LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, collision_center_radius + TWO_N_MILE), # Right bounding line
-            LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, collision_center_radius + TWO_N_MILE), # Right bounding line
+            LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm, False, collision_center_radius + GlobalConfig.TWO_N_MILE), # Right bounding line
+            LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm, False, collision_center_radius + GlobalConfig.TWO_N_MILE), # Right bounding line
             LineObstacle(vessel_state.x, vessel_state.y, vessel_state.v_norm_perp, False, DIRECTION_THRESHOLD), # Behind bounding line
             LineObstacle(goal_state.x, goal_state.y, vessel_state.v_norm_perp, True, DIRECTION_THRESHOLD),  # Front bounding line        
         ]
@@ -145,7 +145,7 @@ class TrajectoryGenerator:
                         goal_sample_rate=GOAL_SAMPLE_RATE,
                         collision_points=collision_points,
                         interpolator=interpolator,
-                        scaler = SCALER * MAX_COORD / start_goal_dist / 1.5)
+                        scaler = SCALER * GlobalConfig.MAX_COORD / start_goal_dist / 1.5)
         
         # Add the original position to start the path
         path = rrt.plan_trajectory()

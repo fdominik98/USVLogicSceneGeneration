@@ -5,8 +5,8 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.actor_state import ActorState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.vessel_types import CargoShip, FishingShip, MilitaryVessel, MotorVessel, PassengerShip, VesselType
-from utils.asv_utils import EGO_BEAM, EGO_LENGTH, vessel_radius
+from utils.vessel_types import ALL_VESSEL_TYPES, CargoShip, FishingShip, MilitaryVessel, MotorVessel, VesselType
+from global_config import GlobalConfig, vessel_radius
 from utils.file_system_utils import COMMON_OCEAN_FOLDER, get_all_file_paths
 from commonroad.geometry.shape import Rectangle
 from commonocean.common.file_reader import CommonOceanFileReader
@@ -35,21 +35,29 @@ def get_scenes(file_path : str)-> List[ConcreteScene]:
             heading = obst.initial_state.orientation
             vessel_type = obstacle_type_map[obst.obstacle_type]
             if isinstance(obst.obstacle_shape, Rectangle):  
-                if obst.obstacle_shape.length > vessel_type.max_length or obst.obstacle_shape.length < vessel_type.min_length:
-                    raise ValueError('Object length is out of vessel type limits. Adjust!')   
-                if obst.obstacle_shape.width > vessel_type.max_beam or obst.obstacle_shape.width < vessel_type.min_beam:
-                    raise ValueError('Object beam is out of vessel type limits. Adjust!')  
-                if speed > vessel_type.max_speed or speed < vessel_type.min_speed:
-                    raise ValueError('Object speed is out of vessel type limits. Adjust!') 
+                if not vessel_type.do_match( obst.obstacle_shape.length, speed, obst.obstacle_shape.width):
+                    raise ValueError('Object attributes is out of vessel type limits. Adjust!')   
                 
-                builder.set_state(ConcreteVessel(vessel_id, False, obst.obstacle_shape.length, vessel_radius(obst.obstacle_shape.length), vessel_type.max_speed, vessel_type.name, beam=obst.obstacle_shape.width),
+                builder.set_state(ConcreteVessel(id=vessel_id,
+                                                 is_os=False,
+                                                 length=obst.obstacle_shape.length,
+                                                 radius=vessel_radius(obst.obstacle_shape.length),
+                                                 max_speed=vessel_type.max_speed,
+                                                 type=vessel_type.name,
+                                                 beam=obst.obstacle_shape.width),
                                 ActorState(p[0], p[1], speed, heading))
                 vessel_id += 1
     if len(builder) == 0:
         return scenes   
      
-    ego_vessel_type = PassengerShip()
-    ego_vessel = ConcreteVessel(0, True, EGO_LENGTH, vessel_radius(EGO_LENGTH), ego_vessel_type.max_speed, ego_vessel_type.name, beam = EGO_BEAM)
+    ego_vessel_type = ALL_VESSEL_TYPES[GlobalConfig.OS_VESSEL_TYPE]
+    ego_vessel = ConcreteVessel(id=0,
+                                is_os=True,
+                                length=ego_vessel_type.max_length,
+                                radius=vessel_radius(ego_vessel_type.max_length),
+                                max_speed=ego_vessel_type.max_speed,
+                                type=GlobalConfig.OS_VESSEL_TYPE,
+                                beam = ego_vessel_type.max_beam)
     for planning_problem in planning_problem_set.planning_problem_dict.values():
         p = planning_problem.initial_state.position
         speed = planning_problem.initial_state.velocity

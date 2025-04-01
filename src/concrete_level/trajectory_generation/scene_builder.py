@@ -8,6 +8,7 @@ from logical_level.models.actor_variable import StaticObstacleVariable, VesselVa
 from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
 from logical_level.models.values import ObstacleValues, VesselValues
 from utils.vessel_types import ALL_VESSEL_TYPES
+from global_config import GlobalConfig
 
 
 class SceneBuilder(Dict[ConcreteActor, ActorState]):  
@@ -33,7 +34,7 @@ class SceneBuilder(Dict[ConcreteActor, ActorState]):
             if isinstance(actor_var, VesselVariable) and isinstance(values, VesselValues):
                 vessel_type = actor_var.vessel_type
                 if vessel_type.is_unspecified:
-                    valid_types = [t for t in ALL_VESSEL_TYPES if t.do_match(values.l, values.sp)]
+                    valid_types = [ALL_VESSEL_TYPES[t] for t in GlobalConfig.VALID_VESSEL_TYPES if ALL_VESSEL_TYPES[t].do_match(values.l, values.sp)]
                     vessel_type = random.choice(valid_types)
                 builder.set_state(ConcreteVessel(id=actor_var.id, radius=values.r, type=vessel_type.name, 
                                                  is_os=actor_var.is_os, length=values.l, max_speed=vessel_type.max_speed),
@@ -41,7 +42,7 @@ class SceneBuilder(Dict[ConcreteActor, ActorState]):
             elif isinstance(actor_var, StaticObstacleVariable) and isinstance(values, ObstacleValues):
                 obstacle_type = actor_var.obstacle_type
                 if obstacle_type.is_unspecified:
-                    valid_types = [t for t in ALL_STATIC_OBSTACLE_TYPES if t.do_match(values.r)]
+                    valid_types = [ALL_STATIC_OBSTACLE_TYPES[t] for t in GlobalConfig.VALID_STATIC_OBSTACLE_TYPES if ALL_STATIC_OBSTACLE_TYPES[t].do_match(values.r)]
                     obstacle_type = random.choice(valid_types)
                 builder.set_state(ConcreteStaticObstacle(id=actor_var.id, radius=values.r, type=obstacle_type.name),
                                   ActorState(x=values.x, y=values.y, speed=0, heading=0))

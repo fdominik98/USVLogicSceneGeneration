@@ -5,7 +5,7 @@ from concrete_level.models.concrete_actors import ConcreteActor
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache
 from visualization.colreg_scenarios.plot_components.plot_component import PlotComponent
-from utils.asv_utils import N_MILE_TO_M_CONVERSION
+from global_config import GlobalConfig
 
 
 class DistanceComponent(PlotComponent):
@@ -23,7 +23,10 @@ class DistanceComponent(PlotComponent):
             key = (actor1, actor2)
             props = eval_cache.get_props(var1, var2)
             
-            text_str = f'{props.o_distance / N_MILE_TO_M_CONVERSION:.1f} NM'
+            if props.o_distance < 1000:
+                text_str = f'{props.o_distance:.0f} m'
+            else:
+                text_str = f'{props.o_distance / GlobalConfig.N_MILE_TO_M_CONVERSION:.1f} NM'
             text = self.ax.text(props.val1.p[0] + props.p12[0] / 2, props.val1.p[1] + props.p12[1] / 2, text_str, fontsize=10, color='black', zorder=self.zorder + 10)
             self.text_graphs[key] = text
             
@@ -40,7 +43,10 @@ class DistanceComponent(PlotComponent):
             props = eval_cache.get_props(var1, var2)
             
             self.text_graphs[key].set_position((props.val1.p[0] + props.p12[0] / 2, props.val1.p[1] + props.p12[1] / 2))
-            text_str = f'{props.o_distance / N_MILE_TO_M_CONVERSION:.1f} NM'
+            if props.o_distance < 1000:
+                text_str = f'{props.o_distance:.0f} m'
+            else:
+                text_str = f'{props.o_distance / GlobalConfig.N_MILE_TO_M_CONVERSION:.1f} NM'
             self.text_graphs[key].set_text(text_str)
             
             self.line_graphs[key].set_data([props.val1.x, props.val2.x], [props.val1.y, props.val2.y])

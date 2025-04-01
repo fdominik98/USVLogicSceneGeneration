@@ -5,7 +5,7 @@ from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import calculate_solution, generate_scene, scenic_scenario
 from logical_level.constraint_satisfaction.solver_base import SolverBase
 from logical_level.models.logical_scenario import LogicalScenario
-from utils.asv_utils import BEAM_ANGLE, BEAM_ROTATION_ANGLE, BOW_ANGLE, MASTHEAD_LIGHT_ANGLE, STERN_ANGLE, o2VisibilityByo1, vessel_radius
+from global_config import GlobalConfig, o2VisibilityByo1, vessel_radius
 from utils.scenario import Scenario
 
 
@@ -48,19 +48,19 @@ class RejectionSamplingPipeline(SolverBase):
                 # heading_ego_to_ts: relative angle to ego heading
                 # heading_ts_to_ego: relative angle to p12
                 if functional_scenario.head_on(os, o):
-                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0.0, max(angle_half_cone_p21, BOW_ANGLE))
+                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, GlobalConfig.BOW_ANGLE), 0.0, max(angle_half_cone_p21, GlobalConfig.BOW_ANGLE))
                 if functional_scenario.crossing_from_port(os, o):
-                    bearing_map[(os.id, o.id)] = (-BEAM_ROTATION_ANGLE, BEAM_ANGLE, -BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                    bearing_map[(os.id, o.id)] = (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)
                 if functional_scenario.crossing_from_port(o, os):
-                    bearing_map[(os.id, o.id)] = (BEAM_ROTATION_ANGLE, BEAM_ANGLE, BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                    bearing_map[(os.id, o.id)] = (GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)
                 if functional_scenario.overtaking_to_port(os, o):
-                    bearing_map[(os.id, o.id)] = (BEAM_ROTATION_ANGLE, BEAM_ANGLE, -np.pi, STERN_ANGLE)
+                    bearing_map[(os.id, o.id)] = (GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)
                 if functional_scenario.overtaking_to_port(o, os):
-                    bearing_map[(os.id, o.id)] = (-np.pi, STERN_ANGLE, -BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                    bearing_map[(os.id, o.id)] = (-np.pi, GlobalConfig.STERN_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)
                 if functional_scenario.overtaking_to_starboard(os, o):
-                    bearing_map[(os.id, o.id)] = (-BEAM_ROTATION_ANGLE, BEAM_ANGLE, -np.pi, STERN_ANGLE)
+                    bearing_map[(os.id, o.id)] = (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)
                 if functional_scenario.overtaking_to_starboard(o, os):
-                    bearing_map[(os.id, o.id)] = (-np.pi, STERN_ANGLE, BEAM_ROTATION_ANGLE, BEAM_ANGLE)
+                    bearing_map[(os.id, o.id)] = (-np.pi, GlobalConfig.STERN_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)
                     
             for o in functional_scenario.obstacle_objects:
                 os = functional_scenario.os_object
@@ -70,7 +70,7 @@ class RejectionSamplingPipeline(SolverBase):
                 angle_half_cone_p12 = abs(np.arcsin(sin_half_cone_p12_theta))
                     
                 if functional_scenario.dangerous_head_on_sector_of(o, os):
-                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, BOW_ANGLE), 0, 2*np.pi)
+                    bearing_map[(os.id, o.id)] = (0.0, max(angle_half_cone_p12, GlobalConfig.BOW_ANGLE), 0, 2*np.pi)
         
         scenario = scenic_scenario(os_id, ts_ids, obst_ids,
                                    length_map, radius_map, vis_distance_map = vis_distance_map,
