@@ -70,12 +70,8 @@ class ScenarioPlot(PlotBase):
             
         #self.title = '\n'.join([rel.name for rel in self.functional_scenario if rel.has_os()])
         self.title = self.trajectory_manager.functional_scenario.name
-            
-        aggregate = AggregateAll(self.trajectory_manager.logical_scenario, minimize=True)
-        print(aggregate.derive_penalty(individual=self.trajectory_manager.concrete_scene.individual).info)                      
                         
         self.set_layout()    
-        
         
     def set_layout(self):
         #self.fig.tight_layout(pad=10)

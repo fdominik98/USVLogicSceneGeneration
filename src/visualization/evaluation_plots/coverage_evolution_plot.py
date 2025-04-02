@@ -28,6 +28,7 @@ class CoverageEvolutionPlot(EvalPlot):
             all_axes : List[plt.Axes] = []
             for j, config_group in enumerate(self.comparison_groups):
                 axi : plt.Axes = axes[j][i]
+                all_axes.append(axi)
                 if j == 0:
                     axi.set_title(self.vessel_num_labels[i])                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$" + "\nCovered classes")
@@ -59,9 +60,9 @@ class CoverageEvolutionPlot(EvalPlot):
                     max_value = max(values)
                         
                 labels = list(range(len(values)))
-                axi.plot(labels, values, color=self.colors[j], linestyle='-', linewidth=5)
-                axi.plot(list(range(len(relevant_values))), relevant_values, color='blue', linestyle='-', linewidth=2.5)
-                axi.plot(list(range(len(ambiguous_values))), ambiguous_values, color='red', linestyle='-', linewidth=2.5)
+                axi.plot(labels, values, color=self.colors[j], linestyle='-', linewidth=6)
+                axi.plot(list(range(len(relevant_values))), relevant_values, color='blue', linestyle='-', linewidth=1.5)
+                axi.plot(list(range(len(ambiguous_values))), ambiguous_values, color='red', linestyle='-', linewidth=1.5)
                 
                 xticks = list(np.linspace(labels[0], labels[-1], 6))
                 xticks = [int(t) for t in xticks] 

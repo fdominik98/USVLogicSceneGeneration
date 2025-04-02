@@ -37,7 +37,7 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     # RS-O
     # (f'{base_name}_2_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_o_config),
     # (f'{base_name}_2_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_o_config),
-    # (f'{base_name}_3_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_o_config),
+    (f'{base_name}_3_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_o_config),
     # (f'{base_name}_3_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_o_config),
     # (f'{base_name}_4_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_o_config),
     # (f'{base_name}_5_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_o_config),
@@ -46,7 +46,7 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     #RS-MSR
     # (f'{base_name}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
     # (f'{base_name}_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_msr_config),
-    # (f'{base_name}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
+    (f'{base_name}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
     # (f'{base_name}_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_msr_config),
     # (f'{base_name}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
     # (f'{base_name}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),

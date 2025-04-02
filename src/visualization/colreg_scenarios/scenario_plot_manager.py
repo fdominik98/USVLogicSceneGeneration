@@ -1,6 +1,8 @@
 from datetime import datetime
+import json
 import os
 import tkinter as tk
+from tkinter import messagebox
 from typing import Dict, List, Optional, Tuple
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -168,7 +170,7 @@ class ScenarioPlotManager():
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         for actor in self.trajectory_manger.logical_scenario.actor_variables:
             col = self.create_actor_info_col(light_colors[actor.id])
-            actors_label = tk.Label(master=col, text=actor.name, background=light_colors[actor.id])
+            actors_label = tk.Label(master=col, text=fr'{actor.name}', background=light_colors[actor.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.actor_info_labels = self.create_actor_info_labels()
@@ -194,7 +196,7 @@ class ScenarioPlotManager():
         actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         for actor in self.trajectory_manger.logical_scenario.actor_variables:
             col = self.create_actor_control_col(light_colors[actor.id])
-            actors_label = tk.Label(master=col, text=actor.name, background=light_colors[actor.id])
+            actors_label = tk.Label(master=col, text=fr'{actor.name}', background=light_colors[actor.id])
             actors_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
         
         self.create_actor_checkbox_row([self.colreg_plot.ship_markings_component.ship_dot_graphs], 'Dot')
@@ -218,8 +220,9 @@ class ScenarioPlotManager():
         for actor1, actor2 in self.all_actor_pairs:
             col = self.create_colreg_control_col(light_colors[actor2.id])
             rel_label = tk.Label(master=col, text=
-                f'{self.trajectory_manger.scenario.get_actor_name(actor1)}->{self.trajectory_manger.scenario.get_actor_name(actor2)}',
+                fr'{self.trajectory_manger.scenario.get_actor_name(actor1)} → {self.trajectory_manger.scenario.get_actor_name(actor2)}',
                 background=light_colors[actor1.id])
+            rel_label.bind("<Button-1>", lambda event, a1=actor1, a2=actor2: self.show_actor_info(a1, a2))
             rel_label.pack(side=tk.TOP, fill=tk.NONE, pady=(0, 5))
             
         self.create_relation_checkbox_row(self.colreg_plot.distance_component.graphs_by_rels, 'Dist', True)
@@ -228,6 +231,39 @@ class ScenarioPlotManager():
         self.create_relation_checkbox_row(self.colreg_plot.add_vo_cone_component.graphs_by_rels, 'VO calc', False)
         self.create_relation_checkbox_row([self.colreg_plot.prime_component.p12_vec_graphs], 'P12', False)
         self.create_relation_checkbox_row([self.colreg_plot.prime_component.p21_vec_graphs], 'P21', False)
+       
+    def show_actor_info(self, actor1 : ConcreteActor, actor2 : ConcreteActor):
+        """Create a custom, wider message window."""
+        var1 = self.trajectory_manger.scenario.to_variable(actor1)
+        var2 = self.trajectory_manger.scenario.to_variable(actor2)
+        
+        popup = tk.Toplevel()
+        popup.title(f'{var1.name} → {var2.name}')
+        popup.geometry("500x500")  # Set custom width and height
+        popup.resizable(True, True)
+        
+        
+        geo_props_str = "\n".join([f"{str(key)}: {str(value)}" for key, value in self.trajectory_manger.scenario.evaluation_cache.get_props(var1, var2).__dict__.items()])
+        text = f'''
+        Information about: {actor1} → {actor2}
+        
+        {self.trajectory_manger.scenario.penalty.pretty_info((var1, var2))}
+        
+        {self.trajectory_manger.scenario.penalty.pretty_info((var2, var1))}
+        
+        {geo_props_str}
+        
+        '''
+        
+        label = tk.Label(popup, text=text, font=("Arial", 12), anchor="w", justify="left")
+        label.pack(pady=20, padx=20)
+
+        close_button = tk.Button(popup, text="OK", command=popup.destroy)
+        close_button.pack(pady=10)
+
+        popup.transient()  # Make it a child window
+        popup.grab_set()  
+        
         
     def create_actor_checkbox_row(self, plot_components: List[Dict[ConcreteActor, plt.Artist]], text: str, init_checked=True):
         for pc in plot_components:

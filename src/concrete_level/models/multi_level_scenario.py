@@ -5,9 +5,11 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from functional_level.metamodels.functional_scenario import FuncObject, FunctionalScenario
+from logical_level.constraint_satisfaction.aggregates import AggregateAll
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, VesselToVesselProperties
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.logical_scenario import LogicalScenario
+from logical_level.models.penalty import Penalty
 from logical_level.models.relation_constraints_concept.literals import DoCollide, MayCollide
 
 
@@ -21,7 +23,12 @@ class MultiLevelScenario():
         self.concrete_actor_map : Dict[int, ConcreteActor] = {actor.id : actor for actor in self.concrete_scene.actors}
         self.logical_actor_map : Dict[int, ActorVariable] = {actor.id : actor for actor in self.logical_scenario.actor_variables}
         self.functional_object_map : Dict[int, FuncObject] = {obj.id : obj for obj in self.functional_scenario.sorted_sea_objects}
-        self.evaluation_cache = EvaluationCache(self.concrete_scene.assignments(self.logical_scenario.actor_variables))
+        self.assignments = self.concrete_scene.assignments(self.logical_scenario.actor_variables)
+        self.evaluation_cache = EvaluationCache(self.assignments)
+        
+    @property
+    def penalty(self) -> Penalty:
+        return self.logical_scenario.relation_constraint.evaluate_penalty(self.assignments) 
         
     def to_concrete_vessel(self, actor_or_obj : Union[ConcreteActor, FuncObject]) -> ConcreteScene:
         return self.concrete_actor_map[actor_or_obj.id]

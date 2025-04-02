@@ -67,9 +67,12 @@ class SolverBase(ABC):
             eval_data.best_fitness_index = penalty.total_penalty
             
             if self.verbose:
-                print(penalty.info)            
+                print(penalty.pretty_info())            
                 print("Best individual is:", best_solution)
                 print("Best individual fitness is:", eval_data.best_fitness)
+                
+            if round(eval_data.evaluation_time) < eval_data.timeout and not penalty.is_zero:
+                raise ValueError('Something went wrong.')
                 
         except Exception as e:
             eval_data.error_message = f'{str(e)}\n{traceback.format_exc()}'

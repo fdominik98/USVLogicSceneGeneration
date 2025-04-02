@@ -58,7 +58,7 @@ class GlobalConfig():
     
     OS_VESSEL_TYPE = 'MiniUSV'
     VALID_VESSEL_TYPES = ['MiniUSV']
-    VALID_STATIC_OBSTACLE_TYPES : list = []
+    VALID_STATIC_OBSTACLE_TYPES = []
     
     DIST_DRIFT = 1.0 # meter
     MIN_COORD = 0.0
@@ -94,6 +94,12 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
             return GlobalConfig.VISIBILITY_DIST_5
         else:
             return GlobalConfig.VISIBILITY_DIST_6
+        
+def possible_vis_distances(length1, length2):
+    return [min(o2VisibilityByo1(True, length1), o2VisibilityByo1(True, length2)),
+            min(o2VisibilityByo1(True, length1), o2VisibilityByo1(False, length2)),
+            min(o2VisibilityByo1(False, length1), o2VisibilityByo1(True, length2)),
+            min(o2VisibilityByo1(False, length1), o2VisibilityByo1(False, length2))]
         
 
 # FOR FUTURE WORK

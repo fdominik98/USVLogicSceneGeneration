@@ -24,8 +24,8 @@ class GeometricProperties(ABC):
         # Compute visibility angles
         self.angle_p21_v2 = compute_angle(self.p21, self.val2.v, self.o_distance, self.val2.sp)
         
-        self.sin_half_cone_p21_theta = np.clip(self.val1.r / self.o_distance, -1, 1)
-        self.angle_half_cone_p21 = abs(np.arcsin(self.sin_half_cone_p21_theta))
+        self.sin_half_col_cone_theta = np.clip(max(self.val1.r, self.val2.r) / self.o_distance, -1, 1)
+        self.angle_half_col_cone = abs(np.arcsin(self.sin_half_col_cone_theta))
 
         self.dcpa = 0.0
         self.tcpa = 0.0

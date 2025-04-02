@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Dict, Tuple
+import json
+from typing import Any, Dict, List, Optional, Tuple
 
 from logical_level.models.actor_variable import ActorVariable
 from enum import Enum
@@ -24,7 +25,7 @@ class Penalty():
     
     category_num = 4
     
-    info : str = ""
+    info : Dict[Tuple[ActorVariable, ActorVariable], List[str]] = field(default_factory=dict)
     
     @property
     def total_penalty(self) -> float:
@@ -45,11 +46,13 @@ class Penalty():
             else:
                 new_actor_penalties[var] = value   # Add new key-value pairs
                 
+        merged_infos = {key: self.info.get(key, []) + other.info.get(key, []) for key in set(self.info) | set(other.info)}
+                
         return Penalty(new_actor_penalties, self.visibility_penalty + other.visibility_penalty,
                         self.bearing_penalty + other.bearing_penalty,
                         self.collision_penalty + other.collision_penalty,
                         self.dimension_penalty + other.dimension_penalty,
-                        f'{self.info}\n{other.info}')
+                        merged_infos)
     
     def __eq__(self, other):
         if isinstance(other, Penalty):
@@ -70,3 +73,10 @@ class Penalty():
     @property
     def is_zero(self) -> bool:
         return self.total_penalty == 0.0
+    
+    def pretty_info(self, actors : Optional[Tuple[ActorVariable, ActorVariable]] = None) -> str:
+        if actors is None:
+            return '\n'.join([f"{key[0].name} → {key[1].name} : {json.dumps(value, indent=3)}" for key, value in self.info.items()])
+        if actors not in self.info:
+            return ''
+        return json.dumps(self.info[actors], indent=3)

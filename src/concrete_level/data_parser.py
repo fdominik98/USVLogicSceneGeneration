@@ -35,8 +35,8 @@ class DataParser(ABC):
             measurement_data = []
             error_message = data['error_message']
             if error_message is not None:
-                print(f'WARNING: error in evaluation data: {error_message}')
-                if data['best_scene'] is not None:
+                print(f'WARNING: error in evaluation data {data["timestamp"]}: {error_message}')
+                if data['best_scene'] is None:
                     continue
             for column in self.column_names:
                 measurement_data.append(data[column])

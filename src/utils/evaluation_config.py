@@ -11,6 +11,7 @@ from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 
 NUMBER_OF_RUNS = {(2, 0) : 1000, (2, 1) : 1000, (3, 0) : 1000, (3, 1) : 1000, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
 NUMBER_OF_RUNS = {(2, 0) : 7, (2, 1) : 7, (3, 0) : 28, (3, 1) : 28, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
+NUMBER_OF_RUNS = {(2, 0) : 7, (2, 1) : 7, (3, 0) : 112, (3, 1) : 28, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240

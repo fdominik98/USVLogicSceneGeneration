@@ -4,154 +4,51 @@ class GenObject(Object):
     is_actor : False
     allowCollisions : True
 
-    def set_geometry(self):
-        pass
-
 class Actor(GenObject):
     id : int
     length : 1
     is_vessel : False
     is_actor : True
 
-    def sp_constraint(self) -> bool:
-        return True
-
-    def h_constraints(self) -> bool:
-        return True
-
 class Obstacle(Actor):
     area_radius : float
-
-    def set_geometry(self):
-        self.r = self.area_radius
-        self.p = self.position
 
 class Vessel(Actor):
     is_vessel : True
     is_os : False
     max_speed : GlobalConfig.MAX_SPEED_IN_MS
 
-    def set_geometry(self):
-        self.l = self.length
-        self.r = vessel_radius(self.l)
-        self.p = self.position
-        self.v = self.velocity
-        self.sp = np.linalg.norm(self.v)
-        self.h = calculate_heading(self.v[0], self.v[1])
-        self.v_norm = self.v / self.sp
-        self.v_norm_perp = np.array([self.v_norm[1], -self.v_norm[0]])
-
-    def sp_constraint(self) -> bool:
-        return GlobalConfig.MIN_SPEED_IN_MS - GlobalConfig.EPSILON < self.sp < GlobalConfig.MAX_SPEED_IN_MS + GlobalConfig.EPSILON
-
-    def h_constraints(self) -> bool:
-        return GlobalConfig.MIN_HEADING - GlobalConfig.EPSILON and < self.h < GlobalConfig.MAX_HEADING + GlobalConfig.EPSILON
-
 class OwnShip(Vessel):
     is_os : True
 
 
-class GeometricProperties(GenObject):
-    val1 : Actor
-    val2 : Vessel
-    def set_geometry(self):
-        self.val1.set_geometry()
-        self.val2.set_geometry()
-        self.safety_dist = max(self.val1.r, self.val2.r)
-
-        self.p12 = self.val2.p - self.val1.p
-        self.p21 = self.val1.p - self.val2.p  # Avoid redundant calculations
-
-        # Compute norm of relative position vector (distance)
-        self.o_distance = float(max(np.linalg.norm(self.p12), GlobalConfig.EPSILON))
-
-        # Compute visibility angles
-        self.angle_p21_v2 = compute_angle(self.p21, self.val2.v, self.o_distance, self.val2.sp)
-        
-        self.sin_half_cone_p21_theta = np.clip(self.val1.r / self.o_distance, -1, 1)
-        self.angle_half_cone_p21 = abs(np.arcsin(self.sin_half_cone_p21_theta))
-
-        self.dcpa = 0.0
-        self.tcpa = 0.0
-        self.vis_distance = 0.0
-
-    def check_sp_and_h_constraints(self) -> bool:
-        return (self.val1.sp_constraint() and
-                self.val2.sp_constraint() and 
-                self.val1.h_constraints() and
-                self.val2.h_constraints())
-
-    def check_at_vis_may_collide(self):
-        self.set_geometry()
-        collision_pred = self.dcpa > 0 and self.dcpa < self.safety_dist
-        distance_pred = (self.o_distance > self.vis_distance - GlobalConfig.DIST_DRIFT and self.o_distance < self.vis_distance + GlobalConfig.DIST_DRIFT)
-        sp_h_violation = self.check_sp_and_h_constraints()
-        pred = collision_pred and distance_pred and sp_h_violation
-        if not pred:
-            print('AtVisMayCollideProps violation')
-            if not collision_pred:
-                print('Collision violation')
-            if not distance_pred:
-                print(f'Distance violation: real:{self.o_distance/GlobalConfig.N_MILE_TO_M_CONVERSION}, vis:{self.vis_distance/GlobalConfig.N_MILE_TO_M_CONVERSION} ({self.val1.id, self.val2.id})')
-            if not sp_h_violation:
-                print('sp, h violation')
-        return pred
-
-    def check_out_vis_or_may_not_collide(self):
-        self.set_geometry()
-        pred = ((self.dcpa > self.safety_dist or 
-            self.o_distance > self.vis_distance + GlobalConfig.DIST_DRIFT) and
-            self.check_sp_and_h_constraints())
-        if not pred:
-            print('NoCollideOutVisProps violation')
-        return pred
-
-class ObstacleToVesselProperties(GeometricProperties):
-    def set_geometry(self):
-        super().set_geometry()
-        self.tcpa = np.dot(self.p21, self.val2.v_norm)
-        self.dcpa = np.linalg.norm(self.p21 - self.tcpa * self.val2.v_norm)
-        self.vis_distance = o2VisibilityByo1(True, self.val1.r)
-
-class VesselToVesselProperties(GeometricProperties):
-    def set_geometry(self):
-        super().set_geometry()
-        self.v12 = self.val1.v - self.val2.v
-        self.v12_norm_stable = max(np.linalg.norm(self.v12), GlobalConfig.EPSILON)
-
-        # Compute angles
-        self.angle_p12_v1 = compute_angle(self.p12, self.val1.v, self.o_distance, self.val1.sp)
-
-        # Compute visibility distance
-        self.vis_distance = min(
-            o2VisibilityByo1(self.angle_p21_v2 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
-            o2VisibilityByo1(self.angle_p12_v1 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)
-        )
-
-        # Compute time and distance to closest approach
-        self.tcpa = np.dot(self.p12, self.v12) / self.v12_norm_stable**2
-        self.dcpa = float(np.linalg.norm(self.p21 + self.v12 * max(0, self.tcpa)))
-
-def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distance_map, bearing_map):
+def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_distances_map, min_distance_map, vis_distance_map, bearing_map):
     ego = new OwnShip with id os_id, at (GlobalConfig.MAX_COORD/2, GlobalConfig.MAX_COORD/2), with velocity (0, Range(GlobalConfig.MIN_SPEED_IN_MS, GlobalConfig.MAX_SPEED_IN_MS)), facing toward (GlobalConfig.MAX_COORD/2, GlobalConfig.MAX_COORD)
     os_radius = radius_map[os_id]
 
-    region_2 = CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_2 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_2 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-    region_3 = CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_3 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_3 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-    region_5 = CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_5 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_5 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-    region_6 = CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_6 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, GlobalConfig.VISIBILITY_DIST_6 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-    distance_region = region_2.union(region_3).union(region_5).union(region_6)
-    distance = GlobalConfig.VISIBILITY_DIST_2
+    def add_ts(ts_id):
+        dist1 = possible_distances_map[(os_id, ts_id)][0]
+        dist2 = possible_distances_map[(os_id, ts_id)][1]
+        dist3 = possible_distances_map[(os_id, ts_id)][2]
+        dist4 = possible_distances_map[(os_id, ts_id)][3]
 
-    def add_ts(ts_id, distance_region, distance):
-        visibility_dist = vis_distance_map.get((0, ts_id), None)
+        region_1 = CircularRegion(ego.position, dist1 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, dist1 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
+        region_2 = CircularRegion(ego.position, dist2 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, dist2 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
+        region_3 = CircularRegion(ego.position, dist3 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, dist3 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
+        region_4 = CircularRegion(ego.position, dist4 + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, dist4 - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
+
+        distance_region = region_1.union(region_2).union(region_3).union(region_4)
+
+        min_distance = min_distance_map[(os_id, ts_id)]
+
+        visibility_dist = vis_distance_map.get((os_id, ts_id), None)
         ts_length = length_map[ts_id]
         ts_radius = radius_map[ts_id]
-        heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map.get((0, ts_id), (0, 2*np.pi, 0, 2*np.pi))
+        heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego = bearing_map.get((os_id, ts_id), (0, 2*np.pi, 0, 2*np.pi))
         
         if visibility_dist is not None:
             distance_region = CircularRegion(ego.position, visibility_dist + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, visibility_dist - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-            distance = visibility_dist
+            min_distance = visibility_dist
 
         bearing_region_ego_to_ts = SectorRegion(ego.position, GlobalConfig.MAX_DISTANCE*3, heading_ego_to_ts + ego.heading, bearing_angle_ego_to_ts - GlobalConfig.EPSILON)
         
@@ -162,7 +59,7 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distanc
         p21 = new GenObject facing toward ego.position - ts_point.position
         bearing_region_ts_to_ego = SectorRegion(ts_point.position, GlobalConfig.MAX_DISTANCE*3, heading_ts_to_ego + p21.heading, bearing_angle_ts_to_ego - GlobalConfig.EPSILON)
         
-        sin_half_cone_theta = np.clip(max(ts_radius, os_radius) / distance, -1, 1)
+        sin_half_cone_theta = np.clip(max(ts_radius, os_radius) / min_distance, -1, 1)
         angle_half_cone = abs(np.arcsin(sin_half_cone_theta))
         voc_region = SectorRegion(ts_point.position + ego.velocity, GlobalConfig.MAX_DISTANCE*3, p21.heading, 2 * angle_half_cone)
 
@@ -170,18 +67,16 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distanc
 
         velocity_point = new Point in ts_velocity_region
         ts = new Vessel with id ts_id, at ts_point.position, with velocity velocity_point.position-ts_point.position, with length ts_length
-        prop = new VesselToVesselProperties with val1 ego, with val2 ts
-        return ts, prop
+        return ts
 
 
-    def add_obst(obst_id, distance_region, distance):
-        visibility_dist = vis_distance_map.get((0, obst_id), None)
+    def add_obst(obst_id):
+        visibility_dist = vis_distance_map[(os_id, obst_id)]
         obst_radius = radius_map[obst_id]
-        heading_ego_to_obst, bearing_angle_ego_to_obst, heading_obst_to_ego, bearing_angle_obst_to_ego = bearing_map.get((0, obst_id), (0, 2*np.pi, 0, 2*np.pi))
+        heading_ego_to_obst, bearing_angle_ego_to_obst, heading_obst_to_ego, bearing_angle_obst_to_ego = bearing_map.get((os_id, obst_id), (0, 2*np.pi, 0, 2*np.pi))
         
-        if visibility_dist is not None:
-            distance_region = CircularRegion(ego.position, visibility_dist + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, visibility_dist - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
-            distance = visibility_dist
+        distance_region = CircularRegion(ego.position, visibility_dist + GlobalConfig.DIST_DRIFT - GlobalConfig.EPSILON).difference(CircularRegion(ego.position, visibility_dist - GlobalConfig.DIST_DRIFT + GlobalConfig.EPSILON))
+        distance = visibility_dist
 
         bearing_region_ego_to_obst = SectorRegion(ego.position, GlobalConfig.MAX_DISTANCE*3, heading_ego_to_obst + ego.heading, bearing_angle_ego_to_obst - GlobalConfig.EPSILON)
         
@@ -193,9 +88,6 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, vis_distanc
         obst_point = new Point in obst_point_region
 
         obst = new Obstacle with id obst_id, at obst_point.position, with area_radius obst_radius
-        prop = new ObstacleToVesselProperties with val1 obst, with val2 ego
-        return obst, prop
+        return obst
 
-    ts_infos = [add_ts(ts_id, distance_region, distance) for ts_id in ts_ids]
-    obst_infos = [add_obst(obst_id, distance_region, distance) for obst_id in obst_ids]
-    return ts_infos, obst_infos
+    return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]

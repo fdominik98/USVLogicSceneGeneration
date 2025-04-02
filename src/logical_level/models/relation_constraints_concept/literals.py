@@ -57,7 +57,7 @@ class BinaryLiteral(Literal, ABC):
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         category, penalty = self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
         return Penalty({self.var1 : penalty, self.var2 : penalty}, **{str(category) : penalty},
-                       info=fr'{self.name}({self.var1, self.var2}) : {penalty}')
+                       info={(self.var1, self.var2) : [fr'{self.name}({self.var1, self.var2}) : {penalty}']})
         
     @abstractmethod
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
@@ -75,7 +75,7 @@ class UnaryLiteral(Literal, ABC):
         values = eval_cache.assignments.get(self.var)
         category, penalty = self._do_evaluate_penalty(values)
         return Penalty({self.var : penalty}, **{str(category) : penalty},
-                       info=fr'{self.name}({self.var}) : {penalty}')
+                       info={(self.var, self.var) : [fr'{self.name}({self.var}) : {penalty}']})
     
     @abstractmethod
     def _do_evaluate_penalty(self, value : ActorValues) -> Tuple[PenaltyCategory, float]:
@@ -139,7 +139,7 @@ class InHeadOnSectorOf(BinaryLiteral):
         super().__init__(var1, var2, 'InHeadOnSectorOf', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, 0.0, max(geo_props.angle_half_cone_p21, GlobalConfig.BOW_ANGLE))
+        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, 0.0, max(geo_props.angle_half_col_cone, GlobalConfig.BOW_ANGLE / 2))
     
 class InSternSectorOf(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
