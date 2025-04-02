@@ -209,6 +209,6 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_di
         return obst
 
     return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[], length_map={0: 1.0000000000118545, 1: 1.0000000000980689, 2: 1.000000000004947}, radius_map={0: 4.000000000047418, 1: 4.0000000003922755, 2: 4.000000000019788}, possible_distances_map={(0, 1): [74.08004000087818, 74.08004000087818, 74.08004000726496, 185.20010000219546], (0, 2): [74.08004000036647, 74.08004000087818, 74.08004000036647, 185.20010000091617]}, min_distance_map={(0, 1): 74.08004000087818, (0, 2): 74.08004000036647}, vis_distance_map={}, bearing_map={})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[], length_map={0: 1.0000000000639755, 1: 0.9999999999543048, 2: 1.0000000000896776}, radius_map={0: 4.000000000255902, 1: 3.999999999817219, 2: 4.00000000035871}, possible_distances_map={(0, 1): [74.0800399966149, 74.0800400047393, 74.0800399966149, 185.20009999153723], (0, 2): [74.0800400047393, 74.0800400047393, 74.08004000664332, 185.20010001184824]}, min_distance_map={(0, 1): 74.0800399966149, (0, 2): 74.0800400047393}, vis_distance_map={}, bearing_map={})
 ts1 = ts_infos.pop(0)
 ts2 = ts_infos.pop(0)

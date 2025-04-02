@@ -17,7 +17,7 @@ class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
     
     def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, scenarios, test_config, number_of_runs, warmups, verbose)
         
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
@@ -28,9 +28,9 @@ class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
             if problem.aggregate.object_num > eval_data.population_size:
                 eval_data.population_size = problem.aggregate.object_num
             
-            ref_dirs = get_reference_directions("das-dennis", problem.aggregate.object_num, n_partitions=1)
+            ref_dirs = get_reference_directions("das-dennis", int(problem.aggregate.object_num), n_partitions=1)
             # Define the NSGA-III algorithm
-            algorithm = NSGA3(ref_dirs, pop_size=eval_data.population_size,
+            algorithm = NSGA3(ref_dirs, pop_size=int(eval_data.population_size),
                               crossover=SBX(eta=eval_data.crossover_eta, prob=eval_data.crossover_prob,),
                               mutation=PM(eta=eval_data.mutate_eta, prob=eval_data.mutate_prob), sampling=initial_population,)
 

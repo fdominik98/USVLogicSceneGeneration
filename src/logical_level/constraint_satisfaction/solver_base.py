@@ -1,10 +1,12 @@
 from copy import deepcopy
 from datetime import datetime
 import gc
+import os
 import traceback
 import random
 from typing import Dict, List, Optional, Tuple
 import numpy as np
+import psutil
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.assignments import Assignments
@@ -29,16 +31,16 @@ class SolverBase(ABC):
         self.warmups = warmups
         self.verbose = verbose
        
-    def run(self):
+    def run(self, core_id : int):
         self.set_seed(self.test_config.random_seed)
         
         for logical_scenario in islice(cycle(self.scenarios.keys()), self.warmups):
-            self.evaluate(logical_scenario, False)
+            self.__evaluate(logical_scenario, core_id, False)
         
         for logical_scenario in islice(cycle(self.scenarios.keys()), self.number_of_runs):
-            self.evaluate(logical_scenario, True)
+            self.__evaluate(logical_scenario, core_id, True)
          
-    def evaluate(self, logical_scenario : LogicalScenario, save : bool):
+    def __evaluate(self, logical_scenario : LogicalScenario, core_id : int,  save : bool):
         try:
             eval_data = deepcopy(self.test_config)
             eval_data.vessel_number = logical_scenario.vessel_number
@@ -52,6 +54,9 @@ class SolverBase(ABC):
             some_input = self.init_problem(logical_scenario, initial_pop, eval_data)
             
             gc.collect()
+            p = psutil.Process(os.getpid()) # Ensure dedicated cpu
+            p.cpu_affinity([core_id])
+            
             start_time = datetime.now()
             some_results = self.do_evaluate(some_input, eval_data)
             eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()

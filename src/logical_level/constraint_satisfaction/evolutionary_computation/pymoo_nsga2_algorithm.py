@@ -7,15 +7,15 @@ from pymoo.operators.mutation.pm import PM
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga_algorithm import BestSolutionCallback, NSGAProblem, OptimumTermination, PyMooNSGAAlgorithm
 from pymoo.core.population import Population
-from functional_level.metamodels.functional_scenario import FunctionalScenario
 import time
+from utils.scenario import Scenario
 
 class PyMooNSGA2Algorithm(PyMooNSGAAlgorithm):
     algorithm_desc = 'pymoo_NSGA2_algorithm'
     
-    def __init__(self, measurement_name: str, functional_scenarios: List[str | FunctionalScenario], test_config : EvaluationData,
+    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
                  number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, functional_scenarios,test_config, number_of_runs, warmups, verbose)
+        super().__init__(measurement_name, scenarios, test_config, number_of_runs, warmups, verbose)
         
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
@@ -24,7 +24,7 @@ class PyMooNSGA2Algorithm(PyMooNSGAAlgorithm):
             initial_population = Population.new("X", initial_population)
             
             # Define the NSGA-II algorithm
-            algorithm = NSGA2(pop_size=eval_data.population_size,
+            algorithm = NSGA2(pop_size=int(eval_data.population_size),
                               crossover=SBX(eta=eval_data.crossover_eta, prob=eval_data.crossover_prob,),
                               mutation=PM(eta=eval_data.mutate_eta, prob=eval_data.mutate_prob), sampling=initial_population,)
 
