@@ -5,7 +5,6 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from simulation.mqtt_client import MqttAgentClient, MqttScenarioClient
 from simulation.sim_utils import coord_to_lat_long, waypoint_from_state, to_true_north
-import os
 import docker
 import yaml
 import time
