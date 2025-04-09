@@ -18,7 +18,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_
 NUMBER_OF_RUNS = 1
 WARMUPS = 0
 RANDOM_SEED = 1234
-TIMEOUT = 60
+TIMEOUT = 180
 INIT_METHOD = 'uniform'
 
 functional_scenarios = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]

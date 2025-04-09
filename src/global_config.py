@@ -32,43 +32,43 @@ class GlobalConfig():
     MAX_HEADING = np.pi
 
 #-----------------------------------------------------------
-    # MIN_BEAM = 2.0
-    # MAX_BEAM = 80.0
-    # MIN_OBSTACLE_RADIUS = 10.0
-    # MAX_OBSTACLE_RADIUS = 400.0
+    MIN_BEAM = 2.0
+    MAX_BEAM = 80.0
+    MIN_OBSTACLE_RADIUS = 10.0
+    MAX_OBSTACLE_RADIUS = 400.0
     
-    # EGO_VESSEL_TYPE = 'EgoPassengerShip'
-    # VALID_VESSEL_TYPES = ['OtherType']
-    # VALID_STATIC_OBSTACLE_TYPES = ['OtherType']
+    OS_VESSEL_TYPE = 'OSPassengerShip'
+    VALID_VESSEL_TYPES = ['OtherType']
+    VALID_STATIC_OBSTACLE_TYPES = ['OtherType']
     
-    # DIST_DRIFT = 50.0 # meter
-    # MIN_COORD = 0.0
-    # MAX_COORD = 2.0 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
-    # MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
-
-    # MIN_LENGTH = 10.0
-    # MAX_LENGTH = 400.0
-    # MIN_SPEED_IN_MS = 0.2 * KNOT_TO_MS_CONVERSION
-    # MAX_SPEED_IN_MS = 50.0 * KNOT_TO_MS_CONVERSION
-    
-    MIN_BEAM = 0.5
-    MAX_BEAM = 0.5
-    MIN_OBSTACLE_RADIUS = 0.1
-    MAX_OBSTACLE_RADIUS = 10.0
-    
-    OS_VESSEL_TYPE = 'MiniUSV'
-    VALID_VESSEL_TYPES = ['MiniUSV']
-    VALID_STATIC_OBSTACLE_TYPES = []
-    
-    DIST_DRIFT = 1.0 # meter
+    DIST_DRIFT = 50.0 # meter
     MIN_COORD = 0.0
-    MAX_COORD = 0.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+    MAX_COORD = 2.0 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
     MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
 
-    MIN_LENGTH = 1.0
-    MAX_LENGTH = 1.0
-    MIN_SPEED_IN_MS = 0.2 # m/s
-    MAX_SPEED_IN_MS = 2.0 # m/s
+    MIN_LENGTH = 10.0
+    MAX_LENGTH = 400.0
+    MIN_SPEED_IN_MS = 0.2 * KNOT_TO_MS_CONVERSION
+    MAX_SPEED_IN_MS = 50.0 * KNOT_TO_MS_CONVERSION
+    
+    # MIN_BEAM = 0.5
+    # MAX_BEAM = 0.5
+    # MIN_OBSTACLE_RADIUS = 0.1
+    # MAX_OBSTACLE_RADIUS = 10.0
+    
+    # OS_VESSEL_TYPE = 'MiniUSV'
+    # VALID_VESSEL_TYPES = ['MiniUSV']
+    # VALID_STATIC_OBSTACLE_TYPES = []
+    
+    # DIST_DRIFT = 1.0 # meter
+    # MIN_COORD = 0.0
+    # MAX_COORD = 0.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+    # MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
+
+    # MIN_LENGTH = 1.0
+    # MAX_LENGTH = 1.0
+    # MIN_SPEED_IN_MS = 0.2 # m/s
+    # MAX_SPEED_IN_MS = 2.0 # m/s
     
     
 

@@ -116,8 +116,8 @@ class PassengerShip(VesselType):
     
     
 @dataclass(frozen=True, repr=False)
-class EgoPassengerShip(VesselType):
-    name : str = 'EgoPassengerShip'
+class OSPassengerShip(VesselType):
+    name : str = 'OSPassengerShip'
     min_length : float = 30.0
     max_length : float = 30.0
     max_speed : float = 40.0 * GlobalConfig.KNOT_TO_MS_CONVERSION
@@ -171,7 +171,7 @@ ALL_VESSEL_TYPES : Dict[str, VesselType] = {'OtherType' : OtherVesselType(),
                                             'MotorVessel' : MotorVessel(),
                                             'SailingVessel' : SailingVessel(),
                                             'MilitaryVessel' : MilitaryVessel(),
-                                            'EgoPassengerShip' : EgoPassengerShip(),
+                                            'OSPassengerShip' : OSPassengerShip(),
                                             'UnspecifiedType' : UnspecifiedVesselType()}
 
 DEFAULT_VESSEL_TYPE = UnspecifiedVesselType()

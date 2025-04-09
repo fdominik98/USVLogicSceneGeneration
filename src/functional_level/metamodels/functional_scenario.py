@@ -188,11 +188,11 @@ class FunctionalScenario(Scenario):
                 self.overtaking(o2, o1)))
     
     def find_vessel_type_name(self, obj : FuncObject) -> Optional[str]:
-        return next((self.Vessel_interpretation.get_value(o2)
+        return next((self.Vessel_type_interpretation.get_value(o2)
                      for o1, o2 in self.vessel_type_interpretation if o1 == obj), UnspecifiedVesselType.name)
         
     def find_obstacle_type_name(self, obj : FuncObject) -> Optional[str]:
-        return next((self.Static_obstacle_interpretation.get_value(o2)
+        return next((self.Static_obstacle_type_interpretation.get_value(o2)
                      for o1, o2 in self.static_obstacle_type_interpretation if o1 == obj), UnspecifiedObstacleType.name)
         
     @property

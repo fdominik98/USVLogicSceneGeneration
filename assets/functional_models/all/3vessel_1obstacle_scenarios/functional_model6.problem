@@ -1,20 +1,22 @@
-/*enum VesselType {OtherType, CargoShip, Tanker,
+enum VesselType {OtherType, CargoShip, Tanker,
                  ContainerShip, PassengerShip,
                  FishingShip, MotorVessel,
-                 SailingVessel, MilitaryVessel}
-*/
+                 SailingVessel, MilitaryVessel,
+                OSPassengerShip}
+
 
 //enum StaticObstacleType {Small, Medium, Large}
 
 abstract class Vessel {
-    //VesselType[1] vesselType
     Vessel[0..*] overtakingToPort
     Vessel[0..*] overtakingToStarboard
     Vessel[0..*] crossingFromPort
     Vessel[0..*] headOn opposite headOn
 }
 
-class OS extends Vessel.
+class OS extends Vessel {
+    VesselType[1] vesselType
+}
 class TS extends Vessel.
 
 class StaticObstacle {
@@ -94,6 +96,8 @@ overtakingToPort(ts2, os).
 default !overtakingToStarboard(*, *).
 overtakingToStarboard(os, ts1).
 default !crossingFromPort(*, *).
+default !vesselType(*, *).
+vesselType(os, OSPassengerShip).
 default !atDangerousHeadOnSectorOf(*, *).
 atDangerousHeadOnSectorOf(obst1, os).
 default !headOn(*, *).
