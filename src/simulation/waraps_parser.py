@@ -9,11 +9,15 @@ import docker
 import yaml
 import time
 from global_config import GlobalConfig
-from utils.file_system_utils import SIMULATION_FOLDER
+from utils.file_system_utils import SIMULATION_GEN_FOLDER
+from utils.math_utils import compute_start_point
 
 class WARAPSParser():
     def __init__(self, trajectory_manager : TrajectoryManager):
         self.trajectory_manager = trajectory_manager
+        
+        self.sim_tag = 'test'
+        #self.tag = 'latest'
         
         # Start Docker client
         self.docker_client = docker.from_env()
@@ -32,12 +36,13 @@ class WARAPSParser():
             self.waypoint_map[vessel] = waypoints
     
     def start_container(self, vessel : ConcreteVessel, init_state : ActorState, port : int):
+        
         project_name = f'{self.trajectory_manager.functional_scenario.name}_{vessel.name}'.lower()
         
         process = subprocess.Popen(['docker-compose', '-p', project_name, 'down'])
         process.wait()
         
-        params_file = f'{SIMULATION_FOLDER}/params-{project_name}.params'
+        params_file = f'{SIMULATION_GEN_FOLDER}/params-{project_name}.params'
         params = {
                     # Boat params
                     'FRAME_CLASS' : 2, # motorboat
@@ -74,7 +79,8 @@ class WARAPSParser():
                     # Speed and steering control gains
                     'ATC_SPEED_P': 0.1,  # Proportional gain for speed control loop
                     'ATC_STR_RAT_FF': 0.75,  # Feedforward term for steering rate control
-                    'ATC_ACCEL_MAX' : 0.5,
+                    'ATC_ACCEL_MAX' : vessel.max_acceleration,
+                    'WPNAV_ACCEL' : vessel.max_acceleration ,
                     
                     # Battery monitoring setup
                     'BATT_MONITOR': 4,  # Type of battery monitoring (e.g., analog voltage and current sensing)
@@ -98,6 +104,9 @@ class WARAPSParser():
         arduagent = f'{vessel.name}_arduagent'
         simulator = f'{vessel.name}_simulator'
             
+        # Shift the position to let the ship accelerate
+        start_pos = compute_start_point(init_state.p, init_state.v, init_state.speed, vessel.max_acceleration)
+        # vessel_pos = coord_to_lat_long(start_pos)
         vessel_pos = coord_to_lat_long(init_state.p)
         env = {
             'NAME' : vessel.name,
@@ -123,11 +132,11 @@ class WARAPSParser():
             
             'SPEEDUP': '1',
             'VEHICLE' : 'Rover',
-            'MODEL': 'motorboat',
+            'MODEL': 'rover-skid',
             'VEHICLE_PARAMS': 'Rover',
             'INSTANCE' : '0',
             
-            'HOME_POS': f'{vessel_pos[0]},{vessel_pos[1]},0,{to_true_north(init_state.heading_deg)}',
+            'HOME_POS': f'{vessel_pos[0]},{vessel_pos[1]},0,{to_true_north(init_state.heading)}',
             
             'MAVPROXY': f'tcpin:{mavproxy}:14551',
             'LOCAL_BRIDGE': f'udp:localhost:14550',
@@ -139,7 +148,7 @@ class WARAPSParser():
         docker_compose = {
             'services' : {                
                 simulator : {
-                    'image' : 'registry.waraps.org/ardupilot-sitl:latest',
+                    'image' : f'registry.waraps.org/ardupilot-sitl:{self.sim_tag}',
                     'restart' : 'unless-stopped',
                     'environment' : env_list,
                     'volumes' : [f'{params_file}:/params/my{env["VEHICLE_PARAMS"]}.params'],
@@ -158,7 +167,7 @@ class WARAPSParser():
                 },
                 
                 arduagent : {
-                    'image' : 'registry.waraps.org/waraps-arduagent:test',
+                    'image' : f'registry.waraps.org/waraps-arduagent:test',
                     'depends_on' : [mavproxy, simulator],
                     'restart' : 'unless-stopped',
                     'environment' : env_list,
@@ -167,7 +176,7 @@ class WARAPSParser():
             }
         }
 
-        compose_filename = f'{SIMULATION_FOLDER}/docker-compose-{project_name}.yml'
+        compose_filename = f'{SIMULATION_GEN_FOLDER}/docker-compose-{project_name}.yml'
         # Save as a new compose file
         with open(compose_filename, 'w') as file:
             yaml.dump(docker_compose, file, default_flow_style=False)
@@ -177,8 +186,5 @@ class WARAPSParser():
                                     '--project-name', project_name,
                                     'up', '-d'])
         process.wait()
-        # Delete the modified compose file
-        # os.remove(compose_filename)
-        # os.remove(params_file)
         
         

@@ -1,11 +1,11 @@
 services:
-  OS_0_arduagent:
+  TS_1_arduagent:
     command: python -B -u /app/main.py
     depends_on:
-    - OS_0_mavproxy
-    - OS_0_simulator
+    - TS_1_mavproxy
+    - TS_1_simulator
     environment: &id001
-    - NAME=OS_0
+    - NAME=TS_1
     - DOMAIN=surface
     - REAL_SIM=simulation
     - AGENT_DESCRIPTION=surface vessel
@@ -19,32 +19,32 @@ services:
     - MQTT_PASSWORD=
     - FCS_SERIAL=/dev/serial0
     - BAUD_RATE=57600
-    - CONNECTION_STRING=tcp:OS_0_mavproxy:14551
+    - CONNECTION_STRING=tcp:TS_1_mavproxy:14551
     - SIM_PORT=5760
     - SPEEDUP=1
     - VEHICLE=Rover
-    - MODEL=motorboat
+    - MODEL=rover-skid
     - VEHICLE_PARAMS=Rover
     - INSTANCE=0
-    - HOME_POS=55.66320638298599,17.365440663199678,0,5.498776545209694e-09
-    - MAVPROXY=tcpin:OS_0_mavproxy:14551
+    - HOME_POS=55.66272730497337,17.365742307568933,0,343.9612479278757
+    - MAVPROXY=tcpin:TS_1_mavproxy:14551
     - LOCAL_BRIDGE=udp:localhost:14550
-    - GCS_1=udp:host.docker.internal:14552
+    - GCS_1=udp:host.docker.internal:14553
     image: registry.waraps.org/waraps-arduagent:test
     restart: unless-stopped
-  OS_0_mavproxy:
-    command: mavproxy.py --master=tcp:OS_0_simulator:5760 --out=tcpin:OS_0_mavproxy:14551
-      --out=udp:host.docker.internal:14552
+  TS_1_mavproxy:
+    command: mavproxy.py --master=tcp:TS_1_simulator:5760 --out=tcpin:TS_1_mavproxy:14551
+      --out=udp:host.docker.internal:14553
     depends_on:
-    - OS_0_simulator
+    - TS_1_simulator
     environment: *id001
     image: registry.waraps.org/waraps-mavproxy:latest
     restart: unless-stopped
     stdin_open: true
     tty: true
-  OS_0_simulator:
+  TS_1_simulator:
     environment: *id001
-    image: registry.waraps.org/ardupilot-sitl:latest
+    image: registry.waraps.org/ardupilot-sitl:test
     restart: unless-stopped
     volumes:
-    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/params-3vessel_0obstacle_os_0.params:/params/myRover.params
+    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/gen/params-2vessel_0obstacle_ts_1.params:/params/myRover.params

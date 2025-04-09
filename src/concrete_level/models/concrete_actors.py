@@ -97,7 +97,8 @@ class ConcreteVessel(ConcreteActor):
     
     @property
     def max_acceleration(self) -> float:
-        return self.max_speed**2 / (2* 15 * self.length)
+        #return self.max_speed**2 / (2* 15 * self.length)
+        return 0.5
     
     @property
     def logical_variable(self) -> VesselVariable:

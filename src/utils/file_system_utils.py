@@ -10,6 +10,7 @@ PROJECT_REPORT_FOLDER = f'{ASSET_FOLDER}/project_report'
 IMAGES_FOLDER = f'{ASSET_FOLDER}/images'
 EXPORTED_PLOTS_FOLDER = f'{IMAGES_FOLDER}/exported_plot'
 SIMULATION_FOLDER = f'{ASSET_FOLDER}/simulation'
+SIMULATION_GEN_FOLDER = f'{SIMULATION_FOLDER}/gen'
 
 from pathlib import Path
 
@@ -30,6 +31,7 @@ def ensure_directories():
         IMAGES_FOLDER,
         EXPORTED_PLOTS_FOLDER,
         SIMULATION_FOLDER,
+        SIMULATION_GEN_FOLDER,
     ]
 
     for folder in folders:
