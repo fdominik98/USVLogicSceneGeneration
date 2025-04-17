@@ -4,7 +4,7 @@ from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from simulation.mqtt_client import MqttAgentClient, MqttScenarioClient
-from simulation.sim_utils import coord_to_lat_long, waypoint_from_state, to_true_north
+from simulation.sim_utils import coord_to_lat_long, true_north_heading, waypoint_from_state, to_true_north
 import docker
 import yaml
 import time
@@ -132,11 +132,11 @@ class WARAPSParser():
             
             'SPEEDUP': '1',
             'VEHICLE' : 'Rover',
-            'MODEL': 'rover-skid',
-            'VEHICLE_PARAMS': 'Rover',
+            'MODEL': 'motorboat',
+            'VEHICLE_PARAMS': 'motorboat',
             'INSTANCE' : '0',
             
-            'HOME_POS': f'{vessel_pos[0]},{vessel_pos[1]},0,{to_true_north(init_state.heading)}',
+            'HOME_POS': f'{start_pos[0]},{start_pos[1]},0,{true_north_heading(start_pos, vessel_pos)}',
             
             'MAVPROXY': f'tcpin:{mavproxy}:14551',
             'LOCAL_BRIDGE': f'udp:localhost:14550',
@@ -151,8 +151,8 @@ class WARAPSParser():
                     'image' : f'registry.waraps.org/ardupilot-sitl:{self.sim_tag}',
                     'restart' : 'unless-stopped',
                     'environment' : env_list,
-                    'volumes' : [f'{params_file}:/params/my{env["VEHICLE_PARAMS"]}.params'],
-                    #'command' : f'/ardupilot/Tools/autotest/sim_vehicle.py --vehicle {env['VEHICLE']} --frame {env['MODEL']} -I{env['INSTANCE']} --custom-location="{env['HOME_POS']}" --add-param-file=/params/my{env['VEHICLE_PARAMS']}.params -w --no-rebuild --no-mavproxy --speedup {env['SPEEDUP']}'
+                    'volumes' : [f'{params_file}:/params/my{env["VEHICLE_PARAMS"]}.parm'],
+                    'command': f'/ardupilot/Tools/autotest/sim_vehicle.py --vehicle {env["VEHICLE"]} --frame {env["MODEL"]} -I{env["INSTANCE"]} --custom-location="{env["HOME_POS"]}" -w --no-rebuild --no-mavproxy --speedup {env["SPEEDUP"]}'
                 },
                 
                 mavproxy : {

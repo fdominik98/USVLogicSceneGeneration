@@ -5,26 +5,27 @@
 from logical_level.constraint_satisfaction.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm, CategoryAggregate
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling_pipeline import RejectionSamplingPipeline
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 
 
 NUMBER_OF_RUNS = {(2, 0) : 1000, (2, 1) : 1000, (3, 0) : 1000, (3, 1) : 1000, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
 NUMBER_OF_RUNS = {(2, 0) : 7, (2, 1) : 7, (3, 0) : 28, (3, 1) : 28, (4, 0) : 1000, (5, 0) : 1000, (6, 0) : 1000}
-NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7, (3, 0) : 28 * 5, (3, 1) : 28, (4, 0) : 84 * 5, (5, 0) : 1000, (6, 0) : 1000}
+NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 5, (3, 1) : 28 * 5, (4, 0) : 84 * 5, (5, 0) : 210 * 5, (6, 0) : 462 * 5}
 WARMUPS = 2
 RANDOM_SEED = 1234
 TIMEOUT = 240
 INIT_METHOD = RandomInstanceInitializer.name
 VERBOSE = True
 
-nsga2_vessel_sb_msr_config = EvaluationData(population_size=10, mutate_eta=15, mutate_prob=0.8,
-                            crossover_eta=20, crossover_prob=1, timeout=TIMEOUT,
+nsga2_vessel_sb_msr_config = EvaluationData(population_size=8, mutate_eta=20, mutate_prob=0.8,
+                            crossover_eta=15, crossover_prob=1, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
                             config_group='SB-MSR', algorithm_desc=PyMooNSGA2Algorithm.algorithm_desc)
 
-nsga2_vessel_sb_o_config = EvaluationData(population_size=10, mutate_eta=15, mutate_prob=0.8,
-                            crossover_eta=20, crossover_prob=1, timeout=TIMEOUT,
+nsga2_vessel_sb_o_config = EvaluationData(population_size=8, mutate_eta=20, mutate_prob=0.8,
+                            crossover_eta=15, crossover_prob=1, timeout=TIMEOUT,
                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
                             config_group='SB-O', algorithm_desc=PyMooNSGA2Algorithm.algorithm_desc)
 
@@ -36,6 +37,16 @@ scenic_rs_o_config = EvaluationData(population_size=1, timeout=TIMEOUT, init_met
                                random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name,
                             config_group='RS-O', algorithm_desc=RejectionSamplingPipeline.algorithm_desc)
 
+
+nsga3_vessel_sb_msr_config = EvaluationData(population_size=6, mutate_eta=1, mutate_prob=0.5,
+                            crossover_eta=1, crossover_prob=0.8, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
+                            config_group='SB-MSR', algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc)
+
+nsga3_vessel_sb_o_config = EvaluationData(population_size=6, mutate_eta=1, mutate_prob=0.5,
+                            crossover_eta=1, crossover_prob=0.8, timeout=TIMEOUT,
+                            init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name,
+                            config_group='SB-O', algorithm_desc=PyMooNSGA2Algorithm.algorithm_desc)
 
 # ga_config = EvaluationData(population_size=4, num_parents_mating = 4,
 #                         mutate_eta=20, mutate_prob=0.2, crossover_eta=10,
@@ -50,9 +61,6 @@ scenic_rs_o_config = EvaluationData(population_size=1, timeout=TIMEOUT, init_met
 #                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=CategoryAggregate.name)
 
 
-# nsga3_vessel_config = EvaluationData(population_size=6, mutate_eta=15, mutate_prob=1.0,
-#                             crossover_eta=10, crossover_prob=0.8, timeout=TIMEOUT,
-#                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=ActorAggregate.name)
 # nsga3_all_config = EvaluationData(population_size=20, mutate_eta=1, mutate_prob=0.8,
 #                             crossover_eta=1, crossover_prob=1.0, timeout=TIMEOUT,
 #                             init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)

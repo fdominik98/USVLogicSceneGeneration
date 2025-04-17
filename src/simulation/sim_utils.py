@@ -40,6 +40,18 @@ def from_true_north(true_north: float, unit : Union[Unit.DEGREES, Unit.RADIANS] 
         heading -= 360  # Convert to range [-180, 180]
     return heading
 
+from math import atan2, radians, degrees, sin, cos
+
+def true_north_heading(p1 : np.ndarray, p2 : np.ndarray) -> float:
+    delta_lon = p1[1] - p2[1]
+    x = sin(delta_lon) * cos(p1[0])
+    y = cos(p2[0]) * sin(p1[0]) - sin(p2[0]) * cos(p1[0]) * cos(delta_lon)
+    
+    initial_bearing = atan2(x, y)
+    # Convert to degrees and normalize
+    bearing_degrees = (degrees(initial_bearing) + 360) % 360
+    return bearing_degrees
+
 def coord_to_lat_long(p : np.ndarray) -> np.ndarray:
     """
     Convert local coordinate system (meters) to latitude and longitude.

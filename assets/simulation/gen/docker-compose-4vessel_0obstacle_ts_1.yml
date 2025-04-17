@@ -26,7 +26,7 @@ services:
     - MODEL=rover-skid
     - VEHICLE_PARAMS=Rover
     - INSTANCE=0
-    - HOME_POS=55.662857253106246,17.370165757034847,0,201.85740891110987
+    - HOME_POS=398.96326046364373,418.93626908395794,0,140.7535283371692
     - MAVPROXY=tcpin:TS_1_mavproxy:14551
     - LOCAL_BRIDGE=udp:localhost:14550
     - GCS_1=udp:host.docker.internal:14553
@@ -43,6 +43,9 @@ services:
     stdin_open: true
     tty: true
   TS_1_simulator:
+    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle Rover --frame rover-skid
+      -I0 --custom-location="398.96326046364373,418.93626908395794,0,140.7535283371692"
+      -w --no-rebuild --no-mavproxy --speedup 1
     environment: *id001
     image: registry.waraps.org/ardupilot-sitl:test
     restart: unless-stopped

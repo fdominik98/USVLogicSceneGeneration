@@ -4,7 +4,7 @@ from concrete_level.data_parser import EvalDataParser
 from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from evaluation.risk_evaluation import RiskVector
-from logical_level.constraint_satisfaction.evolutionary_computation.evaluation_data import EvaluationData
+from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 
 dp = EvalDataParser()
 eval_datas : List[EvaluationData] = dp.load_dirs_merged_as_models()
