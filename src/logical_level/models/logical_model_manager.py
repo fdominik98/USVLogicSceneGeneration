@@ -6,7 +6,7 @@ from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilde
 from logical_level.models.actor_variable import OSVariable, StaticObstacleVariable, TSVariable
 from logical_level.models.logical_scenario import LogicalScenario
 from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
-from logical_level.models.relation_constraints_concept.predicates import OutVisOrMayNotCollide, AtVisAndMayCollide
+from logical_level.models.relation_constraints_concept.predicates import AtVisAndMayCollideSoon, OutVisOrMayNotCollide, AtVisAndMayCollide
 
 class LogicalModelManager():
     __scenario_cache_map = {
@@ -36,7 +36,7 @@ class LogicalModelManager():
         relation_constr_exprs = set(
             [OutVisOrMayNotCollide(ts1, ts2) for ts1, ts2 in combinations(ts_vessels, 2)] + 
             [OutVisOrMayNotCollide(o, ts) for o, ts in product(obstacles, ts_vessels)] +
-            [AtVisAndMayCollide(non_os, os) for non_os in ts_vessels + obstacles])
+            [AtVisAndMayCollideSoon(non_os, os) for non_os in ts_vessels + obstacles])
         
         cls.__scenario_cache_map[actor_number_by_type] = LogicalScenario(LogicalScenarioBuilder.get_initializer(RandomInstanceInitializer.name, actor_variables),
                         RelationConstrTerm(relation_constr_exprs),

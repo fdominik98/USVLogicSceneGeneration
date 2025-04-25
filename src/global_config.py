@@ -1,6 +1,6 @@
 import numpy as np
 
-class GlobalConfig():    
+class BaseConfig():    
     # 6 nautical miles = 11112,066 meters
     # 5 nautical miles = 9260,005 meters
     # 4 nautical miles = 7408,004 meters
@@ -14,12 +14,19 @@ class GlobalConfig():
     BEAM_ANGLE = np.radians(112.5)
     MASTHEAD_LIGHT_ANGLE = 2 * BEAM_ANGLE
     BEAM_ROTATION_ANGLE = BEAM_ANGLE / 2
+    
+    HALF_BOW_ANGLE = BOW_ANGLE / 2
+    HALF_BEAM_ANGLE = BEAM_ANGLE / 2
+    HALF_STERN_ANGLE = STERN_ANGLE / 2
+    HALF_MASTHEAD_LIGHT_ANGLE = MASTHEAD_LIGHT_ANGLE / 2
 
     EPSILON=1e-10
 
     ONE_MINUTE_IN_SEC = 60
     ONE_HOUR_IN_SEC = 60 * ONE_MINUTE_IN_SEC
+    TWO_HOURS_IN_SEC = 2 * ONE_HOUR_IN_SEC
     TEN_MINUTE_IN_SEC = 10 * ONE_MINUTE_IN_SEC
+    TWENTY_MINUTE_IN_SEC = 20 * ONE_MINUTE_IN_SEC
 
     TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
@@ -29,9 +36,31 @@ class GlobalConfig():
     VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
 
     MIN_HEADING = -np.pi
-    MAX_HEADING = np.pi
+    MAX_HEADING = np.pi    
+    
+class WaraPsConfig(BaseConfig):
+    MIN_BEAM = 0.5
+    MAX_BEAM = 0.5
+    MIN_OBSTACLE_RADIUS = 0.1
+    MAX_OBSTACLE_RADIUS = 10.0
+    
+    OS_VESSEL_TYPE = 'MiniUSV'
+    VALID_VESSEL_TYPES = ['MiniUSV']
+    VALID_STATIC_OBSTACLE_TYPES = []
+    
+    DIST_DRIFT = 1.0 # meter
+    MIN_COORD = 0.0
+    MAX_COORD = 0.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 926 m
+    MAX_DISTANCE = MAX_COORD * np.sqrt(2)
+    MAX_TEMPORAL_DISTANCE = BaseConfig.ONE_HOUR_IN_SEC
+    SAFE_TEMPORAL_DISTANCE = BaseConfig.TEN_MINUTE_IN_SEC
 
-#-----------------------------------------------------------
+    MIN_LENGTH = 1.0
+    MAX_LENGTH = 1.0
+    MIN_SPEED_IN_MS = 0.2 # m/s
+    MAX_SPEED_IN_MS = 2.0 # m/s
+    
+class GeneralMaritimeConfig(BaseConfig):
     MIN_BEAM = 2.0
     MAX_BEAM = 80.0
     MIN_OBSTACLE_RADIUS = 10.0
@@ -43,34 +72,23 @@ class GlobalConfig():
     
     DIST_DRIFT = 50.0 # meter
     MIN_COORD = 0.0
-    MAX_COORD = 2.0 * 6.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
+    MAX_COORD = 2.0 * 6.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 24076.013 m
     MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
+    MAX_TEMPORAL_DISTANCE = BaseConfig.TWO_HOURS_IN_SEC
+    SAFE_TEMPORAL_DISTANCE = BaseConfig.TWENTY_MINUTE_IN_SEC
 
     MIN_LENGTH = 10.0
     MAX_LENGTH = 400.0
-    MIN_SPEED_IN_MS = 0.2 * KNOT_TO_MS_CONVERSION
-    MAX_SPEED_IN_MS = 50.0 * KNOT_TO_MS_CONVERSION
-    
-    # MIN_BEAM = 0.5
-    # MAX_BEAM = 0.5
-    # MIN_OBSTACLE_RADIUS = 0.1
-    # MAX_OBSTACLE_RADIUS = 10.0
-    
-    # OS_VESSEL_TYPE = 'MiniUSV'
-    # VALID_VESSEL_TYPES = ['MiniUSV']
-    # VALID_STATIC_OBSTACLE_TYPES = []
-    
-    # DIST_DRIFT = 1.0 # meter
-    # MIN_COORD = 0.0
-    # MAX_COORD = 0.5 * N_MILE_TO_M_CONVERSION # 24076.013 m
-    # MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
+    MIN_SPEED_IN_MS = 0.2 * BaseConfig.KNOT_TO_MS_CONVERSION
+    MAX_SPEED_IN_MS = 50.0 * BaseConfig.KNOT_TO_MS_CONVERSION
 
-    # MIN_LENGTH = 1.0
-    # MAX_LENGTH = 1.0
-    # MIN_SPEED_IN_MS = 0.2 # m/s
-    # MAX_SPEED_IN_MS = 2.0 # m/s
-    
-    
+ 
+class GlobalConfig(GeneralMaritimeConfig):  
+    pass
+
+# class GlobalConfig(WaraPsConfig):
+#     pass 
+
 
 def vessel_radius(length : float) -> float:
     return length * 4

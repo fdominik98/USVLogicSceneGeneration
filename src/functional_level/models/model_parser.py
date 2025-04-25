@@ -45,7 +45,7 @@ class ModelParser():
                 builder.add_new_obstacle(obj_name)
             else:
                 raise ValueError(f"Unknown object type: {obj_type}")
-
+            
         # Parse relationships
         relationship_patterns = {
             "headOn": lambda o1, o2: builder.add_head_on(o1, o2),
@@ -53,7 +53,7 @@ class ModelParser():
             "overtakingToStarboard": lambda o1, o2: builder.add_overtaking_to_starboard(o1, o2),
             "crossingFromPort": lambda o1, o2: builder.add_crossing_from_port(o1, o2),
             "atDangerousHeadOnSectorOf" : lambda o1, o2: builder.add_at_dangerous_head_on_sector_of(o1, o2),
-            "vesselType" : lambda o1, o2: builder.vessel_type_interpretation.add(o1, o2),
+            "vesselType" : lambda o1, o2: builder.add_vessel_type(o1, o2),
             "staticObstacleType" : lambda o1, o2: builder.static_obstacle_type_interpretation.add(o1, o2),
         }
         for rel_type, assertion in relationship_patterns.items():

@@ -9,7 +9,7 @@ from utils.math_utils import compute_angle
 
 class GeometricProperties(ABC):
     
-    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, assignments):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable, assignments : Assignments):
         self.val1 : ActorValues = assignments[var1]
         self.val2 : VesselValues = assignments[var2]
         
@@ -94,8 +94,8 @@ class VesselToVesselProperties(GeometricProperties):
 
         # Compute visibility distance
         self.vis_distance = min(
-            o2VisibilityByo1(self.angle_p21_v2 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val2.l),
-            o2VisibilityByo1(self.angle_p12_v1 >= GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2, self.val1.l)
+            o2VisibilityByo1(self.angle_p21_v2 >= GlobalConfig.HALF_MASTHEAD_LIGHT_ANGLE, self.val2.l),
+            o2VisibilityByo1(self.angle_p12_v1 >= GlobalConfig.HALF_MASTHEAD_LIGHT_ANGLE, self.val1.l)
         )
 
         # Compute time and distance to closest approach

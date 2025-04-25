@@ -16,7 +16,8 @@ class RelationConstrComposite(ABC):
     
     def evaluate_penalty(self, assignments : Assignments) -> Penalty:
         cache = EvaluationCache(assignments)
-        return self._evaluate_penalty(cache)
+        penalty = self._evaluate_penalty(cache)
+        return penalty
     
     def holds(self, eval_cache : EvaluationCache) -> bool:
         return self._evaluate_penalty(eval_cache).is_zero

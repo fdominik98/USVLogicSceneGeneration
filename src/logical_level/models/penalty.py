@@ -23,9 +23,9 @@ class Penalty():
     collision_penalty : float = 0
     dimension_penalty : float = 0
     
-    category_num = 4
-    
     info : Dict[Tuple[ActorVariable, ActorVariable], List[str]] = field(default_factory=dict)
+    
+    category_num = 4
     
     @property
     def total_penalty(self) -> float:
@@ -48,7 +48,8 @@ class Penalty():
                 
         merged_infos = {key: self.info.get(key, []) + other.info.get(key, []) for key in set(self.info) | set(other.info)}
                 
-        return Penalty(new_actor_penalties, self.visibility_penalty + other.visibility_penalty,
+        return Penalty(new_actor_penalties,
+                        self.visibility_penalty + other.visibility_penalty,
                         self.bearing_penalty + other.bearing_penalty,
                         self.collision_penalty + other.collision_penalty,
                         self.dimension_penalty + other.dimension_penalty,

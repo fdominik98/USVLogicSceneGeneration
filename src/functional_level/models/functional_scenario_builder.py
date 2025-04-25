@@ -3,6 +3,7 @@ from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from functional_level.metamodels.interpretation import OSInterpretation, StaticObstacleInterpretation, StaticObstacleTypeInterpretation, TSInterpretation, VesselTypeInterpretation, atVisibilityDistanceInterpretation, inHeadOnSectorOfInterpretation, inPortSideSectorOfInterpretation, inStarboardSideSectorOfInterpretation, inSternSectorOfInterpretation, inVisibilityDistanceInterpretation, mayCollideInterpretation, outVisibilityDistanceInterpretation, staticObstacleTypeInterpretation, vesselTypeInterpretation
 from functional_level.models.object_generator import ObjectGenerator
+from global_config import GlobalConfig
 from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
 from utils.vessel_types import ALL_VESSEL_TYPES
 
@@ -95,6 +96,11 @@ class FunctionalScenarioBuilder():
     def add_at_dangerous_head_on_sector_of(self, o1, o2):
         self.in_head_on_sector_of_interpretation.add(o1, o2)
         self.add_at_visibility_distance_and_may_collide(o1, o2)
+        
+    def add_vessel_type(self, o1, o2):
+        if self.OS_interpretation.contains(o1):
+            o2 = self.find_vessel_type_by_name(GlobalConfig.OS_VESSEL_TYPE)
+        self.vessel_type_interpretation.add(o1, o2)
         
     def build(self) -> FunctionalScenario:
         return FunctionalScenario(
