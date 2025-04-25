@@ -9,6 +9,7 @@ class PlotBase(ABC):
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     plt.rcParams['font.size'] = 12
+    plt.rcParams['pdf.fonttype'] = 42
     
     def __init__(self):
         super().__init__()
