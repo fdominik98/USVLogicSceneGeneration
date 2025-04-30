@@ -35,15 +35,17 @@ for i, eval_data in enumerate(eval_datas):
         info(eval_data)
         continue
     
-    if eval_data.best_fitness_index > 0.0:
-        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build()
+    if not eval_data.is_valid:
         skipped += 1
         print('Not optimal solution, skipped.')
     else:    
         risk_vector = RiskVector(ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data))
-        eval_data.best_scene = SceneBuilder(eval_data.best_scene._data).build(risk_vector.min_dcpa,
-                     risk_vector.min_tcpa, risk_vector.danger_sector, risk_vector.max_proximity_index)
+        eval_data.best_scene = SceneBuilder(eval_data.best_scene).build(
+                                                        dcpa=risk_vector.min_dcpa,
+                                                        tcpa=risk_vector.min_tcpa,
+                                                        danger_sector=risk_vector.danger_sector,
+                                                        proximity_index=risk_vector.max_proximity_index)
         done += 1
-    eval_data.save_to_json()
+        eval_data.save_to_json()
     info(eval_data)
     

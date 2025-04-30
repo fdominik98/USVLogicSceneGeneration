@@ -78,7 +78,7 @@ class NavigationRiskIndex():
             for i in range(0, 180):
                 for direction in [-1, 1]:  # -1 for counterclockwise, 1 for clockwise
                     new_state = self.initial_state.modify_copy(heading=self.initial_state.heading + direction * np.radians(i), speed=speed)
-                    new_scene = SceneBuilder(self.scene.as_dict()).set_state(self.vessel, new_state)
+                    new_scene = SceneBuilder(self.scene).set_state(self.vessel, new_state)
                     scenario = MultiLevelScenario(new_scene, self.scenario.logical_scenario, self.scenario.functional_scenario)
                     if scenario.may_collide_anyone(self.vessel):
                         collides += 1

@@ -73,7 +73,17 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
-        },         
+        }, 
+        {
+            "name": "Annotate Functional Hash",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/annotate_hash.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },        
         {
             "name": "RRTFN",
             "type": "debugpy",

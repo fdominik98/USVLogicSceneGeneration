@@ -9,8 +9,9 @@ from visualization.plotting_utils import DummyEvalPlot
 from itertools import combinations
 
 class DiversityStatisticsTable(DummyEvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], get_equivalence_class_distribution=ConcreteSceneAbstractor.get_equivalence_class_distribution): 
+    def __init__(self, eval_datas : List[EvaluationData], is_second_level_abstraction=False, get_equivalence_class_distribution=ConcreteSceneAbstractor.get_equivalence_class_distribution): 
         self.get_equivalence_class_distribution = get_equivalence_class_distribution
+        self.is_second_level_abstraction = is_second_level_abstraction
         super().__init__(eval_datas)
         
     @property   
@@ -25,8 +26,8 @@ class DiversityStatisticsTable(DummyEvalPlot):
         groups_to_compare = list(combinations(self.comparison_groups, 2))
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             for j, (group1, group2) in enumerate(groups_to_compare):
-                equivalence_classes1 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group1]], actor_number_by_type)
-                equivalence_classes2 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group2]], actor_number_by_type)
+                equivalence_classes1 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group1]], self.is_second_level_abstraction)
+                equivalence_classes2 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group2]], self.is_second_level_abstraction)
                 if len(equivalence_classes1) == 0 or len(equivalence_classes2) == 0:
                     continue
                 values1 = [int(count) for _, count in equivalence_classes1.values()]

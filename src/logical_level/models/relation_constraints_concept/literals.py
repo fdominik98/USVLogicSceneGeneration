@@ -128,7 +128,7 @@ class InBeamSectorOf(BinaryLiteral, ABC):
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
         angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
                                      geo_props.o_distance / geo_props.val2.sp)
-        return PenaltyCategory.BEARING, (self.penalty(angle_p21_v2_rot, 0.0, GlobalConfig.HALF_BEAM_ANGLE))
+        return PenaltyCategory.BEARING, (self.penalty(angle_p21_v2_rot, 0.0, GlobalConfig.HALF_SIDE_ANGLE))
     
 class InPortSideSectorOf(InBeamSectorOf):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
@@ -139,9 +139,9 @@ class InStarboardSideSectorOf(InBeamSectorOf):
         super().__init__(var1, var2, 'InStarboardSectorOf', -GlobalConfig.BEAM_ROTATION_ANGLE, negated)
 
         
-class InHeadOnSectorOf(BinaryLiteral):
+class InBowSectorOf(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
-        super().__init__(var1, var2, 'InHeadOnSectorOf', np.pi, negated)
+        super().__init__(var1, var2, 'InBowSectorOf', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
         return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, 0.0, max(geo_props.angle_half_col_cone, GlobalConfig.HALF_BOW_ANGLE))
@@ -151,7 +151,7 @@ class InSternSectorOf(BinaryLiteral):
         super().__init__(var1, var2, 'InSternSectorOf', np.pi, negated)
         
     def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, GlobalConfig.HALF_MASTHEAD_LIGHT_ANGLE, np.pi)
+        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, GlobalConfig.SIDE_ANGLE, np.pi)
     
     
 ############ MAY COLLISION ##################

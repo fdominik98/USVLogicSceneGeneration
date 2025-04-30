@@ -6,18 +6,20 @@ from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import EvalPlot
 
 class DiversityPlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], is_higher_abstraction=False): 
-        self.is_higher_abstraction = is_higher_abstraction
+    def __init__(self, eval_datas : List[EvaluationData], is_second_level_abstraction=False): 
+        self.is_second_level_abstraction = is_second_level_abstraction
         super().__init__(eval_datas)
         
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
+        #return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr', 'common_ocean_benchmark']
+        return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
-        return [(2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (5, 0), (6, 0)]
+        #return [(2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (5, 0), (6, 0)]
+        return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
         fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(3 * 4, 3.8), constrained_layout=True)
@@ -34,13 +36,13 @@ class DiversityPlot(EvalPlot):
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$")
                 
                 equivalence_classes = ConcreteSceneAbstractor.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]],
-                                                                                                                                             self.is_higher_abstraction)
+                                                                                                                                             self.is_second_level_abstraction)
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                     
                 all_shapes = len(equivalence_classes)
-                relevant_shapes = sum(1 for scenario, count in equivalence_classes.values() if scenario.functional_scenario.is_relevant)
-                ambiguous_shapes = sum(1 for scenario, count in equivalence_classes.values() if scenario.functional_scenario.is_ambiguous)
+                relevant_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_relevant)
+                ambiguous_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_ambiguous)
                 
                 axi.text(0.98, 0.98, f'all shapes: {all_shapes}\nrelevant shapes: {relevant_shapes}\nambiguous shapes: {ambiguous_shapes}', 
                 transform=axi.transAxes,  # Use axis coordinates

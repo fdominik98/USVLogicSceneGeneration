@@ -77,5 +77,5 @@ class MultiLevelScenario():
     def modify_state_get_new_scene(self, actor: ConcreteActor, x : Optional[float] = None, y : Optional[float] = None,
         speed : Optional[float] = None, heading : Optional[float] = None) -> 'MultiLevelScenario':
         new_state = self.concrete_scene[actor].modify_copy(x=x, y=y, speed=speed, heading=heading)
-        new_scene = SceneBuilder(self.concrete_scene.as_dict()).set_state(actor, new_state).build()
+        new_scene = SceneBuilder(self.concrete_scene).set_state(actor, new_state).build()
         return MultiLevelScenario(new_scene, self.logical_scenario, self.functional_scenario)

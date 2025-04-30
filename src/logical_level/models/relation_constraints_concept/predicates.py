@@ -1,7 +1,7 @@
 from typing import Set
 from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
 from logical_level.models.relation_constraints_concept.composites import RelationConstrClause, RelationConstrComposite, RelationConstrTerm
-from logical_level.models.relation_constraints_concept.literals import InHeadOnSectorOf, InPortSideSectorOf, AtVis, MayCollide, SoonMeet, InStarboardSideSectorOf, InSternSectorOf, OutVis
+from logical_level.models.relation_constraints_concept.literals import InBowSectorOf, InPortSideSectorOf, AtVis, MayCollide, SoonMeet, InStarboardSideSectorOf, InSternSectorOf, OutVis
 
 class BinaryPredicate(RelationConstrTerm):
     def __init__(self, name : str,  var1 : ActorVariable, var2 : ActorVariable, components : Set[RelationConstrComposite]):
@@ -36,13 +36,13 @@ class InMastheadSectorOf(BinaryPredicate):
 class HeadOn(BinaryPredicate):
     def __init__(self, var1 : VesselVariable, var2 : VesselVariable):
         super().__init__('HeadOn', var1, var2,
-                         {InHeadOnSectorOf(var1, var2), InHeadOnSectorOf(var2, var1), AtVisAndMayCollideSoon(var1, var2)})
+                         {InBowSectorOf(var1, var2), InBowSectorOf(var2, var1), AtVisAndMayCollideSoon(var1, var2)})
     
 
 class CrossingFromPort(BinaryPredicate):
     def __init__(self,  var1 : VesselVariable, var2 : VesselVariable):
-        not_in_mutual_head_on_sector = RelationConstrTerm({InHeadOnSectorOf(var1, var2, negated=True),
-                                            InHeadOnSectorOf(var2, var1, negated=True)})
+        not_in_mutual_head_on_sector = RelationConstrTerm({InBowSectorOf(var1, var2, negated=True),
+                                            InBowSectorOf(var2, var1, negated=True)})
         super().__init__('CrossingFromPort', var1, var2,
                          {InPortSideSectorOf(var1, var2), InStarboardSideSectorOf(var2, var1),
                           AtVisAndMayCollideSoon(var1, var2), not_in_mutual_head_on_sector})
@@ -61,5 +61,5 @@ class OvertakingToStarboard(BinaryPredicate):
 class DangerousHeadOnSectorOf(BinaryPredicate):
     def __init__(self, var1 : StaticObstacleVariable, var2 : VesselVariable):
         super().__init__('DangerousHeadOnSectorOf', var1, var2,
-                         {InHeadOnSectorOf(var1, var2), AtVisAndMayCollide(var1, var2)})
+                         {InBowSectorOf(var1, var2), AtVisAndMayCollide(var1, var2)})
     

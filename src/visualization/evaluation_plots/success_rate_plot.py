@@ -14,7 +14,7 @@ class SuccessRatePlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr']
+        return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

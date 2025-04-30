@@ -1,7 +1,7 @@
 from typing import Dict
 from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.functional_scenario import FunctionalScenario
-from functional_level.metamodels.interpretation import OSInterpretation, StaticObstacleInterpretation, StaticObstacleTypeInterpretation, TSInterpretation, VesselTypeInterpretation, atVisibilityDistanceInterpretation, inHeadOnSectorOfInterpretation, inPortSideSectorOfInterpretation, inStarboardSideSectorOfInterpretation, inSternSectorOfInterpretation, inVisibilityDistanceInterpretation, mayCollideInterpretation, outVisibilityDistanceInterpretation, staticObstacleTypeInterpretation, vesselTypeInterpretation
+from functional_level.metamodels.interpretation import OSInterpretation, StaticObstacleInterpretation, StaticObstacleTypeInterpretation, TSInterpretation, VesselTypeInterpretation, atVisibilityDistanceInterpretation, inBowSectorOfInterpretation, inPortSideSectorOfInterpretation, inStarboardSideSectorOfInterpretation, inSternSectorOfInterpretation, inVisibilityDistanceInterpretation, mayCollideInterpretation, outVisibilityDistanceInterpretation, staticObstacleTypeInterpretation, vesselTypeInterpretation
 from functional_level.models.object_generator import ObjectGenerator
 from global_config import GlobalConfig
 from utils.static_obstacle_types import ALL_STATIC_OBSTACLE_TYPES
@@ -21,7 +21,7 @@ class FunctionalScenarioBuilder():
         
         self.may_collide_interpretation = mayCollideInterpretation()
         
-        self.in_head_on_sector_of_interpretation = inHeadOnSectorOfInterpretation()
+        self.in_head_on_sector_of_interpretation = inBowSectorOfInterpretation()
         self.in_port_side_sector_of_interpretation = inPortSideSectorOfInterpretation()
         self.in_starboard_side_sector_of_interpretation = inStarboardSideSectorOfInterpretation()
         self.in_stern_sector_of_interpretation = inSternSectorOfInterpretation() 
@@ -113,7 +113,7 @@ class FunctionalScenarioBuilder():
             at_visibility_distance_interpretation=self.at_visibility_distance_interpretation,
             in_visibility_distance_interpretation=self.in_visibility_distance_interpretation,
             may_collide_interpretation=self.may_collide_interpretation,
-            in_head_on_sector_of_interpretation=self.in_head_on_sector_of_interpretation,
+            in_bow_sector_of_interpretation=self.in_head_on_sector_of_interpretation,
             in_port_side_sector_of_interpretation=self.in_port_side_sector_of_interpretation,
             in_starboard_side_sector_of_interpretation=self.in_starboard_side_sector_of_interpretation,
             in_stern_sector_of_interpretation=self.in_stern_sector_of_interpretation,

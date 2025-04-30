@@ -58,12 +58,12 @@ class RejectionSamplingPipeline(SolverBase):
                 # heading_ts_to_ego: relative angle to p12
                 scenarios = [
                     (functional_scenario.head_on(os, o),                 (0.0,                               max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
-                (functional_scenario.crossing_from_port(os, o),          (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE,                     -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)),
-                    (functional_scenario.crossing_from_port(o, os),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.BEAM_ANGLE,                      GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE)),
-                    (functional_scenario.overtaking_to_port(os, o),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.BEAM_ANGLE,                      -np.pi,   GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.overtaking_to_port(o, os),      (-np.pi,                            GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE,             GlobalConfig.BEAM_ANGLE)),
-                    (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.BEAM_ANGLE,           -np.pi,   GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.overtaking_to_starboard(o, os), (-np.pi,                            GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.BEAM_ANGLE))
+                (functional_scenario.crossing_from_port(os, o),          (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE,                     -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.crossing_from_port(o, os),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE,                      GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.overtaking_to_port(os, o),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE,                      -np.pi,   GlobalConfig.STERN_ANGLE)),
+                    (functional_scenario.overtaking_to_port(o, os),      (-np.pi,                            GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE,             GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE,           -np.pi,   GlobalConfig.STERN_ANGLE)),
+                    (functional_scenario.overtaking_to_starboard(o, os), (-np.pi,                            GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE))
                 ]
                 
                 for condition, bearing in scenarios:

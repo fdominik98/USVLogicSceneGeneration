@@ -6,7 +6,7 @@ from functional_level.metamodels.functional_object import FuncObject
 from functional_level.metamodels.interpretation import (
     BinaryInterpretation, SeaObjectInterpretation, StaticObstacleInterpretation, atVisibilityDistanceInterpretation, headOnInterpretation,
     inVisibilityDistanceInterpretation, mayCollideInterpretation, outVisibilityDistanceInterpretation,  OSInterpretation, TSInterpretation,
-    VesselInterpretation, VesselTypeInterpretation, StaticObstacleTypeInterpretation, inHeadOnSectorOfInterpretation, 
+    VesselInterpretation, VesselTypeInterpretation, StaticObstacleTypeInterpretation, inBowSectorOfInterpretation, 
     inPortSideSectorOfInterpretation, inStarboardSideSectorOfInterpretation, inSternSectorOfInterpretation, 
     staticObstacleTypeInterpretation, vesselTypeInterpretation, overtakingToPortInterpretation, overtakingToStarboardInterpretation,
     crossingFromPortInterpretation, dangerousHeadOnSectorOfInterpretation)
@@ -31,7 +31,7 @@ class FunctionalScenario(Scenario):
     
     may_collide_interpretation : mayCollideInterpretation = mayCollideInterpretation()
     
-    in_head_on_sector_of_interpretation : inHeadOnSectorOfInterpretation = inHeadOnSectorOfInterpretation()
+    in_bow_sector_of_interpretation : inBowSectorOfInterpretation = inBowSectorOfInterpretation()
     in_port_side_sector_of_interpretation : inPortSideSectorOfInterpretation = inPortSideSectorOfInterpretation()
     in_starboard_side_sector_of_interpretation : inStarboardSideSectorOfInterpretation = inStarboardSideSectorOfInterpretation()
     in_stern_sector_of_interpretation : inSternSectorOfInterpretation = inSternSectorOfInterpretation()
@@ -130,8 +130,8 @@ class FunctionalScenario(Scenario):
     
     def head_on(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_vessel(o1) and self.is_vessel(o2) and
-                self.in_head_on_sector_of_interpretation.contains((o1, o2)) and
-                self.in_head_on_sector_of_interpretation.contains((o2, o1)) and
+                self.in_bow_sector_of_interpretation.contains((o1, o2)) and
+                self.in_bow_sector_of_interpretation.contains((o2, o1)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
     
     def overtaking_to_port(self, o1 : FuncObject, o2 : FuncObject) -> bool:
@@ -176,7 +176,7 @@ class FunctionalScenario(Scenario):
         
     def dangerous_head_on_sector_of(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_obstacle(o1) and self.is_vessel(o2) and
-                self.in_head_on_sector_of_interpretation.contains((o1, o2)) and
+                self.in_bow_sector_of_interpretation.contains((o1, o2)) and
                 self.at_visibility_distance_and_may_collide(o1, o2))
     
     def in_colregs_situation_with(self, o1 : FuncObject, o2 : FuncObject) -> bool:
@@ -256,15 +256,15 @@ class FunctionalScenario(Scenario):
         return set(combinations(self.ts_objects.union(self.obstacle_objects), 2))
     
     
-    def shape_hash_hard(self, hops: int = 1) -> int:
+    def first_level_shape_hash(self, hops: int = 1) -> int:
         return self._shape_hash(hops,
             [self.in_visibility_distance_interpretation, self.at_visibility_distance_interpretation,
              self.out_visibility_distance_interpretation, self.may_collide_interpretation,
-             self.in_head_on_sector_of_interpretation, self.in_port_side_sector_of_interpretation,
+             self.in_bow_sector_of_interpretation, self.in_port_side_sector_of_interpretation,
              self.in_starboard_side_sector_of_interpretation, self.in_stern_sector_of_interpretation,
              self.static_obstacle_type_interpretation, self.vessel_type_interpretation])
         
-    def shape_hash_soft(self, hops: int = 1) -> int:
+    def second_level_shape_hash(self, hops: int = 1) -> int:
         return self._shape_hash(hops,
             [self.head_on_interpretation, self.overtaking_to_port_interpretation,
              self.overtaking_to_starboard_interpretation, self.crossing_from_port_interpretation,

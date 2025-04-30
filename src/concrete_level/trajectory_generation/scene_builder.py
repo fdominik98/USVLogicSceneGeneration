@@ -1,5 +1,5 @@
 import random
-from typing import Dict
+from typing import Dict, Optional
 from concrete_level.models.concrete_actors import ConcreteActor, ConcreteStaticObstacle, ConcreteVessel
 from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_scene import ConcreteScene
@@ -12,10 +12,13 @@ from global_config import GlobalConfig
 
 
 class SceneBuilder(Dict[ConcreteActor, ActorState]):  
-    def __init__(self, existing_dict=None, *args, **kwargs):
+    def __init__(self, base_scene : Optional[ConcreteScene]=None, *args, **kwargs):
         # Initialize with an empty dict if no existing_dict is provided
-        if existing_dict is None:
+        if base_scene is not None:
+            existing_dict = base_scene._data
+        else:
             existing_dict = {}
+        self.base_scene = base_scene
         # Call the parent constructor with the provided data
         super().__init__(existing_dict, *args, **kwargs)
     
@@ -24,8 +27,19 @@ class SceneBuilder(Dict[ConcreteActor, ActorState]):
        return self
        
             
-    def build(self, dcpa = None, tcpa = None, danger_sector = None, proximity_index = None) -> ConcreteScene:
-        return ConcreteScene(self, dcpa, tcpa, danger_sector, proximity_index)
+    def build(self, dcpa=None, tcpa=None, danger_sector=None, proximity_index=None,
+              first_level_hash=None, second_level_hash=None, is_relevant=None,
+              is_ambiguous=None) -> ConcreteScene:
+        return ConcreteScene(
+            self,
+            **{key: value if value is not None else getattr(self.base_scene, key, None) 
+               for key, value in {
+               'dcpa': dcpa, 'tcpa': tcpa, 'danger_sector': danger_sector, 
+               'proximity_index': proximity_index, 'first_level_hash': first_level_hash, 
+               'second_level_hash': second_level_hash, 'is_relevant': is_relevant, 
+               'is_ambiguous': is_ambiguous
+               }.items()}
+        )
     
     @staticmethod
     def build_from_assignments(assignments : Assignments) -> ConcreteScene:

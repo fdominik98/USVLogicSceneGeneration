@@ -141,8 +141,8 @@ class inSternSectorOfInterpretation(BinaryInterpretation):
     name : str = field(default='inSternSector', init=False)
     
 @dataclass(frozen=True)
-class inHeadOnSectorOfInterpretation(BinaryInterpretation):
-    name : str = field(default='inHeadOnSector', init=False)
+class inBowSectorOfInterpretation(BinaryInterpretation):
+    name : str = field(default='inBowSector', init=False)
     
 @dataclass(frozen=True)
 class staticObstacleTypeInterpretation(BinaryInterpretation):

@@ -76,7 +76,7 @@ class SolverBase(ABC):
                 print("Best individual is:", best_solution)
                 print("Best individual fitness is:", eval_data.best_fitness)
                 
-            if round(eval_data.evaluation_time) < eval_data.timeout and not penalty.is_zero:
+            if round(eval_data.evaluation_time) + 1 < eval_data.timeout and not penalty.is_zero:
                 raise ValueError('Something went wrong.')
                 
         except Exception as e:

@@ -13,7 +13,7 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.actor_variable import ActorVariable
 from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite, RelationConstrTerm
-from logical_level.models.relation_constraints_concept.literals import AtVis, BinaryLiteral, InHeadOnSectorOf, InVis, MayCollide, OutVis, InPortSideSectorOf, InStarboardSideSectorOf, InSternSectorOf
+from logical_level.models.relation_constraints_concept.literals import AtVis, BinaryLiteral, InBowSectorOf, InVis, MayCollide, OutVis, InPortSideSectorOf, InStarboardSideSectorOf, InSternSectorOf
 
 class ConcreteSceneAbstractor():
     
@@ -35,7 +35,7 @@ class ConcreteSceneAbstractor():
             (AtVis, builder.at_visibility_distance_interpretation),
             (OutVis, builder.out_visibility_distance_interpretation),
             (InVis, builder.in_visibility_distance_interpretation),
-            (InHeadOnSectorOf, builder.in_head_on_sector_of_interpretation),
+            (InBowSectorOf, builder.in_head_on_sector_of_interpretation),
             (InPortSideSectorOf, builder.in_port_side_sector_of_interpretation),
             (InStarboardSideSectorOf, builder.in_starboard_side_sector_of_interpretation),
             (InSternSectorOf, builder.in_stern_sector_of_interpretation)
@@ -66,19 +66,20 @@ class ConcreteSceneAbstractor():
     
     
     @staticmethod            
-    def get_equivalence_class_distribution(scenes : List[ConcreteScene], is_higher_abstraction = False) -> Dict[int, Tuple[MultiLevelScenario, int]]:
-        equivalence_classes : Dict[int, Tuple[MultiLevelScenario, int]] = {}
+    def get_equivalence_class_distribution(scenes : List[ConcreteScene], is_second_level_abstraction = False) -> Dict[int, Tuple[ConcreteScene, int]]:
+        equivalence_classes : Dict[int, Tuple[ConcreteScene, int]] = {}
         for scene in scenes:
-            scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(scene)
-            if is_higher_abstraction:
-                hash = scenario.functional_scenario.shape_hash_soft()
+            if not scene.has_functional_hash:
+                raise ValueError('Scene does not have a functional hash. Annotate hash!')
+            if is_second_level_abstraction:
+                hash = scene.second_level_hash
             else:
-                hash = scenario.functional_scenario.shape_hash_hard()
+                hash = scene.first_level_hash
                 
             if hash not in equivalence_classes:
-                equivalence_classes[hash] = (scenario, 1)
+                equivalence_classes[hash] = (scene, 1)
             else:
                 _, count = equivalence_classes[hash]
-                equivalence_classes[hash] = (scenario, count + 1)
+                equivalence_classes[hash] = (scene, count + 1)
         return equivalence_classes
     

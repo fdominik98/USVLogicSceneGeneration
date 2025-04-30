@@ -16,9 +16,19 @@ class ConcreteScene(Serializable):
     danger_sector : Optional[float] = None
     proximity_index : Optional[float] = None
     
+    first_level_hash : Optional[int] = None
+    second_level_hash : Optional[int] = None
+    is_relevant : Optional[bool] = None
+    is_ambiguous : Optional[bool] = None
+    
     @property
     def has_risk_metrics(self):
         return all(value is not None for value in [self.dcpa, self.tcpa, self.danger_sector, self.proximity_index])
+    
+    @property
+    def has_functional_hash(self):
+        return all(value is not None for value in [self.first_level_hash, self.second_level_hash,
+                                                   self.is_relevant, self.is_ambiguous])
     
     def __post_init__(self):
         object.__setattr__(self, '_data', dict(self._data))

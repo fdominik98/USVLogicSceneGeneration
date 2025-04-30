@@ -19,11 +19,11 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
         
     def do_draw(self):
         for actor, state in self.scenario.concrete_scene.items():
-            angle1_masthead = np.degrees(state.heading + GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
-            angle2_masthead = np.degrees(state.heading - GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
+            angle1_masthead = np.degrees(state.heading + GlobalConfig.SIDE_ANGLE)
+            angle2_masthead = np.degrees(state.heading - GlobalConfig.SIDE_ANGLE)
             
-            angle1_bow = np.degrees(state.heading + GlobalConfig.BOW_ANGLE / 2)
-            angle2_bow = np.degrees(state.heading - GlobalConfig.BOW_ANGLE / 2)
+            angle1_bow = np.degrees(state.heading + GlobalConfig.HALF_BOW_ANGLE)
+            angle2_bow = np.degrees(state.heading - GlobalConfig.HALF_BOW_ANGLE)
             
             # Create the wedge (filled circle slice)
             wedge_stern = patches.Wedge(state.p,
@@ -56,11 +56,11 @@ class CenteredAngleCircleComponent(AngleCircleComponent):
             
     def do_update(self, scene : ConcreteScene) -> List[plt.Artist]:
         for actor, state in scene.items():
-            angle1_masthead = np.degrees(state.heading + GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
-            angle2_masthead = np.degrees(state.heading - GlobalConfig.MASTHEAD_LIGHT_ANGLE / 2)
+            angle1_masthead = np.degrees(state.heading + GlobalConfig.SIDE_ANGLE)
+            angle2_masthead = np.degrees(state.heading - GlobalConfig.SIDE_ANGLE)
             
-            angle1_bow = np.degrees(state.heading + GlobalConfig.BOW_ANGLE / 2)
-            angle2_bow = np.degrees(state.heading - GlobalConfig.BOW_ANGLE / 2)
+            angle1_bow = np.degrees(state.heading + GlobalConfig.HALF_BOW_ANGLE)
+            angle2_bow = np.degrees(state.heading - GlobalConfig.HALF_BOW_ANGLE)
             
             self.wedge_sterns[actor].set_center(state.p)
             self.wedge_sterns[actor].set_radius(self.angle_circle_radius)
