@@ -61,8 +61,8 @@ nsga3_vessel_sb_msr_config = EvaluationData(population_size=6, mutate_eta=1, mut
                             init_method=MEAS_GlobalConfig.INIT_METHOD, random_seed=MEAS_GlobalConfig.RANDOM_SEED, aggregate_strat=ActorAggregate.name,
                             config_group='SB-MSR', algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc)
 
-nsga3_vessel_sb_o_config = EvaluationData(population_size=6, mutate_eta=1, mutate_prob=0.5,
-                            crossover_eta=1, crossover_prob=0.8, timeout=MEAS_GlobalConfig.TIMEOUT,
+nsga3_vessel_sb_o_config = EvaluationData(population_size=6, mutate_eta=15, mutate_prob=1,
+                            crossover_eta=5, crossover_prob=0.8, timeout=MEAS_GlobalConfig.TIMEOUT,
                             init_method=MEAS_GlobalConfig.INIT_METHOD, random_seed=MEAS_GlobalConfig.RANDOM_SEED, aggregate_strat=ActorAggregate.name,
                             config_group='SB-O', algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc)
 
