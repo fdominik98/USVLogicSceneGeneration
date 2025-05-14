@@ -26,6 +26,7 @@ class RuntimeStatisticsTable(DummyEvalPlot):
                     continue
                 
                 statistical_test = MannWhitneyUCliffDelta(values1, values2)
-                print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
+                #print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
+                print(f'{actor_number_by_type[0]} vessels, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
             
         return DummyEvalPlot.create_fig(self)

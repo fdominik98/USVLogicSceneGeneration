@@ -13,14 +13,14 @@ class MainMeasurementConfig():
    TIMEOUT = 600
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = False
-   # BASE_NAME = 'test'
-   BASE_NAME = 'test_sbo_re'
+   BASE_NAME = 'test'
    
 class DummyMeasurementConfig():   
-   NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 1, (3, 1) : 28 * 1, (4, 0) : 84 * 1, (5, 0) : 210 * 1, (6, 0) : 462 * 1}
+   #NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 1, (3, 1) : 28 * 1, (4, 0) : 84 * 1, (5, 0) : 210 * 1, (6, 0) : 462 * 1}
+   NUMBER_OF_RUNS = {(2, 0) : 10, (2, 1) : 10, (3, 0) : 10, (3, 1) : 10, (4, 0) : 10, (5, 0) : 10, (6, 0) : 10}
    WARMUPS = 0
    RANDOM_SEED = 1234
-   TIMEOUT = 30
+   TIMEOUT = 600
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = True
    BASE_NAME = 'dummy_test'
@@ -34,9 +34,9 @@ class MiniUSVMeasurementConfig():
    VERBOSE = True
    BASE_NAME = 'mini_usv_test'
    
-# MEAS_GlobalConfig = DummyMeasurementConfig()
 # MEAS_GlobalConfig = MiniUSVMeasurementConfig()
-MEAS_GlobalConfig = MainMeasurementConfig()
+#MEAS_GlobalConfig = MainMeasurementConfig()
+MEAS_GlobalConfig = DummyMeasurementConfig()
 
 nsga2_vessel_sb_msr_config = EvaluationData(population_size=8, mutate_eta=20, mutate_prob=0.8,
                             crossover_eta=15, crossover_prob=1, timeout=MEAS_GlobalConfig.TIMEOUT,

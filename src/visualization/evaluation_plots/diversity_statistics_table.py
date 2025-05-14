@@ -28,6 +28,18 @@ class DiversityStatisticsTable(DummyEvalPlot):
             for j, (group1, group2) in enumerate(groups_to_compare):
                 equivalence_classes1 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group1]], self.is_second_level_abstraction)
                 equivalence_classes2 = self.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][group2]], self.is_second_level_abstraction)
+                
+                all_keys = set(equivalence_classes1.keys()) | set(equivalence_classes2.keys())
+
+                # Step 2: Add missing keys with default value (None, 0)
+                for key in all_keys:
+                    equivalence_classes1.setdefault(key, (None, 0))
+                    equivalence_classes2.setdefault(key, (None, 0))
+
+                # Step 3: Sort dictionaries by key
+                equivalence_classes1 = dict(sorted(equivalence_classes1.items()))
+                equivalence_classes2 = dict(sorted(equivalence_classes2.items()))
+                
                 if len(equivalence_classes1) == 0 or len(equivalence_classes2) == 0:
                     continue
                 values1 = [int(count) for _, count in equivalence_classes1.values()]

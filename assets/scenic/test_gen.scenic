@@ -11,14 +11,12 @@ class BaseConfig():
     
     BOW_ANGLE = np.radians(10.0)
     STERN_ANGLE = np.radians(135)
-    BEAM_ANGLE = np.radians(112.5)
-    MASTHEAD_LIGHT_ANGLE = 2 * BEAM_ANGLE
-    BEAM_ROTATION_ANGLE = BEAM_ANGLE / 2
+    SIDE_ANGLE = np.radians(112.5)
+    BEAM_ROTATION_ANGLE = SIDE_ANGLE / 2
     
     HALF_BOW_ANGLE = BOW_ANGLE / 2
-    HALF_BEAM_ANGLE = BEAM_ANGLE / 2
+    HALF_SIDE_ANGLE = SIDE_ANGLE / 2
     HALF_STERN_ANGLE = STERN_ANGLE / 2
-    HALF_MASTHEAD_LIGHT_ANGLE = MASTHEAD_LIGHT_ANGLE / 2
 
     EPSILON=1e-10
 
@@ -229,6 +227,9 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_di
         return obst
 
     return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[], length_map={0: 29.999999999964416, 1: 282.7955717363372, 2: 210.68369150383728}, radius_map={0: 119.99999999985766, 1: 1131.1822869453488, 2: 842.7347660153491}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005], (0, 2): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002, (0, 2): 3704.002}, vis_distance_map={}, bearing_map={})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2, 3, 4, 5], obst_ids=[], length_map={0: 30.000000000073793, 1: 253.7273068228172, 2: 259.3119187952121, 3: 66.49559316742405, 4: 186.67956231543295, 5: 133.2578977724274}, radius_map={0: 120.00000000029517, 1: 1014.9092272912688, 2: 1037.2476751808483, 3: 265.9823726696962, 4: 746.7182492617318, 5: 533.0315910897097}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005], (0, 2): [3704.002, 3704.002, 5556.003, 9260.005], (0, 3): [3704.002, 3704.002, 5556.003, 9260.005], (0, 4): [3704.002, 3704.002, 5556.003, 9260.005], (0, 5): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002, (0, 2): 3704.002, (0, 3): 3704.002, (0, 4): 3704.002, (0, 5): 3704.002}, vis_distance_map={}, bearing_map={})
 ts1 = ts_infos.pop(0)
 ts2 = ts_infos.pop(0)
+ts3 = ts_infos.pop(0)
+ts4 = ts_infos.pop(0)
+ts5 = ts_infos.pop(0)

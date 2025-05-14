@@ -81,10 +81,15 @@ class EvalPlot(PlotBase, ABC):
         colors = [color1_rgb + (color2_rgb - color1_rgb) * i / (size - 1) for i in range(size)]
         return [np.array([color[0], color[1], color[2], 0.7]) for color in colors]
     
-    def set_yticks(self, axi : plt.Axes, values):
-        yticks = np.linspace(0, max(values), 6)
+    def set_yticks(self, axi : plt.Axes, values, unit : str = None, tick_number : int = 6):
+        yticks = np.linspace(0, max(values), tick_number)
         yticks = [round(t) for t in yticks] 
+        if unit is None:
+            ytick_labels = yticks
+        else:
+            ytick_labels = [f'{round(t)}{unit}' for t in yticks] 
         axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False)
+        axi.set_yticklabels([ytick_labels[0], ytick_labels[-1]] + list(ytick_labels))
         
     def init_axi(self, pos : int, axi : plt.Axes, label : str):
         axi.set_aspect('auto', adjustable='box')

@@ -65,7 +65,7 @@ class EvalDataParser(DataParser):
     
     def load_data_models_from_files(self, files : List[str]) -> List[EvaluationData]:
         data_models = [self.load_model_from_file(file) for file in files]
-        return [model for model in data_models if model.error_message is None and model.best_scene is not None]
+        return [model for model in data_models]
     
     def load_dirs_merged_as_models(self) -> List[EvaluationData]:
         files = []
@@ -95,7 +95,7 @@ class TrajDataParser(DataParser):
     
     def load_models_from_files(self, files : List[str]) -> List[TrajectoryData]:
         data_models = [self.load_model_from_file(file) for file in files]
-        return [model for model in data_models if model.error_message is None and model.trajectories is not None]
+        return [model for model in data_models]
     
     def load_dict_from_file(self, file : str) -> dict:
         dict = TrajectoryData.load_dict_from_json(file)

@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from utils.file_system_utils import IMAGES_FOLDER
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from visualization.evaluation_plots.average_time_per_scene_plot import AverageTimePerScenePlot
 from visualization.evaluation_plots.coverage_evolution_plot import CoverageEvolutionPlot
 from visualization.evaluation_plots.diversity_statistics_table import AmbiguousDiversityStatisticsTable, DiversityStatisticsTable
 from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
@@ -42,6 +43,7 @@ class EvalPlotManager():
             "Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
             "Runtime (successful)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
             "Runtime (all)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            "Average Time per Scene" : PlotWrapper(AverageTimePerScenePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
             "...-----------------------------------..." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
             "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
