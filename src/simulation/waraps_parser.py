@@ -1,10 +1,12 @@
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Tuple
+from haversine import Unit
+import numpy as np
 from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from simulation.mqtt_client import MqttAgentClient, MqttScenarioClient
-from simulation.sim_utils import coord_to_lat_long, true_north_heading, waypoint_from_state, to_true_north
+from simulation.sim_utils import coord_to_lat_long, true_north_heading, waypoint_from_state
 import docker
 import yaml
 import time
@@ -15,9 +17,7 @@ from utils.math_utils import compute_start_point
 class WARAPSParser():
     def __init__(self, trajectory_manager : TrajectoryManager):
         self.trajectory_manager = trajectory_manager
-        
-        self.sim_tag = 'test'
-        #self.tag = 'latest'
+        self.trajectory_manager.shift_states_to_zero()
         
         # Start Docker client
         self.docker_client = docker.from_env()
@@ -28,14 +28,18 @@ class WARAPSParser():
         self.agent_clients : List[MqttAgentClient] = []
         self.waypoint_map : Dict[ConcreteVessel, List[dict]] = {}
         for i, (vessel, state) in enumerate(self.trajectory_manager.concrete_scene.items()):
-            self.start_container(vessel, state, 14552 + i)
+            if not isinstance(vessel, ConcreteVessel):
+                raise ValueError(f"Vessel {vessel} is not a ConcreteVessel.")
+            
+            vessel_pos = compute_start_point(state.p, state.v, state.speed, vessel.max_acceleration)
+            self.start_container(vessel, state, vessel_pos, 14552 + i)
             # TODO: configuring container environments for agents
-            self.agent_clients.append(MqttAgentClient(vessel))
+            self.agent_clients.append(MqttAgentClient(vessel, state, vessel_pos))
             data = self.trajectory_manager.trajectories[0:GlobalConfig.TEN_MINUTE_IN_SEC][vessel]
             waypoints = [waypoint_from_state(state) for state in data]
             self.waypoint_map[vessel] = waypoints
     
-    def start_container(self, vessel : ConcreteVessel, init_state : ActorState, port : int):
+    def start_container(self, vessel : ConcreteVessel, init_state : ActorState, vessel_pos : np.ndarray, port : int):
         
         project_name = f'{self.trajectory_manager.functional_scenario.name}_{vessel.name}'.lower()
         
@@ -54,19 +58,19 @@ class WARAPSParser():
                     # Waypoint navigation parameters
                     'WP_PIVOT_ANGLE': 0.0,  # Angle threshold in degrees for initiating a pivot turn at a waypoint
                     'WP_RADIUS': vessel.length / 2,  # Acceptance radius in meters around a waypoint, set to half the vessel's length
-                    'WP_SPEED': vessel.max_speed,  # Target speed in meters per second between waypoints, set to the vessel's maximum speed
-
+                    'WP_SPEED': init_state.speed,  # Target speed in meters per second between waypoints, set to the vessel's maximum speed
+                    'WPNAV_SPEED' : init_state.speed,  # Speed in meters per second for waypoint navigation, set to the vessel's maximum speed
                     'SPEED_MAX' : vessel.max_speed,
                     # Gripper control parameters
-                    'GRIP_ENABLE': 1,  # Enables the use of a gripper; 1 for enabled, 0 for disabled
-                    'GRIP_GRAB': 1100,  # PWM value in microseconds to command the gripper to grab a payload
-                    'GRIP_NEUTRAL': 1500,  # PWM value in microseconds for the gripper's neutral position (neither grabbing nor releasing)
-                    'GRIP_REGRAB': 0,  # Time in seconds to re-grip payload after releasing; 0 disables this feature
-                    'GRIP_RELEASE': 1900,  # PWM value in microseconds to command the gripper to release a payload
-                    'GRIP_TYPE': 1,  # Type of gripper; 1 for servo gripper, 2 for EMP gripper
+                    # 'GRIP_ENABLE': 1,  # Enables the use of a gripper; 1 for enabled, 0 for disabled
+                    # 'GRIP_GRAB': 1100,  # PWM value in microseconds to command the gripper to grab a payload
+                    # 'GRIP_NEUTRAL': 1500,  # PWM value in microseconds for the gripper's neutral position (neither grabbing nor releasing)
+                    # 'GRIP_REGRAB': 0,  # Time in seconds to re-grip payload after releasing; 0 disables this feature
+                    # 'GRIP_RELEASE': 1900,  # PWM value in microseconds to command the gripper to release a payload
+                    # 'GRIP_TYPE': 1,  # Type of gripper; 1 for servo gripper, 2 for EMP gripper
 
-                    # Servo output functions
-                    'SERVO9_FUNCTION': 28,  # Assigns servo output 9 to function as a gripper
+                    # # Servo output functions
+                    # 'SERVO9_FUNCTION': 28,  # Assigns servo output 9 to function as a gripper
 
                     # Obstacle avoidance parameters
                     'OA_MARGIN_MAX': vessel.radius,  # Maximum distance in meters to maintain from obstacles; 0 disables margin
@@ -87,10 +91,11 @@ class WARAPSParser():
 
                     # Cruise control settings
                     'CRUISE_SPEED': init_state.speed,  # Target speed in meters per second for autonomous modes
-                    'CRUISE_THROTTLE': 30,  # Initial throttle percentage to achieve cruise speed
+                    'CRUISE_THROTTLE' : 30, # Initial throttle percentage to achieve cruise speed
+                    # 'CRUISE_THROTTLE': 30,  # Initial throttle percentage to achieve cruise speed
 
-                    'SERVO1_FUNCTION': 73,  # Function assigned to servo output 1 (Throttle Left)
-                    'SERVO3_FUNCTION': 74,  # Function assigned to servo output 3 (Throttle Right)
+                    # 'SERVO1_FUNCTION': 73,  # Function assigned to servo output 1 (Throttle Left)
+                    # 'SERVO3_FUNCTION': 74,  # Function assigned to servo output 3 (Throttle Right)
         }
         
         
@@ -105,9 +110,8 @@ class WARAPSParser():
         simulator = f'{vessel.name}_simulator'
             
         # Shift the position to let the ship accelerate
-        start_pos = compute_start_point(init_state.p, init_state.v, init_state.speed, vessel.max_acceleration)
-        # vessel_pos = coord_to_lat_long(start_pos)
-        vessel_pos = coord_to_lat_long(init_state.p)
+        
+        start_pos_lat_long = coord_to_lat_long(init_state.p)
         env = {
             'NAME' : vessel.name,
             'DOMAIN' : 'surface',
@@ -119,7 +123,8 @@ class WARAPSParser():
             'VIDEO_SERVER' : 'ome.waraps.org',
             
             'BROKER' : 'host.docker.internal',
-            'PORT' : '1883',
+            #'PORT' : '1883',
+            'PORT' : '1882',
             'TLS_CERTIFICE' : '0',
             'MQTT_USER' : '',
             'MQTT_PASSWORD' : '',
@@ -136,10 +141,10 @@ class WARAPSParser():
             'VEHICLE_PARAMS': 'motorboat',
             'INSTANCE' : '0',
             
-            'HOME_POS': f'{start_pos[0]},{start_pos[1]},0,{true_north_heading(start_pos, vessel_pos)}',
+            'HOME_POS': f'{start_pos_lat_long[0]},{start_pos_lat_long[1]},0,{true_north_heading(vessel_pos, init_state.p, Unit.DEGREES)}',
             
             'MAVPROXY': f'tcpin:{mavproxy}:14551',
-            'LOCAL_BRIDGE': f'udp:localhost:14550',
+            'LOCAL_BRIDGE': f'udp:host.docker.internal:14550',
             
             'GCS_1': f'udp:host.docker.internal:{str(port)}',
         }
@@ -148,11 +153,11 @@ class WARAPSParser():
         docker_compose = {
             'services' : {                
                 simulator : {
-                    'image' : f'registry.waraps.org/ardupilot-sitl:{self.sim_tag}',
+                    'image' : f'registry.waraps.org/ardupilot-sitl:latest',
                     'restart' : 'unless-stopped',
                     'environment' : env_list,
-                    'volumes' : [f'{params_file}:/params/my{env["VEHICLE_PARAMS"]}.parm'],
-                    'command': f'/ardupilot/Tools/autotest/sim_vehicle.py --vehicle {env["VEHICLE"]} --frame {env["MODEL"]} -I{env["INSTANCE"]} --custom-location="{env["HOME_POS"]}" -w --no-rebuild --no-mavproxy --speedup {env["SPEEDUP"]}'
+                    'volumes' : [f'{params_file}:/params/my{env["VEHICLE_PARAMS"]}.params'],
+                    #'command': f'/ardupilot/Tools/autotest/sim_vehicle.py --vehicle {env["VEHICLE"]} --frame {env["MODEL"]} -I{env["INSTANCE"]} --custom-location="{env["HOME_POS"]}" -w --no-rebuild --no-mavproxy --speedup {env["SPEEDUP"]}'
                 },
                 
                 mavproxy : {
@@ -167,7 +172,7 @@ class WARAPSParser():
                 },
                 
                 arduagent : {
-                    'image' : f'registry.waraps.org/waraps-arduagent:test',
+                    'image' : f'registry.waraps.org/waraps-arduagent:latest',
                     'depends_on' : [mavproxy, simulator],
                     'restart' : 'unless-stopped',
                     'environment' : env_list,

@@ -129,11 +129,11 @@ class OSVariable(VesselVariable):
     
     @property
     def min_coord(self) -> float:
-        return GlobalConfig.MAX_COORD / 2 - GlobalConfig.EPSILON
+        return GlobalConfig.OS_COORD - GlobalConfig.EPSILON
     
     @property
     def max_coord(self) -> float:
-        return GlobalConfig.MAX_COORD / 2 + GlobalConfig.EPSILON
+        return GlobalConfig.OS_COORD + GlobalConfig.EPSILON
     
     @property
     def name(self) -> str:

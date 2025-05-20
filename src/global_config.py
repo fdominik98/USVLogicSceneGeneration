@@ -49,6 +49,7 @@ class WaraPsConfig(BaseConfig):
     DIST_DRIFT = 1.0 # meter
     MIN_COORD = 0.0
     MAX_COORD = 0.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 926 m
+    OS_COORD = MAX_COORD / 2
     MAX_DISTANCE = MAX_COORD * np.sqrt(2)
     MAX_TEMPORAL_DISTANCE = BaseConfig.ONE_HOUR_IN_SEC
     SAFE_TEMPORAL_DISTANCE = BaseConfig.TEN_MINUTE_IN_SEC
@@ -71,6 +72,7 @@ class GeneralMaritimeConfig(BaseConfig):
     DIST_DRIFT = 50.0 # meter
     MIN_COORD = 0.0
     MAX_COORD = 2.0 * 6.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 24076.013 m
+    OS_COORD = MAX_COORD / 2
     MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
     MAX_TEMPORAL_DISTANCE = BaseConfig.TWO_HOURS_IN_SEC
     SAFE_TEMPORAL_DISTANCE = BaseConfig.TWENTY_MINUTE_IN_SEC
@@ -81,11 +83,11 @@ class GeneralMaritimeConfig(BaseConfig):
     MAX_SPEED_IN_MS = 50.0 * BaseConfig.KNOT_TO_MS_CONVERSION
 
  
-class GlobalConfig(GeneralMaritimeConfig):  
-    pass
+# class GlobalConfig(GeneralMaritimeConfig):  
+#     pass
 
-# class GlobalConfig(WaraPsConfig):
-#     pass 
+class GlobalConfig(WaraPsConfig):
+    pass 
 
 
 def vessel_radius(length : float) -> float:

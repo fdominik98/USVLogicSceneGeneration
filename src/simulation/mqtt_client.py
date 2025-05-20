@@ -4,29 +4,31 @@ from dataclasses import dataclass, field
 import json
 import ssl
 import traceback
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 import uuid
+import numpy as np
 import paho.mqtt.client as mqtt
 
+from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.concrete_scene import ConcreteScene
 from simulation.sim_utils import waypoint_from_state
 
-@dataclass(frozen=True)
 class MqttClient(ABC):
     '''Mqtt connection information'''
-    client: mqtt.Client = field(init=False)
-    user: str = field(default='', init=False)
-    password: str = field(default='', init=False)
-    broker: str = field(default='localhost', init=False)
-    port: int = field(default=1883, init=False)
-    tls_connection: bool = field(default=False, init=False)
+    user : str = ''
+    password : str = ''
+    broker: str = 'localhost'
+    port: int = 1882
+    tls_connection: bool = False
+    running_tasks : Set[str] = set()
     
-    def __post_init__(self):
-        object.__setattr__(self, 'client', mqtt.Client(client_id=self.name))
+    def __init__(self):
+        self.client = mqtt.Client(client_id=self.name)
         self.client.user_data_set('waraps')
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
+        self.client.on_message = self.on_message
     
     
     def connect(self):
@@ -70,7 +72,18 @@ class MqttClient(ABC):
         '''Is triggered when a message is published on topics agent subscribes to'''
         try:
             msg_str = msg.payload.decode('utf-8')
-            print(f'Received from {self.receiver_name}: {json.loads(msg_str)}')
+            msg_dict = json.loads(msg_str)
+            print(f'Received from {self.receiver_name}: {msg_dict}')
+            if 'status' in msg_dict:
+                if msg_dict['status'] == 'running' or msg_dict['status'] == 'started' or msg_dict['status'] == 'planning':
+                    self.running_tasks.add(msg_dict['task-uuid'])
+                if msg_dict['status'] == 'failed' or msg_dict['status'] == 'finished' or msg_dict['status'] == 'aborted':
+                    self.running_tasks.discard(msg_dict['task-uuid'])
+            elif 'response' in msg_dict:
+                if msg_dict['response'] == 'running':
+                    self.running_tasks.add(msg_dict['task-uuid'])
+                if msg_dict['response'] == 'failed' or msg_dict['response'] == 'finished':
+                    self.running_tasks.discard(msg_dict['task-uuid'])
         except Exception:
             print(traceback.format_exc())
 
@@ -97,9 +110,12 @@ class MqttClient(ABC):
         self.client.disconnect()     
         
         
-@dataclass(frozen=True)
 class MqttAgentClient(MqttClient):
-    vessel : ConcreteVessel
+    def __init__(self, vessel : ConcreteVessel, initial_state : ActorState, vessel_pos : np.ndarray):
+        self.vessel = vessel
+        self.initial_state = initial_state
+        self.vessel_pos = vessel_pos
+        super().__init__()
         
     @property
     def listen_topics(self) -> List[str]:
@@ -115,7 +131,7 @@ class MqttAgentClient(MqttClient):
         return self.vessel.name
             
             
-    def publish_command(self, waypoints : List[dict], speed):
+    def publish_follow_path(self, waypoints : List[dict], speed):
         command = {
             'com-uuid': str(uuid.uuid4()),
             'command': 'start-task',
@@ -135,8 +151,64 @@ class MqttAgentClient(MqttClient):
         str_command = json.dumps(command)
         self.client.publish(self.base_topic, str_command)   
         
+    def publish_abort_all(self):
+        for task in self.running_tasks:
+            command = {
+                'com-uuid': str(uuid.uuid4()),
+                'command': 'signal-task',
+                'sender': self.name,
+                'signal': '$abort',
+                'task-uuid': task
+            }
+            str_command = json.dumps(command)
+            self.client.publish(self.base_topic, str_command)
+            
+    def publish_go_to(self, waypoint : np.ndarray, speed, look_at : np.ndarray = None):
+        command = {
+            'com-uuid': str(uuid.uuid4()),
+            'command': 'start-task',
+            'execution-unit': f'{self.vessel.name}',
+            'sender': self.name,
+            'task': {
+                'name': 'move-to',
+                'params': {
+                'speed': str(speed),
+                'waypoint': {
+                    'altitude': 0,
+                    'latitude': waypoint[0],
+                    'longitude': waypoint[1],
+                    'rostype': 'GeoPoint'
+                }
+                }
+            },
+            'task-uuid': str(uuid.uuid4()),
+            'time_added': 0
+        }
+        str_command = json.dumps(command)
+        self.client.publish(self.base_topic, str_command)
+        
+        # if look_at is not None:
+        #     command = {
+        #         'com-uuid': str(uuid.uuid4()),
+        #         'command': 'start-task',
+        #         'execution-unit': f'{self.vessel.name}',
+        #         'sender': self.name,
+        #         'task': {
+        #             'name': 'look-at-position',
+        #             'params': {
+        #             'geopoint': {
+        #                 'latitude': look_at[0],
+        #                 'longitude': look_at[1],
+        #                 'altitude': 0
+        #             }
+        #             },
+        #             'task-uuid': str(uuid.uuid4())
+        #         }
+        #     }
+        #     str_command = json.dumps(command)
+        #     self.client.publish(self.base_topic, str_command)
+        
 
-@dataclass(frozen=True)
 class MqttScenarioClient(MqttClient):
     
     @property

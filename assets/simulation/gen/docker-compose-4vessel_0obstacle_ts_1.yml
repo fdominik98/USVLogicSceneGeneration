@@ -13,7 +13,7 @@ services:
     - VIDEO_SRC0=/dev/video0
     - VIDEO_SERVER=ome.waraps.org
     - BROKER=host.docker.internal
-    - PORT=1883
+    - PORT=1882
     - TLS_CERTIFICE=0
     - MQTT_USER=
     - MQTT_PASSWORD=
@@ -23,14 +23,14 @@ services:
     - SIM_PORT=5760
     - SPEEDUP=1
     - VEHICLE=Rover
-    - MODEL=rover-skid
-    - VEHICLE_PARAMS=Rover
+    - MODEL=motorboat
+    - VEHICLE_PARAMS=motorboat
     - INSTANCE=0
-    - HOME_POS=398.96326046364373,418.93626908395794,0,140.7535283371692
+    - HOME_POS=57.7640942153664,16.685564539037447,0,15.914409249467838
     - MAVPROXY=tcpin:TS_1_mavproxy:14551
-    - LOCAL_BRIDGE=udp:localhost:14550
+    - LOCAL_BRIDGE=udp:host.docker.internal:14550
     - GCS_1=udp:host.docker.internal:14553
-    image: registry.waraps.org/waraps-arduagent:test
+    image: registry.waraps.org/waraps-arduagent:latest
     restart: unless-stopped
   TS_1_mavproxy:
     command: mavproxy.py --master=tcp:TS_1_simulator:5760 --out=tcpin:TS_1_mavproxy:14551
@@ -43,11 +43,8 @@ services:
     stdin_open: true
     tty: true
   TS_1_simulator:
-    command: /ardupilot/Tools/autotest/sim_vehicle.py --vehicle Rover --frame rover-skid
-      -I0 --custom-location="398.96326046364373,418.93626908395794,0,140.7535283371692"
-      -w --no-rebuild --no-mavproxy --speedup 1
     environment: *id001
     image: registry.waraps.org/ardupilot-sitl:test
     restart: unless-stopped
     volumes:
-    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/gen/params-4vessel_0obstacle_ts_1.params:/params/myRover.params
+    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/gen/params-4vessel_0obstacle_ts_1.params:/params/mymotorboat.params

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 import json
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,7 +17,7 @@ class PenaltyCategory(Enum):
 
 @dataclass(frozen=True)
 class Penalty():
-    actor_penalties : Dict[ActorVariable, float] = field(default_factory=dict)
+    actor_penalties : Dict[ActorVariable, float] = field(default_factory=lambda: defaultdict(float))
 
     visibility_penalty : float = 0
     bearing_penalty : float = 0

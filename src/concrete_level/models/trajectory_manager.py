@@ -19,6 +19,9 @@ class TrajectoryManager():
         else:
             raise ValueError(f'The passed parameter has incorrect type: {type(trajectories)}')
             
+        self.__set_scenario()
+        
+    def __set_scenario(self):
         self.scenario = ConcreteSceneAbstractor.get_abstractions_from_concrete(self.trajectories.get_scene(0))
         self.logical_scenario = self.scenario.logical_scenario
         self.functional_scenario = self.scenario.functional_scenario
@@ -30,3 +33,8 @@ class TrajectoryManager():
     @property
     def timespan(self):
         return self.trajectories.timespan
+    
+    def shift_states_to_zero(self):
+        builder = TrajectoryBuilder(self.trajectories._data)
+        self.trajectories = builder.shift_states_to_zero().build()
+        self.__set_scenario()

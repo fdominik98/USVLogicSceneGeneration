@@ -1,0 +1,50 @@
+services:
+  OS_0_arduagent:
+    command: python -B -u /app/main.py
+    depends_on:
+    - OS_0_mavproxy
+    - OS_0_simulator
+    environment: &id001
+    - NAME=OS_0
+    - DOMAIN=surface
+    - REAL_SIM=simulation
+    - AGENT_DESCRIPTION=surface vessel
+    - AGENT_MODEL=vessel.mini_usv
+    - VIDEO_SRC0=/dev/video0
+    - VIDEO_SERVER=ome.waraps.org
+    - BROKER=host.docker.internal
+    - PORT=1882
+    - TLS_CERTIFICE=0
+    - MQTT_USER=
+    - MQTT_PASSWORD=
+    - FCS_SERIAL=/dev/serial0
+    - BAUD_RATE=57600
+    - CONNECTION_STRING=tcp:OS_0_mavproxy:14551
+    - SIM_PORT=5760
+    - SPEEDUP=10
+    - VEHICLE=Rover
+    - MODEL=motorboat
+    - VEHICLE_PARAMS=motorboat
+    - INSTANCE=0
+    - HOME_POS=57.760277,16.678081,0,0.0
+    - MAVPROXY=tcpin:OS_0_mavproxy:14551
+    - LOCAL_BRIDGE=udp:host.docker.internal:14550
+    - GCS_1=udp:host.docker.internal:14552
+    image: registry.waraps.org/waraps-arduagent:latest
+    restart: unless-stopped
+  OS_0_mavproxy:
+    command: mavproxy.py --master=tcp:OS_0_simulator:5760 --out=tcpin:OS_0_mavproxy:14551
+      --out=udp:host.docker.internal:14552
+    depends_on:
+    - OS_0_simulator
+    environment: *id001
+    image: registry.waraps.org/waraps-mavproxy:latest
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+  OS_0_simulator:
+    environment: *id001
+    image: registry.waraps.org/ardupilot-sitl:latest
+    restart: unless-stopped
+    volumes:
+    - C:\Users\freyd\Desktop\USVLogicSceneGeneration\src\utils/../../assets/simulation/gen/params-3vessel_0obstacle_os_0.params:/params/mymotorboat.params

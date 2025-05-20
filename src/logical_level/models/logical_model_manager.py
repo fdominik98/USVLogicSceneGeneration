@@ -10,6 +10,8 @@ from logical_level.models.relation_constraints_concept.predicates import AtVisAn
 
 class LogicalModelManager():
     __scenario_cache_map = {
+        (1, 0) : None,
+        (1, 1) : None,
         (2, 0) : None,
         (2, 1) : None,
         (3, 0) : None,

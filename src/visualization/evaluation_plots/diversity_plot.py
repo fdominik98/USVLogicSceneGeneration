@@ -1,13 +1,15 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
+from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from visualization.plotting_utils import EvalPlot
 
 class DiversityPlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], is_second_level_abstraction=False): 
+    def __init__(self, eval_datas : List[EvaluationData], is_second_level_abstraction=False, is_relevant=True): 
         self.is_second_level_abstraction = is_second_level_abstraction
+        self.is_relevant = is_relevant
         super().__init__(eval_datas)
         
     
@@ -36,8 +38,11 @@ class DiversityPlot(EvalPlot):
                     axi.set_title(self.vessel_num_labels[i], fontweight='bold')                    
                 self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$")
                 
-                equivalence_classes = ConcreteSceneAbstractor.get_equivalence_class_distribution([eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]],
-                                                                                                                                             self.is_second_level_abstraction)
+                equivalence_classes : Dict[int, Tuple[ConcreteScene, int]] = ConcreteSceneAbstractor.get_equivalence_class_distribution(
+                    [eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]],
+                    self.is_second_level_abstraction)
+                
+                equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items() if scene.is_relevant == self.is_relevant}
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                     

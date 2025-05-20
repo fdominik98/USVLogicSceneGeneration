@@ -32,9 +32,12 @@ class ActorState(Serializable):
     def heading_deg(self):
         return np.rad2deg(self.heading)
         
-    def modify_copy(self, x : Optional[float] = None, y : Optional[float] = None,
-             speed : Optional[float] = None, heading : Optional[float] = None) -> 'ActorState':
-        return ActorState(x or self.x, y or self.y, speed or self.speed, heading or self.heading)
+    def modify_copy(self, x: Optional[float] = None, y: Optional[float] = None,
+                speed: Optional[float] = None, heading: Optional[float] = None) -> 'ActorState':
+        return ActorState(x if x is not None else self.x,
+                            y if y is not None else self.y,
+                            speed if speed is not None else self.speed,
+                            heading if heading is not None else self.heading)
     
     
     @classmethod

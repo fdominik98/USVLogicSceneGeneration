@@ -33,9 +33,11 @@ class EvalPlotManager():
         self.plots : Dict[str, PlotWrapper] = {
             ".---------------------------------------." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             #"Scenario Type Statistics" : PlotWrapper(ScenarioTypeStatisticsPlot, {'eval_datas': self.eval_datas}),
-            "First-level Abstraction Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
+            "First-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : True}),
+            "First-level Abstraction Diversity -non-relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : False}),
             #"Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
-            "Second-level Abstraction Diversity" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
+            "Second-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : True}),
+            "Second-level Abstraction Diversity, -non-relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : False}),
             #"Higher Abstraction Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
             'First-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
             'Second-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),

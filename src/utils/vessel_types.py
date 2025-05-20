@@ -72,11 +72,12 @@ class OtherVesselType(VesselType):
 @dataclass(frozen=True, repr=False)
 class MiniUSV(VesselType):
     name : str = 'MiniUSV'
-    min_length : float = 1.0
-    max_length : float = 1.0
-    max_speed : float = 2.0 # m/s
-    min_beam : float = 0.5
-    max_beam : float = 0.5
+    min_length : float = GlobalConfig.MIN_LENGTH
+    max_length : float = GlobalConfig.MAX_LENGTH
+    min_speed : float = GlobalConfig.MIN_SPEED_IN_MS
+    max_speed : float = GlobalConfig.MAX_SPEED_IN_MS
+    min_beam : float = GlobalConfig.MIN_BEAM
+    max_beam : float = GlobalConfig.MAX_BEAM
     
 @dataclass(frozen=True, repr=False)
 class CargoShip(VesselType):

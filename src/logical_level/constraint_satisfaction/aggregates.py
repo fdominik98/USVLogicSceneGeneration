@@ -62,7 +62,7 @@ class ActorAggregate(Aggregate):
 
     def evaluate(self, individual : np.ndarray):
         penalty = self.derive_penalty(individual)
-        return tuple((penalty.actor_penalties[var] for var in self.logical_scenario.actor_variables))
+        return tuple((penalty.actor_penalties[var] if var in penalty.actor_penalties else 0 for var in self.logical_scenario.actor_variables))
     
 class AggregateAll(Aggregate):
     name =  'all'

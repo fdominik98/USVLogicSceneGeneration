@@ -3,6 +3,7 @@ import traceback
 from concrete_level.data_parser import EvalDataParser
 from concrete_level.models.trajectory_manager import TrajectoryManager
 from simulation.waraps_parser import WARAPSParser
+from simulation.sim_utils import coord_to_lat_long
 
 def main():
     dp = EvalDataParser()
@@ -29,7 +30,14 @@ def main():
             for client in parser.agent_clients:
                 # Get the command list for this client.
                 if command == 1:
-                    client.publish_command(parser.waypoint_map[client.vessel], trajectory_manager.concrete_scene[client.vessel].speed)
+                    client.publish_follow_path(parser.waypoint_map[client.vessel], client.initial_state.speed)
+                    print(f"Sent command {command} to vessel {client.vessel}")
+                elif command == 2:
+                    client.publish_abort_all()
+                    print(f"Sent command {command} to vessel {client.vessel}")
+                elif command == 3:
+                    client.publish_go_to(coord_to_lat_long(client.vessel_pos), client.initial_state.speed,
+                                         look_at=coord_to_lat_long(client.initial_state.p))
                     print(f"Sent command {command} to vessel {client.vessel}")
                 else:
                     print(f"Invalid command number for vessel {client.vessel}.")

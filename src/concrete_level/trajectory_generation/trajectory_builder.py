@@ -46,3 +46,8 @@ class TrajectoryBuilder(Dict[ConcreteVessel, List[ActorState]]):
             new_trajectory.append(turned_state.modify_copy(x=new_p[0], y=new_p[1]))
         return new_trajectory
     
+    def shift_states_to_zero(self) -> 'TrajectoryBuilder':
+        for vessel in self.keys():
+            self[vessel] = [state.modify_copy(x=state.x-GlobalConfig.OS_COORD, y=state.y-GlobalConfig.OS_COORD) for state in self[vessel]]
+        return self
+    

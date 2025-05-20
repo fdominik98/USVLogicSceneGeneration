@@ -204,7 +204,7 @@ class FunctionalScenario(Scenario):
         
         return (all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects) and
                 all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects) and
-                all((self.out_vis_or_may_not_collide(o1, o2) or self.out_vis_or_may_not_collide(o2, o1)) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
+                all(not self.in_colregs_situation_with(o1, o2) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
        
     @property 
     def is_ambiguous(self) -> bool:

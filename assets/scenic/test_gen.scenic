@@ -49,6 +49,7 @@ class WaraPsConfig(BaseConfig):
     DIST_DRIFT = 1.0 # meter
     MIN_COORD = 0.0
     MAX_COORD = 0.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 926 m
+    OS_COORD = MAX_COORD / 2
     MAX_DISTANCE = MAX_COORD * np.sqrt(2)
     MAX_TEMPORAL_DISTANCE = BaseConfig.ONE_HOUR_IN_SEC
     SAFE_TEMPORAL_DISTANCE = BaseConfig.TEN_MINUTE_IN_SEC
@@ -71,6 +72,7 @@ class GeneralMaritimeConfig(BaseConfig):
     DIST_DRIFT = 50.0 # meter
     MIN_COORD = 0.0
     MAX_COORD = 2.0 * 6.5 * BaseConfig.N_MILE_TO_M_CONVERSION # 24076.013 m
+    OS_COORD = MAX_COORD / 2
     MAX_DISTANCE = MAX_COORD * np.sqrt(2) # 34048.624 m
     MAX_TEMPORAL_DISTANCE = BaseConfig.TWO_HOURS_IN_SEC
     SAFE_TEMPORAL_DISTANCE = BaseConfig.TWENTY_MINUTE_IN_SEC
@@ -81,11 +83,11 @@ class GeneralMaritimeConfig(BaseConfig):
     MAX_SPEED_IN_MS = 50.0 * BaseConfig.KNOT_TO_MS_CONVERSION
 
  
-class GlobalConfig(GeneralMaritimeConfig):  
-    pass
+# class GlobalConfig(GeneralMaritimeConfig):  
+#     pass
 
-# class GlobalConfig(WaraPsConfig):
-#     pass 
+class GlobalConfig(WaraPsConfig):
+    pass 
 
 
 def vessel_radius(length : float) -> float:
@@ -227,9 +229,6 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_di
         return obst
 
     return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2, 3, 4, 5], obst_ids=[], length_map={0: 30.000000000073793, 1: 253.7273068228172, 2: 259.3119187952121, 3: 66.49559316742405, 4: 186.67956231543295, 5: 133.2578977724274}, radius_map={0: 120.00000000029517, 1: 1014.9092272912688, 2: 1037.2476751808483, 3: 265.9823726696962, 4: 746.7182492617318, 5: 533.0315910897097}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005], (0, 2): [3704.002, 3704.002, 5556.003, 9260.005], (0, 3): [3704.002, 3704.002, 5556.003, 9260.005], (0, 4): [3704.002, 3704.002, 5556.003, 9260.005], (0, 5): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002, (0, 2): 3704.002, (0, 3): 3704.002, (0, 4): 3704.002, (0, 5): 3704.002}, vis_distance_map={}, bearing_map={})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[], length_map={0: 1.0000000000084337, 1: 0.999999999927459, 2: 1.0000000000357847}, radius_map={0: 4.000000000033735, 1: 3.999999999709836, 2: 4.000000000143139}, possible_distances_map={(0, 1): [74.08003999462616, 74.08004000062476, 74.08003999462616, 185.2000999865654], (0, 2): [74.08004000062476, 74.08004000062476, 74.08004000265093, 185.2001000015619]}, min_distance_map={(0, 1): 74.08003999462616, (0, 2): 74.08004000062476}, vis_distance_map={(0, 1): 74.08003999462616, (0, 2): 74.08004000062476}, bearing_map={(0, 1): (-0.9817477042468103, 1.9634954084936207, -3.141592653589793, 2.356194490192345), (0, 2): (-3.141592653589793, 2.356194490192345, 0.9817477042468103, 1.9634954084936207)})
 ts1 = ts_infos.pop(0)
 ts2 = ts_infos.pop(0)
-ts3 = ts_infos.pop(0)
-ts4 = ts_infos.pop(0)
-ts5 = ts_infos.pop(0)
