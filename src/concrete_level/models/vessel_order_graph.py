@@ -24,7 +24,7 @@ class VesselOrderGraph():
         self.nodes : Dict[ConcreteVessel, VesselNode] = {}
         self.in_degree : Dict[VesselNode, int] = {}
         self.out_degree : Dict[VesselNode, int] = {}
-        relations = [(scenario.to_concrete_vessel(obj1), scenario.to_concrete_vessel(obj2)) for obj1, obj2 in scenario.functional_scenario.binary_interpretation_tuples]
+        relations = [(scenario.to_concrete_vessel(obj1), scenario.to_concrete_vessel(obj2)) for obj1, obj2 in scenario.functional_scenario.all_colregs_relation_pairs]
         
         for rel in relations:
             self.add_nodes(rel)

@@ -9,7 +9,7 @@ abstract class Vessel {
     Vessel[0..*] inSternSectorOf
     Vessel[0..*] inPortSideSectorOf
     Vessel[0..*] inStarboardSideSectorOf
-    Vessel[0..*] inBowOnSectorOf
+    Vessel[0..*] inBowSectorOf
     Vessel[0..*] atVisibilityDistance opposite atVisibilityDistance
     Vessel[0..*] mayCollide opposite mayCollide
 }
@@ -49,7 +49,7 @@ error selfLoopRules(Vessel o) <->
     inSternSectorOf(o, o);
     inPortSideSectorOf(o, o);
     inStarboardSideSectorOf(o, o);
-    inBowOnSectorOf(o, o);
+    inBowSectorOf(o, o);
     atVisibilityDistance(o, o);
     mayCollide(o, o).
 
@@ -61,7 +61,7 @@ error selfLoopRules(Vessel o) <->
 error sectorRules(Vessel o, Vessel v) <->
     inSternSectorOf(o, v), inMastheadSectorOf(o, v);
     inPortSideSectorOf(o, v), inStarboardSideSectorOf(o, v);
-    inBowOnSectorOf(o, v), inSternSectorOf(o, v).
+    inBowSectorOf(o, v), inSternSectorOf(o, v).
 
 error mayCollideInStern(Vessel v1, Vessel v2) <->
     mayCollide(v1, v2), inSternSectorOf(v1, v2), inSternSectorOf(v2,v1).
@@ -85,7 +85,7 @@ error TSNotInDangerousEncounterSituationWithOS(TS ts, OS os) <->
 
 
 error TSTS(TS ts1, TS ts2) <->
-    inSectorOf(ts1, ts2); inBowOnSectorOf(ts1, ts2);
+    inSectorOf(ts1, ts2); inBowSectorOf(ts1, ts2);
     atVisibilityDistance(ts1, ts2); mayCollide(ts1, ts2).
 
 

@@ -187,6 +187,12 @@ class FunctionalScenario(Scenario):
                 self.crossing_from_port(o2, o1) or
                 self.overtaking(o1, o2) or
                 self.overtaking(o2, o1)))
+        
+    def in_colregs_relation(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+        return (self.is_vessel(o1) and self.is_vessel(o2) and
+                (self.head_on(o1, o2) or
+                self.crossing_from_port(o1, o2) or
+                self.overtaking(o1, o2)))
     
     def find_vessel_type_name(self, obj : FuncObject) -> Optional[str]:
         return next((self.Vessel_type_interpretation.get_value(o2)
@@ -256,6 +262,9 @@ class FunctionalScenario(Scenario):
     def all_ts_obstacle_pair_combinations(self) -> Set[Tuple[FuncObject, FuncObject]]:
         return set(combinations(self.ts_objects.union(self.obstacle_objects), 2))
     
+    @property
+    def all_colregs_relation_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
+        return set([(o1, o2) for o1, o2 in list(permutations(self.sea_objects, 2)) if self.in_colregs_relation(o1, o2)])
     
     def first_level_shape_hash(self, hops: int = 1) -> int:
         return self._shape_hash(hops,

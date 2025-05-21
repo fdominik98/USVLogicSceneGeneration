@@ -18,6 +18,7 @@ class WARAPSParser():
     def __init__(self, trajectory_manager : TrajectoryManager):
         self.trajectory_manager = trajectory_manager
         self.trajectory_manager.shift_states_to_zero()
+        self.is_simulation = False
         
         # Start Docker client
         self.docker_client = docker.from_env()
@@ -32,9 +33,10 @@ class WARAPSParser():
                 raise ValueError(f"Vessel {vessel} is not a ConcreteVessel.")
             
             vessel_pos = compute_start_point(state.p, state.v, state.speed, vessel.max_acceleration)
-            self.start_container(vessel, state, vessel_pos, 14552 + i)
+            if self.is_simulation:
+                self.start_container(vessel, state, vessel_pos, 14552 + i)
             # TODO: configuring container environments for agents
-            self.agent_clients.append(MqttAgentClient(vessel, state, vessel_pos))
+            self.agent_clients.append(MqttAgentClient(self.is_simulation, vessel, state, vessel_pos))
             data = self.trajectory_manager.trajectories[0:GlobalConfig.TEN_MINUTE_IN_SEC][vessel]
             waypoints = [waypoint_from_state(state) for state in data]
             self.waypoint_map[vessel] = waypoints

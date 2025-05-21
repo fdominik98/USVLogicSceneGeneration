@@ -9,7 +9,7 @@ abstract class Vessel {
     Vessel[0..*] inSternSectorOf
     Vessel[0..*] inPortSideSectorOf
     Vessel[0..*] inStarboardSideSectorOf
-    Vessel[0..*] inBowOnSectorOf opposite inBowOnSectorOf
+    Vessel[0..*] inBowOnSectorOf
     Vessel[0..*] atVisibilityDistance opposite atVisibilityDistance
     Vessel[0..*] mayCollide opposite mayCollide
 }
@@ -97,23 +97,24 @@ TS(ts2).
 TS(ts3).
 TS(ts4).
 default !inSternSectorOf(*, *).
-inSternSectorOf(os, ts2).
-inSternSectorOf(os, ts4).
 default !inPortSideSectorOf(*, *).
-inPortSideSectorOf(os, ts3).
+inPortSideSectorOf(os, ts1).
 inPortSideSectorOf(ts1, os).
 default !inStarboardSideSectorOf(*, *).
-inStarboardSideSectorOf(os, ts1).
+inStarboardSideSectorOf(os, ts2).
+inStarboardSideSectorOf(os, ts3).
+inStarboardSideSectorOf(os, ts4).
 inStarboardSideSectorOf(ts2, os).
 inStarboardSideSectorOf(ts3, os).
 inStarboardSideSectorOf(ts4, os).
-default !vesselType(*, *).
-vesselType(os, OSPassengerShip).
 default !inBowOnSectorOf(*, *).
 inBowOnSectorOf(os, ts1).
-inBowOnSectorOf(os, ts3).
-inBowOnSectorOf(ts1, os).
+inBowOnSectorOf(os, ts4).
+inBowOnSectorOf(ts2, os).
 inBowOnSectorOf(ts3, os).
+inBowOnSectorOf(ts4, os).
+default !vesselType(*, *).
+vesselType(os, OSPassengerShip).
 default !atVisibilityDistance(*, *).
 atVisibilityDistance(os, ts1).
 atVisibilityDistance(os, ts2).

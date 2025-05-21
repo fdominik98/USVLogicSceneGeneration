@@ -23,6 +23,9 @@ def main():
     # Main loop: wait for a number input corresponding to a command index.
     while True:
         try:
+            print('1 : Execute scenario')
+            print('2 : abort everything')
+            print('3 : Go to start position')
             user_input = input("Enter command number: ").strip()
             # Convert the user input to an integer.
             command = int(user_input)

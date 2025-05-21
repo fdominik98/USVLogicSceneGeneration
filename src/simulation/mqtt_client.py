@@ -14,16 +14,28 @@ from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.concrete_scene import ConcreteScene
 from simulation.sim_utils import waypoint_from_state
 
-class MqttClient(ABC):
-    '''Mqtt connection information'''
+
+@dataclass(frozen=True)
+class MQttConnectionInfo():
     user : str = ''
     password : str = ''
     broker: str = 'localhost'
     port: int = 1882
     tls_connection: bool = False
-    running_tasks : Set[str] = set()
-    
-    def __init__(self):
+    allow_certificates = False
+
+class MqttClient(ABC):
+   
+    def __init__(self, is_simulation):
+        self.running_tasks : Set[str] = set()
+        
+        if is_simulation:
+            self.connection_info = MQttConnectionInfo()
+        else:
+            self.connection_info = MQttConnectionInfo(user='mqtt', password='Check', broker='broker.waraps.org', port=8883, tls_connection=True,
+                                                      allow_certificates=False)
+        
+        
         self.client = mqtt.Client(client_id=self.name)
         self.client.user_data_set('waraps')
         self.client.on_connect = self.on_connect
@@ -33,26 +45,26 @@ class MqttClient(ABC):
     
     def connect(self):
         '''Connect to the broker using the mqtt client'''
-        if self.tls_connection:
-            self.client.username_pw_set(self.user, self.password)
-            self.client.tls_set(cert_reqs=ssl.CERT_NONE)
+        if self.connection_info.tls_connection:
+            self.client.username_pw_set(self.connection_info.user, self.connection_info.password)
+            self.client.tls_set(cert_reqs=(ssl.CERT_NONE if self.connection_info.allow_certificates else ssl.CERT_REQUIRED),)
             self.client.tls_insecure_set(True)
         try:
             res = None
             while res is None or res is not mqtt.MQTTErrorCode.MQTT_ERR_SUCCESS:
-                res : mqtt.MQTTErrorCode = self.client.connect(self.broker, self.port, 60)
+                res : mqtt.MQTTErrorCode = self.client.connect(self.connection_info.broker, self.connection_info.port, 60)
                 print(f'{self.name} connection result: {res}')
             self.client.loop_start()
         except Exception as exc:
-            print(f'{self.name} failed to connect to broker {self.broker}:{self.port}')
+            print(f'{self.name} failed to connect to broker {self.connection_info.broker}:{self.connection_info.port}')
             print(exc)
-            exit()
+            print(f'Continue without {self.receiver_name}.')
             
     def on_connect(self, client, userdata, flags, rc):
         '''Callback triggered when the client connects to the broker'''
         try:
             if rc == 0:
-                print(f'{self.name} connected to MQTT Broker: {self.broker}:{self.port}')
+                print(f'{self.name} connected to MQTT Broker: {self.connection_info.broker}:{self.connection_info.port}')
                 for listen_topic in self.listen_topics:
                     self.client.subscribe(listen_topic)
                     print(f'Subscribing to {listen_topic}')
@@ -111,31 +123,42 @@ class MqttClient(ABC):
         
         
 class MqttAgentClient(MqttClient):
-    def __init__(self, vessel : ConcreteVessel, initial_state : ActorState, vessel_pos : np.ndarray):
+    
+    vessel_id_name_map = {
+        0 : 'MiniUSV1',
+        1 : 'MiniUSV2',
+        2 : 'MiniUSV3',
+        3 : 'MiniUSV4',
+    }
+    
+    def __init__(self, is_simulation : bool, vessel : ConcreteVessel, initial_state : ActorState, vessel_pos : np.ndarray):
+        self.is_simulation = is_simulation
+        self.simulation_str = 'simulation' if is_simulation else 'real'
         self.vessel = vessel
         self.initial_state = initial_state
         self.vessel_pos = vessel_pos
-        super().__init__()
+        self.vessel_name = self.vessel.name if is_simulation else self.vessel_id_name_map[vessel.id]
+        super().__init__(is_simulation)
         
     @property
     def listen_topics(self) -> List[str]:
-        return [f'waraps/unit/surface/simulation/{self.vessel.name}/exec/response',
-                f'waraps/unit/surface/simulation/{self.vessel.name}/exec/feedback']
+        return [f'waraps/unit/surface/{self.simulation_str}/{self.vessel_name}/exec/response',
+                f'waraps/unit/surface/{self.simulation_str}/{self.vessel_name}/exec/feedback']
     
     @property
     def base_topic(self) -> str:
-        return f'waraps/unit/surface/simulation/{self.vessel.name}/exec/command'
+        return f'waraps/unit/surface/{self.simulation_str}/{self.vessel_name}/exec/command'
     
     @property
     def receiver_name(self) -> str:
-        return self.vessel.name
+        return self.vessel_name
             
             
     def publish_follow_path(self, waypoints : List[dict], speed):
         command = {
             'com-uuid': str(uuid.uuid4()),
             'command': 'start-task',
-            'execution-unit': f'{self.vessel.name}',
+            'execution-unit': f'{self.vessel_name}',
             'sender': self.name,
             'task': {
                 'name': 'move-path',
@@ -167,7 +190,7 @@ class MqttAgentClient(MqttClient):
         command = {
             'com-uuid': str(uuid.uuid4()),
             'command': 'start-task',
-            'execution-unit': f'{self.vessel.name}',
+            'execution-unit': f'{self.vessel_name}',
             'sender': self.name,
             'task': {
                 'name': 'move-to',
@@ -191,7 +214,7 @@ class MqttAgentClient(MqttClient):
         #     command = {
         #         'com-uuid': str(uuid.uuid4()),
         #         'command': 'start-task',
-        #         'execution-unit': f'{self.vessel.name}',
+        #         'execution-unit': f'{self.vessel_name}',
         #         'sender': self.name,
         #         'task': {
         #             'name': 'look-at-position',
@@ -209,47 +232,4 @@ class MqttAgentClient(MqttClient):
         #     self.client.publish(self.base_topic, str_command)
         
 
-class MqttScenarioClient(MqttClient):
-    
-    @property
-    def receiver_name(self) -> str:
-        return 'genesis_backend'
-    
-    @property
-    def listen_topics(self) -> List[str]:
-        return [f'waraps/service/virtual/real/realgenesis1/exec/response',
-                f'waraps/service/virtual/real/realgenesis1/exec/feedback']
-    
-    @property
-    def base_topic(self) -> str:
-        return f'waraps/service/virtual/real/realgenesis1/exec/command'
-    
-    def publish_command(self, scene : ConcreteScene, scenario_name : str):
-        vessel_dict : Dict[str, Dict[str, Any]] = defaultdict(lambda: defaultdict(dict))
-        for vessel in scene.vessels:
-            waypoint = waypoint_from_state(scene[vessel])
-            vessel_dict[vessel.name]['coordinates'] = [{'lat' : waypoint['latitude'], 'lng' : waypoint['longitude']}]
-            vessel_dict[vessel.name]['image'] = 'boat'
-            vessel_dict[vessel.name]['imageObj'] = {'name': 'boat', 'type': 'boat', 'icon': '/icons/simulated_boat.svg', 'parent': False, 'mapObject': False,
-                                    'modules': {'gazebo': {'active': False, 'camera': False}, 'team_leader': {'active': False}, 'object_detection': {'active': False}}}
-            vessel_dict[vessel.name]['children'] = []
-            vessel_dict[vessel.name]['resource_pools'] = []
-            vessel_dict[vessel.name]['name'] = vessel.name
-            
-        command = {
-            'com-uuid': str(uuid.uuid4()),
-            'command': 'start-task',
-            'execution-unit': self.receiver_name,
-            'sender': self.name,
-            'task': {
-                'name': 'generate-scenario',
-                'params': {
-                'scenario': vessel_dict,
-                'scenarioName': scenario_name
-                }
-            },
-            'task-uuid': str(uuid.uuid4())
-        }
-        str_command = json.dumps(command)
-        self.client.publish(self.base_topic, str_command)   
         

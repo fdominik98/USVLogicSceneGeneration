@@ -58,7 +58,7 @@ class ModelParser():
             "inSternSectorOf": lambda o1, o2: builder.in_stern_sector_of_interpretation.add(o1, o2),
             "inPortSideSectorOf": lambda o1, o2: builder.in_port_side_sector_of_interpretation.add(o1, o2),
             "inStarboardSideSectorOf": lambda o1, o2: builder.in_starboard_side_sector_of_interpretation.add(o1, o2),
-            "inBowSectorOf": lambda o1, o2: builder.in_bow_sector_of_interpretation.add(o1, o2),
+            "inBowOnSectorOf": lambda o1, o2: builder.in_bow_sector_of_interpretation.add(o1, o2),
             "atVisibilityDistance": lambda o1, o2: builder.at_visibility_distance_interpretation.add(o1, o2),
             "outVisibilityDistance": lambda o1, o2: builder.out_visibility_distance_interpretation.add(o1, o2),
             "inVisibilityDistance": lambda o1, o2: builder.in_visibility_distance_interpretation.add(o1, o2),

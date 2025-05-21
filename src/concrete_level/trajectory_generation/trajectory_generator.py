@@ -89,8 +89,10 @@ class TrajectoryGenerator:
         
         if len(collision_points) != 0:
             collision_center, collision_center_radius = find_center_and_radius(collision_points)
+            collision_center_radius = collision_center_radius + vessel.radius * 2
         else:
             collision_center = vessel_state.p + vessel_state.v * interpolator.path_length / 2
+            collision_center_radius = 0
         
         start_coll_center_dist = np.linalg.norm(vessel_state.p - collision_center)
         start_furthest_point_dist = np.linalg.norm(vessel_state.p - furthest_collision_point)
