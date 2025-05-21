@@ -22,6 +22,8 @@ RANDOM_SEED = 1234
 TIMEOUT = 180
 INIT_METHOD = 'uniform'
 
+MEAS_NAME = 'parameter_test_msr'
+
 #FUNCTIONAL_SCENARIOS = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
 FUNCTIONAL_SCENARIOS = [LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
 #CONFIG_GROUP='SB-MSR'
@@ -91,47 +93,47 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
 
 
     tests : List[Tuple[Any, SolverBase]]= [
-        # (create_GA_config, PyGadGAAlgorithm(measurement_name='parameter_optimization_2',
+        # (create_GA_config, PyGadGAAlgorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
                                             scenarios=FUNCTIONAL_SCENARIOS,
                                             test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
                                             warmups = WARMUPS, verbose=False)),
         
-        (create_NSGA_vessel_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+        (create_NSGA_vessel_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
                                             scenarios=FUNCTIONAL_SCENARIOS,
                                             test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
                                             warmups = WARMUPS, verbose=False)),
         
-        # (create_NSGA_category_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+        # (create_NSGA_category_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        # (create_NSGA_category_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+        # (create_NSGA_category_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        # (create_NSGA_all_config, PyMooNSGA2Algorithm(measurement_name='parameter_optimization_2',
+        # (create_NSGA_all_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        # (create_NSGA_all_config, PyMooNSGA3Algorithm(measurement_name='parameter_optimization_2',
+        # (create_NSGA_all_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        # (create_PSO_config, PySwarmPSOAlgorithm(measurement_name='parameter_optimization_2',
+        # (create_PSO_config, PySwarmPSOAlgorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
         
-        # (create_DE_config, SciPyDEAlgorithm(measurement_name='parameter_optimization_2',
+        # (create_DE_config, SciPyDEAlgorithm(measurement_name=MEAS_NAME,
         #                                     functional_scenarios=functional_scenarios,
         #                                     test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
         #                                     warmups = WARMUPS, verbose=False)),
