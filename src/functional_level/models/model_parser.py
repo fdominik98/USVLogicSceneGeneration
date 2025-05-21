@@ -55,6 +55,14 @@ class ModelParser():
             "atDangerousHeadOnSectorOf" : lambda o1, o2: builder.add_at_dangerous_head_on_sector_of(o1, o2),
             "vesselType" : lambda o1, o2: builder.add_vessel_type(o1, o2),
             "staticObstacleType" : lambda o1, o2: builder.static_obstacle_type_interpretation.add(o1, o2),
+            "inSternSectorOf": lambda o1, o2: builder.in_stern_sector_of_interpretation.add(o1, o2),
+            "inPortSideSectorOf": lambda o1, o2: builder.in_port_side_sector_of_interpretation.add(o1, o2),
+            "inStarboardSideSectorOf": lambda o1, o2: builder.in_starboard_side_sector_of_interpretation.add(o1, o2),
+            "inBowSectorOf": lambda o1, o2: builder.in_bow_sector_of_interpretation.add(o1, o2),
+            "atVisibilityDistance": lambda o1, o2: builder.at_visibility_distance_interpretation.add(o1, o2),
+            "outVisibilityDistance": lambda o1, o2: builder.out_visibility_distance_interpretation.add(o1, o2),
+            "inVisibilityDistance": lambda o1, o2: builder.in_visibility_distance_interpretation.add(o1, o2),
+            "mayCollide": lambda o1, o2: builder.may_collide_interpretation.add(o1, o2),
         }
         for rel_type, assertion in relationship_patterns.items():
             rel_pattern = fr"{rel_type}\((\w+), (\w+)\)\."

@@ -4,14 +4,14 @@ enum VesselType {OtherType, CargoShip, Tanker,
                  SailingVessel, MilitaryVessel,
                 OSPassengerShip}
 
-
-//enum StaticObstacleType {Small, Medium, Large}
-
 abstract class Vessel {
-    Vessel[0..*] overtakingToPort
-    Vessel[0..*] overtakingToStarboard
-    Vessel[0..*] crossingFromPort
-    Vessel[0..*] headOn opposite headOn
+    //VesselType[1] vesselType
+    Vessel[0..*] inSternSectorOf
+    Vessel[0..*] inPortSideSectorOf
+    Vessel[0..*] inStarboardSideSectorOf
+    Vessel[0..*] inBowOnSectorOf opposite inBowOnSectorOf
+    Vessel[0..*] atVisibilityDistance opposite atVisibilityDistance
+    Vessel[0..*] mayCollide opposite mayCollide
 }
 
 class OS extends Vessel {
@@ -19,89 +19,121 @@ class OS extends Vessel {
 }
 class TS extends Vessel.
 
-class StaticObstacle {
-    //StaticObstacleType[1] staticObstacleType
-    OS[1] atDangerousHeadOnSectorOf
-}
+//-----------------------------------------------------------------------
+// HELPER PREDICATES
+pred inMastheadSectorOf(Vessel o, Vessel v) <->
+    inPortSideSectorOf(o, v);
+    inStarboardSideSectorOf(o, v).
 
-pred overtaking(Vessel v1, Vessel v2) <->
-    overtakingToPort(v1, v2); overtakingToStarboard(v1, v2).
+pred bothAtVisibilityDistanceAndMayCollide(Vessel v1, Vessel v2) <->
+    atVisibilityDistance(v1, v2), mayCollide(v1, v2).
 
-pred giveWay(Vessel v1) <->
-    overtaking(v1, _);
-    crossingFromPort(v1, _);
-    headOn(_, v1).
+pred inSectorOf(Vessel v1, Vessel v2) <->
+    inSternSectorOf(v1, v2);
+    inPortSideSectorOf(v1, v2);
+    inStarboardSideSectorOf(v1, v2).
 
-pred standOn(Vessel v1) <->
-    overtaking(_, v1);
-    crossingFromPort(_, v1).
+pred inDangerousEncounterWith(Vessel v1, Vessel v2) <->
+    mayCollide(v1, v2), atVisibilityDistance(v1,v2), inSectorOf(v1, v2), inSectorOf(v2, v1).
 
-pred ambiguous(Vessel v) <->
-    giveWay(v), standOn(v).
-
-pred inCOLREGSSituationWith(Vessel v1, Vessel v2) <->
-    headOn(v2, v1);
-    crossingFromPort(v1, v2);
-    crossingFromPort(v2, v1);
-    overtaking(v1, v2);
-    overtaking(v2, v1).
-
-//------------------------------------------------------------------------
-
-error selfCOLREGSRelation(Vessel v) <->
-    inCOLREGSSituationWith(v, v).
+pred inRelativeBearingRelationWith(Vessel o, Vessel v) <->
+    inMastheadSectorOf(o, v);
+    inSternSectorOf(o, v).
 
 
-error doubleCOLREGSRelation(Vessel v1, Vessel v2) <->
-    headOn(v1, v2), crossingFromPort(v1, v2);
-    headOn(v1, v2), overtaking(v1, v2);
-    overtaking(v1, v2), crossingFromPort(v1, v2);
+//----------------------------------------------------------------------------
+// WELL-FORMED PREDICATES (CONSISTENT CASES)
 
-    headOn(v1, v2), crossingFromPort(v2, v1);
-    headOn(v1, v2), overtaking(v2, v1);
-    overtaking(v1, v2), crossingFromPort(v2, v1);
+// No self loops are allowed.
+error selfLoopRules(Vessel o) <->
+    inSternSectorOf(o, o);
+    inPortSideSectorOf(o, o);
+    inStarboardSideSectorOf(o, o);
+    inBowOnSectorOf(o, o);
+    atVisibilityDistance(o, o);
+    mayCollide(o, o).
 
-    crossingFromPort(v1, v2), crossingFromPort(v2, v1);
-    overtaking(v1, v2), overtaking(v2, v1);
+// If a sea object is in the:
+//   - stern sector of a vessel, it cannot be in the masthead sector,
+//   - port sector of a vessel, it cannot be in the starboard sector,
+//   - head on sector of a vessel, it must be in the masthead sector as well.
+// A sea object is either in the stern or masthead sector of a vessel.
+error sectorRules(Vessel o, Vessel v) <->
+    inSternSectorOf(o, v), inMastheadSectorOf(o, v);
+    inPortSideSectorOf(o, v), inStarboardSideSectorOf(o, v);
+    inBowOnSectorOf(o, v), inSternSectorOf(o, v).
 
-    overtakingToPort(v1, v2), overtakingToStarboard(v1, v2).
+error mayCollideInStern(Vessel v1, Vessel v2) <->
+    mayCollide(v1, v2), inSternSectorOf(v1, v2), inSternSectorOf(v2,v1).
 
 
-//----------------------------------------------------------------
-error notInCOLREGSSituationWithOS(TS ts, OS os) <->
-    !inCOLREGSSituationWith(ts, os).
 
-error twoTSInCOLREGSSituation(TS ts1, TS ts2) <->
-    inCOLREGSSituationWith(ts1, ts2).
+//----------------------------------------------------------------------------
+// TESTING PREDICATES (RELEVANT CASES)
 
-error notDangerousHeadOnWithOS(StaticObstacle o, OS os) <->
-    !atDangerousHeadOnSectorOf(o, os).
+// There has to be an OS.
+error noOS() <->
+    !OS(_).
 
+// There is only one OS.
 error moreThanOneOS(OS v1, OS v2) <->
     v1 != v2.
 
-error noOS() <->
-    !OS(_).
+// A TS must be in a COLREGS situation with the OS.
+error TSNotInDangerousEncounterSituationWithOS(TS ts, OS os) <->
+    !inDangerousEncounterWith(ts, os).
+
+
+error TSTS(TS ts1, TS ts2) <->
+    inSectorOf(ts1, ts2); inBowOnSectorOf(ts1, ts2);
+    atVisibilityDistance(ts1, ts2); mayCollide(ts1, ts2).
 
 declare os, ts1, ts2, ts3, ts4, ts5.
 !exists(OS::new).
 !exists(TS::new).
-!exists(StaticObstacle::new).
 OS(os).
 TS(ts1).
 TS(ts2).
 TS(ts3).
 TS(ts4).
 TS(ts5).
-default !overtakingToPort(*, *).
-overtakingToPort(ts1, os).
-overtakingToPort(ts4, os).
-default !overtakingToStarboard(*, *).
-overtakingToStarboard(ts2, os).
-overtakingToStarboard(ts3, os).
-overtakingToStarboard(ts5, os).
-default !crossingFromPort(*, *).
+default !inSternSectorOf(*, *).
+inSternSectorOf(os, ts1).
+inSternSectorOf(os, ts5).
+default !inPortSideSectorOf(*, *).
+inPortSideSectorOf(os, ts4).
+inPortSideSectorOf(ts2, os).
+default !inStarboardSideSectorOf(*, *).
+inStarboardSideSectorOf(os, ts2).
+inStarboardSideSectorOf(os, ts3).
+inStarboardSideSectorOf(ts1, os).
+inStarboardSideSectorOf(ts3, os).
+inStarboardSideSectorOf(ts4, os).
+inStarboardSideSectorOf(ts5, os).
 default !vesselType(*, *).
 vesselType(os, OSPassengerShip).
-default !atDangerousHeadOnSectorOf(*, *).
-default !headOn(*, *).
+default !inBowOnSectorOf(*, *).
+inBowOnSectorOf(os, ts2).
+inBowOnSectorOf(ts2, os).
+default !atVisibilityDistance(*, *).
+atVisibilityDistance(os, ts1).
+atVisibilityDistance(os, ts2).
+atVisibilityDistance(os, ts3).
+atVisibilityDistance(os, ts4).
+atVisibilityDistance(os, ts5).
+atVisibilityDistance(ts1, os).
+atVisibilityDistance(ts2, os).
+atVisibilityDistance(ts3, os).
+atVisibilityDistance(ts4, os).
+atVisibilityDistance(ts5, os).
+default !mayCollide(*, *).
+mayCollide(os, ts1).
+mayCollide(os, ts2).
+mayCollide(os, ts3).
+mayCollide(os, ts4).
+mayCollide(os, ts5).
+mayCollide(ts1, os).
+mayCollide(ts2, os).
+mayCollide(ts3, os).
+mayCollide(ts4, os).
+mayCollide(ts5, os).

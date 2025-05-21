@@ -13,11 +13,20 @@ class BinaryPredicate(RelationConstrTerm):
     def __repr__(self) -> str:
         return f'{self.name}({self.var1}, {self.var2})'
     
+class NotInBowSectorOf(BinaryPredicate):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable):
+        super().__init__('!InBowSectorOf', var1, var2, {InBowSectorOf(var1, var2, negated=True)})
     
 class AtVisAndMayCollideSoon(BinaryPredicate):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable):
         super().__init__('AtVisAndMayCollideSoon', var1, var2,
                          {MayCollide(var1, var2), SoonMeet(var1, var2), AtVis(var1, var2)}) 
+        
+class MayCollideSoon(BinaryPredicate):
+    def __init__(self, var1 : ActorVariable, var2 : VesselVariable):
+        super().__init__('MayCollideSoon', var1, var2,
+                         {MayCollide(var1, var2), SoonMeet(var1, var2)})
+        
 class AtVisAndMayCollide(BinaryPredicate):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable):
         super().__init__('AtVisAndMayCollide', var1, var2,

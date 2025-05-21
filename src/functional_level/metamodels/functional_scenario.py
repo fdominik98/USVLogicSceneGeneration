@@ -121,7 +121,8 @@ class FunctionalScenario(Scenario):
                 self.at_visibility_distance_interpretation.contains((o1, o2)) and
                 self.may_collide_interpretation.contains((o1, o2)))
     
-    def out_vis_or_may_not_collide(self, o1 : FuncObject, o2 : FuncObject) -> bool:
+    def out_vis_or_may_not_collide(self, objects : Tuple[FuncObject, FuncObject]) -> bool:
+        o1, o2 = objects
         return (self.is_sea_object(o1) and self.is_vessel(o2) and
                     (self.out_visibility_distance_interpretation.contains((o1, o2)) or
                     not self.may_collide_interpretation.contains((o1, o2)))
@@ -313,15 +314,16 @@ class FunctionalScenario(Scenario):
             
             return frozenset(attributes)
                     
-        
+        #focused_nodes = self.functional_objects
+        focused_nodes = [self.os_object]
         # Initialize base (0-hop) attributes
-        for node in self.functional_objects:
+        for node in focused_nodes:
             neighborhoods[0][node] = (None, create_attributes(0, node))
 
         # Build neighborhoods iteratively for each hop
         for hop in range(1, hops + 1):
             neighborhoods[hop] = {}
-            for node in self.functional_objects:
+            for node in focused_nodes:
                 neighborhoods[hop][node] = (neighborhoods[hop - 1][node], create_attributes(hop, node))
 
         # Return hash of the last neighborhood

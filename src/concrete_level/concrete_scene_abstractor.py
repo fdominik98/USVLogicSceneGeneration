@@ -35,7 +35,7 @@ class ConcreteSceneAbstractor():
             (AtVis, builder.at_visibility_distance_interpretation),
             (OutVis, builder.out_visibility_distance_interpretation),
             (InVis, builder.in_visibility_distance_interpretation),
-            (InBowSectorOf, builder.in_head_on_sector_of_interpretation),
+            (InBowSectorOf, builder.in_bow_sector_of_interpretation),
             (InPortSideSectorOf, builder.in_port_side_sector_of_interpretation),
             (InStarboardSideSectorOf, builder.in_starboard_side_sector_of_interpretation),
             (InSternSectorOf, builder.in_stern_sector_of_interpretation)

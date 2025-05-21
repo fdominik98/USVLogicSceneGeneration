@@ -83,11 +83,11 @@ class GeneralMaritimeConfig(BaseConfig):
     MAX_SPEED_IN_MS = 50.0 * BaseConfig.KNOT_TO_MS_CONVERSION
 
  
-# class GlobalConfig(GeneralMaritimeConfig):  
-#     pass
+class GlobalConfig(GeneralMaritimeConfig):  
+    pass
 
-class GlobalConfig(WaraPsConfig):
-    pass 
+# class GlobalConfig(WaraPsConfig):
+#     pass 
 
 
 def vessel_radius(length : float) -> float:
@@ -229,6 +229,5 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_di
         return obst
 
     return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2], obst_ids=[], length_map={0: 1.0000000000084337, 1: 0.999999999927459, 2: 1.0000000000357847}, radius_map={0: 4.000000000033735, 1: 3.999999999709836, 2: 4.000000000143139}, possible_distances_map={(0, 1): [74.08003999462616, 74.08004000062476, 74.08003999462616, 185.2000999865654], (0, 2): [74.08004000062476, 74.08004000062476, 74.08004000265093, 185.2001000015619]}, min_distance_map={(0, 1): 74.08003999462616, (0, 2): 74.08004000062476}, vis_distance_map={(0, 1): 74.08003999462616, (0, 2): 74.08004000062476}, bearing_map={(0, 1): (-0.9817477042468103, 1.9634954084936207, -3.141592653589793, 2.356194490192345), (0, 2): (-3.141592653589793, 2.356194490192345, 0.9817477042468103, 1.9634954084936207)})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1], obst_ids=[], length_map={0: 29.99999999999956, 1: 97.4763887630542}, radius_map={0: 119.99999999999824, 1: 389.9055550522168}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002}, vis_distance_map={(0, 1): 9260.005}, bearing_map={(0, 1): (0.9817477042468103, 1.9634954084936207, 0.9817477042468103, 1.9634954084936207)})
 ts1 = ts_infos.pop(0)
-ts2 = ts_infos.pop(0)

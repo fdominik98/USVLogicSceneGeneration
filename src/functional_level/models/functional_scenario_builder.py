@@ -21,7 +21,7 @@ class FunctionalScenarioBuilder():
         
         self.may_collide_interpretation = mayCollideInterpretation()
         
-        self.in_head_on_sector_of_interpretation = inBowSectorOfInterpretation()
+        self.in_bow_sector_of_interpretation = inBowSectorOfInterpretation()
         self.in_port_side_sector_of_interpretation = inPortSideSectorOfInterpretation()
         self.in_starboard_side_sector_of_interpretation = inStarboardSideSectorOfInterpretation()
         self.in_stern_sector_of_interpretation = inSternSectorOfInterpretation() 
@@ -74,8 +74,8 @@ class FunctionalScenarioBuilder():
         self.may_collide_interpretation.add(o1, o2)
     
     def add_head_on(self, o1, o2):
-        self.in_head_on_sector_of_interpretation.add(o1, o2)
-        self.in_head_on_sector_of_interpretation.add(o2, o1)
+        self.in_bow_sector_of_interpretation.add(o1, o2)
+        self.in_bow_sector_of_interpretation.add(o2, o1)
         self.add_at_visibility_distance_and_may_collide(o1, o2)
     
     def add_overtaking_to_port(self, o1, o2):
@@ -94,7 +94,7 @@ class FunctionalScenarioBuilder():
         self.add_at_visibility_distance_and_may_collide(o1, o2)
     
     def add_at_dangerous_head_on_sector_of(self, o1, o2):
-        self.in_head_on_sector_of_interpretation.add(o1, o2)
+        self.in_bow_sector_of_interpretation.add(o1, o2)
         self.add_at_visibility_distance_and_may_collide(o1, o2)
         
     def add_vessel_type(self, o1, o2):
@@ -113,7 +113,7 @@ class FunctionalScenarioBuilder():
             at_visibility_distance_interpretation=self.at_visibility_distance_interpretation,
             in_visibility_distance_interpretation=self.in_visibility_distance_interpretation,
             may_collide_interpretation=self.may_collide_interpretation,
-            in_bow_sector_of_interpretation=self.in_head_on_sector_of_interpretation,
+            in_bow_sector_of_interpretation=self.in_bow_sector_of_interpretation,
             in_port_side_sector_of_interpretation=self.in_port_side_sector_of_interpretation,
             in_starboard_side_sector_of_interpretation=self.in_starboard_side_sector_of_interpretation,
             in_stern_sector_of_interpretation=self.in_stern_sector_of_interpretation,

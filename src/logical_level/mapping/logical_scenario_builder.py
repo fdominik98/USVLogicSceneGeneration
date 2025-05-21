@@ -1,7 +1,8 @@
 from itertools import chain
 from typing import Any, List, Optional, Tuple
 from logical_level.models.relation_constraints_concept.composites import RelationConstrTerm
-from logical_level.models.relation_constraints_concept.predicates import BinaryPredicate, DangerousHeadOnSectorOf, HeadOn, CrossingFromPort, OutVisOrMayNotCollide, OvertakingToPort, OvertakingToStarboard
+from logical_level.models.relation_constraints_concept.literals import InBowSectorOf, InPortSideSectorOf, InStarboardSideSectorOf, InSternSectorOf, AtVis, InVis, OutVis
+from logical_level.models.relation_constraints_concept.predicates import BinaryPredicate, MayCollideSoon, NotInBowSectorOf, DangerousHeadOnSectorOf, HeadOn, CrossingFromPort, OutVisOrMayNotCollide, OvertakingToPort, OvertakingToStarboard
 from logical_level.models.actor_variable import ActorVariable, OSVariable, StaticObstacleVariable, TSVariable
 from logical_level.mapping.instance_initializer import DeterministicInitializer, InstanceInitializer, LatinHypercubeInitializer, RandomInstanceInitializer
 from logical_level.models.logical_scenario import LogicalScenario
@@ -31,11 +32,26 @@ class LogicalScenarioBuilder():
             (functional_scenario.out_vis_or_may_not_collide, OutVisOrMayNotCollide)
         ]
         
+        
+        predicate_constraint_map : List[Tuple[Any, type[BinaryPredicate]]] = [
+            (functional_scenario.in_bow_sector_of_interpretation.contains, InBowSectorOf),
+            #(lambda tuple : not functional_scenario.in_bow_sector_of_interpretation.contains(tuple), NotInBowSectorOf),
+            (functional_scenario.in_stern_sector_of_interpretation.contains, InSternSectorOf),
+            (functional_scenario.in_starboard_side_sector_of_interpretation.contains, InStarboardSideSectorOf),
+            (functional_scenario.in_port_side_sector_of_interpretation.contains, InPortSideSectorOf),
+            (functional_scenario.may_collide_interpretation.contains, MayCollideSoon),
+            (functional_scenario.in_visibility_distance_interpretation.contains, InVis),
+            (functional_scenario.at_visibility_distance_interpretation.contains, AtVis),
+            (functional_scenario.out_visibility_distance_interpretation.contains, OutVis),
+            (functional_scenario.out_vis_or_may_not_collide, OutVisOrMayNotCollide)
+        ]
+        
+        
         # Generate relation constraint expressions
         relation_constr_exprs = set()
         for o1, o2 in functional_scenario.all_sea_object_pair_permutations:
             for pred, Constr in predicate_constraint_map:
-                if pred(o1, o2):
+                if pred((o1, o2)):
                     relation_constr_exprs.add(Constr(object_variable_map[o1], object_variable_map[o2]))
                     
         actor_variables : List[ActorVariable] = sorted(object_variable_map.values(), key=lambda x: x.id)
