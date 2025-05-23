@@ -57,42 +57,46 @@ class RejectionSamplingPipeline(SolverBase):
                 #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
                 # heading_ego_to_ts: relative angle to ego heading
                 # heading_ts_to_ego: relative angle to p12
+                bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
                 
-                scenarios1 = [
+                scenarios = [
                     (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
                     (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
                     (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.in_bow_sector_of_interpretation.contains, (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
+                    (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+                                     functional_scenario.in_port_side_sector_of_interpretation),
+                                                (bow_angle/4, bow_angle/2)),
+                    (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+                                     functional_scenario.in_port_side_sector_of_interpretation),
+                                                (-bow_angle/4, bow_angle/2)),
                 ]
                 
-                scenarios2 = [
-                    (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.in_bow_sector_of_interpretation.contains, (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
+                
+                scenarios = [
+                    (functional_scenario.head_on(os, o), (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
+                    (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
+                    (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                    (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
+                    (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
                 ]
                 
-                # scenarios = [
-                #     (functional_scenario.head_on(os, o),                 (0.0,                               max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
-                # (functional_scenario.crossing_from_port(os, o),          (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE,                     -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                #     (functional_scenario.crossing_from_port(o, os),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE,                      GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                #     (functional_scenario.overtaking_to_port(os, o),      (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE,                      -np.pi,   GlobalConfig.STERN_ANGLE)),
-                #     (functional_scenario.overtaking_to_port(o, os),      (-np.pi,                            GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE,             GlobalConfig.SIDE_ANGLE)),
-                #     (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE,           -np.pi,   GlobalConfig.STERN_ANGLE)),
-                #     (functional_scenario.overtaking_to_starboard(o, os), (-np.pi,                            GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE))
-                # ]
+                for condition, bearing in scenarios:
+                    if condition(o, os):
+                        bearing_map[(os.id, o.id)] = bearing
                 
-                scenario1 = (0, 0)
-                for condition, bearing in scenarios1:
-                    if condition((o, os)):
-                        scenario1 = bearing
+                # scenario1 = (0, 0)
+                # for condition, bearing in scenarios:
+                #     if condition((o, os)):
+                #         scenario1 = bearing
                         
-                scenario2 = (0, 0)
-                for condition, bearing in scenarios2:
-                    if condition((os, o)):
-                        scenario2 = bearing
+                # scenario2 = (0, 0)
+                # for condition, bearing in scenarios:
+                #     if condition((os, o)):
+                #         scenario2 = bearing
             
-                bearing_map[(os.id, o.id)] = (scenario1[0], scenario1[1], scenario2[0], scenario2[1])
+                # bearing_map[(os.id, o.id)] = (scenario1[0], scenario1[1], scenario2[0], scenario2[1])
                     
             for o in functional_scenario.obstacle_objects:
                 os = functional_scenario.os_object

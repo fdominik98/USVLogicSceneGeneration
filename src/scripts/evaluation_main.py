@@ -27,13 +27,13 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga3_vessel_sb_o_config),
     
     # # SB-MSR
-    (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga3_vessel_sb_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga3_vessel_sb_msr_config),
     # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), nsga3_vessel_sb_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga3_vessel_sb_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga3_vessel_sb_msr_config),
     # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), nsga3_vessel_sb_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga3_vessel_sb_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga3_vessel_sb_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga3_vessel_sb_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga3_vessel_sb_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga3_vessel_sb_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga3_vessel_sb_msr_config),
     
     # RS-O
     # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_o_config),
@@ -47,11 +47,11 @@ measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
     #RS-MSR
     (F'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
     # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
     # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
+    # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
     
 ]
 

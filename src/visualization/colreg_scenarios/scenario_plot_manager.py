@@ -325,10 +325,9 @@ class ScenarioPlotManager():
         if not self.root.winfo_exists():
             return
         # Fetch new data
-        self.colreg_plot.animation.get_sim_time_count()
         self.time_label.config(text=self.colreg_plot.animation.get_sim_time_count())
         # Schedule the next update
-        self.control_frame.after(1000, self.update_sim_time) 
+        self.control_frame.after(250, self.update_sim_time) 
         
     def update_actor_info_labels(self):
         if not self.root.winfo_exists():

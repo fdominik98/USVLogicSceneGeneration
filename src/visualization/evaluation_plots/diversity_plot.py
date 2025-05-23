@@ -42,7 +42,10 @@ class DiversityPlot(EvalPlot):
                     [eval_data.best_scene for eval_data in self.measurements[actor_number_by_type][config_group]],
                     self.is_second_level_abstraction)
                 
-                equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items() if scene.is_relevant == self.is_relevant}
+                if self.is_relevant:
+                    equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items() if scene.is_relevant}
+                else :
+                    equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items()}
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                     

@@ -26,6 +26,7 @@ def main():
             print('1 : Execute scenario')
             print('2 : abort everything')
             print('3 : Go to start position')
+            print('4 : Put everyone to loiter')
             user_input = input("Enter command number: ").strip()
             # Convert the user input to an integer.
             command = int(user_input)
@@ -41,6 +42,9 @@ def main():
                 elif command == 3:
                     client.publish_go_to(coord_to_lat_long(client.vessel_pos), client.initial_state.speed,
                                          look_at=coord_to_lat_long(client.initial_state.p))
+                    print(f"Sent command {command} to vessel {client.vessel}")
+                elif command == 4:
+                    client.publish_loiter_all()
                     print(f"Sent command {command} to vessel {client.vessel}")
                 else:
                     print(f"Invalid command number for vessel {client.vessel}.")

@@ -83,11 +83,11 @@ class GeneralMaritimeConfig(BaseConfig):
     MAX_SPEED_IN_MS = 50.0 * BaseConfig.KNOT_TO_MS_CONVERSION
 
  
-class GlobalConfig(GeneralMaritimeConfig):  
-    pass
+# class GlobalConfig(GeneralMaritimeConfig):  
+#     pass
 
-# class GlobalConfig(WaraPsConfig):
-#     pass 
+class GlobalConfig(WaraPsConfig):
+    pass 
 
 
 def vessel_radius(length : float) -> float:

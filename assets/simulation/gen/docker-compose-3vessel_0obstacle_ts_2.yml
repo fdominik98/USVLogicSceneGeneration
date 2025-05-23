@@ -12,29 +12,29 @@ services:
     - AGENT_MODEL=vessel.mini_usv
     - VIDEO_SRC0=/dev/video0
     - VIDEO_SERVER=ome.waraps.org
-    - BROKER=host.docker.internal
-    - PORT=1882
-    - TLS_CERTIFICE=0
-    - MQTT_USER=
-    - MQTT_PASSWORD=
+    - BROKER=broker.waraps.org
+    - PORT=8883
+    - TLS_CERTIFICE=1
+    - MQTT_USER=mqtt
+    - MQTT_PASSWORD=Check
     - FCS_SERIAL=/dev/serial0
     - BAUD_RATE=57600
     - CONNECTION_STRING=tcp:TS_2_mavproxy:14551
     - SIM_PORT=5760
-    - SPEEDUP=10
+    - SPEEDUP=1
     - VEHICLE=Rover
     - MODEL=motorboat
     - VEHICLE_PARAMS=motorboat
     - INSTANCE=0
-    - HOME_POS=57.76075074047202,16.681068518063,0,267.4720233303227
+    - HOME_POS=57.76159674257352,16.683757413552776,0,270.98024210723986
     - MAVPROXY=tcpin:TS_2_mavproxy:14551
     - LOCAL_BRIDGE=udp:host.docker.internal:14550
-    - GCS_1=udp:host.docker.internal:14554
+    - GCS_1=udp:host.docker.internal:14572
     image: registry.waraps.org/waraps-arduagent:latest
     restart: unless-stopped
   TS_2_mavproxy:
     command: mavproxy.py --master=tcp:TS_2_simulator:5760 --out=tcpin:TS_2_mavproxy:14551
-      --out=udp:host.docker.internal:14554
+      --out=udp:host.docker.internal:14572
     depends_on:
     - TS_2_simulator
     environment: *id001

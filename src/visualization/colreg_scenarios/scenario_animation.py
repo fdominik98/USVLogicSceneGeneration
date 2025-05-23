@@ -24,8 +24,8 @@ class ScenarioAnimation():
         return self.sim_time_value * FRAMES_PER_SEC
     
     def get_sim_time_count(self) -> str:
-        sim_time = self.anim_frame_counter / FRAMES_PER_SEC
-        real_time = sim_time * self.speed_up_ratio()
+        real_time = self.anim_frame_counter
+        sim_time = real_time / self.speed_up_ratio()
         return f'Simulation time: {round(sim_time)} s, Real time: {round(real_time)} s'
     
     def __init__(self, fig : plt.Figure,

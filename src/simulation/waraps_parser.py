@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import subprocess
 from typing import Dict, List, Tuple
 from haversine import Unit
@@ -5,12 +6,13 @@ import numpy as np
 from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
 from concrete_level.models.trajectory_manager import TrajectoryManager
-from simulation.mqtt_client import MqttAgentClient, MqttScenarioClient
+from simulation.mqtt_client import MqttAgentClient
 from simulation.sim_utils import coord_to_lat_long, true_north_heading, waypoint_from_state
 import docker
 import yaml
 import time
 from global_config import GlobalConfig
+from simulation.waraps_config import VESSEL_AGENT_MAP, MQttConnectionInfo
 from utils.file_system_utils import SIMULATION_GEN_FOLDER
 from utils.math_utils import compute_start_point
 
@@ -18,7 +20,6 @@ class WARAPSParser():
     def __init__(self, trajectory_manager : TrajectoryManager):
         self.trajectory_manager = trajectory_manager
         self.trajectory_manager.shift_states_to_zero()
-        self.is_simulation = False
         
         # Start Docker client
         self.docker_client = docker.from_env()
@@ -32,16 +33,19 @@ class WARAPSParser():
             if not isinstance(vessel, ConcreteVessel):
                 raise ValueError(f"Vessel {vessel} is not a ConcreteVessel.")
             
+            agent_name, is_simulated = VESSEL_AGENT_MAP[vessel.id]
+            mqtt_connection = MQttConnectionInfo(user='mqtt', password='Check', broker='broker.waraps.org', port=8883, tls_connection=True)
+            
             vessel_pos = compute_start_point(state.p, state.v, state.speed, vessel.max_acceleration)
-            if self.is_simulation:
-                self.start_container(vessel, state, vessel_pos, 14552 + i)
+            if is_simulated:
+                self.start_container(mqtt_connection, vessel, state, vessel_pos, 14570 + i)
             # TODO: configuring container environments for agents
-            self.agent_clients.append(MqttAgentClient(self.is_simulation, vessel, state, vessel_pos))
+            self.agent_clients.append(MqttAgentClient(mqtt_connection, vessel, state, vessel_pos))
             data = self.trajectory_manager.trajectories[0:GlobalConfig.TEN_MINUTE_IN_SEC][vessel]
             waypoints = [waypoint_from_state(state) for state in data]
             self.waypoint_map[vessel] = waypoints
     
-    def start_container(self, vessel : ConcreteVessel, init_state : ActorState, vessel_pos : np.ndarray, port : int):
+    def start_container(self, mqtt_connection : MQttConnectionInfo, vessel : ConcreteVessel, init_state : ActorState, vessel_pos : np.ndarray, port : int):
         
         project_name = f'{self.trajectory_manager.functional_scenario.name}_{vessel.name}'.lower()
         
@@ -124,12 +128,11 @@ class WARAPSParser():
             'VIDEO_SRC0' : '/dev/video0',
             'VIDEO_SERVER' : 'ome.waraps.org',
             
-            'BROKER' : 'host.docker.internal',
-            #'PORT' : '1883',
-            'PORT' : '1882',
-            'TLS_CERTIFICE' : '0',
-            'MQTT_USER' : '',
-            'MQTT_PASSWORD' : '',
+            'BROKER' : mqtt_connection.broker,
+            'PORT' : mqtt_connection.port,
+            'TLS_CERTIFICE' : '0' if not mqtt_connection.tls_connection else '1',
+            'MQTT_USER' : mqtt_connection.user,
+            'MQTT_PASSWORD' : mqtt_connection.password,
             
             'FCS_SERIAL' : '/dev/serial0',            
             'BAUD_RATE' : '57600',

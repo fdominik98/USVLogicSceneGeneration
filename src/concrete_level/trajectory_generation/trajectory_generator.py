@@ -17,7 +17,7 @@ from concrete_level.trajectory_generation.bidirectional_rrt_star_fnd import Bidi
 
 SCALER = 1 / GlobalConfig.MAX_COORD / 1.5  * DIM
 
-DIRECTION_THRESHOLD = 100 # meter
+DIRECTION_THRESHOLD = 1 # meter
 GOAL_SAMPLE_RATE = 5.0 #%
 
 class TrajectoryGenerator:

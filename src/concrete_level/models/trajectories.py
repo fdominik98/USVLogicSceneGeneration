@@ -3,7 +3,7 @@ from dataclasses import dataclass, asdict
 import json
 from typing import Any, Dict, List, Type, Union
 import numpy as np
-from concrete_level.models.concrete_actors import ConcreteVessel
+from concrete_level.models.concrete_actors import ConcreteActor, ConcreteVessel
 from concrete_level.models.actor_state import ActorState
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from concrete_level.models.concrete_scene import ConcreteScene
@@ -85,7 +85,7 @@ class Trajectories(Serializable):
         for attr, value in data.items():
             if attr == '_data':
                 copy_data[attr] = {
-                        ConcreteVessel.from_dict(vessel):
+                        ConcreteActor.from_dict(vessel):
                         [ActorState.from_dict(state) for state in states]
                         for vessel, states in value
                     }

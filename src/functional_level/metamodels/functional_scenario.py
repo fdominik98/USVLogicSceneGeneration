@@ -323,8 +323,11 @@ class FunctionalScenario(Scenario):
             
             return frozenset(attributes)
                     
-        #focused_nodes = self.functional_objects
-        focused_nodes = [self.os_object]
+        for node in self.functional_objects:
+            neighborhoods[0][node] = (None,)
+            
+        # focused_nodes = [self.os_object]
+        focused_nodes = self.functional_objects
         # Initialize base (0-hop) attributes
         for node in focused_nodes:
             neighborhoods[0][node] = (None, create_attributes(0, node))

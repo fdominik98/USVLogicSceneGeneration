@@ -32,6 +32,7 @@ class DashThread(threading.Thread):
         
         def fetch_data():
             self.df, self.dirs = self.dp.load_dirs_merged(self.dirs)
+            # self.df = self.df[self.df['best_scene'].apply(lambda s: not dict(s).get('is_relevant', True))]
             return self.df
 
         self.app.layout = html.Div([
@@ -162,6 +163,5 @@ class DashThread(threading.Thread):
                 return f"Selected Row:\n{pprint.pformat(dict(sorted(row.to_dict().items())))}"
             return "No row selected"
         
-    
     def run(self):
         self.app.run(debug=False, use_reloader=False)

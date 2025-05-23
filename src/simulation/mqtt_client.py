@@ -1,40 +1,21 @@
 from abc import ABC, abstractmethod
-from collections import defaultdict
-from dataclasses import dataclass, field
 import json
 import ssl
 import traceback
-from typing import Any, Dict, List, Set
+from typing import List, Set
 import uuid
 import numpy as np
 import paho.mqtt.client as mqtt
 
 from concrete_level.models.actor_state import ActorState
 from concrete_level.models.concrete_actors import ConcreteVessel
-from concrete_level.models.concrete_scene import ConcreteScene
-from simulation.sim_utils import waypoint_from_state
-
-
-@dataclass(frozen=True)
-class MQttConnectionInfo():
-    user : str = ''
-    password : str = ''
-    broker: str = 'localhost'
-    port: int = 1882
-    tls_connection: bool = False
-    allow_certificates = False
+from simulation.waraps_config import VESSEL_AGENT_MAP, MQttConnectionInfo
 
 class MqttClient(ABC):
    
-    def __init__(self, is_simulation):
+    def __init__(self, mqtt_connection : MQttConnectionInfo):
         self.running_tasks : Set[str] = set()
-        
-        if is_simulation:
-            self.connection_info = MQttConnectionInfo()
-        else:
-            self.connection_info = MQttConnectionInfo(user='mqtt', password='Check', broker='broker.waraps.org', port=8883, tls_connection=True,
-                                                      allow_certificates=False)
-        
+        self.mqtt_connection = mqtt_connection
         
         self.client = mqtt.Client(client_id=self.name)
         self.client.user_data_set('waraps')
@@ -45,18 +26,18 @@ class MqttClient(ABC):
     
     def connect(self):
         '''Connect to the broker using the mqtt client'''
-        if self.connection_info.tls_connection:
-            self.client.username_pw_set(self.connection_info.user, self.connection_info.password)
-            self.client.tls_set(cert_reqs=(ssl.CERT_NONE if self.connection_info.allow_certificates else ssl.CERT_REQUIRED),)
+        if self.mqtt_connection.tls_connection:
+            self.client.username_pw_set(self.mqtt_connection.user, self.mqtt_connection.password)
+            self.client.tls_set(cert_reqs=(ssl.CERT_NONE if self.mqtt_connection.allow_certificates else ssl.CERT_REQUIRED),)
             self.client.tls_insecure_set(True)
         try:
             res = None
             while res is None or res is not mqtt.MQTTErrorCode.MQTT_ERR_SUCCESS:
-                res : mqtt.MQTTErrorCode = self.client.connect(self.connection_info.broker, self.connection_info.port, 60)
+                res : mqtt.MQTTErrorCode = self.client.connect(self.mqtt_connection.broker, self.mqtt_connection.port, 60)
                 print(f'{self.name} connection result: {res}')
             self.client.loop_start()
         except Exception as exc:
-            print(f'{self.name} failed to connect to broker {self.connection_info.broker}:{self.connection_info.port}')
+            print(f'{self.name} failed to connect to broker {self.mqtt_connection.broker}:{self.mqtt_connection.port}')
             print(exc)
             print(f'Continue without {self.receiver_name}.')
             
@@ -64,7 +45,7 @@ class MqttClient(ABC):
         '''Callback triggered when the client connects to the broker'''
         try:
             if rc == 0:
-                print(f'{self.name} connected to MQTT Broker: {self.connection_info.broker}:{self.connection_info.port}')
+                print(f'{self.name} connected to MQTT Broker: {self.mqtt_connection.broker}:{self.mqtt_connection.port}')
                 for listen_topic in self.listen_topics:
                     self.client.subscribe(listen_topic)
                     print(f'Subscribing to {listen_topic}')
@@ -124,21 +105,14 @@ class MqttClient(ABC):
         
 class MqttAgentClient(MqttClient):
     
-    vessel_id_name_map = {
-        0 : 'MiniUSV1',
-        1 : 'MiniUSV2',
-        2 : 'MiniUSV3',
-        3 : 'MiniUSV4',
-    }
-    
-    def __init__(self, is_simulation : bool, vessel : ConcreteVessel, initial_state : ActorState, vessel_pos : np.ndarray):
-        self.is_simulation = is_simulation
-        self.simulation_str = 'simulation' if is_simulation else 'real'
+    def __init__(self, mqtt_connection : MQttConnectionInfo, vessel : ConcreteVessel, initial_state : ActorState, vessel_pos : np.ndarray):
+        agent_name, self.is_simulated = VESSEL_AGENT_MAP[vessel.id]
+        self.simulation_str = 'simulation' if self.is_simulated else 'real'
         self.vessel = vessel
         self.initial_state = initial_state
         self.vessel_pos = vessel_pos
-        self.vessel_name = self.vessel.name if is_simulation else self.vessel_id_name_map[vessel.id]
-        super().__init__(is_simulation)
+        self.vessel_name = self.vessel.name if self.is_simulated else agent_name
+        super().__init__(mqtt_connection)
         
     @property
     def listen_topics(self) -> List[str]:
@@ -172,7 +146,7 @@ class MqttAgentClient(MqttClient):
             'time_added': 0
         }
         str_command = json.dumps(command)
-        self.client.publish(self.base_topic, str_command)   
+        self.client.publish(self.base_topic, str_command, qos=1)   
         
     def publish_abort_all(self):
         for task in self.running_tasks:
@@ -184,7 +158,19 @@ class MqttAgentClient(MqttClient):
                 'task-uuid': task
             }
             str_command = json.dumps(command)
-            self.client.publish(self.base_topic, str_command)
+            self.client.publish(self.base_topic, str_command, qos=1)
+            
+    def publish_loiter_all(self):
+        pass
+        # command = {
+        #     'com-uuid': str(uuid.uuid4()),
+        #     'command': 'signal-task',
+        #     'sender': self.name,
+        #     'signal': '$abort',
+        #     'task-uuid': task
+        # }
+        # str_command = json.dumps(command)
+        # self.client.publish(self.base_topic, str_command)
             
     def publish_go_to(self, waypoint : np.ndarray, speed, look_at : np.ndarray = None):
         command = {
@@ -208,7 +194,7 @@ class MqttAgentClient(MqttClient):
             'time_added': 0
         }
         str_command = json.dumps(command)
-        self.client.publish(self.base_topic, str_command)
+        self.client.publish(self.base_topic, str_command, qos=1)
         
         # if look_at is not None:
         #     command = {

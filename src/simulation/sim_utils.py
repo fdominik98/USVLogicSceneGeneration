@@ -6,7 +6,7 @@ from haversine import inverse_haversine, Direction, Unit
 
 from utils.math_utils import calculate_heading
 
-REFERENCE_POINT = np.array([57.760277, 16.678081])
+REFERENCE_POINT = np.array([57.760671, 16.681177])
 
 def to_true_north(heading: float, unit : Union[Unit.DEGREES, Unit.RADIANS] = Unit.RADIANS) -> float:
     """
