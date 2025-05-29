@@ -28,16 +28,17 @@ class SceneBuilder(Dict[ConcreteActor, ActorState]):
        
             
     def build(self, dcpa=None, tcpa=None, danger_sector=None, proximity_index=None,
-              first_level_hash=None, second_level_hash=None, is_relevant=None,
-              is_ambiguous=None) -> ConcreteScene:
+              first_level_hash=None, second_level_hash=None, is_relevant_by_fec=None,
+              is_relevant_by_fsm=None, is_ambiguous_by_fec=None, is_ambiguous_by_fsm=None) -> ConcreteScene:
         return ConcreteScene(
             self,
             **{key: value if value is not None else getattr(self.base_scene, key, None) 
                for key, value in {
                'dcpa': dcpa, 'tcpa': tcpa, 'danger_sector': danger_sector, 
                'proximity_index': proximity_index, 'first_level_hash': first_level_hash, 
-               'second_level_hash': second_level_hash, 'is_relevant': is_relevant, 
-               'is_ambiguous': is_ambiguous
+               'second_level_hash': second_level_hash, 'is_relevant_by_fec': is_relevant_by_fec, 
+               'is_relevant_by_fsm': is_relevant_by_fsm, 'is_ambiguous_by_fec': is_ambiguous_by_fec,
+               'is_ambiguous_by_fsm': is_ambiguous_by_fsm
                }.items()}
         )
     

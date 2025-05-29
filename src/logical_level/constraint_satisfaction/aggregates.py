@@ -45,8 +45,6 @@ class Aggregate(ABC):
             return AggregateAll(logical_scenario, minimize)     
         elif name == AggregateAllSwarm.name:
             return AggregateAllSwarm(logical_scenario, minimize)      
-        elif name == CategoryAggregate.name:
-            return CategoryAggregate(logical_scenario, minimize)         
         else:
             raise Exception('Unknown aggregate')
 
@@ -75,7 +73,7 @@ class AggregateAll(Aggregate):
         return 1
 
     def evaluate(self, individual : np.ndarray):
-        fitness = self._signed_penalty(self.derive_penalty(individual).total_penalty)
+        fitness = self._signed_penalty(self.derive_penalty(individual).value)
         return (fitness, )
     
 class AggregateAllSwarm(AggregateAll):
@@ -90,18 +88,5 @@ class AggregateAllSwarm(AggregateAll):
             fitnesses.append(super().evaluate(particle)[0])
         return np.array(fitnesses)
     
-    
-class CategoryAggregate(Aggregate):
-    name = 'category'
-    
-    def __init__(self, logical_scenario, minimize):
-        super().__init__(logical_scenario, minimize)
-        
-    @property
-    def object_num(self) -> int:
-        return Penalty.category_num
 
-    def evaluate(self, individual : np.ndarray):
-        penalty = self.derive_penalty(individual)
-        return tuple((self._signed_penalty(pen) for pen in penalty.categorical_penalties))
    

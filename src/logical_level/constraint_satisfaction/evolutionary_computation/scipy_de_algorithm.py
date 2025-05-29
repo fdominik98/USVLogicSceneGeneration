@@ -3,10 +3,9 @@ from typing import List, Tuple
 import numpy as np
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
 from scipy.optimize import differential_evolution, OptimizeResult
 from logical_level.models.logical_scenario import LogicalScenario
-from utils.scenario import Scenario
 
 class ObjectiveMonitorCallback:
     def __init__(self, aggregate : Aggregate, max_time_sec, verbose : bool):
@@ -37,11 +36,14 @@ class ObjectiveMonitorCallback:
         return objective
 
 
-class SciPyDEAlgorithm(SolverBase):
-    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, 'scipy_DE_algorithm', scenarios,test_config, number_of_runs, warmups, verbose)
+class SciPyDEAlgorithm(Solver):
+    def __init__(self, verbose : bool) -> None:
+        self.verbose = verbose
         self.current_best_objective = np.inf
+        
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'scipy_DE_algorithm'
     
     def init_problem(self, logical_scenario : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)

@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import GeneralConstraintSatisfaction
 import pyswarms as ps
 from logical_level.models.logical_scenario import LogicalScenario
 from utils.scenario import Scenario
@@ -42,12 +42,13 @@ class ObjectiveMonitor():
             print(f'Best Cost: {self.best_fitness}')
             print(f'Iter count: {self.iter_count}')
     
-class PySwarmPSOAlgorithm(SolverBase):
-    algorithm_desc = 'pyswarm_PSO_algorithm'
-    
-    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
+class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
+    def __init__(self, verbose : bool) -> None:
+        self.verbose = verbose
+        
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'pyswarm_PSO_algorithm'
     
     def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         pos = np.array([np.array(ind) for ind in initial_population])

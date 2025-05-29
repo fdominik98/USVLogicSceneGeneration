@@ -20,10 +20,10 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {'sb-o' : 'SB-O',
-                        'sb-msr' : 'SB-MSR',
-                        'rs-o' : 'RS-O',
-                        'rs-msr' : 'RS-MSR',
+    config_group_map = {'sb-o' : 'SB-B',
+                        'sb-msr' : 'SB-M',
+                        'rs-o' : 'RS-B',
+                        'rs-msr' : 'RS-M',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
@@ -94,7 +94,7 @@ class EvalPlot(PlotBase, ABC):
     def init_axi(self, pos : int, axi : plt.Axes, label : str):
         axi.set_aspect('auto', adjustable='box')
         if pos == 0:
-            axi.set_ylabel(label)
+            axi.set_ylabel(label, fontsize=14)
         axi.set_yticks([])
         axi.set_xticks([])
     

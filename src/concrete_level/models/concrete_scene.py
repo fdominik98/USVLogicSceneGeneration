@@ -18,8 +18,10 @@ class ConcreteScene(Serializable):
     
     first_level_hash : Optional[int] = None
     second_level_hash : Optional[int] = None
-    is_relevant : Optional[bool] = None
-    is_ambiguous : Optional[bool] = None
+    is_relevant_by_fec : Optional[bool] = None
+    is_relevant_by_fsm : Optional[bool] = None
+    is_ambiguous_by_fec : Optional[bool] = None
+    is_ambiguous_by_fsm : Optional[bool] = None
     
     @property
     def has_risk_metrics(self):
@@ -28,7 +30,8 @@ class ConcreteScene(Serializable):
     @property
     def has_functional_hash(self):
         return all(value is not None for value in [self.first_level_hash, self.second_level_hash,
-                                                   self.is_relevant, self.is_ambiguous])
+                                                   self.is_relevant_by_fec, self.is_relevant_by_fsm,
+                                                   self.is_ambiguous_by_fec, self.is_ambiguous_by_fsm])
     
     def __post_init__(self):
         object.__setattr__(self, '_data', dict(self._data))
@@ -158,5 +161,8 @@ class ConcreteScene(Serializable):
                         ConcreteActor.from_dict(actor): ActorState.from_dict(state)
                         for actor, state in value
                     }
+                copy_data.pop('is_relevant', None)
+                copy_data.pop('is_ambiguous', None)
+                
         return ConcreteScene(**copy_data)
     

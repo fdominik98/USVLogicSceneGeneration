@@ -6,12 +6,12 @@ from typing import Any, List, Tuple
 
 import numpy as np
 from functional_level.models.functional_model_manager import FunctionalModelManager
-from logical_level.constraint_satisfaction.aggregates import ActorAggregate, CategoryAggregate, AggregateAll, AggregateAllSwarm
+from logical_level.constraint_satisfaction.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pygad_ga_algorithm import PyGadGAAlgorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.scipy_de_algorithm import SciPyDEAlgorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import GeneralConstraintSatisfaction, Solver
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.models.logical_model_manager import LogicalModelManager
@@ -21,13 +21,14 @@ WARMUPS = 0
 RANDOM_SEED = 1234
 TIMEOUT = 180
 INIT_METHOD = 'uniform'
+VERBOSE = False
 
 MEAS_NAME = 'parameter_test_msr'
 
 #FUNCTIONAL_SCENARIOS = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
 FUNCTIONAL_SCENARIOS = [LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
-#CONFIG_GROUP='SB-MSR'
-CONFIG_GROUP='SB-O'
+CONFIG_GROUP='SB-MSR'
+# CONFIG_GROUP='SB-O'
 
 
 def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO_batch, combination_DE_batch, core_id):
@@ -63,14 +64,6 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
                             crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
                             config_group=CONFIG_GROUP, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
         
-    def create_NSGA_category_config() -> EvaluationData:
-        if len(combinations_NSGA_batch) == 0:
-            return None
-        population_size, mutate_prob, crossover_prob, mutate_eta, crossover_eta = combinations_NSGA_batch[0]
-        return EvaluationData(population_size = population_size, mutate_eta = mutate_eta, mutate_prob = mutate_prob,
-                            crossover_eta=crossover_eta, crossover_prob=crossover_prob, timeout=TIMEOUT,
-                            config_group=CONFIG_GROUP, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=CategoryAggregate.name)
-        
     def create_PSO_config() -> EvaluationData:
         if len(combinations_PSO_batch) == 0:
             return None
@@ -92,59 +85,27 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
                             timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
 
 
-    tests : List[Tuple[Any, SolverBase]]= [
-        # (create_GA_config, PyGadGAAlgorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_GA_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
-                                            scenarios=FUNCTIONAL_SCENARIOS,
-                                            test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
-                                            warmups = WARMUPS, verbose=False)),
-        
-        (create_NSGA_vessel_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
-                                            scenarios=FUNCTIONAL_SCENARIOS,
-                                            test_config=create_NSGA_vessel_config(), number_of_runs=NUMBER_OF_RUNS,
-                                            warmups = WARMUPS, verbose=False)),
-        
-        # (create_NSGA_category_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        # (create_NSGA_category_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_NSGA_category_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        # (create_NSGA_all_config, PyMooNSGA2Algorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        # (create_NSGA_all_config, PyMooNSGA3Algorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_NSGA_all_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        # (create_PSO_config, PySwarmPSOAlgorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_PSO_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
-        
-        # (create_DE_config, SciPyDEAlgorithm(measurement_name=MEAS_NAME,
-        #                                     functional_scenarios=functional_scenarios,
-        #                                     test_config=create_DE_config(), number_of_runs=NUMBER_OF_RUNS,
-        #                                     warmups = WARMUPS, verbose=False)),
+    solvers : List[Tuple[Any, Solver]]= [
+        # (create_GA_config, PyGadGAAlgorithm(verbose=VERBOSE)),
+        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
+        (create_NSGA_vessel_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
+        # (create_NSGA_all_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
+        # (create_NSGA_all_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
+        # (create_PSO_config, PySwarmPSOAlgorithm(verbose=VERBOSE)),
+        # (create_DE_config, SciPyDEAlgorithm(verbose=VERBOSE)),
     ]
 
     while True:
         runs = 0
-        for config_fun, test in tests:
+        for config_fun, solver in solvers:
             config = config_fun()
             if config is not None:
-                test.test_config = config
+                test = GeneralConstraintSatisfaction(solver,   
+                                            measurement_name=MEAS_NAME,
+                                            scenarios=FUNCTIONAL_SCENARIOS,
+                                            test_config=config,
+                                            number_of_runs=NUMBER_OF_RUNS,
+                                            warmups=WARMUPS, verbose=VERBOSE)   
                 test.run(core_id)
                 runs += 1
         if runs == 0:

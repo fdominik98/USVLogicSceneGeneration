@@ -24,7 +24,7 @@ class DiversityPlot(EvalPlot):
         return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
-        fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(3 * 4, 3.8), constrained_layout=True,
+        fig, axes = plt.subplots(self.comparison_group_count, self.vessel_num_count, figsize=(2.5 * 4, 3.8), constrained_layout=True,
                                  gridspec_kw={'wspace': 0, 'hspace': 0})
         axes = np.atleast_2d(axes)
         
@@ -43,15 +43,15 @@ class DiversityPlot(EvalPlot):
                     self.is_second_level_abstraction)
                 
                 if self.is_relevant:
-                    equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items() if scene.is_relevant}
+                    equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items() if scene.is_relevant_by_fec}
                 else :
                     equivalence_classes = {key : (scene, count) for key, (scene, count) in equivalence_classes.items()}
                 equivalence_classes = dict(sorted(equivalence_classes.items(), key=lambda item: item[1][1], reverse=True))
                 values = [int(count) for _, count in equivalence_classes.values()]
                     
                 all_shapes = len(equivalence_classes)
-                relevant_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_relevant)
-                ambiguous_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_ambiguous)
+                relevant_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_relevant_by_fec)
+                ambiguous_shapes = sum(1 for scene, count in equivalence_classes.values() if scene.is_ambiguous_by_fec)
                 
                 #plot_text = f'all shapes: {all_shapes}\nrelevant shapes: {relevant_shapes}\nambiguous shapes: {ambiguous_shapes}'
                 # plot_text = f'covered: {all_shapes}'

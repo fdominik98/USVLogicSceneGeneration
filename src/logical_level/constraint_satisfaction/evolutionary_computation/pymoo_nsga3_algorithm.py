@@ -1,5 +1,6 @@
 
-from typing import List
+from typing import List, Optional
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.util.ref_dirs import get_reference_directions
@@ -13,15 +14,16 @@ import time
 from utils.scenario import Scenario
 
 class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
-    algorithm_desc = 'pymoo_NSGA3_algorithm'
-    
-    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, scenarios, test_config, number_of_runs, warmups, verbose)
+    def __init__(self, verbose : bool) -> None:
+        super().__init__(verbose)
         
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'pymoo_NSGA3_algorithm'
     
-    def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
-            # Instantiate the problem
+    def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
+                     initial_population : List[List[float]], eval_data : EvaluationData):
+        # Instantiate the problem
             problem = NSGAProblem(logical_scenario, eval_data)
             initial_population = Population.new("X", initial_population)
             

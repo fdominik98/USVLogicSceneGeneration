@@ -1,26 +1,35 @@
-from typing import Any, List, Tuple
+from datetime import datetime
+from typing import List, Optional, Tuple
 import numpy as np
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import calculate_solution, generate_scene, scenic_scenario
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import generate_scene, scenic_scenario
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
 from logical_level.models.logical_scenario import LogicalScenario
 from global_config import GlobalConfig, o2VisibilityByo1, possible_vis_distances
-from utils.scenario import Scenario
+from scenic.core.scenarios import Scenario as ScenicScenario
 
 
-class RejectionSamplingPipeline(SolverBase):
-    algorithm_desc = 'scenic'
+class RejectionSamplingPipeline(Solver):
+    def __init__(self, verbose : bool) -> None:
+        self.verbose = verbose
     
-    def __init__(self, measurement_name: str, functional_scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, functional_scenarios, test_config, number_of_runs, warmups, verbose)
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'scenic'
     
-    def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
-        default_population = initial_population[0]
-        functional_scenario = self.scenarios[logical_scenario]
-        assignments = Assignments(logical_scenario.actor_variables).update_from_individual(default_population)
+    def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
+                     initial_population : List[List[float]], eval_data : EvaluationData):
+        aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
+        return aggregate, logical_scenario, functional_scenario, initial_population
+    
+    
+    def first_sampling_step(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
+                            eval_data: EvaluationData) -> Tuple[ScenicScenario, List[float]]:
+        first_solution = logical_scenario.get_population(eval_data.population_size)[0]
+        assignments = Assignments(logical_scenario.actor_variables).update_from_individual(first_solution)
         
         os_id = logical_scenario.os_variable.id
         ts_ids = [v.id for v in logical_scenario.ts_variables]
@@ -59,21 +68,21 @@ class RejectionSamplingPipeline(SolverBase):
                 # heading_ts_to_ego: relative angle to p12
                 bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
                 
-                scenarios = [
-                    (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
-                    (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
-                                     functional_scenario.in_port_side_sector_of_interpretation),
-                                                (bow_angle/4, bow_angle/2)),
-                    (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
-                                     functional_scenario.in_port_side_sector_of_interpretation),
-                                                (-bow_angle/4, bow_angle/2)),
-                ]
+                # scenarios = [
+                #     (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
+                #     (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                #     (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
+                #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+                #                      functional_scenario.in_port_side_sector_of_interpretation),
+                #                                 (bow_angle/4, bow_angle/2)),
+                #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+                #                      functional_scenario.in_port_side_sector_of_interpretation),
+                #                                 (-bow_angle/4, bow_angle/2)),
+                # ]
                 
                 
                 scenarios = [
-                    (functional_scenario.head_on(os, o), (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE))),
+                    (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
                     (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
                     (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
                     (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
@@ -83,7 +92,7 @@ class RejectionSamplingPipeline(SolverBase):
                 ]
                 
                 for condition, bearing in scenarios:
-                    if condition(o, os):
+                    if condition:
                         bearing_map[(os.id, o.id)] = bearing
                 
                 # scenario1 = (0, 0)
@@ -111,17 +120,29 @@ class RejectionSamplingPipeline(SolverBase):
                                    length_map, radius_map, possible_distances_map, min_distance_map,
                                    vis_distance_map = vis_distance_map,
                                    bearing_map=bearing_map, verbose=self.verbose)
+        return scenario, first_solution
         
-        aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
-        return scenario, aggregate, default_population
+        
     
-    def do_evaluate(self, some_input : Tuple[Any, LogicalScenario, List[float]], eval_data : EvaluationData):
-        scenario, aggregate, default_population = some_input
-        scene, num_iterations, runtime, empty_region = generate_scene(scenario, eval_data.timeout, aggregate, np.inf if self.verbose else 0)
-        return scene, num_iterations, default_population       
+    def do_evaluate(self, some_input : Tuple[Aggregate, LogicalScenario, FunctionalScenario, List[float]], eval_data : EvaluationData):
+        aggregate, logical_scenario, functional_scenario, default_population = some_input
+        iterations = 0
+        start_time = datetime.now()
+        while True:
+            if (datetime.now() - start_time).total_seconds() >= eval_data.timeout:
+                print(f"Sampling reached timeout.")
+                break
+            scenario, first_solution = self.first_sampling_step(logical_scenario, functional_scenario, eval_data)
+            solution, rejection = generate_scene(scenario, aggregate, first_solution)
+            default_population = solution
+            if not rejection:
+                break
+            
+            if self.verbose:
+                print(f"Rejected sample {iterations} because of {rejection}")
+            iterations += 1
+        return default_population, iterations       
     
-    def convert_results(self, some_results : Tuple[Any, int, List[float]], eval_data : EvaluationData) -> Tuple[List[float], int]:
-        scene, num_iterations, default_population = some_results
-        if scene is None:
-            return default_population, num_iterations
-        return calculate_solution(scene), num_iterations
+    def convert_results(self, some_results : Tuple[List[float], int], eval_data : EvaluationData) -> Tuple[List[float], int]:
+        scene, iterations = some_results
+        return scene, iterations

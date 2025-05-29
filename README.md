@@ -5,7 +5,7 @@ A Python 3.12 project for generating and evaluating initial scenes for Autonomou
 
 This project serves as supplementary material for our research paper **Automated Scene Generation for Testing COLREGS-Compliance of Autonomous Surface Vehicles**.
 
-![](./assets/figures/approach.png)
+![](./assets/figures/v2/msr_overview.png)
 
 ## Table of Contents
 - [Project Structure](#project-structure)

@@ -38,7 +38,7 @@ class LogicalModelManager():
         relation_constr_exprs = set(
             [OutVisOrMayNotCollide(ts1, ts2) for ts1, ts2 in combinations(ts_vessels, 2)] + 
             [OutVisOrMayNotCollide(o, ts) for o, ts in product(obstacles, ts_vessels)] +
-            [AtVisAndMayCollideSoon(non_os, os) for non_os in ts_vessels + obstacles])
+            [AtVisAndMayCollide(non_os, os) for non_os in ts_vessels + obstacles])
         
         cls.__scenario_cache_map[actor_number_by_type] = LogicalScenario(LogicalScenarioBuilder.get_initializer(RandomInstanceInitializer.name, actor_variables),
                         RelationConstrTerm(relation_constr_exprs),

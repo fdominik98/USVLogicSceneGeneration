@@ -28,7 +28,11 @@ class RelationConstrTerm(RelationConstrComposite):
         super().__init__(components)
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
-        return sum([comp._evaluate_penalty(eval_cache) for comp in self.components], Penalty())
+        penalties = [comp._evaluate_penalty(eval_cache) for comp in self.components]
+        sum_penalty = sum(penalties, Penalty(0, {}, {}))
+        return Penalty(value=sum_penalty.value,
+                       actor_penalties=sum_penalty.actor_penalties,
+                       info=sum_penalty.info)
     
     def __repr__(self) -> str:
         return f'({" ∧ ".join(f"{comp}" for comp in self.components)})'
@@ -39,7 +43,12 @@ class RelationConstrClause(RelationConstrComposite):
         super().__init__(components)
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
-        return min([comp._evaluate_penalty(eval_cache) for comp in self.components])
+        penalties = [comp._evaluate_penalty(eval_cache) for comp in self.components]
+        sum_penalty = sum(penalties, Penalty(0, {}, {}))
+        min_penalty = min(penalties)
+        return Penalty(value=min_penalty.value,
+                       actor_penalties=min_penalty.actor_penalties,
+                       info=sum_penalty.info)
     
     def __repr__(self) -> str:
         return f'({" ∨ ".join(f"{comp}" for comp in self.components)})'

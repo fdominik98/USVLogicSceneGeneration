@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
-
 import numpy as np
 
 from logical_level.constraint_satisfaction.evaluation_cache import EvaluationCache, GeometricProperties
 from logical_level.models.actor_variable import ActorVariable, VesselVariable
-from logical_level.models.penalty import Penalty, PenaltyCategory
+from logical_level.models.penalty import Penalty
 from logical_level.models.relation_constraints_concept.composites import RelationConstrComposite
 from logical_level.models.values import ActorValues, VesselValues
 from global_config import GlobalConfig
@@ -60,12 +58,12 @@ class BinaryLiteral(Literal, ABC):
         self.var2 : VesselVariable = var2
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
-        category, penalty = self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
-        return Penalty({self.var1 : penalty, self.var2 : penalty}, **{str(category) : penalty},
-                       info={(self.var1, self.var2) : [fr'{self.name}({self.var1, self.var2}) : {penalty}']})
+        penalty_value = self._do_evaluate_penalty(eval_cache.get_props(self.var1, self.var2))
+        return Penalty(value=penalty_value, actor_penalties={self.var1 : penalty_value, self.var2 : penalty_value},
+                       info={(self.var1, self.var2) : [fr'{self.name}({self.var1, self.var2})={penalty_value}']})
         
     @abstractmethod
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
         pass
     
     def __repr__(self) -> str:
@@ -78,12 +76,12 @@ class UnaryLiteral(Literal, ABC):
     
     def _evaluate_penalty(self, eval_cache : EvaluationCache) -> Penalty:
         values = eval_cache.assignments.get(self.var)
-        category, penalty = self._do_evaluate_penalty(values)
-        return Penalty({self.var : penalty}, **{str(category) : penalty},
-                       info={(self.var, self.var) : [fr'{self.name}({self.var}) : {penalty}']})
+        penalty_value = self._do_evaluate_penalty(values)
+        return Penalty(value=penalty_value, actor_penalties={(self.var, self.var) : penalty_value},
+                       info={(self.var, self.var) : [fr'{self.name}({self.var}) : {penalty_value}']})
     
     @abstractmethod
-    def _do_evaluate_penalty(self, value : ActorValues) -> Tuple[PenaltyCategory, float]:
+    def _do_evaluate_penalty(self, value : ActorValues) -> float:
         pass
     
     def __repr__(self) -> str:
@@ -94,22 +92,22 @@ class AtVis(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'AtVis', GlobalConfig.MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.vis_distance - GlobalConfig.DIST_DRIFT, geo_props.vis_distance + GlobalConfig.DIST_DRIFT)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.o_distance, geo_props.vis_distance - GlobalConfig.DIST_DRIFT, geo_props.vis_distance + GlobalConfig.DIST_DRIFT)
         
 class InVis(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InVis', GlobalConfig.MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, 0, geo_props.vis_distance - GlobalConfig.DIST_DRIFT)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.o_distance, 0, geo_props.vis_distance - GlobalConfig.DIST_DRIFT)
         
 class OutVis(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'OutVis', GlobalConfig.MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.VISIBILITY, self.penalty(geo_props.o_distance, geo_props.vis_distance + GlobalConfig.DIST_DRIFT, GlobalConfig.MAX_DISTANCE)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.o_distance, geo_props.vis_distance + GlobalConfig.DIST_DRIFT, GlobalConfig.MAX_DISTANCE)
         
         
 ############ RELATIVE BEARING ##################   
@@ -125,10 +123,10 @@ class InBeamSectorOf(BinaryLiteral, ABC):
     def __rotated_v2(self, geo_props : GeometricProperties):
         return np.dot(self.rotation_matrix, geo_props.val2.v)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
         angle_p21_v2_rot = np.arccos(np.dot(geo_props.p21, self.__rotated_v2(geo_props)) /
                                      geo_props.o_distance / geo_props.val2.sp)
-        return PenaltyCategory.BEARING, (self.penalty(angle_p21_v2_rot, 0.0, GlobalConfig.HALF_SIDE_ANGLE))
+        return self.penalty(angle_p21_v2_rot, 0.0, GlobalConfig.HALF_SIDE_ANGLE)
     
 class InPortSideSectorOf(InBeamSectorOf):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
@@ -143,15 +141,15 @@ class InBowSectorOf(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InBowSectorOf', np.pi, negated)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, 0.0, max(geo_props.angle_half_col_cone, GlobalConfig.HALF_BOW_ANGLE))
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.angle_p21_v2, 0.0, max(geo_props.angle_half_col_cone, GlobalConfig.HALF_BOW_ANGLE))
     
 class InSternSectorOf(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'InSternSectorOf', np.pi, negated)
         
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.BEARING, self.penalty(geo_props.angle_p21_v2, GlobalConfig.SIDE_ANGLE, np.pi)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.angle_p21_v2, GlobalConfig.SIDE_ANGLE, np.pi)
     
     
 ############ MAY COLLISION ##################
@@ -159,23 +157,23 @@ class MayCollide(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'MayCollide', GlobalConfig.MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.COLLISION, self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.dcpa, 0, geo_props.safety_dist)
     
 class SoonMeet(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'SoonMeet', GlobalConfig.MAX_TEMPORAL_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.COLLISION, self.penalty(geo_props.tcpa, 0, GlobalConfig.SAFE_TEMPORAL_DISTANCE)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.tcpa, 0, GlobalConfig.SAFE_TEMPORAL_DISTANCE)
     
 ############ COLLISION ##################
 class DoCollide(BinaryLiteral):
     def __init__(self, var1 : ActorVariable, var2 : VesselVariable, negated : bool = False):
         super().__init__(var1, var2, 'DoCollide', GlobalConfig.MAX_DISTANCE, negated)
     
-    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.COLLISION, self.penalty(geo_props.o_distance, 0, geo_props.safety_dist)
+    def _do_evaluate_penalty(self, geo_props : GeometricProperties) -> float:
+        return self.penalty(geo_props.o_distance, 0, geo_props.safety_dist)
     
 ############ DIMENSION ##################
 class LengthLiteral(UnaryLiteral):
@@ -183,14 +181,14 @@ class LengthLiteral(UnaryLiteral):
         super().__init__(var, 'Length', GlobalConfig.MAX_LENGTH, negated)
         self.var : VesselVariable
     
-    def _do_evaluate_penalty(self, values : VesselValues) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.DIMENSION, self.penalty(values.l, self.var.min_length, self.var.max_length)
+    def _do_evaluate_penalty(self, values : VesselValues) -> float:
+        return self.penalty(values.l, self.var.min_length, self.var.max_length)
     
 class SpeedLiteral(UnaryLiteral):
     def __init__(self, var : VesselVariable, negated : bool = False):
         super().__init__(var, 'Speed', GlobalConfig.MAX_SPEED_IN_MS, negated)
         self.var : VesselVariable
         
-    def _do_evaluate_penalty(self, values : VesselValues) -> Tuple[PenaltyCategory, float]:
-        return PenaltyCategory.DIMENSION, self.penalty(values.sp, self.var.min_speed, self.var.max_speed)
+    def _do_evaluate_penalty(self, values : VesselValues) -> float:
+        return self.penalty(values.sp, self.var.min_speed, self.var.max_speed)
     

@@ -121,8 +121,7 @@ class FunctionalScenario(Scenario):
                 self.at_visibility_distance_interpretation.contains((o1, o2)) and
                 self.may_collide_interpretation.contains((o1, o2)))
     
-    def out_vis_or_may_not_collide(self, objects : Tuple[FuncObject, FuncObject]) -> bool:
-        o1, o2 = objects
+    def out_vis_or_may_not_collide(self, o1 : FuncObject, o2 : FuncObject) -> bool:
         return (self.is_sea_object(o1) and self.is_vessel(o2) and
                     (self.out_visibility_distance_interpretation.contains((o1, o2)) or
                     not self.may_collide_interpretation.contains((o1, o2)))
@@ -201,21 +200,33 @@ class FunctionalScenario(Scenario):
     def find_obstacle_type_name(self, obj : FuncObject) -> Optional[str]:
         return next((self.Static_obstacle_type_interpretation.get_value(o2)
                      for o1, o2 in self.static_obstacle_type_interpretation if o1 == obj), UnspecifiedObstacleType.name)
+    
+    @property    
+    def is_consistent_by_fec(self) -> bool:
+        return(all(not self.in_colregs_situation_with(o, o) for o in self.functional_objects) and 
+               all(not (self.in_colregs_relation(o1, o2) and self.in_colregs_relation(o2, o1)) or self.head_on(o1, o2) for o1, o2 in self.all_sea_object_pair_combinations))
         
     @property
-    def is_relevant(self) -> bool:
+    def is_relevant_by_fec(self) -> bool:
         os = self.os_object
-        # os_obst = all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects)
-        # os_ts = all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects)
-        # ts_ts = all(self.out_vis_or_may_not_collide(o1, o2) or self.out_vis_or_may_not_collide(o2, o1) for (o1, o2) in self.all_ts_obstacle_pair_combinations)
-        
-        return (all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects) and
+        return self.is_consistent_by_fec and (all(self.in_colregs_situation_with(os, ts) for ts in self.ts_objects) and
                 all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects) and
                 all(not self.in_colregs_situation_with(o1, o2) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
+      
+    @property
+    def is_relevant_by_fsm(self) -> bool:
+        os = self.os_object
+        return (all(self.at_visibility_distance_and_may_collide(os, ts) for ts in self.ts_objects) and
+                all(self.dangerous_head_on_sector_of(o, os) for o in self.obstacle_objects) and
+                all(self.out_vis_or_may_not_collide(o1, o2) for (o1, o2) in self.all_ts_obstacle_pair_combinations))
        
     @property 
-    def is_ambiguous(self) -> bool:
-        return self.ambiguous(self.os_object)
+    def is_ambiguous_by_fec(self) -> bool:
+        return self.is_consistent_by_fec and self.is_relevant_by_fec and self.ambiguous(self.os_object)
+    
+    @property 
+    def is_ambiguous_by_fsm(self) -> bool:
+        return self.is_relevant_by_fsm and self.ambiguous(self.os_object)
         
                     
     @property
@@ -257,6 +268,10 @@ class FunctionalScenario(Scenario):
     @property
     def all_sea_object_pair_permutations(self) -> Set[Tuple[FuncObject, FuncObject]]:
         return set(permutations(self.sea_objects, 2))
+    
+    @property
+    def all_sea_object_pair_combinations(self) -> Set[Tuple[FuncObject, FuncObject]]:
+        return set(combinations(self.sea_objects, 2))
     
     @property
     def all_ts_obstacle_pair_combinations(self) -> Set[Tuple[FuncObject, FuncObject]]:

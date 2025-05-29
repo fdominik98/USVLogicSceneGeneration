@@ -1,8 +1,9 @@
 
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Optional, Tuple
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -10,7 +11,6 @@ from pymoo.core.result import Result
 import matplotlib.pyplot as plt
 import matplotlib
 from logical_level.models.logical_scenario import LogicalScenario
-from utils.scenario import Scenario
 matplotlib.cm.get_cmap = matplotlib.colormaps.get_cmap
 from pymoo.core.callback import Callback
 from pymoo.core.termination import Termination
@@ -79,14 +79,14 @@ class BestSolutionCallback(Callback):
                     print(f"{int(time.time() - self.start_time)} - New best solution found: {ind.X} with objective: {ind.F}")
         self.number_of_generations += 1
 
-class PyMooNSGAAlgorithm(SolverBase, ABC):
+class PyMooNSGAAlgorithm(Solver, ABC):
     
-    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
+    def __init__(self, verbose : bool) -> None:
+        self.verbose = verbose
         
     @abstractmethod
-    def init_problem(self, logical_scenario: LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
+    def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
+                     initial_population : List[List[float]], eval_data : EvaluationData):
         pass
 
     

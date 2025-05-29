@@ -1,22 +1,24 @@
 
 import time
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
+from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.solver_base import SolverBase
+from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
 import pygad
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.models.logical_scenario import LogicalScenario
-from utils.scenario import Scenario
 
-class PyGadGAAlgorithm(SolverBase):
-    algorithm_desc = 'pygad_GA_algorithm'
+class PyGadGAAlgorithm(Solver):
+    def __init__(self, verbose : bool) -> None:
+        self.verbose = verbose
+        
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'pygad_GA_algorithm'
     
-    def __init__(self, measurement_name: str, scenarios: List[Scenario], test_config : EvaluationData,
-                 number_of_runs : int, warmups : int, verbose : bool) -> None:
-        super().__init__(measurement_name, scenarios,test_config, number_of_runs, warmups, verbose)
-    
-    def init_problem(self, logical_scenario: LogicalScenario, initial_population: List[List[float]], eval_data: EvaluationData) -> None:
+    def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
+                     initial_population : List[List[float]], eval_data : EvaluationData):
         def fitness_func(cls, solution, solution_idx):
             return Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         

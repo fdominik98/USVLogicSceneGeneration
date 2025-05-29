@@ -23,13 +23,14 @@ class CoverageEvolutionPlot(EvalPlot):
         return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
     def create_fig(self) -> plt.Figure:
-        fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 2), constrained_layout=True)
-        gs = gridspec.GridSpec(2, self.vessel_num_count, height_ratios=[1,1]) 
+        fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 1), constrained_layout=True)
+        gs = gridspec.GridSpec(1, self.vessel_num_count, height_ratios=[1]) 
         # Top axes spans all 6 columns
         ax_top = [fig.add_subplot(gs[0, i]) for i in range(self.vessel_num_count)] 
         # Bottom row: 6 equal-width axes
-        ax_bottom = [fig.add_subplot(gs[1, i]) for i in range(self.vessel_num_count)] 
-        axes = [ax_top, ax_bottom]
+        # ax_bottom = [fig.add_subplot(gs[1, i]) for i in range(self.vessel_num_count)] 
+        # axes = [ax_top, ax_bottom]
+        axes = [ax_top]
         
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             max_value = 0
@@ -50,20 +51,24 @@ class CoverageEvolutionPlot(EvalPlot):
                             else:
                                 equivalence_classes[key] = value
                         values[config_group].append(len(equivalence_classes))
-                        relevant_values[config_group].append(sum(1 for scene, count in equivalence_classes.values() if scene.is_relevant))
-                        ambiguous_values[config_group].append(sum(1 for scene, count in equivalence_classes.values() if scene.is_ambiguous))
+                        relevant_values[config_group].append(sum(1 for scene, count in equivalence_classes.values() if scene.is_relevant_by_fec))
+                        ambiguous_values[config_group].append(sum(1 for scene, count in equivalence_classes.values() if scene.is_ambiguous_by_fec))
                     else:
                         values[config_group].append(values[config_group][-1])
                         relevant_values[config_group].append(relevant_values[config_group][-1])
                         ambiguous_values[config_group].append(ambiguous_values[config_group][-1])
-            for k in range(2): 
+            for k in range(1): 
                 axi : plt.Axes = axes[k][i]
-                if k == 0:
+                if k == 1:
                     axi.set_title(self.vessel_num_labels[i], fontweight='bold')   
-                    row_label = "Covered " + r"$\bf{relevant}$" +"\nequivalence classes" 
+                    row_label = "Covered " + r"$\bf{FECs}$" 
+                    values_to_plot = values
+                elif k == 0:
+                    axi.set_title(self.vessel_num_labels[i], fontweight='bold')   
+                    row_label = "Covered\n" + r"$\bf{relevant}$" +"\nFECs" 
                     values_to_plot = relevant_values
                 else:
-                    row_label = "Covered " + r"$\bf{ambiguous}$" +"\nequivalence classes"        
+                    row_label = "Covered\n" + r"$\bf{ambiguous}$" +"\nFECs"        
                     values_to_plot = ambiguous_values  
                 #self.init_axi(i, axi, r"$\bf{" + self.group_labels[j] + r"}$" + "\nCovered classes")
                 self.init_axi(i, axi, row_label)
@@ -77,19 +82,19 @@ class CoverageEvolutionPlot(EvalPlot):
                 for j, config_group in enumerate(self.comparison_groups):
                     axi.plot(labels, values_to_plot[config_group], color=self.colors[j], linestyle='-', linewidth=3.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
                 
-                max_value = max(i for lst in list(relevant_values.values()) + list(ambiguous_values.values()) for i in lst)
+                max_value = max(i for lst in list(values_to_plot.values()) + list(relevant_values.values()) + list(ambiguous_values.values()) for i in lst)
                 higher_max = round(max_value + max(max_value * 0.1, 1))
                 self.set_yticks(axi, range(higher_max + 1))
                 axi.set_ylim(0, higher_max)
                 
-                if k==1:
+                if k==0:
                     xticks = list(np.linspace(labels[0], labels[-1], 6))
                     xticks = [int(t) for t in xticks] 
                     axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False) 
                 
         # Get handles and labels from the last axis (or any axis — all are the same here)
-        handles, labels = axes[1][0].get_legend_handles_labels()
+        handles, labels = axes[0][0].get_legend_handles_labels()
         # Add one legend to the figure (outside bottom)
-        axes[1][0].legend(handles, labels, ncol=1, fontsize=10, title="Approaches")
+        axes[0][0].legend(handles, labels, ncol=1, fontsize=10, loc='lower right')
         return fig
         
