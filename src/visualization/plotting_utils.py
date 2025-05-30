@@ -20,10 +20,10 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {'sb-o' : 'SB-B',
-                        'sb-msr' : 'SB-M',
-                        'rs-o' : 'RS-B',
-                        'rs-msr' : 'RS-M',
+    config_group_map = {'sb-o' : 'Base-SB',
+                        'sb-msr' : 'MSR-SB',
+                        'rs-o' : 'Base-RS',
+                        'rs-msr' : 'MSR-RS',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
@@ -43,17 +43,17 @@ class EvalPlot(PlotBase, ABC):
         self.vessel_num_labels = [self.actor_numbers_by_type_map[vn] for vn in self.actor_numbers_by_type]
         self.group_labels = [self.algo_map[algo] + '-' + self.aggregate_map[aggregate] for algo, aggregate in self.algos] if is_algo else [self.config_group_map[cg.lower()] for cg in self.config_groups]
         
-        self.measurements : Dict[Tuple[int, int], Dict[str, List[EvaluationData]]] = defaultdict(lambda: defaultdict(list))
-        for actor_number_by_type in self.actor_numbers_by_type:
-            for comparison_group in self.comparison_groups:
-                self.measurements[actor_number_by_type][comparison_group] = []   
+        self.measurements : Dict[Tuple[int, int], Dict[str, Dict[int, List[EvaluationData]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+        # for actor_number_by_type in self.actor_numbers_by_type:
+        #     for comparison_group in self.comparison_groups:
+        #         self.measurements[actor_number_by_type][comparison_group] = []   
         
         self.eval_datas : List[EvaluationData] = sorted(eval_datas, key=lambda eval_data: eval_data.timestamp)
         for eval_data in self.eval_datas:
             comparison_group = (eval_data.algorithm_desc.lower(), eval_data.aggregate_strat.lower()) if is_algo else eval_data.config_group.lower()    
             if (not is_all and not eval_data.is_valid) or comparison_group not in self.comparison_groups or eval_data.actor_number_by_type not in self.actor_numbers_by_type:
                 continue
-            self.measurements[eval_data.actor_number_by_type][comparison_group].append(eval_data) 
+            self.measurements[eval_data.actor_number_by_type][comparison_group][eval_data.random_seed].append(eval_data) 
         super().__init__()                
         
     
@@ -90,6 +90,16 @@ class EvalPlot(PlotBase, ABC):
             ytick_labels = [f'{round(t)}{unit}' for t in yticks] 
         axi.set_yticks([yticks[0], yticks[-1]] + list(yticks), minor=False)
         axi.set_yticklabels([ytick_labels[0], ytick_labels[-1]] + list(ytick_labels))
+        
+    def set_xticks(self, axi : plt.Axes, values, unit : str = None, tick_number : int = 6, rotation: int = 45):
+        xticks = np.linspace(0, max(values), tick_number)
+        xticks = [round(t) for t in xticks] 
+        if unit is None:
+            xtick_labels = xticks
+        else:
+            xtick_labels = [f'{round(t)}{unit}' for t in xticks] 
+        axi.set_xticks([xticks[0], xticks[-1]] + list(xticks), minor=False)
+        axi.set_xticklabels([xtick_labels[0], xtick_labels[-1]] + list(xtick_labels), rotation=rotation)
         
     def init_axi(self, pos : int, axi : plt.Axes, label : str):
         axi.set_aspect('auto', adjustable='box')

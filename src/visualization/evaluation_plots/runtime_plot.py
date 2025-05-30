@@ -32,7 +32,7 @@ class RuntimePlot(EvalPlot):
             data = []
             new_group_labels = []
             for measurement, label in zip(self.measurements[actor_number_by_type].values(), self.group_labels):
-                values = [eval_data.evaluation_time for eval_data in measurement]
+                values = [eval_data.evaluation_time for eval_data in list(measurement.values())[0]]
                 if len(values) != 0:
                     data.append(values)
                     new_group_labels.append(label)

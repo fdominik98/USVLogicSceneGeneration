@@ -9,6 +9,12 @@ class ModelParser():
     FUNCTIONAL_MODELS_PATH_ALL = f'{FUNCTIONAL_MODELS_FOLDER}/all'
     FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{FUNCTIONAL_MODELS_FOLDER}/ambiguous'
     
+    TOTAL_FECS = {(2, 0) : 7,
+                  (3, 0) : 28,
+                  (4, 0) : 84,
+                  (5, 0) : 210,
+                  (6, 0) : 462}
+    
     scenario_path_map = {
         (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacle_scenarios',
         (2, 1) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_1obstacle_scenarios',

@@ -166,6 +166,16 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
-        },       
+        },     
+        {
+            "name": "Evaluate Hyperparameters",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/evaluate_hyperparameters.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },    
     ]
 }

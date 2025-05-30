@@ -16,7 +16,7 @@ from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.models.logical_model_manager import LogicalModelManager
 
-NUMBER_OF_RUNS = 1
+NUMBER_OF_RUNS = 5
 WARMUPS = 0
 RANDOM_SEED = 1234
 TIMEOUT = 180
@@ -25,11 +25,10 @@ VERBOSE = False
 
 MEAS_NAME = 'parameter_test_msr'
 
-#FUNCTIONAL_SCENARIOS = [FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
-FUNCTIONAL_SCENARIOS = [LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]]
-CONFIG_GROUP='SB-MSR'
+LOGICAL_SCENARIO = LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]
+FUNCTIONAL_SCENARIOS = random.sample(FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), 5)
 # CONFIG_GROUP='SB-O'
-
+CONFIG_GROUP='SB-MSR'
 
 def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO_batch, combination_DE_batch, core_id):
 
@@ -87,7 +86,7 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
 
     solvers : List[Tuple[Any, Solver]]= [
         # (create_GA_config, PyGadGAAlgorithm(verbose=VERBOSE)),
-        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
+        # (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
         (create_NSGA_vessel_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
         # (create_NSGA_all_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
         # (create_NSGA_all_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),

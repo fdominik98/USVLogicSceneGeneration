@@ -39,13 +39,13 @@ class MSRConstraintSatisfaction():
         eval_time = 0
         for logical_scenario, functional_scenario in cycle(self.scenarios):
             remaining = list(coverage.values()).count(False)
-            print(f"Covered scenarios: {len(self.scenarios) - remaining}/{len(self.scenarios)}")
             if remaining == 0 or eval_time >= self.max_eval_time:
                 break
             
             if coverage[logical_scenario]:
                 continue
             
+            print(f"Covered scenarios: {len(self.scenarios) - remaining}/{len(self.scenarios)}")
             eval_data = self.__evaluate(logical_scenario, functional_scenario, core_id, True, eval_time)
             eval_time += eval_data.evaluation_time
             coverage[logical_scenario] = eval_data.is_valid

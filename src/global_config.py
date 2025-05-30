@@ -36,7 +36,7 @@ class BaseConfig():
     VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
 
     MIN_HEADING = -np.pi
-    MAX_HEADING = np.pi    
+    MAX_HEADING = np.pi   
     
 class WaraPsConfig(BaseConfig):
     MIN_BEAM = 0.5

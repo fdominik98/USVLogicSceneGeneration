@@ -2,11 +2,8 @@ from collections import defaultdict
 from pprint import pprint
 from typing import Dict, List
 from concrete_level.data_parser import EvalDataParser
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pandas.plotting import parallel_coordinates
-from mpl_toolkits.mplot3d import Axes3D
 
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 
