@@ -18,18 +18,18 @@ class SceneGenerationProcess(Process):
 
 measurements : List[Tuple[str, List[FunctionalScenario], EvaluationData]] = [
     # # SB-MSR
-    (f'{measurement_config.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), search_sb_msr_config),
-    (f'{measurement_config.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), search_sb_msr_config),
-    (f'{measurement_config.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), search_sb_msr_config),
-    (f'{measurement_config.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), search_sb_msr_config),
-    (f'{measurement_config.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), search_sb_msr_config),
+    # (f'{measurement_config.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), search_sb_msr_config),
+    # (f'{measurement_config.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), search_sb_msr_config),
+    # (f'{measurement_config.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), search_sb_msr_config),
+    # (f'{measurement_config.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), search_sb_msr_config),
+    # (f'{measurement_config.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), search_sb_msr_config),
     
     #RS-MSR
-    (F'{measurement_config.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
-    (f'{measurement_config.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
-    (f'{measurement_config.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
-    (f'{measurement_config.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
-    (f'{measurement_config.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
+    # (F'{measurement_config.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
+    # (f'{measurement_config.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
+    # (f'{measurement_config.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
+    # (f'{measurement_config.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
+    # (f'{measurement_config.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
     
 ]
 
@@ -39,19 +39,29 @@ measurements : List[Tuple[str, List[FunctionalScenario], EvaluationData]] = [
 tests : List[MSRConstraintSatisfaction] = [MSRConstraintSatisfaction(solver=SolverFactory.factory(config.algorithm_desc, measurement_config.VERBOSE),
                                                                measurement_name=measurement_name,
                                                                 functional_scenarios=interactions_to_run, test_config=config,
-                                                                warmups=measurement_config.WARMUPS, verbose=measurement_config.VERBOSE)
+                                                                warmups=measurement_config.WARMUPS,
+                                                                average_time_per_scene=measurement_config.AVERAGE_TIME_PER_SCENE,
+                                                                verbose=measurement_config.VERBOSE)
                                             for (measurement_name, interactions_to_run, config) in measurements]
 
 
 def main():
     core_count = cpu_count()
-    processes : List[Process] = []
-    for i in range(len(tests)):
-        process = SceneGenerationProcess(tests[i], i % core_count)
-        process.start()
-        processes.append(process)
-
-    # Wait for all processes to complete
+    processes: List[Process] = []
+    i = 0
+    while i < len(tests):
+        # Clean up finished processes
+        processes = [p for p in processes if p.is_alive()]
+        if len(processes) < core_count:
+            process = SceneGenerationProcess(tests[i], i % core_count)
+            process.start()
+            processes.append(process)
+            i += 1
+        else:
+            # Wait a bit before checking again
+            for p in processes:
+                p.join(timeout=0.1)
+    # Wait for all remaining processes to complete
     for p in processes:
         p.join()
         

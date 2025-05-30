@@ -4,7 +4,7 @@ import gc
 import os
 import traceback
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import List, Tuple
 import numpy as np
 import psutil
 from functional_level.metamodels.functional_scenario import FunctionalScenario
@@ -15,12 +15,11 @@ from logical_level.constraint_satisfaction.general_constraint_satisfaction impor
 from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilder
 from logical_level.models.logical_scenario import LogicalScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
-from utils.scenario import Scenario
 from itertools import cycle, islice
 
 class MSRConstraintSatisfaction():
     def __init__(self, solver : Solver, measurement_name: str, functional_scenarios: List[FunctionalScenario],
-                 test_config : EvaluationData, warmups : int, verbose: bool) -> None:
+                 test_config : EvaluationData, warmups : int, average_time_per_scene : int, verbose: bool) -> None:
         self.solver = solver
         self.measurement_name = measurement_name
         self.scenarios : List[Tuple[LogicalScenario, FunctionalScenario]] = [(LogicalScenarioBuilder.build_from_functional(scenario, test_config.init_method),
@@ -28,7 +27,7 @@ class MSRConstraintSatisfaction():
         self.test_config = test_config
         self.warmups = warmups
         self.verbose = verbose
-        self.max_eval_time = test_config.timeout * len(self.scenarios)
+        self.max_eval_time = average_time_per_scene * len(self.scenarios)
         self.set_seed(self.test_config.random_seed)
         
        

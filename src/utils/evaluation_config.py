@@ -1,3 +1,4 @@
+from global_config import GlobalConfig
 from logical_level.constraint_satisfaction.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
@@ -37,7 +38,8 @@ class MSRMeasurementConfig():
                      (6, 0) : 1 * SIX_VESSEL_CLASS_NUM}
    WARMUPS = 2
    RANDOM_SEED = 1234
-   TIMEOUT = 600
+   TIMEOUT = 180
+   AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = False
    BASE_NAME = 'MSR_test'
