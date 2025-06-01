@@ -36,7 +36,7 @@ class MSRMeasurementConfig():
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = False
    BASE_NAME = 'MSR_test'
-   REPETITIONS = 1
+   REPETITIONS = 30
    
 class DummyMeasurementConfig(MeasurementConfig):   
    #NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 1, (3, 1) : 28 * 1, (4, 0) : 84 * 1, (5, 0) : 210 * 1, (6, 0) : 462 * 1}

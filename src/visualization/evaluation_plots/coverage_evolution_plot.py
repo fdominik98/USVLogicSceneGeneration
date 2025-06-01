@@ -24,13 +24,10 @@ class CoverageEvolutionPlot(EvalPlot):
         #return [(2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (5, 0), (6, 0)]
         return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         
-    # Data: median and q1, q3 of measurement aggregated over random_seeds for each timestamp for each:
-    # actor_number_by_type, config_group
-
     
-    def calculate_coverages_by_timestamps(self, actor_numbers_by_type : Tuple[int, int], config_group : str, seed : int,
+    def calculate_coverages_by_timestamps(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str, seed : int,
                                           timestamps : np.ndarray, pred) -> List[float]:
-        data = self.measurements[actor_numbers_by_type][config_group][seed]
+        data = self.measurements[actor_numbers_by_type][comparison_group][seed]
         coverage = [(0, 0.0)]
         covered_classes : Set[int] = set()
         coverages_by_timestamp = []
@@ -52,13 +49,13 @@ class CoverageEvolutionPlot(EvalPlot):
                 coverages_by_timestamp.append(coverages_by_timestamp[-1] if coverages_by_timestamp else 0)
         return coverages_by_timestamp
     
-    def aggregate_data(self, actor_numbers_by_type : Tuple[int, int], config_group : str,
+    def aggregate_data(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str,
                             timestamps : np.ndarray, pred) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        seeds = self.measurements[actor_numbers_by_type][config_group].keys()
+        seeds = self.measurements[actor_numbers_by_type][comparison_group].keys()
         # Create a 2D array: rows = seeds, columns = timestamps
         coverages_by_seed = []
         for seed in seeds:
-            coverages = self.calculate_coverages_by_timestamps(actor_numbers_by_type, config_group, seed, timestamps, pred)
+            coverages = self.calculate_coverages_by_timestamps(actor_numbers_by_type, comparison_group, seed, timestamps, pred)
             coverages_by_seed.append(coverages)
         # Now coverages_by_seed is a list of lists: [ [cov_t1, cov_t2, ...], ... for each seed ]
         coverages_by_seed = np.array(coverages_by_seed)  # shape: (num_seeds, num_timestamps)
@@ -69,15 +66,17 @@ class CoverageEvolutionPlot(EvalPlot):
         return median, q1, q3
     
     def create_timestamps(self, actor_numbers_by_type) -> np.ndarray:
-        seeds = self.measurements[actor_numbers_by_type][self.comparison_groups[0]].keys()
+        seeds : Set[int] = set()
+        for comparison_group in self.comparison_groups:
+            seeds |= set(self.measurements[actor_numbers_by_type][comparison_group].keys())
         max_runtime = 0
-        for config_group in self.comparison_groups:
+        for comparison_group in self.comparison_groups:
             for seed in seeds:
-                data = self.measurements[actor_numbers_by_type][config_group][seed]
+                data = self.measurements[actor_numbers_by_type][comparison_group][seed]
                 runtime = sum(d.evaluation_time for d in data)
                 if runtime > max_runtime:
                     max_runtime = runtime
-        return np.linspace(0, max_runtime, 200)
+        return np.linspace(0, max_runtime, 400)
     
     def create_fig(self) -> plt.Figure:
         fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 1), constrained_layout=True)
@@ -100,9 +99,9 @@ class CoverageEvolutionPlot(EvalPlot):
                 axi.set_ylim(0, 110)
             
             timestamps = self.create_timestamps(actor_number_by_type)
-            for j, config_group in enumerate(self.comparison_groups):
+            for j, comparison_group in enumerate(self.comparison_groups):
                         
-                median, q1, q3 = self.aggregate_data(actor_number_by_type, config_group, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
+                median, q1, q3 = self.aggregate_data(actor_number_by_type, comparison_group, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
                 
                 axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=3.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
                 axi.fill_between(timestamps, q1, q3, color=self.colors[j], alpha=0.3)

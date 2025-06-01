@@ -79,7 +79,11 @@ class EvalPlot(PlotBase, ABC):
         color2_rgb = np.array((1, 0.5, 0))
         # Generate a range of colors by linear interpolation
         colors = [color1_rgb + (color2_rgb - color1_rgb) * i / (size - 1) for i in range(size)]
-        return [np.array([color[0], color[1], color[2], 0.7]) for color in colors]
+        #return [np.array([color[0], color[1], color[2], 0.7]) for color in colors]
+        return [np.array([0.698, 0.875, 0.541, 1]),
+                  np.array([0.792, 0.698, 0.839, 1]), 
+                  np.array([0.122, 0.471, 0.705, 1]),
+                  np.array([0.902, 0.333, 0.051, 1])]
     
     def set_yticks(self, axi : plt.Axes, values, unit : str = None, tick_number : int = 6):
         yticks = np.linspace(0, max(values), tick_number)
