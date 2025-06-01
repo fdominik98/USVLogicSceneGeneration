@@ -31,7 +31,7 @@ class MSRMeasurementConfig():
                      (6, 0) : 1 * ModelParser.TOTAL_FECS[(6, 0)]}
    WARMUPS = 2
    RANDOM_SEED = 1234
-   TIMEOUT = 240
+   TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
    AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = False

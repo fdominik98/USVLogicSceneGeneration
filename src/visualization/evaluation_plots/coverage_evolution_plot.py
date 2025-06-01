@@ -63,19 +63,29 @@ class CoverageEvolutionPlot(EvalPlot):
         median = np.median(coverages_by_seed, axis=0)
         q1 = np.percentile(coverages_by_seed, 25, axis=0)
         q3 = np.percentile(coverages_by_seed, 75, axis=0)
+        print(median[-1])
         return median, q1, q3
+    
+    @staticmethod
+    def calculate_runtime(data : List[EvaluationData]) -> float:
+        """Calculate the total runtime for a list of EvaluationData."""
+        return sum(d.evaluation_time for d in data)
     
     def create_timestamps(self, actor_numbers_by_type) -> np.ndarray:
         seeds : Set[int] = set()
         for comparison_group in self.comparison_groups:
             seeds |= set(self.measurements[actor_numbers_by_type][comparison_group].keys())
-        max_runtime = 0
+        max_runtime = 0.0
         for comparison_group in self.comparison_groups:
-            for seed in seeds:
-                data = self.measurements[actor_numbers_by_type][comparison_group][seed]
-                runtime = sum(d.evaluation_time for d in data)
-                if runtime > max_runtime:
-                    max_runtime = runtime
+            runtimes = [self.calculate_runtime(self.measurements[actor_numbers_by_type][comparison_group][seed]) for seed in seeds]
+            runtime = np.percentile(runtimes, 90, axis=0)
+            if runtime > max_runtime:
+                max_runtime = runtime
+            # for seed in seeds:
+            #     data = self.measurements[actor_numbers_by_type][comparison_group][seed]
+            #     runtime = sum(d.evaluation_time for d in data)
+            #     if runtime > max_runtime:
+            #         max_runtime = runtime
         return np.linspace(0, max_runtime, 400)
     
     def create_fig(self) -> plt.Figure:
@@ -96,14 +106,14 @@ class CoverageEvolutionPlot(EvalPlot):
             self.init_axi(i, axi, row_label)
             if i == 0:
                 self.set_yticks(axi, range(101), unit='%', tick_number=6)
-                axi.set_ylim(0, 110)
+            axi.set_ylim(0, 105)
             
             timestamps = self.create_timestamps(actor_number_by_type)
             for j, comparison_group in enumerate(self.comparison_groups):
                         
                 median, q1, q3 = self.aggregate_data(actor_number_by_type, comparison_group, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
                 
-                axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=3.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
+                axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
                 axi.fill_between(timestamps, q1, q3, color=self.colors[j], alpha=0.3)
                 
                 self.set_xticks(axi, timestamps, unit='s', tick_number=6)
