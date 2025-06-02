@@ -76,6 +76,13 @@ class EvaluationData(Serializable):
         self.path = file_path
         self.save_to_json()
         
+    def delete_from_disk(self):
+        if self.path is not None and os.path.exists(self.path):
+            os.remove(self.path)
+            self.path = None
+        else:
+            print(f"File {self.path} does not exist or path is None.")
+        
     @property
     def is_valid(self) -> bool:
         return self.best_scene is not None and self.best_fitness_index == 0.0

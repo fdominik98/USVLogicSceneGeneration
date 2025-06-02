@@ -9,10 +9,11 @@ from logical_level.models.logical_scenario import LogicalScenario
 from utils.scenario import Scenario
 
 class ObjectiveMonitor():
-    def __init__(self, logical_scenario : LogicalScenario, eval_data : EvaluationData, start_time, max_time, verbose) -> None:
+    def __init__(self, logical_scenario : LogicalScenario, eval_data : EvaluationData, max_time, verbose) -> None:
         self.verbose = verbose
         self.max_time = max_time
-        self.start_time = start_time
+        self.start_time = time.time()
+        self.runtime = 0.0
         self.best_solution : np.ndarray = np.array([])
         self.best_fitness : float = np.inf
         self.iter_count = 0
@@ -20,8 +21,8 @@ class ObjectiveMonitor():
         
     def objective(self, x):
         self.iter_count+=1
-        elapsed_time = time.time() - self.start_time
-        if elapsed_time > self.max_time:
+        self.runtime = time.time() - self.start_time
+        if self.runtime >= self.max_time:
             if self.verbose:
                 print('Stopping due to timeout.')
             raise StopIteration()
@@ -58,7 +59,7 @@ class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
                                             dimensions=logical_scenario.all_variable_number,
                                             bounds=(np.array(logical_scenario.xl), np.array(logical_scenario.xu)),
                                             init_pos=pos)
-        monitor = ObjectiveMonitor(logical_scenario, eval_data, time.time(), eval_data.timeout, self.verbose)
+        monitor = ObjectiveMonitor(logical_scenario, eval_data, eval_data.timeout, self.verbose)
         
         return optimizer, monitor
     
@@ -72,8 +73,8 @@ class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
             return monitor
        
     
-    def convert_results(self, some_results : ObjectiveMonitor, eval_data : EvaluationData) -> Tuple[List[float], int]:
+    def convert_results(self, some_results : ObjectiveMonitor, eval_data : EvaluationData) -> Tuple[List[float], int, float]:
         some_results.print()
-        return some_results.best_solution.tolist(), some_results.iter_count
+        return some_results.best_solution.tolist(), some_results.iter_count, some_results.runtime
        
 

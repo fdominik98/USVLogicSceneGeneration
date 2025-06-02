@@ -54,7 +54,7 @@ class PyGadGAAlgorithm(Solver):
             parent_selection_type='tournament',
             K_tournament=2           
         )
-        return ga_instance
+        return ga_instance, time.time() - start_time
     
     def do_evaluate(self, some_input : pygad.GA, eval_data : EvaluationData):
         try:
@@ -65,8 +65,8 @@ class PyGadGAAlgorithm(Solver):
         finally:
             return some_input
     
-    def convert_results(self, some_results, eval_data : EvaluationData) -> Tuple[List[float], int]:
-        ga_instance : pygad.GA= some_results
+    def convert_results(self, some_results : Tuple[pygad.GA, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        ga_instance, runtime = some_results
         # After the GA run, print the best solution found
         solution, solution_fitness, solution_idx = ga_instance.best_solution()
         # if self.verbose:
@@ -77,7 +77,7 @@ class PyGadGAAlgorithm(Solver):
         #     best_solutions = [ga_instance.population[idx] for idx in sorted_indices[:num_best_solutions]]
         #     for sol in best_solutions:
         #         ColregPlot(self.logical_scenario.update(sol))
-        return list(solution.flatten()), ga_instance.generations_completed
+        return list(solution.flatten()), ga_instance.generations_completed, runtime
 
 
 

@@ -31,16 +31,17 @@ class NSGAProblem(ElementwiseProblem):
         out["F"] = self.aggregate.evaluate(x)
 
 class OptimumTermination(Termination):
-    def __init__(self, start_time, max_time, verbose):
+    def __init__(self, max_time, verbose):
         super().__init__()
         self.verbose = verbose
         self.max_time = max_time
-        self.start_time = start_time
+        self.start_time = time.time()
+        self.runtime = 0.0
 
     def _update(self, algorithm : GeneticAlgorithm):
         # Check for timeout
-        elapsed_time = time.time() - self.start_time
-        if elapsed_time > self.max_time:
+        self.runtime = time.time() - self.start_time
+        if self.runtime >= self.max_time:
             if self.verbose:
                 print("Stopping due to timeout.")
             return 1.0
@@ -66,6 +67,7 @@ class BestSolutionCallback(Callback):
         self.best_dist = None
         self.number_of_generations = 0
         self.start_time = start_time
+        
 
     def notify(self, algorithm : GeneticAlgorithm):
         current_pop = algorithm.pop
@@ -92,17 +94,21 @@ class PyMooNSGAAlgorithm(Solver, ABC):
     
     def do_evaluate(self, some_input, eval_data : EvaluationData):
         # Perform the optimization
-        problem, algorithm, callback, termination = some_input
+        problem, algorithm = some_input
+        
+        termination = OptimumTermination(eval_data.timeout, self.verbose)
+        callback = BestSolutionCallback(termination.start_time, self.verbose)
+        
         res : Result = minimize(problem,
                   algorithm,                  
                   save_history=self.verbose,
                   verbose=self.verbose,
                   termination=termination,
                   callback=callback)
-        return res, callback
+        return res, callback, termination
     
-    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback], eval_data : EvaluationData) -> Tuple[List[float], int]:
-        res, callback = some_results
+    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback, OptimumTermination], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        res, callback, termination = some_results
         if self.verbose and False:
             # Plot the convergence
             n_evals = []  # corresponding number of function evaluations
@@ -124,7 +130,7 @@ class PyMooNSGAAlgorithm(Solver, ABC):
         # Extract the decision variables (X) and objective values (F)
         # return X[0], self.aggregate.evaluate(X[0])
         eval_data.num_parents_mating = 2
-        return (list(callback.best_solution), callback.number_of_generations)
+        return list(callback.best_solution), callback.number_of_generations, termination.runtime
 
 
 

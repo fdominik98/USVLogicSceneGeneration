@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from typing import List, Optional, Tuple
 import numpy as np
 from functional_level.metamodels.functional_scenario import FunctionalScenario
@@ -127,9 +128,10 @@ class RejectionSamplingPipeline(Solver):
     def do_evaluate(self, some_input : Tuple[Aggregate, LogicalScenario, FunctionalScenario, List[float]], eval_data : EvaluationData):
         aggregate, logical_scenario, functional_scenario, default_population = some_input
         iterations = 0
-        start_time = datetime.now()
+        start_time = time.time()
         while True:
-            if (datetime.now() - start_time).total_seconds() >= eval_data.timeout:
+            runtime = time.time() - start_time
+            if runtime >= eval_data.timeout:
                 print(f"Sampling reached timeout.")
                 break
             scenario, first_solution = self.first_sampling_step(logical_scenario, functional_scenario, eval_data)
@@ -141,8 +143,8 @@ class RejectionSamplingPipeline(Solver):
             if self.verbose:
                 print(f"Rejected sample {iterations} because of {rejection}")
             iterations += 1
-        return default_population, iterations       
+        return default_population, iterations, runtime    
     
-    def convert_results(self, some_results : Tuple[List[float], int], eval_data : EvaluationData) -> Tuple[List[float], int]:
-        scene, iterations = some_results
-        return scene, iterations
+    def convert_results(self, some_results : Tuple[List[float], int, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        scene, iterations, runtime = some_results
+        return scene, iterations, runtime

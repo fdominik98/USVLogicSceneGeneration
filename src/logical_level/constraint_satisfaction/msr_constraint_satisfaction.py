@@ -2,6 +2,7 @@ from copy import deepcopy
 from datetime import datetime
 import gc
 import os
+import time
 import traceback
 import random
 from typing import List, Tuple
@@ -62,18 +63,18 @@ class MSRConstraintSatisfaction():
             eval_data.scenario_name = logical_scenario.name
             eval_data.timestamp = datetime.now().isoformat()            
             
-            initial_pop = logical_scenario.get_population(eval_data.population_size)            
-            some_input = self.solver.init_problem(logical_scenario, functional_scenario, initial_pop, eval_data)
-            
             gc.collect()
             p = psutil.Process(os.getpid()) # Ensure dedicated cpu
             p.cpu_affinity([core_id])
             
-            start_time = datetime.now()
-            some_results = self.solver.do_evaluate(some_input, eval_data)
-            eval_data.evaluation_time = (datetime.now() - start_time).total_seconds()
+            initial_pop = logical_scenario.get_population(eval_data.population_size)            
+            some_input = self.solver.init_problem(logical_scenario, functional_scenario, initial_pop, eval_data)
             
-            best_solution, number_of_generations = self.solver.convert_results(some_results, eval_data)
+            some_results = self.solver.do_evaluate(some_input, eval_data)
+            
+            best_solution, number_of_generations, runtime = self.solver.convert_results(some_results, eval_data)
+            eval_data.evaluation_time = runtime
+            
             assignments = Assignments(logical_scenario.actor_variables).update_from_individual(best_solution)
             eval_data.best_scene = SceneBuilder().build_from_assignments(assignments)
             eval_data.number_of_generations = number_of_generations
@@ -83,13 +84,14 @@ class MSRConstraintSatisfaction():
             eval_data.best_fitness = aggregate.evaluate(best_solution)
             eval_data.best_fitness_index = penalty.value
             
+            if not penalty.is_zero:
+                eval_data.evaluation_time = eval_data.timeout
+            
             if self.verbose:
                 print(penalty.pretty_info())            
                 print("Best individual is:", best_solution)
                 print("Best individual fitness is:", eval_data.best_fitness)
                 
-            if round(eval_data.evaluation_time) + 1 < eval_data.timeout and not penalty.is_zero:
-                raise ValueError('Something went wrong.')
                 
         except Exception as e:
             eval_data.error_message = f'{str(e)}\n{traceback.format_exc()}'

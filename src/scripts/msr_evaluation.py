@@ -39,7 +39,7 @@ def main():
     #----------------------------------------------------------
     tests : List[MSRConstraintSatisfaction] = []
 
-    for i in range(1, measurement_config.REPETITIONS):
+    for i in range(measurement_config.REPETITIONS):
         for (measurement_name, functional_scenarios, config_group) in measurements:
             config = create_config(measurement_config, config_group, measurement_config.RANDOM_SEED + i)
             tests.append(MSRConstraintSatisfaction(solver=SolverFactory.factory(config.algorithm_desc, measurement_config.VERBOSE),

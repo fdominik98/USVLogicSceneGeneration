@@ -36,9 +36,7 @@ class PyMooNSGA3Algorithm(PyMooNSGAAlgorithm):
                               crossover=SBX(eta=eval_data.crossover_eta, prob=eval_data.crossover_prob,),
                               mutation=PM(eta=eval_data.mutate_eta, prob=eval_data.mutate_prob), sampling=initial_population,)
 
-            callback = BestSolutionCallback(time.time(), self.verbose)
-            termination = OptimumTermination(time.time(), eval_data.timeout, self.verbose)
-            return problem, algorithm, callback, termination
+            return problem, algorithm
 
     
 

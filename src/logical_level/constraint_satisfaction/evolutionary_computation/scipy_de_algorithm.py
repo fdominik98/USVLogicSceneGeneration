@@ -10,15 +10,16 @@ from logical_level.models.logical_scenario import LogicalScenario
 class ObjectiveMonitorCallback:
     def __init__(self, aggregate : Aggregate, max_time_sec, verbose : bool):
         self.start_time = time.time()
+        self.runtime = 0.0
         self.max_time_sec = max_time_sec
         self.current_best_objective = np.inf
         self.aggregate = aggregate
         self.verbose = verbose
 
     def __call__(self, xk, convergence):
-        current_time = time.time()
+        self.runtime = time.time() - self.start_time
         
-        if current_time - self.start_time > self.max_time_sec:
+        if self.runtime >= self.max_time_sec:
             if self.verbose:
                 print("Termination stopped due to timeout")
             return True  # Stop optimization
@@ -47,11 +48,14 @@ class SciPyDEAlgorithm(Solver):
     
     def init_problem(self, logical_scenario : LogicalScenario, initial_population : List[List[float]], eval_data : EvaluationData):
         aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
-        objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)
-        return list(zip(logical_scenario.xl, logical_scenario.xu)), objective_monitor, initial_population
+        
+        return list(zip(logical_scenario.xl, logical_scenario.xu)), aggregate, initial_population
     
-    def do_evaluate(self, some_input : Tuple[List[Tuple[int, int]], ObjectiveMonitorCallback, List[List[float]]], eval_data : EvaluationData):
-       bounds, objective_monitor, initial_pop = some_input
+    def do_evaluate(self, some_input : Tuple[List[Tuple[int, int]], Aggregate, List[List[float]]], eval_data : EvaluationData):
+       bounds, aggregate, initial_pop = some_input
+       
+       objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)
+       
        return differential_evolution(objective_monitor.objective, 
                                     bounds,
                                     popsize=eval_data.population_size,
@@ -62,15 +66,16 @@ class SciPyDEAlgorithm(Solver):
                                     recombination=eval_data.crossover_prob,       # Recombination constant (crossover)
                                     callback=objective_monitor,       # Custom callback to handle time termination
                                     disp=self.verbose,
-                                    init=initial_pop)
+                                    init=initial_pop), objective_monitor
     
-    def convert_results(self, some_results : OptimizeResult, eval_data : EvaluationData) -> Tuple[List[float], int]:
+    def convert_results(self, some_results : Tuple[OptimizeResult, ObjectiveMonitorCallback], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        result, monitor = some_results
         if self.verbose:
-            print(some_results)
-        iter_num = some_results['nit']
-        X : np.ndarray = some_results['x']
-        #F : np.ndarray = np.array([some_results['fun']])
-        return X.tolist(), iter_num
+            print(result)
+        iter_num = result['nit']
+        X : np.ndarray = result['x']
+        #F : np.ndarray = np.array([result['fun']])
+        return X.tolist(), iter_num, monitor.runtime
 
 
 

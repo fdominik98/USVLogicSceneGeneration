@@ -14,6 +14,20 @@ class CoverageEvolutionPlot(EvalPlot):
         self.is_second_level_abstraction = is_second_level_abstraction
         super().__init__(eval_datas, is_all=True)
         
+        # for actor_numbers_by_type in self.actor_numbers_by_type:
+        #     for comparison_group in self.config_groups:
+        #         for seed in self.measurements[actor_numbers_by_type][comparison_group].keys():
+        #             for eval_data in self.measurements[actor_numbers_by_type][comparison_group][seed]:
+        #                 if not eval_data.is_valid:
+        #                     eval_data.evaluation_time = GlobalConfig.FOUR_MINUTES_IN_SEC
+        #                     eval_data.error_message = ''
+        #                     eval_data.save_as_measurement()
+        #                 # if the sum of eval time of the eval_datas is greater than GlobalConfig.AVERAGE_TIME_PER_SCENE * ModelParser.TOTAL_FECS[actor_numbers_by_type], delete last eval_data
+        #                 if sum(d.evaluation_time for d in self.measurements[actor_numbers_by_type][comparison_group][seed]) > GlobalConfig.FOUR_MINUTES_IN_SEC * ModelParser.TOTAL_FECS[actor_numbers_by_type]:
+        #                     #delete from disk
+        #                     self.measurements[actor_numbers_by_type][comparison_group][seed][-1].delete_from_disk()
+        #                     self.measurements[actor_numbers_by_type][comparison_group][seed].pop()
+                        
     @property   
     def config_groups(self) -> List[str]:
         #return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr', 'common_ocean_benchmark']
