@@ -10,16 +10,14 @@ from logical_level.models.logical_scenario import LogicalScenario
 class ObjectiveMonitorCallback:
     def __init__(self, aggregate : Aggregate, max_time_sec, verbose : bool):
         self.start_time = time.time()
-        self.runtime = 0.0
         self.max_time_sec = max_time_sec
         self.current_best_objective = np.inf
         self.aggregate = aggregate
         self.verbose = verbose
 
     def __call__(self, xk, convergence):
-        self.runtime = time.time() - self.start_time
-        
-        if self.runtime >= self.max_time_sec:
+        runtime = time.time() - self.start_time        
+        if runtime >= self.max_time_sec:
             if self.verbose:
                 print("Termination stopped due to timeout")
             return True  # Stop optimization
@@ -55,8 +53,7 @@ class SciPyDEAlgorithm(Solver):
        bounds, aggregate, initial_pop = some_input
        
        objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)
-       
-       return differential_evolution(objective_monitor.objective, 
+       res = differential_evolution(objective_monitor.objective, 
                                     bounds,
                                     popsize=eval_data.population_size,
                                     maxiter=np.iinfo(np.int64).max,
@@ -66,16 +63,21 @@ class SciPyDEAlgorithm(Solver):
                                     recombination=eval_data.crossover_prob,       # Recombination constant (crossover)
                                     callback=objective_monitor,       # Custom callback to handle time termination
                                     disp=self.verbose,
-                                    init=initial_pop), objective_monitor
+                                    init=initial_pop)
+       runtime = time.time() - objective_monitor.start_time
+       if self.verbose:
+           print(f"Optimization completed in {runtime:.2f} seconds with {res.nit} iterations.")
+           print(f"Best solution: {res.x}, Objective value: {res.fun}")
+       return res, runtime
     
-    def convert_results(self, some_results : Tuple[OptimizeResult, ObjectiveMonitorCallback], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
-        result, monitor = some_results
+    def convert_results(self, some_results : Tuple[OptimizeResult, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        result, runtime = some_results
         if self.verbose:
             print(result)
         iter_num = result['nit']
         X : np.ndarray = result['x']
         #F : np.ndarray = np.array([result['fun']])
-        return X.tolist(), iter_num, monitor.runtime
+        return X.tolist(), iter_num, runtime
 
 
 

@@ -36,12 +36,11 @@ class OptimumTermination(Termination):
         self.verbose = verbose
         self.max_time = max_time
         self.start_time = time.time()
-        self.runtime = 0.0
 
     def _update(self, algorithm : GeneticAlgorithm):
         # Check for timeout
-        self.runtime = time.time() - self.start_time
-        if self.runtime >= self.max_time:
+        runtime = time.time() - self.start_time
+        if runtime >= self.max_time:
             if self.verbose:
                 print("Stopping due to timeout.")
             return 1.0
@@ -105,10 +104,11 @@ class PyMooNSGAAlgorithm(Solver, ABC):
                   verbose=self.verbose,
                   termination=termination,
                   callback=callback)
-        return res, callback, termination
+        runtime = time.time() - termination.start_time
+        return res, callback, runtime
     
-    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback, OptimumTermination], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
-        res, callback, termination = some_results
+    def convert_results(self, some_results : Tuple[Result, BestSolutionCallback, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        res, callback, runtime = some_results
         if self.verbose and False:
             # Plot the convergence
             n_evals = []  # corresponding number of function evaluations
@@ -130,7 +130,7 @@ class PyMooNSGAAlgorithm(Solver, ABC):
         # Extract the decision variables (X) and objective values (F)
         # return X[0], self.aggregate.evaluate(X[0])
         eval_data.num_parents_mating = 2
-        return list(callback.best_solution), callback.number_of_generations, termination.runtime
+        return list(callback.best_solution), callback.number_of_generations, runtime
 
 
 

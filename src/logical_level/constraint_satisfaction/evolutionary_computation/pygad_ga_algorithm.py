@@ -22,8 +22,8 @@ class PyGadGAAlgorithm(Solver):
         def fitness_func(cls, solution, solution_idx):
             return Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         
-        start_time = time.time()
         
+        start_time = time.time()
         def on_generation(ga_instance : pygad.GA):
             if self.verbose:
                 print(f"Generation = {ga_instance.generations_completed}")
@@ -54,7 +54,8 @@ class PyGadGAAlgorithm(Solver):
             parent_selection_type='tournament',
             K_tournament=2           
         )
-        return ga_instance, time.time() - start_time
+        runtime = time.time() - start_time
+        return ga_instance, runtime
     
     def do_evaluate(self, some_input : pygad.GA, eval_data : EvaluationData):
         try:

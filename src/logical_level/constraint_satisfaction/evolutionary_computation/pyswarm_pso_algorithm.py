@@ -13,7 +13,6 @@ class ObjectiveMonitor():
         self.verbose = verbose
         self.max_time = max_time
         self.start_time = time.time()
-        self.runtime = 0.0
         self.best_solution : np.ndarray = np.array([])
         self.best_fitness : float = np.inf
         self.iter_count = 0
@@ -21,8 +20,8 @@ class ObjectiveMonitor():
         
     def objective(self, x):
         self.iter_count+=1
-        self.runtime = time.time() - self.start_time
-        if self.runtime >= self.max_time:
+        runtime = time.time() - self.start_time
+        if runtime >= self.max_time:
             if self.verbose:
                 print('Stopping due to timeout.')
             raise StopIteration()
@@ -70,11 +69,12 @@ class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
         except StopIteration:
             pass
         finally:
-            return monitor
+            return monitor, time.time() - monitor.start_time
        
     
-    def convert_results(self, some_results : ObjectiveMonitor, eval_data : EvaluationData) -> Tuple[List[float], int, float]:
-        some_results.print()
-        return some_results.best_solution.tolist(), some_results.iter_count, some_results.runtime
+    def convert_results(self, some_results : Tuple[ObjectiveMonitor, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        monitor, runtime = some_results
+        monitor.print()
+        return monitor.best_solution.tolist(), monitor.iter_count, runtime
        
 
