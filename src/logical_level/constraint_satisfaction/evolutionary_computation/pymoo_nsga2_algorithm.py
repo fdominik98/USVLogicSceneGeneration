@@ -6,10 +6,8 @@ from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.operators.crossover.sbx import SBX
 from pymoo.operators.mutation.pm import PM
 from logical_level.models.logical_scenario import LogicalScenario
-from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga_algorithm import BestSolutionCallback, NSGAProblem, OptimumTermination, PyMooNSGAAlgorithm
+from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga_algorithm import NSGAProblem, PyMooNSGAAlgorithm
 from pymoo.core.population import Population
-import time
-from utils.scenario import Scenario
 
 class PyMooNSGA2Algorithm(PyMooNSGAAlgorithm):
     def __init__(self, verbose : bool) -> None:

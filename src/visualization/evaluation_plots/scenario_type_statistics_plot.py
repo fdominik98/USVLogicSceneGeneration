@@ -5,6 +5,7 @@ from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from evaluation.vessel_type_sampler import VesselTypeSampler
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
 from visualization.plotting_utils import EvalPlot
 
 class ScenarioTypeStatisticsPlot(EvalPlot):  
@@ -19,7 +20,7 @@ class ScenarioTypeStatisticsPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
+        return [SB_BASE, SB_MSR, RS, TS_CD_RS, 'common_ocean_benchmark', 'zhu_et_al', 'base_reference']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

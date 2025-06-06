@@ -1,4 +1,4 @@
-from datetime import datetime
+from abc import abstractmethod
 import time
 from typing import List, Optional, Tuple
 import numpy as np
@@ -7,25 +7,25 @@ from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import generate_scene, scenic_scenario
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 from logical_level.models.logical_scenario import LogicalScenario
 from global_config import GlobalConfig, o2VisibilityByo1, possible_vis_distances
 from scenic.core.scenarios import Scenario as ScenicScenario
 
 
-class RejectionSamplingPipeline(Solver):
+class RejectionSamplingPipeline(CSPSolver):
     def __init__(self, verbose : bool) -> None:
         self.verbose = verbose
-    
-    @classmethod
-    def algorithm_desc(cls) -> str:
-        return 'scenic'
     
     def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
                      initial_population : List[List[float]], eval_data : EvaluationData):
         aggregate = Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=True)
         return aggregate, logical_scenario, functional_scenario, initial_population
     
+    @abstractmethod
+    def _provide_region_maps(self, os_id: str, ts_ids: List[str], obst_ids: List[str],
+                           length_map: dict, radius_map: dict, functional_scenario: Optional[FunctionalScenario] = None) -> Tuple[dict, dict, dict, dict]:
+        pass
     
     def first_sampling_step(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
                             eval_data: EvaluationData) -> Tuple[ScenicScenario, List[float]]:
@@ -37,15 +37,62 @@ class RejectionSamplingPipeline(Solver):
         obst_ids = [v.id for v in logical_scenario.obstacle_variables]
         length_map = {}
         radius_map = {}
-        vis_distance_map = {}
-        bearing_map = {}
-        possible_distances_map = {}
-        min_distance_map = {}
         
         for var in logical_scenario.actor_variables:
             length_map[var.id] = assignments[var].l
             radius_map[var.id] = assignments[var].r
             
+        possible_distances_map, min_distance_map, vis_distance_map, bearing_map = self._provide_region_maps(
+            os_id, ts_ids, obst_ids, length_map, radius_map, functional_scenario)
+        
+        scenario = scenic_scenario(os_id, ts_ids, obst_ids,
+                                   length_map, radius_map, possible_distances_map, min_distance_map,
+                                   vis_distance_map = vis_distance_map,
+                                   bearing_map=bearing_map, verbose=self.verbose)
+        return scenario, first_solution
+        
+        
+    
+    def evaluate(self, some_input : Tuple[Aggregate, LogicalScenario, FunctionalScenario, List[float]], eval_data : EvaluationData):
+        aggregate, logical_scenario, functional_scenario, default_population = some_input
+        iterations = 0
+        start_time = time.time()
+        while True:
+            runtime = time.time() - start_time
+            if runtime >= eval_data.timeout:
+                print(f"Sampling reached timeout.")
+                break
+            scenario, first_solution = self.first_sampling_step(logical_scenario, functional_scenario, eval_data)
+            solution, rejection = generate_scene(scenario, aggregate, first_solution)
+            default_population = solution
+            if not rejection:
+                break
+            
+            if self.verbose:
+                print(f"Rejected sample {iterations} because of {rejection}")
+            iterations += 1
+        return default_population, iterations, time.time() - start_time    
+    
+    def convert_results(self, some_results : Tuple[List[float], int, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
+        scene, iterations, runtime = some_results
+        return scene, iterations, runtime
+    
+    
+    
+class TwoStepCDRejectionSampling(RejectionSamplingPipeline):
+    def __init__(self, verbose : bool) -> None:
+        super().__init__(verbose)
+        
+    def _provide_region_maps(self, os_id: str, ts_ids: List[str], obst_ids: List[str],
+                           length_map: dict, radius_map: dict, functional_scenario: Optional[FunctionalScenario] = None) -> Tuple[dict, dict, dict, dict]:
+        if functional_scenario is None:
+            raise ValueError("Functional scenario must be provided for TwoStepCDRejectionSampling.")
+        
+        vis_distance_map = {}
+        bearing_map = {}
+        possible_distances_map = {}
+        min_distance_map = {}
+        
         for ts_id in ts_ids:
             distances = possible_vis_distances(length_map[os_id], length_map[ts_id])
             possible_distances_map[(os_id, ts_id)] = distances
@@ -116,35 +163,55 @@ class RejectionSamplingPipeline(Solver):
                     
                 if functional_scenario.dangerous_head_on_sector_of(o, os):
                     bearing_map[(os.id, o.id)] = (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0, 2*np.pi)
-        
-        scenario = scenic_scenario(os_id, ts_ids, obst_ids,
-                                   length_map, radius_map, possible_distances_map, min_distance_map,
-                                   vis_distance_map = vis_distance_map,
-                                   bearing_map=bearing_map, verbose=self.verbose)
-        return scenario, first_solution
-        
-        
+                    
+        return possible_distances_map, min_distance_map, vis_distance_map, bearing_map
     
-    def do_evaluate(self, some_input : Tuple[Aggregate, LogicalScenario, FunctionalScenario, List[float]], eval_data : EvaluationData):
-        aggregate, logical_scenario, functional_scenario, default_population = some_input
-        iterations = 0
-        start_time = time.time()
-        while True:
-            runtime = time.time() - start_time
-            if runtime >= eval_data.timeout:
-                print(f"Sampling reached timeout.")
-                break
-            scenario, first_solution = self.first_sampling_step(logical_scenario, functional_scenario, eval_data)
-            solution, rejection = generate_scene(scenario, aggregate, first_solution)
-            default_population = solution
-            if not rejection:
-                break
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'Two_Step_CD_Rejection_Sampling'
+    
+    
+class TwoStepRejectionSampling(RejectionSamplingPipeline):
+    def __init__(self, verbose : bool) -> None:
+        super().__init__(verbose)
+        
+    def _provide_region_maps(self, os_id: str, ts_ids: List[str], obst_ids: List[str],
+                           length_map: dict, radius_map: dict, functional_scenario: Optional[FunctionalScenario] = None) -> Tuple[dict, dict, dict, dict]:
+        possible_distances_map = {}
+        min_distance_map = {}
+        
+        for ts_id in ts_ids:
+            distances = possible_vis_distances(length_map[os_id], length_map[ts_id])
+            possible_distances_map[(os_id, ts_id)] = distances
+            min_distance_map[(os_id, ts_id)] = min(distances)
             
-            if self.verbose:
-                print(f"Rejected sample {iterations} because of {rejection}")
-            iterations += 1
-        return default_population, iterations, runtime    
+        return possible_distances_map, min_distance_map, {}, {}
     
-    def convert_results(self, some_results : Tuple[List[float], int, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
-        scene, iterations, runtime = some_results
-        return scene, iterations, runtime
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'Two_Step_Rejection_Sampling'
+    
+class BaseRejectionSampling(RejectionSamplingPipeline):
+    def __init__(self, verbose : bool) -> None:
+        super().__init__(verbose)
+        
+    def _provide_region_maps(self, os_id: str, ts_ids: List[str], obst_ids: List[str],
+                           length_map: dict, radius_map: dict, functional_scenario: Optional[FunctionalScenario] = None) -> Tuple[dict, dict, dict, dict]:
+        possible_distances_map = {}
+        min_distance_map = {}
+        
+        for ts_id in ts_ids:
+            distances = [
+                2 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                3 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                5 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                6 * GlobalConfig.N_MILE_TO_M_CONVERSION
+            ]
+            possible_distances_map[(os_id, ts_id)] = distances
+            min_distance_map[(os_id, ts_id)] = min(distances)
+            
+        return possible_distances_map, min_distance_map, {}, {}
+    
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'Base_Rejection_Sampling'

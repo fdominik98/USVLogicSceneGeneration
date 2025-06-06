@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
@@ -80,7 +80,7 @@ class BestSolutionCallback(Callback):
                     print(f"{int(time.time() - self.start_time)} - New best solution found: {ind.X} with objective: {ind.F}")
         self.number_of_generations += 1
 
-class PyMooNSGAAlgorithm(Solver, ABC):
+class PyMooNSGAAlgorithm(CSPSolver, ABC):
     
     def __init__(self, verbose : bool) -> None:
         self.verbose = verbose
@@ -91,7 +91,7 @@ class PyMooNSGAAlgorithm(Solver, ABC):
         pass
 
     
-    def do_evaluate(self, some_input, eval_data : EvaluationData):
+    def evaluate(self, some_input, eval_data : EvaluationData):
         # Perform the optimization
         problem, algorithm = some_input
         

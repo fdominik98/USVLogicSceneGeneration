@@ -90,7 +90,10 @@ class ModelParser():
     
     @staticmethod
     def load_functional_scenarios(vessel_number : int, obstacle_number : int) -> List[FunctionalScenario]:
-        return ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[(vessel_number, obstacle_number)])
+        scenarios = ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[(vessel_number, obstacle_number)])
+        if len(scenarios) != ModelParser.TOTAL_FECS[(vessel_number, obstacle_number)]:
+            raise ValueError(f"Expected {ModelParser.TOTAL_FECS[(vessel_number, obstacle_number)]} scenarios, but found {len(scenarios)} in {ModelParser.scenario_path_map[(vessel_number, obstacle_number)]}")
+        return scenarios
     
     @staticmethod
     def load_ambiguous_functional_scenarios(vessel_number : int, obstacle_number : int) -> List[FunctionalScenario]:

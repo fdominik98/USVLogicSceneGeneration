@@ -1,80 +1,94 @@
 from multiprocessing import Process, cpu_count
 from typing import List, Tuple
 
-from functional_level.models.functional_model_manager import FunctionalModelManager
-from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import GeneralConstraintSatisfaction
-from logical_level.constraint_satisfaction.solver_factory import SolverFactory
-from logical_level.models.logical_model_manager import LogicalModelManager
-from utils.evaluation_config import MEAS_GlobalConfig, nsga2_vessel_sb_o_config, scenic_rs_o_config, scenic_rs_msr_config, nsga2_vessel_sb_msr_config, nsga3_vessel_sb_msr_config,  nsga3_vessel_sb_o_config
-from utils.scenario import Scenario
+from logical_level.constraint_satisfaction.csp_evaluation.csp_evaluator import CSPEvaluatorImpl
+from logical_level.constraint_satisfaction.csp_evaluation.csp_scheduler import CSPScheduler, CSPSchedulerFactory
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver_factory import CPSSolverFactory
+from utils.evaluation_config import TS_CD_RS, TS_RS, SB_MSR, RS, SB_BASE, BaseSBMeasurementConfig, MeasurementConfig, create_config, RSMeasurementConfig, MSRMeasurementConfig, DummyMeasurementConfig, get_scenarios
 
 class SceneGenerationProcess(Process):
-    def __init__(self, solver : GeneralConstraintSatisfaction, core_id : int) -> None:
-        super().__init__(target=solver.run, args=(core_id,), name=solver.measurement_name, daemon=True)
-
-measurements : List[Tuple[str, List[Scenario], EvaluationData]] = [
-    # SB-O
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_1_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(1, 0), nsga3_vessel_sb_o_config),
-    
-    # SB-O
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga3_vessel_sb_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga3_vessel_sb_o_config),
-    
-    # # SB-MSR
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), nsga3_vessel_sb_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), nsga3_vessel_sb_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), nsga3_vessel_sb_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), nsga3_vessel_sb_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), nsga3_vessel_sb_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), nsga3_vessel_sb_msr_config),
-    (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), nsga3_vessel_sb_msr_config),
-    
-    # RS-O
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_o_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_o_config),
-    
-    #RS-MSR
-    # (F'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 0), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_2_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(2, 1), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 0), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_3_vessel_1_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(3, 1), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_4_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(4, 0), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_5_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(5, 0), scenic_rs_msr_config),
-    # (f'{MEAS_GlobalConfig.BASE_NAME}_6_vessel_0_obstacle_scenarios', FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), scenic_rs_msr_config), 
-    
-]
-
-
-#----------------------------------------------------------
-
-tests : List[GeneralConstraintSatisfaction] = [GeneralConstraintSatisfaction(solver=SolverFactory.factory(config.algorithm_desc, MEAS_GlobalConfig.VERBOSE),
-                                                               measurement_name=measurement_name,
-                                                                scenarios=interactions_to_run, test_config=config,
-                                                                number_of_runs=MEAS_GlobalConfig.NUMBER_OF_RUNS[interactions_to_run[0].actor_number_by_type],
-                                                                warmups=MEAS_GlobalConfig.WARMUPS, verbose=MEAS_GlobalConfig.VERBOSE)
-                                            for (measurement_name, interactions_to_run, config) in measurements]
+    def __init__(self, test : CSPScheduler, core_id : int, measurement_name) -> None:
+        super().__init__(target=test.run, args=(core_id,), name=f'process on {core_id} - {measurement_name}', daemon=True)
 
 
 def main():
-    core_count = cpu_count()
-    processes : List[Process] = []
-    for i in range(len(tests)):
-        process = SceneGenerationProcess(tests[i], i % core_count)
-        process.start()
-        processes.append(process)
+    msr_measurement_config = MSRMeasurementConfig()
+    base_sb_measurement_config = BaseSBMeasurementConfig()
+    base_rs_measurement_config = RSMeasurementConfig()
+    
+    measurements : List[Tuple[MeasurementConfig, Tuple[int, int], str]] = [
+        # (msr_measurement_config, (2, 0), SB_MSR),
+        # (msr_measurement_config, (3, 0), SB_MSR),
+        # (msr_measurement_config, (4, 0), SB_MSR),
+        # (msr_measurement_config, (5, 0), SB_MSR),
+        # (msr_measurement_config, (6, 0), SB_MSR),
+        
+        # (msr_measurement_config, (2, 0), TS_CD_RS),
+        # (msr_measurement_config, (3, 0), TS_CD_RS),
+        # (msr_measurement_config, (4, 0), TS_CD_RS),
+        # (msr_measurement_config, (5, 0), TS_CD_RS),
+        # (msr_measurement_config, (6, 0), TS_CD_RS), 
+        
+        # (base_measurement_config, (2, 0), SB_BASE),
+        # (base_measurement_config, (3, 0), SB_BASE),
+        # (base_measurement_config, (4, 0), SB_BASE),
+        # (base_measurement_config, (5, 0), SB_BASE),
+        # (base_measurement_config, (6, 0), SB_BASE), 
+        
+        # (base_rs_measurement_config, (2, 0), RS),
+        # (base_rs_measurement_config, (3, 0), RS),
+        # (base_rs_measurement_config, (4, 0), RS),
+        # (base_rs_measurement_config, (5, 0), RS),
+        # (base_rs_measurement_config, (6, 0), RS), 
+        
+        (base_rs_measurement_config, (2, 0), TS_RS),
+        (base_rs_measurement_config, (3, 0), TS_RS),
+        (base_rs_measurement_config, (4, 0), TS_RS),
+        (base_rs_measurement_config, (5, 0), TS_RS),
+        (base_rs_measurement_config, (6, 0), TS_RS), 
+    ]
 
-    # Wait for all processes to complete
+
+    #----------------------------------------------------------
+    tests : List[Tuple[CSPScheduler, str, int]] = []
+
+    for i in range(1):  # Repeat the measurements 30 times
+    # for i in range(1):
+        for (measurement_config, actor_number, config_group) in measurements:
+            random_seed = measurement_config.RANDOM_SEED + i
+            measurement_name = f'{measurement_config.BASE_NAME}_{actor_number[0]}_vessel_{actor_number[1]}_obstacle_scenarios'
+            config = create_config(measurement_config, config_group, random_seed)
+            solver = CPSSolverFactory.factory(config.algorithm_desc, measurement_config.VERBOSE)
+            
+            evaluator = CSPEvaluatorImpl(solver, measurement_name, config, measurement_config.VERBOSE)
+            
+            scenarios = get_scenarios(actor_number[0], actor_number[1], config_group)
+            
+            scheduler = CSPSchedulerFactory.factory(evaluator, scenarios, random_seed, measurement_config.WARMUPS,
+                                                    measurement_config.AVERAGE_TIME_PER_SCENE, config.init_method)
+            
+            tests.append((scheduler, measurement_name, actor_number[0]))
+
+
+    tests.sort(key=lambda x: x[2])  # Sort by vessel number for better load balancing
+    
+    
+    core_count = cpu_count()
+    processes: List[Process] = []
+    i = 0
+    while i < len(tests):
+        # Clean up finished processes
+        processes = [p for p in processes if p.is_alive()]
+        if len(processes) < core_count:
+            process = SceneGenerationProcess(tests[i][0], i % core_count, tests[i][1])
+            process.start()
+            processes.append(process)
+            i += 1
+        else:
+            # Wait a bit before checking again
+            for p in processes:
+                p.join(timeout=0.1)
+    # Wait for all remaining processes to complete
     for p in processes:
         p.join()
         

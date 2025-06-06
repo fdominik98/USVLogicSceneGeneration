@@ -4,12 +4,12 @@ from typing import List, Optional, Tuple
 import numpy as np
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 import pygad
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.models.logical_scenario import LogicalScenario
 
-class PyGadGAAlgorithm(Solver):
+class PyGadGAAlgorithm(CSPSolver):
     def __init__(self, verbose : bool) -> None:
         self.verbose = verbose
         
@@ -17,27 +17,35 @@ class PyGadGAAlgorithm(Solver):
     def algorithm_desc(cls) -> str:
         return 'pygad_GA_algorithm'
     
+    class OnGenerationCallback:
+        def __init__(self, logical_scenario: LogicalScenario, eval_data: EvaluationData, start_time: float, verbose: bool):
+            self.logical_scenario = logical_scenario
+            self.eval_data = eval_data
+            self.start_time = start_time
+            self.verbose = verbose
+            
+        def execute(self, ga_instance : pygad.GA):
+            if self.verbose:
+                print(f"Generation = {ga_instance.generations_completed}")
+                print(f"Best solution = {ga_instance.best_solution()}")
+            elapsed_time = time.time() - self.start_time
+            solution, solution_fitness, solution_idx = ga_instance.best_solution()
+            if abs(solution_fitness) == 0.0:
+                if self.verbose:
+                    print(f"Terminating due to fitness reaching 0.0.")
+                raise StopIteration
+            if elapsed_time > self.eval_data.timeout:
+                if self.verbose:
+                    print(f"Terminating due to timeout of {self.eval_data.timeout} seconds.")
+                raise StopIteration
+    
     def init_problem(self, logical_scenario: LogicalScenario, functional_scenario: Optional[FunctionalScenario],
                      initial_population : List[List[float]], eval_data : EvaluationData):
         def fitness_func(cls, solution, solution_idx):
             return Aggregate.factory(logical_scenario, eval_data.aggregate_strat, minimize=False).evaluate(solution)[0]
         
         
-        start_time = time.time()
-        def on_generation(ga_instance : pygad.GA):
-            if self.verbose:
-                print(f"Generation = {ga_instance.generations_completed}")
-                print(f"Best solution = {ga_instance.best_solution()}")
-            elapsed_time = time.time() - start_time
-            solution, solution_fitness, solution_idx = ga_instance.best_solution()
-            if abs(solution_fitness) == 0.0:
-                if self.verbose:
-                    print(f"Terminating due to fitness reaching 0.0.")
-                raise StopIteration
-            if elapsed_time > eval_data.timeout:
-                if self.verbose:
-                    print(f"Terminating due to timeout of {eval_data.timeout} seconds.")
-                raise StopIteration
+        on_generation_callback = self.OnGenerationCallback(logical_scenario, eval_data, time.time(), self.verbose)
             
         # Setting up the GA
         ga_instance : pygad.GA = pygad.GA(
@@ -48,23 +56,24 @@ class PyGadGAAlgorithm(Solver):
             num_genes=logical_scenario.all_variable_number,
             gene_space=[{'low': low, 'high': high} for low, high in zip(logical_scenario.xl, logical_scenario.xu)],
             initial_population=initial_population,
-            on_generation=on_generation,
+            on_generation=on_generation_callback.execute,
             mutation_probability=eval_data.mutate_prob,
             crossover_probability=eval_data.crossover_prob,
             parent_selection_type='tournament',
             K_tournament=2           
         )
-        runtime = time.time() - start_time
-        return ga_instance, runtime
+        return ga_instance
     
-    def do_evaluate(self, some_input : pygad.GA, eval_data : EvaluationData):
+    def evaluate(self, some_input : Tuple[pygad.GA, OnGenerationCallback], eval_data : EvaluationData):
         try:
+            algo, on_generation_callback = some_input
+            on_generation_callback.start_time = time.time()
             # Run the GA
-            some_input.run()
+            algo.run()
         except StopIteration:
             pass
         finally:
-            return some_input
+            return some_input, time.time() - on_generation_callback.start_time
     
     def convert_results(self, some_results : Tuple[pygad.GA, float], eval_data : EvaluationData) -> Tuple[List[float], int, float]:
         ga_instance, runtime = some_results

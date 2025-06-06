@@ -1,34 +1,34 @@
-from functional_level.models.model_parser import ModelParser
+from typing import List
+
+import numpy as np
+from functional_level.models.functional_model_manager import FunctionalModelManager
 from global_config import GlobalConfig
 from logical_level.constraint_satisfaction.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
-from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling_pipeline import RejectionSamplingPipeline
+from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling_pipeline import BaseRejectionSampling, TwoStepCDRejectionSampling, TwoStepRejectionSampling
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
+from logical_level.models.logical_model_manager import LogicalModelManager
+from utils.scenario import Scenario
+
+SB_MSR = 'sb-msr'
+SB_BASE = 'sb-base'
+TS_CD_RS = 'rs-msr'
+RS = 'rs'
+CD_RS = 'cd-rs'
+TS_RS = 'ts-rs'
 
 class MeasurementConfig():   
-   #NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 5, (3, 1) : 28 * 5, (4, 0) : 84 * 5, (5, 0) : 210 * 5, (6, 0) : 462 * 5}
-   NUMBER_OF_RUNS = {(2, 0) : 1 * ModelParser.TOTAL_FECS[(2, 0)], 
-                     # (2, 1) : 1 * ModelParser.TOTAL_FECS[(2, 1)],
-                     (3, 0) : 1 * ModelParser.TOTAL_FECS[(3, 0)], 
-                     # (3, 1) : 1 * ModelParser.TOTAL_FECS[(3, 1)],
-                     (4, 0) : 1 * ModelParser.TOTAL_FECS[(4, 0)],
-                     (5, 0) : 1 * ModelParser.TOTAL_FECS[(5, 0)],
-                     (6, 0) : 1 * ModelParser.TOTAL_FECS[(6, 0)]}
    WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = 600
    INIT_METHOD = RandomInstanceInitializer.name
+   AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
    VERBOSE = True
    BASE_NAME = 'test'
    
 class MSRMeasurementConfig():   
-   NUMBER_OF_RUNS = {(2, 0) : 1 * ModelParser.TOTAL_FECS[(2, 0)], 
-                     (3, 0) : 1 * ModelParser.TOTAL_FECS[(3, 0)], 
-                     (4, 0) : 1 * ModelParser.TOTAL_FECS[(4, 0)],
-                     (5, 0) : 1 * ModelParser.TOTAL_FECS[(5, 0)],
-                     (6, 0) : 1 * ModelParser.TOTAL_FECS[(6, 0)]}
    WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
@@ -36,32 +36,56 @@ class MSRMeasurementConfig():
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = False
    BASE_NAME = 'MSR_test'
-   REPETITIONS = 30
+   
+class BaseSBMeasurementConfig():   
+   WARMUPS = 2
+   RANDOM_SEED = 1234
+   TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
+   AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
+   INIT_METHOD = RandomInstanceInitializer.name
+   VERBOSE = False
+   BASE_NAME = 'Base_test'
+   
+class RSMeasurementConfig():   
+   WARMUPS = 2
+   RANDOM_SEED = 1234
+   TIMEOUT = np.inf # No timeout for RS
+   AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
+   INIT_METHOD = RandomInstanceInitializer.name
+   VERBOSE = False
+   BASE_NAME = 'Base_test'
    
 class DummyMeasurementConfig(MeasurementConfig):   
-   #NUMBER_OF_RUNS = {(2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 1, (3, 1) : 28 * 1, (4, 0) : 84 * 1, (5, 0) : 210 * 1, (6, 0) : 462 * 1}
-   NUMBER_OF_RUNS = {(2, 0) : 10, (2, 1) : 10, (3, 0) : 10, (3, 1) : 10, (4, 0) : 10, (5, 0) : 10, (6, 0) : 10}
-   WARMUPS = 0
+   WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = 10
    INIT_METHOD = RandomInstanceInitializer.name
-   VERBOSE = True
+   AVERAGE_TIME_PER_SCENE = 10
+   VERBOSE = False
    BASE_NAME = 'dummy_test'
    
 class MiniUSVMeasurementConfig(MeasurementConfig):   
-   NUMBER_OF_RUNS = {(1, 0) : 1, (2, 0) : 7 * 5, (2, 1) : 7 * 5, (3, 0) : 28 * 1, (3, 1) : 28 * 1, (4, 0) : 84 * 1, (5, 0) : 210 * 1, (6, 0) : 462 * 1}
    WARMUPS = 0
    RANDOM_SEED = 1234
    TIMEOUT = 30
    INIT_METHOD = RandomInstanceInitializer.name
    VERBOSE = True
    BASE_NAME = 'mini_usv_test'
+  
+  
+def get_scenarios(vessel_number : int, obstacle_number : int, config_group : str) -> List[Scenario]: 
+   if config_group == SB_MSR or config_group == TS_CD_RS or config_group==CD_RS:
+      return FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)
+   elif config_group == SB_BASE or config_group == RS or config_group == TS_RS:
+      return LogicalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)
+   else:
+      raise ValueError(f"Unknown config group: {config_group}")
    
 def create_config(meas_config : MeasurementConfig, config_group : str, random_seed : int) -> EvaluationData:
    config = EvaluationData(timeout=meas_config.TIMEOUT,
                             init_method=meas_config.INIT_METHOD, random_seed=random_seed,
                             aggregate_strat=ActorAggregate.name, config_group=config_group)
-   if config_group == 'SB-MSR':
+   if config_group == SB_MSR:
       config.population_size=30
       config.mutate_eta=15
       config.mutate_prob=1
@@ -69,22 +93,28 @@ def create_config(meas_config : MeasurementConfig, config_group : str, random_se
       config.crossover_prob=1
       config.algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc()                 
       config.aggregate_strat=ActorAggregate.name
-   elif config_group == 'SB-O':
-      config.population_size=8
-      config.mutate_eta=20
+   elif config_group == SB_BASE:
+      config.population_size=10
+      config.mutate_eta=15
       config.mutate_prob=0.8
-      config.crossover_eta=15
+      config.crossover_eta=20
       config.crossover_prob=1
-      config.algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc()                 
+      config.algorithm_desc=PyMooNSGA2Algorithm.algorithm_desc()                 
       config.aggregate_strat=ActorAggregate.name
-   elif config_group == 'RS-MSR':
+   elif config_group == TS_CD_RS:
       config.population_size=1
       config.aggregate_strat=AggregateAll.name
-      config.algorithm_desc=RejectionSamplingPipeline.algorithm_desc()
-   elif config_group == 'RS-O':
+      config.algorithm_desc=TwoStepCDRejectionSampling.algorithm_desc()
+   elif config_group == RS:
       config.population_size=1
       config.aggregate_strat=AggregateAll.name
-      config.algorithm_desc=RejectionSamplingPipeline.algorithm_desc()
+      config.algorithm_desc=BaseRejectionSampling.algorithm_desc()
+   elif config_group == CD_RS:
+      raise NotImplementedError("CD_RS is not implemented in the current configuration.")
+   elif config_group == TS_RS:
+      config.population_size=1
+      config.aggregate_strat=AggregateAll.name
+      config.algorithm_desc=TwoStepRejectionSampling.algorithm_desc()
    else:
       raise ValueError(f"Unknown config group: {config_group}")
    return config

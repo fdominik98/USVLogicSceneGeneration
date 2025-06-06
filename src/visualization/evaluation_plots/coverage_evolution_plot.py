@@ -1,12 +1,10 @@
-from typing import Dict, List, Set, Tuple
+from typing import List, Set, Tuple
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-from concrete_level.models.concrete_scene import ConcreteScene
 from functional_level.models.model_parser import ModelParser
-from global_config import GlobalConfig
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
+from utils.evaluation_config import SB_BASE, SB_MSR, RS, TS_CD_RS
 from visualization.plotting_utils import EvalPlot
 
 class CoverageEvolutionPlot(EvalPlot):  
@@ -14,24 +12,10 @@ class CoverageEvolutionPlot(EvalPlot):
         self.is_second_level_abstraction = is_second_level_abstraction
         super().__init__(eval_datas, is_all=True)
         
-        # for actor_numbers_by_type in self.actor_numbers_by_type:
-        #     for comparison_group in self.config_groups:
-        #         for seed in self.measurements[actor_numbers_by_type][comparison_group].keys():
-        #             for eval_data in self.measurements[actor_numbers_by_type][comparison_group][seed]:
-        #                 if not eval_data.is_valid:
-        #                     eval_data.evaluation_time = GlobalConfig.FOUR_MINUTES_IN_SEC
-        #                     eval_data.error_message = ''
-        #                     eval_data.save_as_measurement()
-        #                 # if the sum of eval time of the eval_datas is greater than GlobalConfig.AVERAGE_TIME_PER_SCENE * ModelParser.TOTAL_FECS[actor_numbers_by_type], delete last eval_data
-        #                 if sum(d.evaluation_time for d in self.measurements[actor_numbers_by_type][comparison_group][seed]) > GlobalConfig.FOUR_MINUTES_IN_SEC * ModelParser.TOTAL_FECS[actor_numbers_by_type]:
-        #                     #delete from disk
-        #                     self.measurements[actor_numbers_by_type][comparison_group][seed][-1].delete_from_disk()
-        #                     self.measurements[actor_numbers_by_type][comparison_group][seed].pop()
-                        
     @property   
     def config_groups(self) -> List[str]:
-        #return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr', 'common_ocean_benchmark']
-        return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr']
+        #return [SB_BASE, RS, SB_MSR, TS_CD_RS, 'common_ocean_benchmark']
+        return [SB_BASE, RS, SB_MSR, TS_CD_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
@@ -66,6 +50,8 @@ class CoverageEvolutionPlot(EvalPlot):
     def aggregate_data(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str,
                             timestamps : np.ndarray, pred) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         seeds = self.measurements[actor_numbers_by_type][comparison_group].keys()
+        if len(seeds) == 0:
+            return np.array([0]*timestamps), np.array([0]*timestamps), np.array([0]*timestamps)
         # Create a 2D array: rows = seeds, columns = timestamps
         coverages_by_seed = []
         for seed in seeds:
@@ -86,22 +72,36 @@ class CoverageEvolutionPlot(EvalPlot):
         return sum(d.evaluation_time for d in data)
     
     def create_timestamps(self, actor_numbers_by_type) -> np.ndarray:
-        seeds : Set[int] = set()
-        for comparison_group in self.comparison_groups:
-            seeds |= set(self.measurements[actor_numbers_by_type][comparison_group].keys())
         max_runtime = 0.0
         for comparison_group in self.comparison_groups:
-            runtimes = [self.calculate_runtime(self.measurements[actor_numbers_by_type][comparison_group][seed]) for seed in seeds]
-            runtime = np.percentile(runtimes, 90, axis=0)
-            if runtime > max_runtime:
-                max_runtime = runtime
-            # for seed in seeds:
-            #     data = self.measurements[actor_numbers_by_type][comparison_group][seed]
-            #     runtime = sum(d.evaluation_time for d in data)
-            #     if runtime > max_runtime:
-            #         max_runtime = runtime
+            for seed in self.measurements[actor_numbers_by_type][comparison_group].keys():
+                runtime = self.calculate_runtime(self.measurements[actor_numbers_by_type][comparison_group][seed])
+                if runtime > max_runtime:
+                    max_runtime = runtime
         return np.linspace(0, max_runtime, 400)
     
+    
+    def crop_data(self, timestamps : np.ndarray, data : List[Tuple[np.ndarray, np.ndarray, np.ndarray]]) -> Tuple[np.ndarray, List[Tuple[np.ndarray, np.ndarray, np.ndarray]]]:
+        # Find the last index where any y-series changes
+        last_change_indices = []
+
+        for median, q1, q3 in data:
+            change_indices = np.where((np.diff(median) != 0) | (np.diff(q1) != 0) | (np.diff(q3) != 0))[0]
+            if len(change_indices) > 0:
+                last_change = change_indices[-1] + 1  # +1 to include the last change point
+                last_change_indices.append(last_change)
+
+        # Determine the global last change index
+        if last_change_indices:
+            global_last_change_index = max(last_change_indices)
+        else:
+            global_last_change_index = len(timestamps) - 1  # No change in any series
+            
+        timestamps_trimmed = timestamps[:global_last_change_index + 1]
+        data_trimmed = [(median[:global_last_change_index + 1], q1[:global_last_change_index + 1], q3[:global_last_change_index + 1],) for median, q1, q3 in data]
+        return timestamps_trimmed, data_trimmed
+            
+            
     def create_fig(self) -> plt.Figure:
         fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 1), constrained_layout=True)
         gs = gridspec.GridSpec(1, self.vessel_num_count, height_ratios=[1]) 
@@ -123,10 +123,15 @@ class CoverageEvolutionPlot(EvalPlot):
             axi.set_ylim(0, 105)
             
             timestamps = self.create_timestamps(actor_number_by_type)
+            data = []
             for j, comparison_group in enumerate(self.comparison_groups):
-                        
                 median, q1, q3 = self.aggregate_data(actor_number_by_type, comparison_group, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
+                data.append((median, q1, q3))
                 
+            timestamps, data = self.crop_data(timestamps, data)
+            
+            for j, comparison_group in enumerate(self.comparison_groups):                        
+                median, q1, q3 = data[j]                
                 axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
                 axi.fill_between(timestamps, q1, q3, color=self.colors[j], alpha=0.3)
                 

@@ -11,7 +11,7 @@ from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_
 from logical_level.constraint_satisfaction.evolutionary_computation.pygad_ga_algorithm import PyGadGAAlgorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.scipy_de_algorithm import SciPyDEAlgorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pyswarm_pso_algorithm import PySwarmPSOAlgorithm
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import GeneralConstraintSatisfaction, Solver
+from logical_level.constraint_satisfaction.one_step_constraint_satisfaction import GeneralConstraintSatisfaction, CSPSolver
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.models.logical_model_manager import LogicalModelManager
@@ -84,7 +84,7 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
                             timeout=TIMEOUT, init_method=INIT_METHOD, random_seed=RANDOM_SEED, aggregate_strat=AggregateAll.name)
 
 
-    solvers : List[Tuple[Any, Solver]]= [
+    solvers : List[Tuple[Any, CSPSolver]]= [
         # (create_GA_config, PyGadGAAlgorithm(verbose=VERBOSE)),
         # (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
         (create_NSGA_vessel_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),

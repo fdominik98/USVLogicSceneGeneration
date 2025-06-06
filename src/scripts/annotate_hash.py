@@ -40,15 +40,15 @@ for i, eval_data in enumerate(eval_datas):
         print('Not optimal solution, skipped.')
     else:    
         scenario = ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data)
-        first_level_hash = scenario.functional_scenario.first_level_shape_hash()
-        second_level_hash = scenario.functional_scenario.second_level_shape_hash()
+        fsm_level_hash = scenario.functional_scenario.fsm_shape_hash()
+        fec_level_hash = scenario.functional_scenario.fec_shape_hash()
         is_relevant_by_fec = scenario.functional_scenario.is_relevant_by_fec
         is_relevant_by_fsm = scenario.functional_scenario.is_relevant_by_fsm
         is_ambiguous_by_fec = scenario.functional_scenario.is_ambiguous_by_fec
         is_ambiguous_by_fsm = scenario.functional_scenario.is_ambiguous_by_fsm
         eval_data.best_scene = SceneBuilder(eval_data.best_scene).build(
-                                                        first_level_hash=first_level_hash,
-                                                        second_level_hash=second_level_hash,
+                                                        first_level_hash=fsm_level_hash,
+                                                        second_level_hash=fec_level_hash,
                                                         is_relevant_by_fec=is_relevant_by_fec,
                                                         is_relevant_by_fsm=is_relevant_by_fsm,
                                                         is_ambiguous_by_fec=is_ambiguous_by_fec,

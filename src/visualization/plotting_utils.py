@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
+from utils.evaluation_config import SB_BASE, SB_MSR, RS, TS_CD_RS, CD_RS, TS_RS
 
 class PlotBase(ABC):
     plt.rcParams['font.family'] = 'serif'
@@ -20,10 +21,12 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {'sb-o' : 'Base-SB',
-                        'sb-msr' : 'MSR-SB',
-                        'rs-o' : 'Base-RS',
-                        'rs-msr' : 'MSR-RS',
+    config_group_map = {SB_BASE : 'Base-SB',
+                        SB_MSR : 'MSR-SB',
+                        RS : 'RS',
+                        TS_CD_RS : 'TS-CD-RS',
+                        TS_RS : 'TS-RS',
+                        CD_RS : 'CD-RS',                        
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
@@ -123,7 +126,7 @@ class DummyEvalPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
+        return [SB_BASE, SB_MSR, RS, TS_CD_RS, 'common_ocean_benchmark']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

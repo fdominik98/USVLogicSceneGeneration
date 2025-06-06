@@ -61,7 +61,7 @@ def generate_scene(scenario : ScenicScenario, aggregate : Aggregate, first_solut
     
 
 def scenic_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_distances_map, min_distance_map, vis_distance_map, bearing_map, verbose=False) -> ScenicScenario:
-    base_path = f'{SCENIC_FOLDER}/scenic_base.scenic'
+    base_path = f'{SCENIC_FOLDER}/scenic_scenario.scenic'
     if not os.path.exists(base_path):
         raise FileNotFoundError(base_path)
     with open(base_path, 'r') as file:

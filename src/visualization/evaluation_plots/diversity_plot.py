@@ -4,6 +4,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
+from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
 from visualization.plotting_utils import EvalPlot
 
 class DiversityPlot(EvalPlot):  
@@ -15,8 +16,8 @@ class DiversityPlot(EvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        #return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr', 'common_ocean_benchmark']
-        return ['sb-o', 'rs-o', 'sb-msr', 'rs-msr']
+        #return [SB_BASE, RS, SB_MSR, TS_CD_RS, 'common_ocean_benchmark']
+        return [SB_BASE, RS, SB_MSR, TS_CD_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

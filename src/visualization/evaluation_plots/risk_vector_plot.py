@@ -5,6 +5,7 @@ import numpy as np
 from concrete_level.models.concrete_scene import ConcreteScene
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from global_config import GlobalConfig
+from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
 from visualization.plotting_utils import EvalPlot
 
 class RiskVectorPlot(EvalPlot):  
@@ -39,7 +40,7 @@ class RiskVectorPlot(EvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return ['sb-o', 'sb-msr', 'rs-o', 'rs-msr', 'common_ocean_benchmark']
+        return [SB_BASE, SB_MSR, RS, TS_CD_RS, 'common_ocean_benchmark']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

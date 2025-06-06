@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import Solver
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 from scipy.optimize import differential_evolution, OptimizeResult
 from logical_level.models.logical_scenario import LogicalScenario
 
@@ -35,7 +35,7 @@ class ObjectiveMonitorCallback:
         return objective
 
 
-class SciPyDEAlgorithm(Solver):
+class SciPyDEAlgorithm(CSPSolver):
     def __init__(self, verbose : bool) -> None:
         self.verbose = verbose
         self.current_best_objective = np.inf
@@ -49,7 +49,7 @@ class SciPyDEAlgorithm(Solver):
         
         return list(zip(logical_scenario.xl, logical_scenario.xu)), aggregate, initial_population
     
-    def do_evaluate(self, some_input : Tuple[List[Tuple[int, int]], Aggregate, List[List[float]]], eval_data : EvaluationData):
+    def evaluate(self, some_input : Tuple[List[Tuple[int, int]], Aggregate, List[List[float]]], eval_data : EvaluationData):
        bounds, aggregate, initial_pop = some_input
        
        objective_monitor = ObjectiveMonitorCallback(aggregate, eval_data.timeout, self.verbose)

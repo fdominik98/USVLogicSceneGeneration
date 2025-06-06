@@ -3,10 +3,9 @@ from typing import List, Tuple
 import numpy as np
 from logical_level.constraint_satisfaction.aggregates import Aggregate
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from logical_level.constraint_satisfaction.general_constraint_satisfaction import GeneralConstraintSatisfaction
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 import pyswarms as ps
 from logical_level.models.logical_scenario import LogicalScenario
-from utils.scenario import Scenario
 
 class ObjectiveMonitor():
     def __init__(self, logical_scenario : LogicalScenario, eval_data : EvaluationData, max_time, verbose) -> None:
@@ -42,7 +41,7 @@ class ObjectiveMonitor():
             print(f'Best Cost: {self.best_fitness}')
             print(f'Iter count: {self.iter_count}')
     
-class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
+class PySwarmPSOAlgorithm(CSPSolver):
     def __init__(self, verbose : bool) -> None:
         self.verbose = verbose
         
@@ -62,7 +61,7 @@ class PySwarmPSOAlgorithm(GeneralConstraintSatisfaction):
         
         return optimizer, monitor
     
-    def do_evaluate(self, some_input : Tuple[ps.single.GlobalBestPSO, ObjectiveMonitor], eval_data : EvaluationData):
+    def evaluate(self, some_input : Tuple[ps.single.GlobalBestPSO, ObjectiveMonitor], eval_data : EvaluationData):
         optimizer, monitor = some_input
         try:
             optimizer.optimize(monitor.objective, iters=np.iinfo(np.int64).max, verbose=self.verbose)

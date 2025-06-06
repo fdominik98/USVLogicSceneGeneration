@@ -21,10 +21,12 @@ class BaseConfig():
     EPSILON=1e-10
 
     ONE_MINUTE_IN_SEC = 60
+    FOUR_MINUTES_IN_SEC = 4 * ONE_MINUTE_IN_SEC
     ONE_HOUR_IN_SEC = 60 * ONE_MINUTE_IN_SEC
     TWO_HOURS_IN_SEC = 2 * ONE_HOUR_IN_SEC
     TEN_MINUTE_IN_SEC = 10 * ONE_MINUTE_IN_SEC
     TWENTY_MINUTE_IN_SEC = 20 * ONE_MINUTE_IN_SEC
+    ONE_DAY_IN_SEC = 24 * ONE_HOUR_IN_SEC
 
     TWO_N_MILE = 2 * N_MILE_TO_M_CONVERSION
 
@@ -34,7 +36,7 @@ class BaseConfig():
     VISIBILITY_DIST_6 = 6 * N_MILE_TO_M_CONVERSION
 
     MIN_HEADING = -np.pi
-    MAX_HEADING = np.pi    
+    MAX_HEADING = np.pi   
     
 class WaraPsConfig(BaseConfig):
     MIN_BEAM = 0.5
@@ -229,5 +231,8 @@ def create_scenario(os_id, ts_ids, obst_ids, length_map, radius_map, possible_di
         return obst
 
     return [add_ts(ts_id) for ts_id in ts_ids], [add_obst(obst_id) for obst_id in obst_ids]
-ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1], obst_ids=[], length_map={0: 29.9999999999464, 1: 248.5450864102199}, radius_map={0: 119.9999999997856, 1: 994.1803456408796}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002}, vis_distance_map={(0, 1): 9260.005}, bearing_map={(0, 1): (0.9817477042468103, 1.9634954084936207, 0.9817477042468103, 1.9634954084936207)})
+ts_infos, obst_infos = create_scenario(os_id = 0, ts_ids=[1, 2, 3, 4], obst_ids=[], length_map={0: 29.999999999905555, 1: 208.77536691724, 2: 327.3497404970434, 3: 50.290889134035034, 4: 129.19662240683869}, radius_map={0: 119.99999999962222, 1: 835.10146766896, 2: 1309.3989619881736, 3: 201.16355653614013, 4: 516.7864896273547}, possible_distances_map={(0, 1): [3704.002, 3704.002, 5556.003, 9260.005], (0, 2): [3704.002, 3704.002, 5556.003, 9260.005], (0, 3): [3704.002, 3704.002, 5556.003, 9260.005], (0, 4): [3704.002, 3704.002, 5556.003, 9260.005]}, min_distance_map={(0, 1): 3704.002, (0, 2): 3704.002, (0, 3): 3704.002, (0, 4): 3704.002}, vis_distance_map={(0, 1): 5556.003, (0, 2): 9260.005, (0, 3): 9260.005, (0, 4): 5556.003}, bearing_map={(0, 1): (-0.9817477042468103, 1.9634954084936207, -3.141592653589793, 2.356194490192345), (0, 2): (-0.9817477042468103, 1.9634954084936207, -0.9817477042468103, 1.9634954084936207), (0, 3): (0.9817477042468103, 1.9634954084936207, 0.9817477042468103, 1.9634954084936207), (0, 4): (-0.9817477042468103, 1.9634954084936207, -3.141592653589793, 2.356194490192345)})
 ts1 = ts_infos.pop(0)
+ts2 = ts_infos.pop(0)
+ts3 = ts_infos.pop(0)
+ts4 = ts_infos.pop(0)

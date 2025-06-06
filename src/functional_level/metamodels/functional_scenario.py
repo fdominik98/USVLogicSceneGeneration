@@ -281,7 +281,7 @@ class FunctionalScenario(Scenario):
     def all_colregs_relation_pairs(self) -> Set[Tuple[FuncObject, FuncObject]]:
         return set([(o1, o2) for o1, o2 in list(permutations(self.sea_objects, 2)) if self.in_colregs_relation(o1, o2)])
     
-    def first_level_shape_hash(self, hops: int = 1) -> int:
+    def fsm_shape_hash(self, hops: int = 1) -> int:
         return self._shape_hash(hops,
             [self.in_visibility_distance_interpretation, self.at_visibility_distance_interpretation,
              self.out_visibility_distance_interpretation, self.may_collide_interpretation,
@@ -289,7 +289,7 @@ class FunctionalScenario(Scenario):
              self.in_starboard_side_sector_of_interpretation, self.in_stern_sector_of_interpretation,
              self.static_obstacle_type_interpretation, self.vessel_type_interpretation])
         
-    def second_level_shape_hash(self, hops: int = 1) -> int:
+    def fec_shape_hash(self, hops: int = 1) -> int:
         return self._shape_hash(hops,
             [self.head_on_interpretation, self.overtaking_to_port_interpretation,
              self.overtaking_to_starboard_interpretation, self.crossing_from_port_interpretation,
