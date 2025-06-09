@@ -29,7 +29,7 @@ def main():
         # (msr_measurement_config, (5, 0), TS_CD_RS),
         # (msr_measurement_config, (6, 0), TS_CD_RS), 
         
-        (base_sb_measurement_config, (2, 0), SB_BASE),
+        # (base_sb_measurement_config, (2, 0), SB_BASE),
         # (base_sb_measurement_config, (3, 0), SB_BASE),
         # (base_sb_measurement_config, (4, 0), SB_BASE),
         # (base_sb_measurement_config, (5, 0), SB_BASE),
@@ -59,7 +59,7 @@ def main():
     #----------------------------------------------------------
     tests : List[Tuple[CSPScheduler, str, int]] = []
 
-    for i in range(10):  # Repeat the measurements 30 times
+    for i in range(30):  # Repeat the measurements 30 times
         for (measurement_config, actor_number, config_group) in measurements:
             random_seed = measurement_config.RANDOM_SEED + i
             measurement_name = f'{measurement_config.BASE_NAME}_{actor_number[0]}_vessel_{actor_number[1]}_obstacle_scenarios'
