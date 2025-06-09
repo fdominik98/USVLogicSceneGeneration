@@ -2,11 +2,8 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from datetime import datetime
 import gc
-import os
 import traceback
 from typing import Optional
-
-import psutil
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from logical_level.constraint_satisfaction.aggregates import Aggregate
@@ -19,7 +16,7 @@ from logical_level.models.logical_scenario import LogicalScenario
 class CSPEvaluator(ABC):
     @abstractmethod
     def evaluate(self, logical_scenario : LogicalScenario, functional_scenario : Optional[FunctionalScenario],
-                   core_id : int,  save : bool, current_eval_time : float, max_eval_time : float) -> EvaluationData:
+                save : bool, current_eval_time : float, max_eval_time : float) -> EvaluationData:
         pass
     
     @property
@@ -35,7 +32,7 @@ class CSPEvaluatorImpl(CSPEvaluator):
         self.verbose = verbose
         
     def evaluate(self, logical_scenario : LogicalScenario, functional_scenario : Optional[FunctionalScenario],
-                   core_id : int,  save : bool, current_eval_time : float, max_eval_time : float) -> EvaluationData:
+                 save : bool, current_eval_time : float, max_eval_time : float) -> EvaluationData:
         try:
             eval_data = deepcopy(self.test_config)
             eval_data.vessel_number = logical_scenario.vessel_number
@@ -47,8 +44,6 @@ class CSPEvaluatorImpl(CSPEvaluator):
             eval_data.timeout = min(eval_data.timeout, max_eval_time - current_eval_time)         
             
             gc.collect()
-            p = psutil.Process(os.getpid()) # Ensure dedicated cpu
-            p.cpu_affinity([core_id])
             
             initial_pop = logical_scenario.get_population(eval_data.population_size)            
             some_input = self.solver.init_problem(logical_scenario, functional_scenario, initial_pop, eval_data)

@@ -43,6 +43,7 @@ class EvalPlot(PlotBase, ABC):
         self.comparison_group_count = len(self.comparison_groups)
         self.vessel_num_count = len(self.actor_numbers_by_type)
         self.colors = self.generate_colors(self.comparison_group_count)
+        self.markers = ['o', 's', '^', 'D', 'v', 'x', '*', 'P', 'h']
         self.vessel_num_labels = [self.actor_numbers_by_type_map[vn] for vn in self.actor_numbers_by_type]
         self.group_labels = [self.algo_map[algo] + '-' + self.aggregate_map[aggregate] for algo, aggregate in self.algos] if is_algo else [self.config_group_map[cg.lower()] for cg in self.config_groups]
         

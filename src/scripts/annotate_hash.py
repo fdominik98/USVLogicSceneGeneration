@@ -1,15 +1,15 @@
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Process, cpu_count
+import random
+import time
 from typing import List
+
+import numpy as np
+from tqdm import tqdm
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from concrete_level.data_parser import EvalDataParser
-from concrete_level.models.multi_level_scenario import MultiLevelScenario
 from concrete_level.trajectory_generation.scene_builder import SceneBuilder
-from evaluation.risk_evaluation import RiskVector
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-
-dp = EvalDataParser()
-eval_datas : List[EvaluationData] = dp.load_dirs_merged_as_models()
-skipped = 0
-done = 0
 
 # for eval_data in eval_datas:    
 #     pass    
@@ -18,42 +18,47 @@ done = 0
 #     print(f'Config Group: {eval_data.config_group}. Done {done}, Skipped: {skipped} / {len(eval_datas)}')
 # exit(0)#-------------------------------------------------------
 
-START_FROM = 0
-
-def info(data : EvaluationData):
+def info(data : EvaluationData, done : int, skipped : int, total_eval_datas : int):
     print(f'''Measurement: {data.measurement_name}, Algorithm: {data.algorithm_desc}, Config name: {data.scenario_name} 
-            Config Group: {data.config_group}. Done {done}, Skipped: {skipped}, ({done + skipped} / {len(eval_datas)}, {(done + skipped) / len(eval_datas) * 100:.1f} %)''')
+            Config Group: {data.config_group}. Done {done}, Skipped: {skipped}, ({done + skipped} / {total_eval_datas}, {(done + skipped) / total_eval_datas * 100:.1f} %)''')
 
-for i, eval_data in enumerate(eval_datas):
-    
-    if i < START_FROM:
-        if eval_data.best_scene.has_functional_hash:
-            done += 1
-        else:
-            skipped += 1
-        print('Before start, skipped.')    
-        info(eval_data)
-        continue
-    
+def annotate_hash(eval_data : EvaluationData):
+    # skipped = 0
+    # done = 0
     if not eval_data.is_valid:
-        skipped += 1
-        print('Not optimal solution, skipped.')
-    else:    
-        scenario = ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data)
-        fsm_level_hash = scenario.functional_scenario.fsm_shape_hash()
-        fec_level_hash = scenario.functional_scenario.fec_shape_hash()
-        is_relevant_by_fec = scenario.functional_scenario.is_relevant_by_fec
-        is_relevant_by_fsm = scenario.functional_scenario.is_relevant_by_fsm
-        is_ambiguous_by_fec = scenario.functional_scenario.is_ambiguous_by_fec
-        is_ambiguous_by_fsm = scenario.functional_scenario.is_ambiguous_by_fsm
-        eval_data.best_scene = SceneBuilder(eval_data.best_scene).build(
-                                                        first_level_hash=fsm_level_hash,
-                                                        second_level_hash=fec_level_hash,
-                                                        is_relevant_by_fec=is_relevant_by_fec,
-                                                        is_relevant_by_fsm=is_relevant_by_fsm,
-                                                        is_ambiguous_by_fec=is_ambiguous_by_fec,
-                                                        is_ambiguous_by_fsm=is_ambiguous_by_fsm)
-        done += 1
-        eval_data.save_to_json()
-    info(eval_data)
+        return
+        # skipped += 1
+        # print('Not optimal solution, skipped.')
+    scenario = ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data)
+    fsm_level_hash = scenario.functional_scenario.fsm_shape_hash()
+    fec_level_hash = scenario.functional_scenario.fec_shape_hash()
+    is_relevant_by_fec = scenario.functional_scenario.is_relevant_by_fec
+    is_relevant_by_fsm = scenario.functional_scenario.is_relevant_by_fsm
+    is_ambiguous_by_fec = scenario.functional_scenario.is_ambiguous_by_fec
+    is_ambiguous_by_fsm = scenario.functional_scenario.is_ambiguous_by_fsm
+    eval_data.best_scene = SceneBuilder(eval_data.best_scene).build(
+                                                    first_level_hash=fsm_level_hash,
+                                                    second_level_hash=fec_level_hash,
+                                                    is_relevant_by_fec=is_relevant_by_fec,
+                                                    is_relevant_by_fsm=is_relevant_by_fsm,
+                                                    is_ambiguous_by_fec=is_ambiguous_by_fec,
+                                                    is_ambiguous_by_fsm=is_ambiguous_by_fsm)
+    # done += 1
+    eval_data.save_to_json()
+    # info(eval_data, done, skipped, len(eval_datas))
     
+def main():
+    dp = EvalDataParser()
+    eval_datas : List[EvaluationData] = dp.load_dirs_merged_as_models()
+    
+    # random.seed(time.time())
+    # random.shuffle(eval_datas)
+
+    # core_count = cpu_count()
+
+    # eval_data_batches = np.array_split(eval_datas, core_count)
+    with ThreadPoolExecutor() as executor:
+        results = list(tqdm(executor.map(annotate_hash, eval_datas), total=len(eval_datas), desc="Hashing eval datas"))
+            
+if __name__ == '__main__':
+    main()

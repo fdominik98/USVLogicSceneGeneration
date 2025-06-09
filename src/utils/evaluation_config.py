@@ -7,7 +7,12 @@ from logical_level.constraint_satisfaction.aggregates import ActorAggregate, Agg
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
-from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling_pipeline import BaseRejectionSampling, TwoStepCDRejectionSampling, TwoStepRejectionSampling
+from logical_level.constraint_satisfaction.rejection_sampling.rejection_sampling_pipeline import (
+   BaseRejectionSampling,
+   CDRejectionSampling,
+   TwoStepCDRejectionSampling,
+   TwoStepRejectionSampling,
+)
 from logical_level.mapping.instance_initializer import RandomInstanceInitializer
 from logical_level.models.logical_model_manager import LogicalModelManager
 from utils.scenario import Scenario
@@ -34,7 +39,7 @@ class MSRMeasurementConfig():
    TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
    AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
    INIT_METHOD = RandomInstanceInitializer.name
-   VERBOSE = False
+   VERBOSE = True
    BASE_NAME = 'MSR_test'
    
 class BaseSBMeasurementConfig():   
@@ -110,7 +115,9 @@ def create_config(meas_config : MeasurementConfig, config_group : str, random_se
       config.aggregate_strat=AggregateAll.name
       config.algorithm_desc=BaseRejectionSampling.algorithm_desc()
    elif config_group == CD_RS:
-      raise NotImplementedError("CD_RS is not implemented in the current configuration.")
+      config.population_size=1
+      config.aggregate_strat=AggregateAll.name
+      config.algorithm_desc=CDRejectionSampling.algorithm_desc()
    elif config_group == TS_RS:
       config.population_size=1
       config.aggregate_strat=AggregateAll.name

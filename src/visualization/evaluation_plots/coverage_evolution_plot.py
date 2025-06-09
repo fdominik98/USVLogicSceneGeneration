@@ -34,9 +34,7 @@ class CoverageEvolutionPlot(EvalPlot):
             next_timestamp = coverage[-1][1] + d.evaluation_time
             if d.is_valid and d.best_scene.second_level_hash not in covered_classes and pred(d):
                 covered_classes.add(d.best_scene.second_level_hash)
-                coverage.append((coverage[-1][0] + 1, next_timestamp))
-            else:
-                coverage.append((coverage[-1][0], next_timestamp))
+            coverage.append((len(covered_classes), next_timestamp))
                 
         # find the last timestamp in the coverage that is less than or equal to each timestamp in timestamps
         for timestamp in timestamps:
@@ -133,6 +131,7 @@ class CoverageEvolutionPlot(EvalPlot):
             for j, comparison_group in enumerate(self.comparison_groups):                        
                 median, q1, q3 = data[j]                
                 axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
+                
                 axi.fill_between(timestamps, q1, q3, color=self.colors[j], alpha=0.3)
                 
                 self.set_xticks(axi, timestamps, unit='s', tick_number=6)

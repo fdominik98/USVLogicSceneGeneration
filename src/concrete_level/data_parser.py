@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from typing import List, Tuple
 import pandas as pd
+from tqdm import tqdm
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 import tkfilebrowser
 from utils.file_system_utils import GEN_DATA_FOLDER, get_all_file_paths
@@ -63,9 +65,11 @@ class EvalDataParser(DataParser):
         files = tkfilebrowser.askopenfilenames(initialdir=self.dir)
         return self.load_data_models_from_files(files)
     
-    def load_data_models_from_files(self, files : List[str]) -> List[EvaluationData]:
-        data_models = [self.load_model_from_file(file) for file in files]
-        return [model for model in data_models]
+
+    def load_data_models_from_files(self, files: List[str]) -> List[EvaluationData]:
+        with ThreadPoolExecutor() as executor:
+            results = list(tqdm(executor.map(self.load_model_from_file, files), total=len(files), desc="Loading files"))
+        return results
     
     def load_dirs_merged_as_models(self) -> List[EvaluationData]:
         files = []

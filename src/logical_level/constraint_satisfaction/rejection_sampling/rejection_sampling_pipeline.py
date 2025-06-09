@@ -101,59 +101,58 @@ class TwoStepCDRejectionSampling(RejectionSamplingPipeline):
         for obst_id in obst_ids:
             vis_distance_map[(os_id, obst_id)] = o2VisibilityByo1(True, radius_map[obst_id])
             
-        if functional_scenario is not None:
-            os = functional_scenario.os_object
-            for o in functional_scenario.ts_objects:
-                vis_distance_map[(os.id, o.id)] = min(
-                    o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((os, o)), length_map[o.id]),
-                    o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((o, os)), length_map[os.id]))
-                
-                sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
-                angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
-                
-                #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
-                # heading_ego_to_ts: relative angle to ego heading
-                # heading_ts_to_ego: relative angle to p12
-                bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
-                
-                # scenarios = [
-                #     (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
-                #     (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                #     (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
-                #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
-                #                      functional_scenario.in_port_side_sector_of_interpretation),
-                #                                 (bow_angle/4, bow_angle/2)),
-                #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
-                #                      functional_scenario.in_port_side_sector_of_interpretation),
-                #                                 (-bow_angle/4, bow_angle/2)),
-                # ]
-                
-                
-                scenarios = [
-                    (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
-                    (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                    (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
-                    (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
-                ]
-                
-                for condition, bearing in scenarios:
-                    if condition:
-                        bearing_map[(os.id, o.id)] = bearing
-                
-                # scenario1 = (0, 0)
-                # for condition, bearing in scenarios:
-                #     if condition((o, os)):
-                #         scenario1 = bearing
-                        
-                # scenario2 = (0, 0)
-                # for condition, bearing in scenarios:
-                #     if condition((os, o)):
-                #         scenario2 = bearing
+        os = functional_scenario.os_object
+        for o in functional_scenario.ts_objects:
+            vis_distance_map[(os.id, o.id)] = min(
+                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((os, o)), length_map[o.id]),
+                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((o, os)), length_map[os.id]))
             
-                # bearing_map[(os.id, o.id)] = (scenario1[0], scenario1[1], scenario2[0], scenario2[1])
+            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+            angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
+            
+            #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
+            # heading_ego_to_ts: relative angle to ego heading
+            # heading_ts_to_ego: relative angle to p12
+            bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
+            
+            # scenarios = [
+            #     (functional_scenario.in_port_side_sector_of_interpretation.contains, (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE)),
+            #     (functional_scenario.in_starboard_side_sector_of_interpretation.contains, (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+            #     (functional_scenario.in_stern_sector_of_interpretation.contains, (-np.pi, GlobalConfig.STERN_ANGLE)),
+            #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+            #                      functional_scenario.in_port_side_sector_of_interpretation),
+            #                                 (bow_angle/4, bow_angle/2)),
+            #     (lambda tuple : (functional_scenario.in_bow_sector_of_interpretation.contains(tuple) and
+            #                      functional_scenario.in_port_side_sector_of_interpretation),
+            #                                 (-bow_angle/4, bow_angle/2)),
+            # ]
+            
+            
+            scenarios = [
+                (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
+                (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
+            ]
+            
+            for condition, bearing in scenarios:
+                if condition:
+                    bearing_map[(os.id, o.id)] = bearing
+            
+            # scenario1 = (0, 0)
+            # for condition, bearing in scenarios:
+            #     if condition((o, os)):
+            #         scenario1 = bearing
+                    
+            # scenario2 = (0, 0)
+            # for condition, bearing in scenarios:
+            #     if condition((os, o)):
+            #         scenario2 = bearing
+        
+            # bearing_map[(os.id, o.id)] = (scenario1[0], scenario1[1], scenario2[0], scenario2[1])
                     
             for o in functional_scenario.obstacle_objects:
                 os = functional_scenario.os_object
@@ -215,3 +214,62 @@ class BaseRejectionSampling(RejectionSamplingPipeline):
     @classmethod
     def algorithm_desc(cls) -> str:
         return 'Base_Rejection_Sampling'
+    
+class CDRejectionSampling(RejectionSamplingPipeline):
+    def __init__(self, verbose : bool) -> None:
+        super().__init__(verbose)
+        
+    def _provide_region_maps(self, os_id: str, ts_ids: List[str], obst_ids: List[str],
+                           length_map: dict, radius_map: dict, functional_scenario: Optional[FunctionalScenario] = None) -> Tuple[dict, dict, dict, dict]:
+        if functional_scenario is None:
+            raise ValueError("Functional scenario must be provided for TwoStepCDRejectionSampling.")
+        
+        vis_distance_map = {}
+        bearing_map = {}
+        possible_distances_map = {}
+        min_distance_map = {}
+        
+        for ts_id in ts_ids:
+            distances = [
+                2 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                3 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                5 * GlobalConfig.N_MILE_TO_M_CONVERSION,
+                6 * GlobalConfig.N_MILE_TO_M_CONVERSION
+            ]
+            possible_distances_map[(os_id, ts_id)] = distances
+            min_distance_map[(os_id, ts_id)] = min(distances)
+            
+        os = functional_scenario.os_object
+        for o in functional_scenario.ts_objects:
+            vis_distance_map[(os.id, o.id)] = min(
+                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((os, o)), length_map[o.id]),
+                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((o, os)), length_map[os.id]))
+            
+            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+            angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
+            
+            #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
+            # heading_ego_to_ts: relative angle to ego heading
+            # heading_ts_to_ego: relative angle to p12
+            bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
+            
+            scenarios = [
+                (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
+                (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
+            ]
+            
+            for condition, bearing in scenarios:
+                if condition:
+                    bearing_map[(os.id, o.id)] = bearing
+            
+                    
+        return possible_distances_map, min_distance_map, {}, bearing_map
+    
+    @classmethod
+    def algorithm_desc(cls) -> str:
+        return 'CD_Rejection_Sampling'

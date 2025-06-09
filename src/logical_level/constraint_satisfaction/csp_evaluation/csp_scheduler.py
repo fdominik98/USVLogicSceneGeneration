@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from itertools import cycle, islice
+import os
 from typing import List, Set, Tuple
+
+import psutil
 
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from functional_level.metamodels.functional_scenario import FunctionalScenario
@@ -18,6 +21,10 @@ class CSPScheduler(ABC):
     def run(self, core_id : int):
         pass
     
+    @staticmethod
+    def print_status(seed, covered_fecs, total_fecs, evaluator_name, eval_time, max_eval_time):
+        print(f"Seed: {seed}, FECs: {covered_fecs}/{total_fecs} with {evaluator_name}. Time: {round(eval_time)}/{max_eval_time}.")
+    
     
 class MSRScheduler(CSPScheduler):
     def __init__(self, evaluator: CSPEvaluator, functional_scenarios: List[FunctionalScenario],
@@ -27,6 +34,7 @@ class MSRScheduler(CSPScheduler):
                                                                              scenario) for scenario in functional_scenarios]
         self.warmups = warmups
         self.max_eval_time = average_time_per_scene * len(self.scenarios)
+        self.random_seed = random_seed
         set_seed(random_seed)
         
     def run(self, core_id : int):
@@ -37,8 +45,8 @@ class MSRScheduler(CSPScheduler):
         coverage = {logical_scenario : False for logical_scenario, _ in self.scenarios}
         eval_time = 0
         for logical_scenario, functional_scenario in cycle(self.scenarios):
-            remaining = list(coverage.values()).count(False)
-            if remaining == 0 or eval_time >= self.max_eval_time:
+            covered = list(coverage.values()).count(True)
+            if covered == len(self.scenarios) or eval_time >= self.max_eval_time:
                 break
             
             if coverage[logical_scenario]:
@@ -53,7 +61,8 @@ class MSRScheduler(CSPScheduler):
             eval_time += eval_data.evaluation_time
             if eval_data.is_valid:
                 coverage[logical_scenario] = True
-                print(f"Covered FECs: {len(self.scenarios) - remaining + 1}/{len(self.scenarios)} with {self.evaluator.name}.")
+                self.print_status(self.random_seed, covered + 1, len(self.scenarios),
+                                  self.evaluator.name, eval_time, self.max_eval_time)
                 continue
         
 class OneStepScheduler(CSPScheduler):
@@ -65,11 +74,15 @@ class OneStepScheduler(CSPScheduler):
         self.total_fecs = ModelParser.TOTAL_FECS[self.actor_number]
         self.max_eval_time = average_time_per_scene * self.total_fecs
         self.warmups = warmups
+        self.random_seed = random_seed
         set_seed(random_seed)
     
     def run(self, core_id : int):
+        p = psutil.Process(os.getpid()) # Ensure dedicated cpu
+        p.cpu_affinity([core_id])
+            
         for i in range(self.warmups):
-            self.evaluator.evaluate(self.logical_scenario, None, core_id, False, 0, self.max_eval_time)
+            self.evaluator.evaluate(self.logical_scenario, None, False, 0, self.max_eval_time)
             print(f'warmup {i + 1}/{self.warmups} completed with {self.evaluator.name}.')
             
         covered_hashes : Set[int] = set()
@@ -78,17 +91,17 @@ class OneStepScheduler(CSPScheduler):
         while(eval_time < self.max_eval_time and len(covered_hashes) < self.total_fecs):
             eval_data = self.evaluator.evaluate(self.logical_scenario,
                                                 None,
-                                                core_id,
                                                 True,
                                                 eval_time,
                                                 self.max_eval_time)
+            eval_time += eval_data.evaluation_time
             if eval_data.is_valid:
                 scenario = ConcreteSceneAbstractor.get_abstractions_from_eval(eval_data)
-                if scenario.functional_scenario.is_relevant_by_fec:
-                    if scenario.functional_scenario.fec_shape_hash() not in covered_hashes:
-                        print(f"Covered FECs: {len(covered_hashes) + 1}/{self.total_fecs} with {self.evaluator.name}.")
-                    covered_hashes.add(scenario.functional_scenario.fec_shape_hash())
-            eval_time += eval_data.evaluation_time
+                fec_hash = scenario.functional_scenario.fec_shape_hash()
+                if scenario.functional_scenario.is_relevant_by_fec and fec_hash not in covered_hashes:
+                    covered_hashes.add(fec_hash)
+                    self.print_status(self.random_seed, len(covered_hashes), self.total_fecs,
+                                      self.evaluator.name, eval_time, self.max_eval_time)
             
 class CSPSchedulerFactory:
     @staticmethod

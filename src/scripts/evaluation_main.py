@@ -4,7 +4,7 @@ from typing import List, Tuple
 from logical_level.constraint_satisfaction.csp_evaluation.csp_evaluator import CSPEvaluatorImpl
 from logical_level.constraint_satisfaction.csp_evaluation.csp_scheduler import CSPScheduler, CSPSchedulerFactory
 from logical_level.constraint_satisfaction.csp_evaluation.csp_solver_factory import CPSSolverFactory
-from utils.evaluation_config import TS_CD_RS, TS_RS, SB_MSR, RS, SB_BASE, BaseSBMeasurementConfig, MeasurementConfig, create_config, RSMeasurementConfig, MSRMeasurementConfig, DummyMeasurementConfig, get_scenarios
+from utils.evaluation_config import CD_RS, TS_CD_RS, TS_RS, SB_MSR, RS, SB_BASE, BaseSBMeasurementConfig, MeasurementConfig, create_config, RSMeasurementConfig, MSRMeasurementConfig, DummyMeasurementConfig, get_scenarios
 
 class SceneGenerationProcess(Process):
     def __init__(self, test : CSPScheduler, core_id : int, measurement_name) -> None:
@@ -29,11 +29,11 @@ def main():
         # (msr_measurement_config, (5, 0), TS_CD_RS),
         # (msr_measurement_config, (6, 0), TS_CD_RS), 
         
-        # (base_measurement_config, (2, 0), SB_BASE),
-        # (base_measurement_config, (3, 0), SB_BASE),
-        # (base_measurement_config, (4, 0), SB_BASE),
-        # (base_measurement_config, (5, 0), SB_BASE),
-        # (base_measurement_config, (6, 0), SB_BASE), 
+        (base_sb_measurement_config, (2, 0), SB_BASE),
+        # (base_sb_measurement_config, (3, 0), SB_BASE),
+        # (base_sb_measurement_config, (4, 0), SB_BASE),
+        # (base_sb_measurement_config, (5, 0), SB_BASE),
+        # (base_sb_measurement_config, (6, 0), SB_BASE), 
         
         # (base_rs_measurement_config, (2, 0), RS),
         # (base_rs_measurement_config, (3, 0), RS),
@@ -41,19 +41,25 @@ def main():
         # (base_rs_measurement_config, (5, 0), RS),
         # (base_rs_measurement_config, (6, 0), RS), 
         
-        (base_rs_measurement_config, (2, 0), TS_RS),
-        (base_rs_measurement_config, (3, 0), TS_RS),
-        (base_rs_measurement_config, (4, 0), TS_RS),
-        (base_rs_measurement_config, (5, 0), TS_RS),
-        (base_rs_measurement_config, (6, 0), TS_RS), 
+        # (base_rs_measurement_config, (2, 0), TS_RS),
+        # (base_rs_measurement_config, (3, 0), TS_RS),
+        # (base_rs_measurement_config, (4, 0), TS_RS),
+        # (base_rs_measurement_config, (5, 0), TS_RS),
+        # (base_rs_measurement_config, (6, 0), TS_RS), 
+        
+        # (msr_measurement_config, (2, 0), CD_RS),
+        # (msr_measurement_config, (3, 0), CD_RS),
+        # (msr_measurement_config, (4, 0), CD_RS),
+        # (msr_measurement_config, (5, 0), CD_RS),
+        # (msr_measurement_config, (6, 0), CD_RS),
+        
     ]
 
 
     #----------------------------------------------------------
     tests : List[Tuple[CSPScheduler, str, int]] = []
 
-    for i in range(1):  # Repeat the measurements 30 times
-    # for i in range(1):
+    for i in range(10):  # Repeat the measurements 30 times
         for (measurement_config, actor_number, config_group) in measurements:
             random_seed = measurement_config.RANDOM_SEED + i
             measurement_name = f'{measurement_config.BASE_NAME}_{actor_number[0]}_vessel_{actor_number[1]}_obstacle_scenarios'
