@@ -11,6 +11,7 @@ IMAGES_FOLDER = f'{ASSET_FOLDER}/images'
 EXPORTED_PLOTS_FOLDER = f'{IMAGES_FOLDER}/exported_plot'
 SIMULATION_FOLDER = f'{ASSET_FOLDER}/simulation'
 SIMULATION_GEN_FOLDER = f'{SIMULATION_FOLDER}/gen'
+SSH_KEY_FILE = f'{ASSET_FOLDER}/ssh_key/measurement_key.pem'
 
 from pathlib import Path
 

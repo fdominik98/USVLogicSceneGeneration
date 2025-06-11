@@ -38,8 +38,11 @@ class MSRScheduler(CSPScheduler):
         set_seed(random_seed)
         
     def run(self, core_id : int):
+        p = psutil.Process(os.getpid()) # Ensure dedicated cpu
+        p.cpu_affinity([core_id])
+        
         for i, (logical_scenario, functional_scenario) in enumerate(islice(cycle(self.scenarios), self.warmups)):
-            self.evaluator.evaluate(logical_scenario, functional_scenario, core_id, False, 0, self.max_eval_time)
+            self.evaluator.evaluate(logical_scenario, functional_scenario, False, 0, self.max_eval_time)
             print(f'warmup {i + 1}/{self.warmups} completed with {self.evaluator.name}.')
         
         coverage = {logical_scenario : False for logical_scenario, _ in self.scenarios}
@@ -54,7 +57,6 @@ class MSRScheduler(CSPScheduler):
             
             eval_data = self.evaluator.evaluate(logical_scenario,
                                                 functional_scenario,
-                                                core_id,
                                                 True,
                                                 eval_time,
                                                 self.max_eval_time)

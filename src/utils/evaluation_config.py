@@ -39,7 +39,7 @@ class MSRMeasurementConfig():
    TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
    AVERAGE_TIME_PER_SCENE = GlobalConfig.FOUR_MINUTES_IN_SEC
    INIT_METHOD = RandomInstanceInitializer.name
-   VERBOSE = True
+   VERBOSE = False
    BASE_NAME = 'MSR_test'
    
 class BaseSBMeasurementConfig():   

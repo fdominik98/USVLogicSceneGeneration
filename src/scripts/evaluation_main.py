@@ -35,11 +35,11 @@ def main():
         # (base_sb_measurement_config, (5, 0), SB_BASE),
         # (base_sb_measurement_config, (6, 0), SB_BASE), 
         
-        # (base_rs_measurement_config, (2, 0), RS),
-        # (base_rs_measurement_config, (3, 0), RS),
-        # (base_rs_measurement_config, (4, 0), RS),
-        # (base_rs_measurement_config, (5, 0), RS),
-        # (base_rs_measurement_config, (6, 0), RS), 
+        (base_rs_measurement_config, (2, 0), RS),
+        (base_rs_measurement_config, (3, 0), RS),
+        (base_rs_measurement_config, (4, 0), RS),
+        (base_rs_measurement_config, (5, 0), RS),
+        (base_rs_measurement_config, (6, 0), RS), 
         
         # (base_rs_measurement_config, (2, 0), TS_RS),
         # (base_rs_measurement_config, (3, 0), TS_RS),
