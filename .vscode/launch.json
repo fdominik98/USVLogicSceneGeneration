@@ -46,6 +46,17 @@
         },
 
         {
+            "name": "Fetch Data from VMs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/fetch_data_from_vm.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+
+        {
             "name": "Table Browser",
             "type": "debugpy",
             "request": "launch",

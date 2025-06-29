@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from evaluation.chi_square_kl_div import ChiSquareKLDiv
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
-from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
+from utils.evaluation_config import BASE_RS, BASE_SB, MSR_SB, MSR_RS
 from visualization.plotting_utils import DummyEvalPlot
 from itertools import combinations
 
@@ -15,7 +15,7 @@ class DiversityStatisticsTable(DummyEvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return [SB_BASE, SB_MSR, RS, TS_CD_RS, 'common_ocean_benchmark']
+        return [BASE_SB, MSR_SB, BASE_RS, MSR_RS, 'common_ocean_benchmark']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

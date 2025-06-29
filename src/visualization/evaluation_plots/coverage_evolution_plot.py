@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from functional_level.models.model_parser import ModelParser
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import SB_BASE, SB_MSR, RS, TS_CD_RS
+from utils.evaluation_config import BASE_SB, MSR_SB, BASE_RS, MSR_RS, CD_RS, TS_RS
 from visualization.plotting_utils import EvalPlot
 
 class CoverageEvolutionPlot(EvalPlot):  
@@ -15,7 +15,7 @@ class CoverageEvolutionPlot(EvalPlot):
     @property   
     def config_groups(self) -> List[str]:
         #return [SB_BASE, RS, SB_MSR, TS_CD_RS, 'common_ocean_benchmark']
-        return [SB_BASE, RS, SB_MSR, TS_CD_RS]
+        return [BASE_SB, BASE_RS, MSR_SB, MSR_RS, CD_RS, TS_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
@@ -114,27 +114,27 @@ class CoverageEvolutionPlot(EvalPlot):
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             axi : plt.Axes = axes[0][i]
             axi.set_title(self.vessel_num_labels[i], fontweight='bold')   
-            row_label = "Covered\n" + r"$\bf{relevant}$" +"\nFECs" 
+            row_label = "Percentage of covered\n" + r"$\bf{relevant}$" +" FECs (%)" 
             self.init_axi(i, axi, row_label)
             if i == 0:
-                self.set_yticks(axi, range(101), unit='%', tick_number=6)
+                self.set_yticks(axi, range(101), unit=' %', tick_number=6)
             axi.set_ylim(0, 105)
             
             timestamps = self.create_timestamps(actor_number_by_type)
             data = []
-            for j, comparison_group in enumerate(self.comparison_groups):
-                median, q1, q3 = self.aggregate_data(actor_number_by_type, comparison_group, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
+            for j, cg in enumerate(self.comparison_groups):
+                median, q1, q3 = self.aggregate_data(actor_number_by_type, cg, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
                 data.append((median, q1, q3))
                 
             timestamps, data = self.crop_data(timestamps, data)
             
-            for j, comparison_group in enumerate(self.comparison_groups):                        
+            for j, cg in enumerate(self.comparison_groups):                        
                 median, q1, q3 = data[j]                
-                axi.plot(timestamps, median, color=self.colors[j], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.group_labels[j] + r"}$")
+                axi.plot(timestamps, median, color=self.colors[cg], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.config_group_map[cg] + r"}$")
                 
-                axi.fill_between(timestamps, q1, q3, color=self.colors[j], alpha=0.3)
+                axi.fill_between(timestamps, q1, q3, color=self.colors[cg], alpha=0.3)
                 
-                self.set_xticks(axi, timestamps, unit='s', tick_number=6)
+                self.set_xticks(axi, timestamps, unit=' s', tick_number=6)
                 
         # Get handles and labels from the last axis (or any axis — all are the same here)
         handles, labels = axes[0][0].get_legend_handles_labels()

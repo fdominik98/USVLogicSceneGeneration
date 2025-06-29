@@ -90,7 +90,6 @@ class ScenarioPlotManager():
         self.metrics_plot = None
         self.root = tk.Tk()
         self.root.resizable(True, True)
-        self.image_folder = f'{EXPORTED_PLOTS_FOLDER}/images/exported_plots'
         
         self.sim_time_update_id = None
         self.root.option_add("*Font", ("Times New Roman", 14))
@@ -351,9 +350,9 @@ class ScenarioPlotManager():
         
         
     def to_pdf(self):
-        file_name = f'{self.trajectory_manger.functional_scenario.name}_{datetime.now().isoformat().replace(":","-")}'
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
+        file_name = f'{self.selected_plot.get()}_{datetime.now().isoformat().replace(":","-")}'
+        self.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
+        self.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')
         
     def on_select_plot(self, value):

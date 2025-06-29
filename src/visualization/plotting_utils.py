@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import SB_BASE, SB_MSR, RS, TS_CD_RS, CD_RS, TS_RS
+from utils.evaluation_config import BASE_SB, MSR_SB, BASE_RS, MSR_RS, CD_RS, TS_RS
 
 class PlotBase(ABC):
     plt.rcParams['font.family'] = 'serif'
@@ -21,15 +21,25 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {SB_BASE : 'Base-SB',
-                        SB_MSR : 'MSR-SB',
-                        RS : 'RS',
-                        TS_CD_RS : 'TS-CD-RS',
+    config_group_map = {BASE_SB : 'Base-SB',
+                        MSR_SB : 'MSR-SB',
+                        BASE_RS : 'Base-RS',
+                        MSR_RS : 'MSR-RS',
                         TS_RS : 'TS-RS',
                         CD_RS : 'CD-RS',                        
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
+    
+    colors = {
+        BASE_SB : np.array([0.698, 0.875, 0.541, 1]),
+        BASE_RS : np.array([0.792, 0.698, 0.839, 1]),
+        MSR_SB : np.array([0.122, 0.471, 0.705, 1]),
+        MSR_RS : np.array([0.902, 0.333, 0.051, 1]),
+        CD_RS : np.array([0.361, 0.596, 0.643, 1]),            
+        TS_RS : np.array([0.494, 0.282, 0.415, 1]),
+    }
+                
     
     actor_numbers_by_type_map = {
         (2, 0) : '2 vessels', (2, 1) : '2 vessels, 1 obstacle', (3, 0) : '3 vessels', (3, 1) : '3 vessels, 1 obstacle', (4, 0) : '4 vessels', (5, 0) : '5 vessels', (6, 0) : '6 vessels', 
@@ -42,7 +52,7 @@ class EvalPlot(PlotBase, ABC):
         self.comparison_groups : List[Any] = self.algos if is_algo else self.config_groups
         self.comparison_group_count = len(self.comparison_groups)
         self.vessel_num_count = len(self.actor_numbers_by_type)
-        self.colors = self.generate_colors(self.comparison_group_count)
+        # self.colors = self.generate_colors(self.comparison_group_count)
         self.markers = ['o', 's', '^', 'D', 'v', 'x', '*', 'P', 'h']
         self.vessel_num_labels = [self.actor_numbers_by_type_map[vn] for vn in self.actor_numbers_by_type]
         self.group_labels = [self.algo_map[algo] + '-' + self.aggregate_map[aggregate] for algo, aggregate in self.algos] if is_algo else [self.config_group_map[cg.lower()] for cg in self.config_groups]
@@ -85,11 +95,15 @@ class EvalPlot(PlotBase, ABC):
         colors = [color1_rgb + (color2_rgb - color1_rgb) * i / (size - 1) for i in range(size)]
         #return [np.array([color[0], color[1], color[2], 0.7]) for color in colors]
         return [np.array([0.698, 0.875, 0.541, 1]),
-                  np.array([0.792, 0.698, 0.839, 1]), 
-                  np.array([0.122, 0.471, 0.705, 1]),
-                  np.array([0.902, 0.333, 0.051, 1])]
+                np.array([0.792, 0.698, 0.839, 1]), 
+                np.array([0.122, 0.471, 0.705, 1]),
+                np.array([0.902, 0.333, 0.051, 1]),
+                np.array([0.361, 0.596, 0.643, 1]),  # darker teal-blue
+                np.array([0.494, 0.282, 0.415, 1])]  # muted plum/purple
     
     def set_yticks(self, axi : plt.Axes, values, unit : str = None, tick_number : int = 6):
+        if values is None or len(values) == 0:
+            return
         yticks = np.linspace(0, max(values), tick_number)
         yticks = [round(t) for t in yticks] 
         if unit is None:
@@ -127,7 +141,7 @@ class DummyEvalPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return [SB_BASE, SB_MSR, RS, TS_CD_RS, 'common_ocean_benchmark']
+        return [BASE_SB, MSR_SB, BASE_RS, MSR_RS, 'common_ocean_benchmark']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

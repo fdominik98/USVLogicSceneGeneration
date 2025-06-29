@@ -4,7 +4,7 @@ import tkinter as tk
 from typing import Dict, List
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from utils.file_system_utils import IMAGES_FOLDER
+from utils.file_system_utils import EXPORTED_PLOTS_FOLDER
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from visualization.evaluation_plots.average_time_per_scene_plot import AverageTimePerScenePlot
 from visualization.evaluation_plots.coverage_evolution_plot import CoverageEvolutionPlot
@@ -13,6 +13,7 @@ from visualization.evaluation_plots.relevant_ratio_plot import RelevantRatioPlot
 from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
 from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
 from visualization.evaluation_plots.scenario_type_statistics_table import ScenarioTypeStatisticsTable
+from visualization.evaluation_plots.time_per_eq_class_plot import TimePerEqvClassPlot, TimePerScenePlot
 from visualization.plotting_utils import DummyEvalPlot, EvalPlot
 from visualization.evaluation_plots.diversity_plot import AmbiguousDiversityPlot, DiversityPlot
 from visualization.evaluation_plots.risk_vector_plot import RiskVectorPlot
@@ -34,26 +35,28 @@ class EvalPlotManager():
         self.plots : Dict[str, PlotWrapper] = {
             ".---------------------------------------." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             #"Scenario Type Statistics" : PlotWrapper(ScenarioTypeStatisticsPlot, {'eval_datas': self.eval_datas}),
-            "First-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : True}),
-            "First-level Abstraction Diversity -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : False}),
+            # "First-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : True}),
+            # "First-level Abstraction Diversity -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : False}),
             #"Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
             "Second-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : True}),
-            "Second-level Abstraction Diversity, -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : False}),
+            # "Second-level Abstraction Diversity, -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : False}),
             #"Higher Abstraction Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
-            'First-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
+            # 'First-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
             'Second-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
             'Scene relevance ratio' : PlotWrapper(RelevantRatioPlot, {'eval_datas': self.eval_datas,}),
             
             "..-------------------------------------.." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
-            "Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
-            "Runtime (successful)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
-            "Runtime (all)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
-            "Average Time per Scene" : PlotWrapper(AverageTimePerScenePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
-            "...-----------------------------------..." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
-            "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
-            "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
-            "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
-            "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
+            "Time Per Eqv Class" : PlotWrapper(TimePerEqvClassPlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            "Time Per Scene" : PlotWrapper(TimePerScenePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            # "Success Rate" : PlotWrapper(SuccessRatePlot, {'eval_datas': self.eval_datas, 'is_algo': False}),
+            # "Runtime (successful)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': False, 'is_algo': False}),
+            # "Runtime (all)" : PlotWrapper(RuntimePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            # "Average Time per Scene" : PlotWrapper(AverageTimePerScenePlot, {'eval_datas': self.eval_datas, 'is_all': True, 'is_algo': False}),
+            # "...-----------------------------------..." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
+            # "Risk Vector Proximity index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'proximity'}),
+            # "Risk Vector DS index" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'ds'}),
+            # "Risk Vector DCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'dcpa'}),
+            # "Risk Vector TCPA" : PlotWrapper(RiskVectorPlot, {'eval_datas': self.eval_datas, 'metric' : 'tcpa'}),
             "....---------------------------------...." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
             "First-level Abstraction Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
             "Second-level Abstraction Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
@@ -63,7 +66,6 @@ class EvalPlotManager():
         
         self.root = tk.Tk()
         self.root.resizable(True, True)
-        self.image_folder = f'{IMAGES_FOLDER}/exported_plots'
         
         self.root.option_add("*Font", ("Times New Roman", 14))
         
@@ -128,8 +130,8 @@ class EvalPlotManager():
         
     def to_pdf(self):
         file_name = f'{self.selected_plot.get()}_{datetime.now().isoformat().replace(":","-")}'
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
-        self.canvas.figure.savefig(f'{self.image_folder}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
+        self.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.svg', format='svg', bbox_inches='tight', dpi=350)
+        self.canvas.figure.savefig(f'{EXPORTED_PLOTS_FOLDER}/{file_name}.pdf', format='pdf', bbox_inches='tight', dpi=350)
         print('image saved')
         
         

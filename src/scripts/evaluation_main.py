@@ -4,7 +4,7 @@ from typing import List, Tuple
 from logical_level.constraint_satisfaction.csp_evaluation.csp_evaluator import CSPEvaluatorImpl
 from logical_level.constraint_satisfaction.csp_evaluation.csp_scheduler import CSPScheduler, CSPSchedulerFactory
 from logical_level.constraint_satisfaction.csp_evaluation.csp_solver_factory import CPSSolverFactory
-from utils.evaluation_config import CD_RS, TS_CD_RS, TS_RS, SB_MSR, RS, SB_BASE, BaseSBMeasurementConfig, MeasurementConfig, create_config, RSMeasurementConfig, MSRMeasurementConfig, DummyMeasurementConfig, get_scenarios
+from utils.evaluation_config import CD_RS, MSR_RS, TS_RS, MSR_SB, BASE_RS, BASE_SB, BaseSBMeasurementConfig, MeasurementConfig, create_config, RSMeasurementConfig, MSRMeasurementConfig, DummyMeasurementConfig, get_scenarios
 
 class SceneGenerationProcess(Process):
     def __init__(self, test : CSPScheduler, core_id : int, measurement_name) -> None:
@@ -35,11 +35,11 @@ def main():
         # (base_sb_measurement_config, (5, 0), SB_BASE),
         # (base_sb_measurement_config, (6, 0), SB_BASE), 
         
-        (base_rs_measurement_config, (2, 0), RS),
-        (base_rs_measurement_config, (3, 0), RS),
-        (base_rs_measurement_config, (4, 0), RS),
-        (base_rs_measurement_config, (5, 0), RS),
-        (base_rs_measurement_config, (6, 0), RS), 
+        (base_rs_measurement_config, (2, 0), BASE_RS),
+        (base_rs_measurement_config, (3, 0), BASE_RS),
+        (base_rs_measurement_config, (4, 0), BASE_RS),
+        (base_rs_measurement_config, (5, 0), BASE_RS),
+        (base_rs_measurement_config, (6, 0), BASE_RS), 
         
         # (base_rs_measurement_config, (2, 0), TS_RS),
         # (base_rs_measurement_config, (3, 0), TS_RS),

@@ -2,7 +2,7 @@ from itertools import combinations
 from typing import List, Tuple
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
-from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
+from utils.evaluation_config import BASE_RS, BASE_SB, MSR_SB, MSR_RS
 from visualization.plotting_utils import DummyEvalPlot
 
 class RuntimeStatisticsTable(DummyEvalPlot):  
@@ -11,7 +11,7 @@ class RuntimeStatisticsTable(DummyEvalPlot):
     
     @property   
     def config_groups(self) -> List[str]:
-        return [SB_BASE, SB_MSR, RS, TS_CD_RS]
+        return [BASE_SB, MSR_SB, BASE_RS, MSR_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

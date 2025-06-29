@@ -8,6 +8,7 @@ import psutil
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
 from functional_level.metamodels.functional_scenario import FunctionalScenario
 from functional_level.models.model_parser import ModelParser
+from global_config import GlobalConfig
 from logical_level.constraint_satisfaction.csp_evaluation.csp_evaluator import CSPEvaluator
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.mapping.logical_scenario_builder import LogicalScenarioBuilder
@@ -24,6 +25,10 @@ class CSPScheduler(ABC):
     @staticmethod
     def print_status(seed, covered_fecs, total_fecs, evaluator_name, eval_time, max_eval_time):
         print(f"Seed: {seed}, FECs: {covered_fecs}/{total_fecs} with {evaluator_name}. Time: {round(eval_time)}/{max_eval_time}.")
+       
+    @staticmethod 
+    def print_warmup_status(seed, warmup_number, total_warmups, evaluator_name):
+        print(f"Seed: {seed}, Warmup {warmup_number}/{total_warmups} completed with {evaluator_name}.")
     
     
 class MSRScheduler(CSPScheduler):
@@ -43,7 +48,7 @@ class MSRScheduler(CSPScheduler):
         
         for i, (logical_scenario, functional_scenario) in enumerate(islice(cycle(self.scenarios), self.warmups)):
             self.evaluator.evaluate(logical_scenario, functional_scenario, False, 0, self.max_eval_time)
-            print(f'warmup {i + 1}/{self.warmups} completed with {self.evaluator.name}.')
+            self.print_warmup_status(self.random_seed, i + 1, self.warmups, self.evaluator.name)
         
         coverage = {logical_scenario : False for logical_scenario, _ in self.scenarios}
         eval_time = 0
@@ -84,8 +89,10 @@ class OneStepScheduler(CSPScheduler):
         p.cpu_affinity([core_id])
             
         for i in range(self.warmups):
-            self.evaluator.evaluate(self.logical_scenario, None, False, 0, self.max_eval_time)
-            print(f'warmup {i + 1}/{self.warmups} completed with {self.evaluator.name}.')
+            self.evaluator.evaluate(self.logical_scenario, None, False,
+                                    self.max_eval_time - GlobalConfig.FOUR_MINUTES_IN_SEC, # Limit warmup time to avoid long waits
+                                    self.max_eval_time)
+            self.print_warmup_status(self.random_seed, i + 1, self.warmups, self.evaluator.name)
             
         covered_hashes : Set[int] = set()
         

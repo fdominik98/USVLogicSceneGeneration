@@ -2,7 +2,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import RS, SB_BASE, SB_MSR, TS_CD_RS
+from utils.evaluation_config import BASE_RS, BASE_SB, MSR_SB, MSR_RS
 from visualization.plotting_utils import EvalPlot
 
 class RuntimePlot(EvalPlot):  
@@ -15,7 +15,7 @@ class RuntimePlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return [SB_BASE, RS, SB_MSR, TS_CD_RS]
+        return [BASE_SB, BASE_RS, MSR_SB, MSR_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
