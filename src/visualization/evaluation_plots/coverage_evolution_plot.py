@@ -2,14 +2,14 @@ from typing import List, Set, Tuple
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+from pyparsing import ABC, abstractmethod
 from functional_level.models.model_parser import ModelParser
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from utils.evaluation_config import BASE_SB, MSR_SB, BASE_RS, MSR_RS, CD_RS, TS_RS
 from visualization.plotting_utils import EvalPlot
 
-class CoverageEvolutionPlot(EvalPlot):  
-    def __init__(self, eval_datas : List[EvaluationData], is_second_level_abstraction = False): 
-        self.is_second_level_abstraction = is_second_level_abstraction
+class CoverageEvolutionPlot(EvalPlot, ABC):  
+    def __init__(self, eval_datas : List[EvaluationData]): 
         super().__init__(eval_datas, is_all=True)
         
     @property   
@@ -21,10 +21,23 @@ class CoverageEvolutionPlot(EvalPlot):
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
         #return [(2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (5, 0), (6, 0)]
         return [(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        
     
+    @property
+    @abstractmethod
+    def total_fecs(self) -> int: 
+        pass   
+    
+    @abstractmethod
+    def pred(self, data : EvaluationData) -> bool:
+        pass
+    
+    @property
+    @abstractmethod
+    def row_label(self) -> str:
+        pass
+
     def calculate_coverages_by_timestamps(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str, seed : int,
-                                          timestamps : np.ndarray, pred) -> List[float]:
+                                          timestamps : np.ndarray) -> List[float]:
         data = self.measurements[actor_numbers_by_type][comparison_group][seed]
         coverage = [(0, 0.0)]
         covered_classes : Set[int] = set()
@@ -32,28 +45,31 @@ class CoverageEvolutionPlot(EvalPlot):
         
         for d in data:
             next_timestamp = coverage[-1][1] + d.evaluation_time
-            if d.is_valid and d.best_scene.second_level_hash not in covered_classes and pred(d):
+            if d.is_valid and self.pred(d):
                 covered_classes.add(d.best_scene.second_level_hash)
             coverage.append((len(covered_classes), next_timestamp))
-                
+        
         # find the last timestamp in the coverage that is less than or equal to each timestamp in timestamps
         for timestamp in timestamps:
             last_coverage = next((c for c in reversed(coverage) if c[1] <= timestamp), None)
             if last_coverage is not None:
-                coverages_by_timestamp.append(last_coverage[0] / ModelParser.TOTAL_FECS[actor_numbers_by_type] * 100)
+                if self.total_fecs[actor_numbers_by_type] == 0:
+                    coverages_by_timestamp.append(0.0)
+                else:
+                    coverages_by_timestamp.append(last_coverage[0] / self.total_fecs[actor_numbers_by_type] * 100)
             else:
                 coverages_by_timestamp.append(coverages_by_timestamp[-1] if coverages_by_timestamp else 0)
         return coverages_by_timestamp
     
     def aggregate_data(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str,
-                            timestamps : np.ndarray, pred) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                            timestamps : np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         seeds = self.measurements[actor_numbers_by_type][comparison_group].keys()
         if len(seeds) == 0:
             return np.array([0]*timestamps), np.array([0]*timestamps), np.array([0]*timestamps)
         # Create a 2D array: rows = seeds, columns = timestamps
         coverages_by_seed = []
         for seed in seeds:
-            coverages = self.calculate_coverages_by_timestamps(actor_numbers_by_type, comparison_group, seed, timestamps, pred)
+            coverages = self.calculate_coverages_by_timestamps(actor_numbers_by_type, comparison_group, seed, timestamps)
             coverages_by_seed.append(coverages)
         # Now coverages_by_seed is a list of lists: [ [cov_t1, cov_t2, ...], ... for each seed ]
         coverages_by_seed = np.array(coverages_by_seed)  # shape: (num_seeds, num_timestamps)
@@ -114,8 +130,7 @@ class CoverageEvolutionPlot(EvalPlot):
         for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
             axi : plt.Axes = axes[0][i]
             axi.set_title(self.vessel_num_labels[i], fontweight='bold')   
-            row_label = "Percentage of covered\n" + r"$\bf{relevant}$" +" FECs (%)" 
-            self.init_axi(i, axi, row_label)
+            self.init_axi(i, axi, self.row_label)
             if i == 0:
                 self.set_yticks(axi, range(101), unit=' %', tick_number=6)
             axi.set_ylim(0, 105)
@@ -123,7 +138,7 @@ class CoverageEvolutionPlot(EvalPlot):
             timestamps = self.create_timestamps(actor_number_by_type)
             data = []
             for j, cg in enumerate(self.comparison_groups):
-                median, q1, q3 = self.aggregate_data(actor_number_by_type, cg, timestamps, lambda d : d.best_scene.is_relevant_by_fec)
+                median, q1, q3 = self.aggregate_data(actor_number_by_type, cg, timestamps)
                 data.append((median, q1, q3))
                 
             timestamps, data = self.crop_data(timestamps, data)
@@ -142,3 +157,35 @@ class CoverageEvolutionPlot(EvalPlot):
         axes[0][0].legend(handles, labels, ncol=1, fontsize=10, loc='lower right')
         return fig
         
+        
+class RelevantCoverageEvolutionPlot(CoverageEvolutionPlot):
+    def __init__(self, eval_datas : List[EvaluationData]): 
+        super().__init__(eval_datas)
+        
+    @property
+    def total_fecs(self) -> int:
+        return ModelParser.TOTAL_REL_FECS
+    
+    def pred(self, data : EvaluationData) -> bool:
+        return data.best_scene.is_relevant_by_fec
+    
+    @property
+    def row_label(self) -> str:
+        return "Percentage of covered\n" + r"$\bf{relevant}$" +" FECs (%)"
+    
+    
+class AmbiguousCoverageEvolutionPlot(CoverageEvolutionPlot):
+    def __init__(self, eval_datas : List[EvaluationData]): 
+        super().__init__(eval_datas)
+        
+    @property
+    def total_fecs(self) -> int:
+        return ModelParser.TOTAL_AMB_FECS
+    
+    def pred(self, data : EvaluationData) -> bool:
+        return data.best_scene.is_ambiguous_by_fec
+    
+    @property
+    def row_label(self) -> str:
+        return "Percentage of covered\n" + r"$\bf{ambiguous}$" +" FECs (%)"
+    

@@ -1,10 +1,12 @@
 from abc import abstractmethod
+from itertools import combinations
 from typing import List, Optional, Set, Tuple
 from matplotlib import gridspec
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import numpy as np
 from pyparsing import ABC
+from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from utils.evaluation_config import BASE_RS, CD_RS, BASE_SB, MSR_SB, MSR_RS, TS_RS
 from visualization.plotting_utils import EvalPlot
@@ -42,12 +44,12 @@ class TimePerPlot(EvalPlot, ABC):
     
     def aggregate_data(self, actor_numbers_by_type : Tuple[int, int], comparison_group : str) -> np.ndarray:
         seeds = self.measurements[actor_numbers_by_type][comparison_group].keys()
-        coverages_by_seed = []
+        times_per_class_by_seed = []
         for seed in seeds:
             time_per_class = self.calculate_average_time(actor_numbers_by_type, comparison_group, seed)
             if time_per_class is not None:
-                coverages_by_seed.append(time_per_class)
-        return np.array(coverages_by_seed)  
+                times_per_class_by_seed.append(time_per_class)
+        return np.array(times_per_class_by_seed)  
         
     
     
@@ -104,8 +106,23 @@ class TimePerPlot(EvalPlot, ABC):
         median_handle = Line2D([0], [0], color='grey', linewidth=2, linestyle=':', label='Median')
 
         # Add the legend to the plot
-        axes[0][0].legend(handles=[mean_handle, median_handle], loc='upper right')                        
+        axes[0][0].legend(handles=[mean_handle, median_handle], loc='upper right')  
+        
+        self.create_stat_test()                      
         return fig
+    
+    def create_stat_test(self):
+        groups_to_compare = list(combinations(self.comparison_groups, 2))
+        for i, actor_number_by_type in enumerate(self.actor_numbers_by_type):
+            for j, (group1, group2) in enumerate(groups_to_compare): 
+                values1 = self.aggregate_data(actor_number_by_type, group1)
+                values2 = self.aggregate_data(actor_number_by_type, group2)           
+                if len(values1) == 0 or len(values2) == 0:
+                    continue
+                
+                statistical_test = MannWhitneyUCliffDelta(values1, values2)
+                #print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
+                print(f'{actor_number_by_type[0]} vessels, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
     
  
  

@@ -78,7 +78,7 @@ class OneStepScheduler(CSPScheduler):
         self.evaluator = evaluator
         self.logical_scenario = logical_scenario
         self.actor_number = (self.logical_scenario.vessel_number, self.logical_scenario.obstacle_number)
-        self.total_fecs = ModelParser.TOTAL_FECS[self.actor_number]
+        self.total_fecs = ModelParser.TOTAL_REL_FECS[self.actor_number]
         self.max_eval_time = average_time_per_scene * self.total_fecs
         self.warmups = warmups
         self.random_seed = random_seed

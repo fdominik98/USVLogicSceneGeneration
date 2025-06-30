@@ -9,11 +9,17 @@ class ModelParser():
     FUNCTIONAL_MODELS_PATH_ALL = f'{FUNCTIONAL_MODELS_FOLDER}/all'
     FUNCTIONAL_MODELS_PATH_AMBIGUOUS = f'{FUNCTIONAL_MODELS_FOLDER}/ambiguous'
     
-    TOTAL_FECS = {(2, 0) : 7,
+    TOTAL_REL_FECS = {(2, 0) : 7,
                   (3, 0) : 28,
                   (4, 0) : 84,
                   (5, 0) : 210,
                   (6, 0) : 462}
+    
+    TOTAL_AMB_FECS = {(2, 0) : 0,
+                  (3, 0) : 12,
+                  (4, 0) : 54,
+                  (5, 0) : 160,
+                  (6, 0) : 385}
     
     scenario_path_map = {
         (2, 0) : f'{FUNCTIONAL_MODELS_PATH_ALL}/2vessel_0obstacle_scenarios',
@@ -91,8 +97,8 @@ class ModelParser():
     @staticmethod
     def load_functional_scenarios(vessel_number : int, obstacle_number : int) -> List[FunctionalScenario]:
         scenarios = ModelParser.__load_functional_scenarios(ModelParser.scenario_path_map[(vessel_number, obstacle_number)])
-        if len(scenarios) != ModelParser.TOTAL_FECS[(vessel_number, obstacle_number)]:
-            raise ValueError(f"Expected {ModelParser.TOTAL_FECS[(vessel_number, obstacle_number)]} scenarios, but found {len(scenarios)} in {ModelParser.scenario_path_map[(vessel_number, obstacle_number)]}")
+        if len(scenarios) != ModelParser.TOTAL_REL_FECS[(vessel_number, obstacle_number)]:
+            raise ValueError(f"Expected {ModelParser.TOTAL_REL_FECS[(vessel_number, obstacle_number)]} scenarios, but found {len(scenarios)} in {ModelParser.scenario_path_map[(vessel_number, obstacle_number)]}")
         return scenarios
     
     @staticmethod

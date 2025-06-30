@@ -7,10 +7,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from utils.file_system_utils import EXPORTED_PLOTS_FOLDER
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from visualization.evaluation_plots.average_time_per_scene_plot import AverageTimePerScenePlot
-from visualization.evaluation_plots.coverage_evolution_plot import CoverageEvolutionPlot
+from visualization.evaluation_plots.coverage_evolution_plot import AmbiguousCoverageEvolutionPlot, CoverageEvolutionPlot, RelevantCoverageEvolutionPlot
 from visualization.evaluation_plots.diversity_statistics_table import AmbiguousDiversityStatisticsTable, DiversityStatisticsTable
 from visualization.evaluation_plots.relevant_ratio_plot import RelevantRatioPlot
-from visualization.evaluation_plots.runtime_statistics_table import RuntimeStatisticsTable
 from visualization.evaluation_plots.scenario_type_statistics_plot import ScenarioTypeStatisticsPlot
 from visualization.evaluation_plots.scenario_type_statistics_table import ScenarioTypeStatisticsTable
 from visualization.evaluation_plots.time_per_eq_class_plot import TimePerEqvClassPlot, TimePerScenePlot
@@ -38,11 +37,12 @@ class EvalPlotManager():
             # "First-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : True}),
             # "First-level Abstraction Diversity -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False, 'is_relevant' : False}),
             #"Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
-            "Second-level Abstraction Diversity -relevant" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : True}),
+            "Coverage Distribution" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas}),
             # "Second-level Abstraction Diversity, -all" : PlotWrapper(DiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True, 'is_relevant' : False}),
             #"Higher Abstraction Ambiguous Diversity" : PlotWrapper(AmbiguousDiversityPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
             # 'First-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
-            'Second-level Abstraction Coverage Evolution' : PlotWrapper(CoverageEvolutionPlot, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
+            'Relevant Coverage Evolution' : PlotWrapper(RelevantCoverageEvolutionPlot, {'eval_datas': self.eval_datas}),
+            'Ambiguous Coverage Evolution' : PlotWrapper(AmbiguousCoverageEvolutionPlot, {'eval_datas': self.eval_datas}),
             'Scene relevance ratio' : PlotWrapper(RelevantRatioPlot, {'eval_datas': self.eval_datas,}),
             
             "..-------------------------------------.." : PlotWrapper(DummyEvalPlot, {'eval_datas': self.eval_datas}),
@@ -61,7 +61,6 @@ class EvalPlotManager():
             "First-level Abstraction Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
             "Second-level Abstraction Diversity Statistics Test" : PlotWrapper(DiversityStatisticsTable, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : True}),
             #"Ambiguous Diversity Statistics Test" : PlotWrapper(AmbiguousDiversityStatisticsTable, {'eval_datas': self.eval_datas, 'is_second_level_abstraction' : False}),
-            "Runtime Statistical Test" : PlotWrapper(RuntimeStatisticsTable, {'eval_datas': self.eval_datas}),
         }
         
         self.root = tk.Tk()
