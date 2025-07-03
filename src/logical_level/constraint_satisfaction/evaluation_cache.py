@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 import numpy as np
-from global_config import GlobalConfig, o2VisibilityByo1
+from global_config import GlobalConfig, o2VisibilityByo1, vis_distance
 from logical_level.constraint_satisfaction.assignments import Assignments
 from logical_level.models.values import ActorValues, VesselValues
 from logical_level.models.actor_variable import ActorVariable, StaticObstacleVariable, VesselVariable
@@ -93,10 +93,9 @@ class VesselToVesselProperties(GeometricProperties):
         self.angle_p12_v1 = compute_angle(self.p12, self.val1.v, self.o_distance, self.val1.sp)
 
         # Compute visibility distance
-        self.vis_distance = min(
-            o2VisibilityByo1(self.angle_p21_v2 >= GlobalConfig.SIDE_ANGLE, self.val2.l),
-            o2VisibilityByo1(self.angle_p12_v1 >= GlobalConfig.SIDE_ANGLE, self.val1.l)
-        )
+        self.vis_distance = vis_distance(
+            self.angle_p21_v2 >= GlobalConfig.SIDE_ANGLE, self.val2.l,
+            self.angle_p12_v1 >= GlobalConfig.SIDE_ANGLE, self.val1.l)
 
         # Compute time and distance to closest approach
         self.tcpa = np.dot(self.p12, self.v12) / self.v12_norm_stable**2

@@ -6,7 +6,7 @@ from concrete_level.models.concrete_scene import ConcreteScene
 from functional_level.models.model_parser import ModelParser
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from concrete_level.concrete_scene_abstractor import ConcreteSceneAbstractor
-from utils.evaluation_config import BASE_RS, BASE_SB, MSR_SB, MSR_RS
+from utils.evaluation_config import RS, SB, MSR_SB, MSR_RS
 from visualization.plotting_utils import EvalPlot
 
 class DiversityPlot(EvalPlot):  
@@ -17,7 +17,7 @@ class DiversityPlot(EvalPlot):
     @property   
     def config_groups(self) -> List[str]:
         #return [SB_BASE, RS, SB_MSR, TS_CD_RS, 'common_ocean_benchmark']
-        return [BASE_SB, BASE_RS, MSR_SB, MSR_RS]
+        return [SB, RS, MSR_SB, MSR_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

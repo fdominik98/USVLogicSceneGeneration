@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import BASE_SB, MSR_SB, BASE_RS, MSR_RS, CD_RS, TS_RS
+from utils.evaluation_config import SB, MSR_SB, RS, MSR_RS, CD_RS, TS_RS
 
 class PlotBase(ABC):
     plt.rcParams['font.family'] = 'serif'
@@ -21,23 +21,23 @@ class PlotBase(ABC):
         pass
 
 class EvalPlot(PlotBase, ABC):    
-    config_group_map = {BASE_SB : 'Base-SB',
+    config_group_map = {SB : 'Base-SB',
                         MSR_SB : 'MSR-SB',
-                        BASE_RS : 'Base-RS',
-                        MSR_RS : 'MSR-RS',
-                        TS_RS : 'TS-RS',
-                        CD_RS : 'CD-RS',                        
+                        RS : 'Base-RS',
+                        TS_RS : 'Base-RS+',
+                        CD_RS : 'MSR-RS',                        
+                        MSR_RS : 'MSR-RS+',
                         'common_ocean_benchmark' : 'CO',
                         'zhu_et_al' : 'Zhu',
                         'base_reference' : 'BaseRef'}
     
     colors = {
-        BASE_SB : np.array([0.698, 0.875, 0.541, 1]),
-        BASE_RS : np.array([0.792, 0.698, 0.839, 1]),
+        SB : np.array([0.698, 0.875, 0.541, 1]),
+        RS : np.array([0.792, 0.698, 0.839, 1]),
         MSR_SB : np.array([0.122, 0.471, 0.705, 1]),
         MSR_RS : np.array([0.902, 0.333, 0.051, 1]),
-        CD_RS : np.array([0.361, 0.596, 0.643, 1]),            
-        TS_RS : np.array([0.494, 0.282, 0.415, 1]),
+        CD_RS : np.array([0.494, 0.282, 0.415, 1]),            
+        TS_RS : np.array([0.361, 0.596, 0.643, 1]),
     }
                 
     
@@ -141,7 +141,7 @@ class DummyEvalPlot(EvalPlot):
         
     @property   
     def config_groups(self) -> List[str]:
-        return [BASE_SB, MSR_SB, BASE_RS, MSR_RS, 'common_ocean_benchmark']
+        return [SB, MSR_SB, RS, MSR_RS, 'common_ocean_benchmark']
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:

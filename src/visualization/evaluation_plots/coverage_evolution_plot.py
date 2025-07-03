@@ -5,7 +5,7 @@ import numpy as np
 from pyparsing import ABC, abstractmethod
 from functional_level.models.model_parser import ModelParser
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import BASE_SB, MSR_SB, BASE_RS, MSR_RS, CD_RS, TS_RS
+from utils.evaluation_config import SB, MSR_SB, RS, MSR_RS, CD_RS, TS_RS
 from visualization.plotting_utils import EvalPlot
 
 class CoverageEvolutionPlot(EvalPlot, ABC):  
@@ -15,7 +15,8 @@ class CoverageEvolutionPlot(EvalPlot, ABC):
     @property   
     def config_groups(self) -> List[str]:
         #return [SB_BASE, RS, SB_MSR, TS_CD_RS, 'common_ocean_benchmark']
-        return [BASE_SB, BASE_RS, MSR_SB, MSR_RS, CD_RS, TS_RS]
+        # return [SB, MSR_SB, RS, TS_RS, CD_RS, MSR_RS]
+        return [SB, MSR_SB, RS, MSR_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
@@ -75,8 +76,8 @@ class CoverageEvolutionPlot(EvalPlot, ABC):
         coverages_by_seed = np.array(coverages_by_seed)  # shape: (num_seeds, num_timestamps)
         # Calculate median, q1, q3 across seeds for each timestamp
         median = np.median(coverages_by_seed, axis=0)
-        q1 = np.percentile(coverages_by_seed, 25, axis=0)
-        q3 = np.percentile(coverages_by_seed, 75, axis=0)
+        q1 = np.percentile(coverages_by_seed, 0, axis=0)
+        q3 = np.percentile(coverages_by_seed, 100, axis=0)
         print(median[-1])
         return median, q1, q3
     
@@ -117,10 +118,13 @@ class CoverageEvolutionPlot(EvalPlot, ABC):
             
             
     def create_fig(self) -> plt.Figure:
-        fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 1), constrained_layout=True)
-        gs = gridspec.GridSpec(1, self.vessel_num_count, height_ratios=[1]) 
+        fig = plt.figure(figsize=(1.7 * self.vessel_num_count, 3), constrained_layout=True)
+        gs = gridspec.GridSpec(2, self.vessel_num_count, height_ratios=[7, 1], hspace=0.9) 
         # Top axes spans all 6 columns
         ax_top = [fig.add_subplot(gs[0, i]) for i in range(self.vessel_num_count)] 
+        # Create an invisible axes spanning the bottom row for the legend
+        ax_bottom = fig.add_subplot(gs[1, :])
+        ax_bottom.axis('off')
         # Bottom row: 6 equal-width axes
         # ax_bottom = [fig.add_subplot(gs[1, i]) for i in range(self.vessel_num_count)] 
         # axes = [ax_top, ax_bottom]
@@ -145,16 +149,16 @@ class CoverageEvolutionPlot(EvalPlot, ABC):
             
             for j, cg in enumerate(self.comparison_groups):                        
                 median, q1, q3 = data[j]                
-                axi.plot(timestamps, median, color=self.colors[cg], linestyle='-', linewidth=1.5, label=r"$\bf{" + self.config_group_map[cg] + r"}$")
+                axi.plot(timestamps, median, color=self.colors[cg], linestyle='-', linewidth=2, label=r"$\bf{" + self.config_group_map[cg] + r"}$")
                 
-                axi.fill_between(timestamps, q1, q3, color=self.colors[cg], alpha=0.3)
+                axi.fill_between(timestamps, q1, q3, color=self.colors[cg], alpha=0.25)
                 
-                self.set_xticks(axi, timestamps, unit=' s', tick_number=6)
+                self.set_xticks(axi, timestamps, unit=' s', tick_number=3)
                 
         # Get handles and labels from the last axis (or any axis — all are the same here)
         handles, labels = axes[0][0].get_legend_handles_labels()
         # Add one legend to the figure (outside bottom)
-        axes[0][0].legend(handles, labels, ncol=1, fontsize=10, loc='lower right')
+        ax_bottom.legend(handles, labels, ncol=4, fontsize=10, loc='lower center')
         return fig
         
         

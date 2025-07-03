@@ -8,7 +8,7 @@ import numpy as np
 from pyparsing import ABC
 from evaluation.mann_whitney_u_cliff_delta import MannWhitneyUCliffDelta
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
-from utils.evaluation_config import BASE_RS, CD_RS, BASE_SB, MSR_SB, MSR_RS, TS_RS
+from utils.evaluation_config import RS, CD_RS, SB, MSR_SB, MSR_RS, TS_RS
 from visualization.plotting_utils import EvalPlot
 
 
@@ -24,7 +24,8 @@ class TimePerPlot(EvalPlot, ABC):
         
     @property   
     def config_groups(self) -> List[str]:
-        return [BASE_RS, TS_RS, CD_RS, MSR_RS]
+        # return [SB, MSR_SB, RS, TS_RS, CD_RS, MSR_RS]
+        return [SB, MSR_SB, RS, MSR_RS]
     
     @property
     def actor_numbers_by_type(self) -> List[Tuple[int, int]]:
@@ -54,13 +55,9 @@ class TimePerPlot(EvalPlot, ABC):
     
     
     def create_fig(self) -> plt.Figure:
-        fig = plt.figure(figsize=(3 * self.vessel_num_count, 1.5 * 1), constrained_layout=True)
-        gs = gridspec.GridSpec(1, self.vessel_num_count, height_ratios=[1]) 
-        # Top axes spans all 6 columns
+        fig = plt.figure(figsize=(1.7 * self.vessel_num_count, 2), constrained_layout=True)
+        gs = gridspec.GridSpec(1, self.vessel_num_count, height_ratios=[1], wspace=1) 
         ax_top = [fig.add_subplot(gs[0, i]) for i in range(self.vessel_num_count)] 
-        # Bottom row: 6 equal-width axes
-        # ax_bottom = [fig.add_subplot(gs[1, i]) for i in range(self.vessel_num_count)] 
-        # axes = [ax_top, ax_bottom]
         axes = [ax_top]
         
         
@@ -90,23 +87,24 @@ class TimePerPlot(EvalPlot, ABC):
             
             for patch, cg in zip(violin_plot['bodies'], new_comparison_groups):
                 patch.set_facecolor(self.colors[cg])           # Set fill color
-                patch.set_linewidth(1.0)   
+                patch.set_alpha(0.8)                           # Set transparency (alpha)
+                patch.set_linewidth(1.0)
             
             violin_plot['cmeans'].set_color('black')
-            violin_plot['cmeans'].set_linewidth(2)
+            violin_plot['cmeans'].set_linewidth(1)
             violin_plot['cmedians'].set_color('grey')
-            violin_plot['cmedians'].set_linewidth(2)
+            violin_plot['cmedians'].set_linewidth(1)
             violin_plot['cmedians'].set_linestyle(':')
             
             maxy = axi.get_ylim()[1]
             axi.set_ylim(0, maxy*1.05)
     
-        # Create custom legend handles
-        mean_handle = Line2D([0], [0], color='black', linewidth=2, label='Mean')
-        median_handle = Line2D([0], [0], color='grey', linewidth=2, linestyle=':', label='Median')
+        # # Create custom legend handles
+        # mean_handle = Line2D([0], [0], color='black', linewidth=2, label='Mean')
+        # median_handle = Line2D([0], [0], color='grey', linewidth=2, linestyle=':', label='Median')
 
-        # Add the legend to the plot
-        axes[0][0].legend(handles=[mean_handle, median_handle], loc='upper right')  
+        # # Add the legend to the plot
+        # axes[0][0].legend(handles=[mean_handle, median_handle], loc='upper right')  
         
         self.create_stat_test()                      
         return fig
@@ -122,9 +120,8 @@ class TimePerPlot(EvalPlot, ABC):
                 
                 statistical_test = MannWhitneyUCliffDelta(values1, values2)
                 #print(f'{actor_number_by_type[0]} vessels, {actor_number_by_type[1]} obstacles, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
-                print(f'{actor_number_by_type[0]} vessels, {group1} - {group2}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
+                print(f'{actor_number_by_type[0]} vessels, {self.config_group_map[group1]} - {self.config_group_map[group2]}: p-value:{statistical_test.p_value_mann_w}, effect-size:{statistical_test.effect_size_cohens_d}')
     
- 
  
 class TimePerEqvClassPlot(TimePerPlot):
     def __init__(self, eval_datas : List[EvaluationData], is_all=True, is_algo=False):
@@ -144,7 +141,7 @@ class TimePerEqvClassPlot(TimePerPlot):
     
     @property
     def row_label(self)-> str:
-        return 'Average time per equivalence class (s)'
+        return 'Average time per\nequivalence class (s)'
    
 class TimePerScenePlot(TimePerPlot):
     def __init__(self, eval_datas : List[EvaluationData], is_all=True, is_algo=False):

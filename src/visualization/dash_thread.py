@@ -32,7 +32,7 @@ class DashThread(threading.Thread):
         
         def fetch_data():
             self.df, self.dirs = self.dp.load_dirs_merged(self.dirs)
-            self.df = self.df[self.df['best_scene'].apply(lambda s: not dict(s).get('is_relevant_by_fec', True))]
+            # self.df = self.df[self.df['best_scene'].apply(lambda s: not dict(s).get('is_relevant_by_fec', True))]
             return self.df
 
         self.app.layout = html.Div([

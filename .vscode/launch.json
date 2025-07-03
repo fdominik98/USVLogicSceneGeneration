@@ -95,7 +95,17 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
-        },        
+        },  
+        {
+            "name": "Compress Eval Data",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/scripts/compress_eval_data.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },  
         {
             "name": "RRTFN",
             "type": "debugpy",

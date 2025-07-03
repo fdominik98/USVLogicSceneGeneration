@@ -5,7 +5,7 @@ import paramiko
 import os
 from tqdm import tqdm
 
-from utils.evaluation_config import BASE_SB
+from utils.evaluation_config import SB
 from utils.file_system_utils import GEN_DATA_FOLDER, SSH_KEY_FILE
 
 ADDRESSES = {
@@ -28,7 +28,7 @@ msr_folders = ["MSR_test_2_vessel_0_obstacle_scenarios",
                 "MSR_test_6_vessel_0_obstacle_scenarios"]
 
 FOLDERS = {
-    "measurements" : [f'{f}/{BASE_SB.upper()}' for f in base_folders],
+    "measurements" : [f'{f}/{SB.upper()}' for f in base_folders],
     # "measurements2" : [f'{f}/{RS.upper()}' for f in base_folders],
     # "measurements3" : [f'{f}/{TS_RS.upper()}' for f in base_folders]",
     # "measurements4" : [f'{f}/{CD_RS.upper()}' for f in msr_folders],

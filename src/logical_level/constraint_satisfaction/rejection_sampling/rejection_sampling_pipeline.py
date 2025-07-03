@@ -9,7 +9,7 @@ from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.rejection_sampling.scenic_utils import generate_scene, scenic_scenario
 from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 from logical_level.models.logical_scenario import LogicalScenario
-from global_config import GlobalConfig, o2VisibilityByo1, possible_vis_distances
+from global_config import GlobalConfig, o2VisibilityByo1, possible_vis_distances_by_bearing, possible_vis_distances_by_length, vis_distance
 from scenic.core.scenarios import Scenario as ScenicScenario
 
 
@@ -90,24 +90,17 @@ class TwoStepCDRejectionSampling(RejectionSamplingPipeline):
         
         vis_distance_map = {}
         bearing_map = {}
-        possible_distances_map = {}
-        min_distance_map = {}
-        
-        for ts_id in ts_ids:
-            distances = possible_vis_distances(length_map[os_id], length_map[ts_id])
-            possible_distances_map[(os_id, ts_id)] = distances
-            min_distance_map[(os_id, ts_id)] = min(distances)
-            
+                    
         for obst_id in obst_ids:
             vis_distance_map[(os_id, obst_id)] = o2VisibilityByo1(True, radius_map[obst_id])
             
         os = functional_scenario.os_object
-        for o in functional_scenario.ts_objects:
-            vis_distance_map[(os.id, o.id)] = min(
-                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((os, o)), length_map[o.id]),
-                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((o, os)), length_map[os.id]))
+        for ts in functional_scenario.ts_objects:
+            vis_distance_map[(os.id, ts.id)] = vis_distance(
+                functional_scenario.in_stern_sector_of_interpretation.contains((ts, os)), length_map[os.id],
+                functional_scenario.in_stern_sector_of_interpretation.contains((os, ts)), length_map[ts.id])
             
-            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[ts.id]) / vis_distance_map[(os.id, ts.id)], -1, 1)
             angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
             
             #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
@@ -129,18 +122,18 @@ class TwoStepCDRejectionSampling(RejectionSamplingPipeline):
             
             
             scenarios = [
-                (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
-                (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
-                (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
-                (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
+                (functional_scenario.head_on(os, ts), (0.0, bow_angle, 0.0, bow_angle)),
+                (functional_scenario.crossing_from_port(os, ts), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.crossing_from_port(ts, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_port(os, ts), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_port(ts, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(os, ts), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(ts, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
             ]
             
             for condition, bearing in scenarios:
                 if condition:
-                    bearing_map[(os.id, o.id)] = bearing
+                    bearing_map[(os.id, ts.id)] = bearing
             
             # scenario1 = (0, 0)
             # for condition, bearing in scenarios:
@@ -154,16 +147,16 @@ class TwoStepCDRejectionSampling(RejectionSamplingPipeline):
         
             # bearing_map[(os.id, o.id)] = (scenario1[0], scenario1[1], scenario2[0], scenario2[1])
                     
-            for o in functional_scenario.obstacle_objects:
+            for ts in functional_scenario.obstacle_objects:
                 os = functional_scenario.os_object
                 
-                sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+                sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[ts.id]) / vis_distance_map[(os.id, ts.id)], -1, 1)
                 angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
                     
-                if functional_scenario.dangerous_head_on_sector_of(o, os):
-                    bearing_map[(os.id, o.id)] = (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0, 2*np.pi)
+                if functional_scenario.dangerous_head_on_sector_of(ts, os):
+                    bearing_map[(os.id, ts.id)] = (0.0, max(angle_col_cone, GlobalConfig.BOW_ANGLE), 0, 2*np.pi)
                     
-        return possible_distances_map, min_distance_map, vis_distance_map, bearing_map
+        return {}, {}, vis_distance_map, bearing_map
     
     @classmethod
     def algorithm_desc(cls) -> str:
@@ -180,7 +173,7 @@ class TwoStepRejectionSampling(RejectionSamplingPipeline):
         min_distance_map = {}
         
         for ts_id in ts_ids:
-            distances = possible_vis_distances(length_map[os_id], length_map[ts_id])
+            distances = possible_vis_distances_by_length(length_map[os_id], length_map[ts_id])
             possible_distances_map[(os_id, ts_id)] = distances
             min_distance_map[(os_id, ts_id)] = min(distances)
             
@@ -224,28 +217,19 @@ class CDRejectionSampling(RejectionSamplingPipeline):
         if functional_scenario is None:
             raise ValueError("Functional scenario must be provided for TwoStepCDRejectionSampling.")
         
-        vis_distance_map = {}
         bearing_map = {}
         possible_distances_map = {}
         min_distance_map = {}
         
-        for ts_id in ts_ids:
-            distances = [
-                2 * GlobalConfig.N_MILE_TO_M_CONVERSION,
-                3 * GlobalConfig.N_MILE_TO_M_CONVERSION,
-                5 * GlobalConfig.N_MILE_TO_M_CONVERSION,
-                6 * GlobalConfig.N_MILE_TO_M_CONVERSION
-            ]
-            possible_distances_map[(os_id, ts_id)] = distances
-            min_distance_map[(os_id, ts_id)] = min(distances)
-            
         os = functional_scenario.os_object
-        for o in functional_scenario.ts_objects:
-            vis_distance_map[(os.id, o.id)] = min(
-                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((os, o)), length_map[o.id]),
-                o2VisibilityByo1(functional_scenario.in_stern_sector_of_interpretation.contains((o, os)), length_map[os.id]))
+        for ts in functional_scenario.ts_objects:
+            distances = possible_vis_distances_by_bearing(
+                functional_scenario.in_stern_sector_of_interpretation.contains((ts, os)),
+                functional_scenario.in_stern_sector_of_interpretation.contains((os, ts)))
+            possible_distances_map[(os.id, ts.id)] = distances
+            min_distance_map[(os.id, ts.id)] = min(distances)
             
-            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[o.id]) / vis_distance_map[(os.id, o.id)], -1, 1)
+            sin_half_col_cone_theta = np.clip(max(radius_map[os.id], radius_map[ts.id]) / min_distance_map[(os.id, ts.id)], -1, 1)
             angle_col_cone = abs(np.arcsin(sin_half_col_cone_theta)) * 2
             
             #heading_ego_to_ts, bearing_angle_ego_to_ts, heading_ts_to_ego, bearing_angle_ts_to_ego
@@ -254,18 +238,18 @@ class CDRejectionSampling(RejectionSamplingPipeline):
             bow_angle = max(angle_col_cone, GlobalConfig.BOW_ANGLE)
             
             scenarios = [
-                (functional_scenario.head_on(os, o), (0.0, bow_angle, 0.0, bow_angle)),
-                (functional_scenario.crossing_from_port(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.crossing_from_port(o, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.overtaking_to_port(os, o), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
-                (functional_scenario.overtaking_to_port(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
-                (functional_scenario.overtaking_to_starboard(os, o), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
-                (functional_scenario.overtaking_to_starboard(o, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
+                (functional_scenario.head_on(os, ts), (0.0, bow_angle, 0.0, bow_angle)),
+                (functional_scenario.crossing_from_port(os, ts), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.crossing_from_port(ts, os), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_port(os, ts), (GlobalConfig.BEAM_ROTATION_ANGLE,  GlobalConfig.SIDE_ANGLE, -np.pi,   GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_port(ts, os), (-np.pi, GlobalConfig.STERN_ANGLE,  -GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(os, ts), (-GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE, -np.pi, GlobalConfig.STERN_ANGLE)),
+                (functional_scenario.overtaking_to_starboard(ts, os), (-np.pi, GlobalConfig.STERN_ANGLE,  GlobalConfig.BEAM_ROTATION_ANGLE, GlobalConfig.SIDE_ANGLE))
             ]
             
             for condition, bearing in scenarios:
                 if condition:
-                    bearing_map[(os.id, o.id)] = bearing
+                    bearing_map[(os.id, ts.id)] = bearing
             
                     
         return possible_distances_map, min_distance_map, {}, bearing_map

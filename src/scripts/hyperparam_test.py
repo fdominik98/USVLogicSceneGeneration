@@ -7,6 +7,9 @@ from typing import Any, List, Tuple
 import numpy as np
 from functional_level.models.functional_model_manager import FunctionalModelManager
 from logical_level.constraint_satisfaction.aggregates import ActorAggregate, AggregateAll, AggregateAllSwarm
+from logical_level.constraint_satisfaction.csp_evaluation.csp_evaluator import CSPEvaluatorImpl
+from logical_level.constraint_satisfaction.csp_evaluation.csp_scheduler import CSPSchedulerFactory
+from logical_level.constraint_satisfaction.csp_evaluation.csp_solver import CSPSolver
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga2_algorithm import PyMooNSGA2Algorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.pygad_ga_algorithm import PyGadGAAlgorithm
 from logical_level.constraint_satisfaction.evolutionary_computation.scipy_de_algorithm import SciPyDEAlgorithm
@@ -14,11 +17,13 @@ from logical_level.constraint_satisfaction.evolutionary_computation.pyswarm_pso_
 from logical_level.constraint_satisfaction.evaluation_data import EvaluationData
 from logical_level.constraint_satisfaction.evolutionary_computation.pymoo_nsga3_algorithm import PyMooNSGA3Algorithm
 from logical_level.models.logical_model_manager import LogicalModelManager
+from utils.evaluation_config import MSR_SB
 
 NUMBER_OF_RUNS = 5
 WARMUPS = 0
-RANDOM_SEED = 1234
+RANDOM_SEED = 1235
 TIMEOUT = 180
+AVERAGE_TIME_PER_SCENE = 180
 INIT_METHOD = 'uniform'
 VERBOSE = False
 
@@ -27,7 +32,7 @@ MEAS_NAME = 'parameter_test_msr'
 LOGICAL_SCENARIO = LogicalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0)[0]
 FUNCTIONAL_SCENARIOS = random.sample(FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(6, 0), 5)
 # CONFIG_GROUP='SB-O'
-CONFIG_GROUP='SB-MSR'
+CONFIG_GROUP=MSR_SB
 
 def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO_batch, combination_DE_batch, core_id):
 
@@ -85,8 +90,8 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
 
     solvers : List[Tuple[Any, CSPSolver]]= [
         # (create_GA_config, PyGadGAAlgorithm(verbose=VERBOSE)),
-        # (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
-        (create_NSGA_vessel_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
+        (create_NSGA_vessel_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
+        # (create_NSGA_vessel_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
         # (create_NSGA_all_config, PyMooNSGA2Algorithm(verbose=VERBOSE)),
         # (create_NSGA_all_config, PyMooNSGA3Algorithm(verbose=VERBOSE)),
         # (create_PSO_config, PySwarmPSOAlgorithm(verbose=VERBOSE)),
@@ -96,15 +101,13 @@ def run_batches(combinations_GA_batch, combinations_NSGA_batch, combinations_PSO
     while True:
         runs = 0
         for config_fun, solver in solvers:
-            config = config_fun()
+            config : EvaluationData = config_fun()
             if config is not None:
-                test = GeneralConstraintSatisfaction(solver,   
-                                            measurement_name=MEAS_NAME,
-                                            scenarios=FUNCTIONAL_SCENARIOS,
-                                            test_config=config,
-                                            number_of_runs=NUMBER_OF_RUNS,
-                                            warmups=WARMUPS, verbose=VERBOSE)   
-                test.run(core_id)
+                evaluator = CSPEvaluatorImpl(solver, MEAS_NAME, config, VERBOSE)
+                
+                scheduler = CSPSchedulerFactory.factory(evaluator, FUNCTIONAL_SCENARIOS, RANDOM_SEED, WARMUPS,
+                                                    AVERAGE_TIME_PER_SCENE, config.init_method)
+                scheduler.run(core_id)
                 runs += 1
         if runs == 0:
             break

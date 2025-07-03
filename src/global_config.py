@@ -1,3 +1,4 @@
+from typing import List
 import numpy as np
 
 class BaseConfig():    
@@ -115,12 +116,28 @@ def o2VisibilityByo1(o1_sees_o2_stern : bool, o2_length : float) -> float:
         else:
             return GlobalConfig.VISIBILITY_DIST_6
         
-def possible_vis_distances(length1, length2):
+def possible_vis_distances_by_length(length1, length2):
     return [min(o2VisibilityByo1(True, length1), o2VisibilityByo1(True, length2)),
             min(o2VisibilityByo1(True, length1), o2VisibilityByo1(False, length2)),
             min(o2VisibilityByo1(False, length1), o2VisibilityByo1(True, length2)),
             min(o2VisibilityByo1(False, length1), o2VisibilityByo1(False, length2))]
+    
+def possible_vis_distances_by_bearing(o2_sees_o1_stern, o1_sees_o2_stern):
+    if o1_sees_o2_stern or o2_sees_o1_stern:
+        return [GlobalConfig.VISIBILITY_DIST_2, GlobalConfig.VISIBILITY_DIST_3,
+                GlobalConfig.VISIBILITY_DIST_2, GlobalConfig.VISIBILITY_DIST_3]
+    else:
+        return [GlobalConfig.VISIBILITY_DIST_2, GlobalConfig.VISIBILITY_DIST_3, 
+                GlobalConfig.VISIBILITY_DIST_5, GlobalConfig.VISIBILITY_DIST_6]
         
+def possible_vis_distances_by_length(length1, length2):
+    return [min(o2VisibilityByo1(True, length1), o2VisibilityByo1(True, length2)),
+            min(o2VisibilityByo1(True, length1), o2VisibilityByo1(False, length2)),
+            min(o2VisibilityByo1(False, length1), o2VisibilityByo1(True, length2)),
+            min(o2VisibilityByo1(False, length1), o2VisibilityByo1(False, length2))]
+    
+def vis_distance(o2_sees_o1_stern, length1, o1_sees_o2_stern, length2):
+    return min(o2VisibilityByo1(o2_sees_o1_stern, length1), o2VisibilityByo1(o1_sees_o2_stern, length2))
 
 # FOR FUTURE WORK
 # Table 1: Approximated minimum spacing for Coldwell's domain if ownship's length and beam are L1 and B1, and target's length and beam are L2 and B2, respectively.

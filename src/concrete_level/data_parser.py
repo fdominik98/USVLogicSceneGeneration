@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
+import json
 from typing import List, Tuple
 import pandas as pd
 from tqdm import tqdm
@@ -88,6 +89,12 @@ class EvalDataParser(DataParser):
         model : EvaluationData = EvaluationData.load_from_json(file)
         model.path = file
         return model
+    
+    def load_compressed_eval(self) -> List[EvaluationData]:
+        file = tkfilebrowser.askopenfilename(initialdir=self.dir)
+        with open(file, "r") as f:
+            loaded_data = json.load(f)
+            return [EvaluationData.from_dict(d) for d in loaded_data]
     
 class TrajDataParser(DataParser):    
     def __init__(self) -> None:

@@ -18,9 +18,9 @@ from logical_level.models.logical_model_manager import LogicalModelManager
 from utils.scenario import Scenario
 
 MSR_SB = 'sb-msr'
-BASE_SB = 'sb-base'
+SB = 'sb-base'
 MSR_RS = 'rs-msr'
-BASE_RS = 'rs'
+RS = 'rs'
 CD_RS = 'cd-rs'
 TS_RS = 'ts-rs'
 
@@ -33,7 +33,7 @@ class MeasurementConfig():
    VERBOSE = True
    BASE_NAME = 'test'
    
-class MSRMeasurementConfig():   
+class MSRMeasurementConfig(MeasurementConfig):   
    WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
@@ -42,7 +42,7 @@ class MSRMeasurementConfig():
    VERBOSE = False
    BASE_NAME = 'MSR_test'
    
-class BaseSBMeasurementConfig():   
+class BaseSBMeasurementConfig(MeasurementConfig):   
    WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = GlobalConfig.FOUR_MINUTES_IN_SEC
@@ -51,7 +51,7 @@ class BaseSBMeasurementConfig():
    VERBOSE = False
    BASE_NAME = 'Base_test'
    
-class RSMeasurementConfig():   
+class RSMeasurementConfig(MeasurementConfig):   
    WARMUPS = 2
    RANDOM_SEED = 1234
    TIMEOUT = np.inf # No timeout for RS
@@ -81,7 +81,7 @@ class MiniUSVMeasurementConfig(MeasurementConfig):
 def get_scenarios(vessel_number : int, obstacle_number : int, config_group : str) -> List[Scenario]: 
    if config_group == MSR_SB or config_group == MSR_RS or config_group==CD_RS:
       return FunctionalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)
-   elif config_group == BASE_SB or config_group == BASE_RS or config_group == TS_RS:
+   elif config_group == SB or config_group == RS or config_group == TS_RS:
       return LogicalModelManager.get_x_vessel_y_obstacle_scenarios(vessel_number, obstacle_number)
    else:
       raise ValueError(f"Unknown config group: {config_group}")
@@ -91,14 +91,21 @@ def create_config(meas_config : MeasurementConfig, config_group : str, random_se
                             init_method=meas_config.INIT_METHOD, random_seed=random_seed,
                             aggregate_strat=ActorAggregate.name, config_group=config_group)
    if config_group == MSR_SB:
-      config.population_size=30
-      config.mutate_eta=15
-      config.mutate_prob=1
-      config.crossover_eta=5
-      config.crossover_prob=1
-      config.algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc()                 
+      15.0, 20.0, 0.8, 15.0, 1.0
+      # config.population_size=30
+      # config.mutate_eta=15
+      # config.mutate_prob=1
+      # config.crossover_eta=5
+      # config.crossover_prob=1
+      # config.algorithm_desc=PyMooNSGA3Algorithm.algorithm_desc()    
+      config.population_size=15
+      config.mutate_eta=20
+      config.mutate_prob=0.8
+      config.crossover_eta=15
+      config.crossover_prob=1.0
+      config.algorithm_desc=PyMooNSGA2Algorithm.algorithm_desc()               
       config.aggregate_strat=ActorAggregate.name
-   elif config_group == BASE_SB:
+   elif config_group == SB:
       config.population_size=10
       config.mutate_eta=15
       config.mutate_prob=0.8
@@ -110,7 +117,7 @@ def create_config(meas_config : MeasurementConfig, config_group : str, random_se
       config.population_size=1
       config.aggregate_strat=AggregateAll.name
       config.algorithm_desc=TwoStepCDRejectionSampling.algorithm_desc()
-   elif config_group == BASE_RS:
+   elif config_group == RS:
       config.population_size=1
       config.aggregate_strat=AggregateAll.name
       config.algorithm_desc=BaseRejectionSampling.algorithm_desc()
